@@ -1,0 +1,21 @@
+{
+  "name": "mass-balance-evidention",
+  "productName": "Mass Balance Evidention",
+  "description": "Mass Balance Evidention",
+  "version": "1.0.2",
+  "main": "./dist/main/main.js",
+  "author": {
+    "name": "Hrvoje Lesar",
+    "email": "hrvoje.lesar1@hotmail.com",
+    "url": "https://hrveklesarov.com"
+  },
+  "scripts": {
+    "electron-rebuild": "node -r ts-node/register ../../.erb/scripts/electron-rebuild.js",
+    "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.js",
+    "postinstall": "npm run electron-rebuild && npm run link-modules"
+  },
+  "dependencies": {
+    "sqlite3": "^5.0.2"
+  },
+  "license": "MIT"
+}
