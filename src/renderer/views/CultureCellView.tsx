@@ -113,6 +113,7 @@ class CultureCellView extends React.Component<
               title="Unos para čestica i kultura"
               tableConfig={cellCultures.tableConfig}
               data={cellCultures.data}
+              hasFilter
               updateData={(data: any) => {
                 this.updateData(this.updateCellCultures, data);
               }}

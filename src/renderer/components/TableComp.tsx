@@ -25,6 +25,7 @@ export interface TableCompProps {
   additionalTableData?: { [key: string]: any };
   customRowFormatter?: any;
   updateData?: any;
+  hasFilter?: boolean;
 }
 
 interface TableCompState {}
@@ -156,6 +157,7 @@ class TableComp extends React.Component<TableCompProps, TableCompState> {
       insert,
       update,
       del,
+      hasFilter = false,
     } = this.props;
     const displayGroupBy = tableConfig.groups ? (
       <GroupBy
@@ -202,13 +204,15 @@ class TableComp extends React.Component<TableCompProps, TableCompState> {
                   table={this.tableRef?.table}
                   columns={tableConfig.inputs}
                 />
-                <Form.Group>
-                  <Form.Label>Filter</Form.Label>
-                  <Filters
-                    table={this.tableRef?.table}
-                    fields={tableConfig.inputs}
-                  />
-                </Form.Group>
+                {hasFilter && (
+                  <Form.Group>
+                    <Form.Label>Filter</Form.Label>
+                    <Filters
+                      table={this.tableRef?.table}
+                      fields={tableConfig.inputs}
+                    />
+                  </Form.Group>
+                )}
               </div>
             </Col>
             {displayGroupBy && <Col className="col-2">{displayGroupBy}</Col>}

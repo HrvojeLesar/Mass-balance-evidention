@@ -53,6 +53,7 @@ class EntryView extends React.Component<EntryViewProps, EntryViewState> {
               title="Pregled zapisa"
               tableConfig={entry.tableConfig}
               data={entry.data}
+              hasFilter
             />
           </Col>
         </Row>

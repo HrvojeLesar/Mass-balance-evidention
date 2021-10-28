@@ -134,6 +134,7 @@ class EntryInsertView extends React.Component<
               title="Unos zapisa"
               tableConfig={entry.tableConfig}
               data={entry.data}
+              hasFilter
               updateData={(data: any) => {
                 this.updateData(this.updateEntry, data);
               }}
