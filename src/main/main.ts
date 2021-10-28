@@ -14,9 +14,28 @@ import path from 'path';
 import { app, BrowserWindow, shell } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import Store from 'electron-store';
 import { resolveHtmlPath, startupProtocol } from './util';
 
 require('./utilities/ipcMain');
+
+type StoreType = {
+  width: number;
+  height: number;
+  x: number | undefined;
+  y: number | undefined;
+  isMaximized: boolean;
+};
+
+const store = new Store<StoreType>({
+  defaults: {
+    width: 800,
+    height: 600,
+    x: undefined,
+    y: undefined,
+    isMaximized: false,
+  },
+});
 
 export default class AppUpdater {
   constructor() {
@@ -55,6 +74,7 @@ const installExtensions = async () => {
 
 const createWindow = async () => {
   startupProtocol();
+  console.log(app.getPath('userData'));
 
   if (isDevelopment) {
     await installExtensions();
@@ -70,8 +90,10 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1024,
-    height: 728,
+    width: store.get('width'),
+    height: store.get('height'),
+    x: store.get('x'),
+    y: store.get('y'),
     icon: getAssetPath('icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -88,8 +110,24 @@ const createWindow = async () => {
     if (process.env.START_MINIMIZED) {
       mainWindow.minimize();
     } else {
-      mainWindow.show();
+      if (store.get('isMaximized')) {
+        mainWindow.maximize();
+      } else {
+        mainWindow.show();
+      }
       mainWindow.focus();
+    }
+  });
+
+  mainWindow.once('close', () => {
+    if (mainWindow) {
+      const { x, y, width, height } = mainWindow?.getNormalBounds();
+      store.set({ x, y, width, height });
+      if (mainWindow.isMaximized()) {
+        store.set({ isMaximized: true });
+      } else {
+        store.set({ isMaximized: false });
+      }
     }
   });
 

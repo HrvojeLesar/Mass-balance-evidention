@@ -2,7 +2,7 @@
   "name": "mass-balance-evidention",
   "productName": "Mass Balance Evidention",
   "description": "Mass Balance Evidention",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "./dist/main/main.js",
   "author": {
     "name": "Hrvoje Lesar",
