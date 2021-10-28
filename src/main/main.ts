@@ -74,7 +74,6 @@ const installExtensions = async () => {
 
 const createWindow = async () => {
   startupProtocol();
-  console.log(app.getPath('userData'));
 
   if (isDevelopment) {
     await installExtensions();

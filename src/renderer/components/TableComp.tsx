@@ -218,6 +218,7 @@ class TableComp extends React.Component<TableCompProps, TableCompState> {
             ref={(ref) => {
               this.tableRef = ref;
             }}
+            className="mb-2"
             columns={tableColumns}
             data={data}
             options={tableConfig.options}
