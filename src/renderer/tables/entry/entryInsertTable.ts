@@ -199,6 +199,9 @@ export default class EntryInsertTable implements Table {
     {
       formatter: 'rowSelection',
       titleFormatter: 'rowSelection',
+      cellClick: (e, cell) => {
+        cell.getRow().toggleSelect();
+      },
       hozAlign: 'center',
       headerHozAlign: 'center',
       headerSort: false,

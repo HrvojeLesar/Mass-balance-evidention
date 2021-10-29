@@ -15,7 +15,10 @@ export interface FilterState {
 }
 
 const numberFilterType = ['=', '<', '<=', '>', '>=', '!='];
-const stringFilterType = [{ tabulatorType: 'like', value: 'Poput' }, '='];
+const stringFilterType = [
+  { tabulatorType: 'like', value: 'Poput' },
+  { tabulatorType: '=', value: 'Jednako' },
+];
 
 const getFilterTypes = (
   input: string
@@ -102,9 +105,9 @@ class Filter extends React.Component<FilterProps, FilterState> {
   };
 
   handleInputChange = (event: any) => {
-    const value = String(event.target.value).trim();
+    const value = String(event.target.value);
     this.removeFilter();
-    this.currentFilter.value = value;
+    this.currentFilter.value = value.trim();
     this.addFilter();
     this.setState({ value });
   };
@@ -133,8 +136,12 @@ class Filter extends React.Component<FilterProps, FilterState> {
       const newTypes = getFilterTypes(selectFilterType);
       if (newTypes !== selectedFilterTypes) {
         this.removeFilter();
-        // eslint-disable-next-line prefer-destructuring
-        this.currentFilter.type = newTypes[0];
+        if (newTypes[0].tabulatorType) {
+          this.currentFilter.type = newTypes[0].tabulatorType;
+        } else {
+          // eslint-disable-next-line prefer-destructuring
+          this.currentFilter.type = newTypes[0];
+        }
         this.addFilter();
         this.setState({
           selectedFilterTypes: newTypes,
