@@ -17,11 +17,11 @@ export const globalOptions = {
   paginationButtonCount: 3,
   placeholder: 'Trenutno nema podataka!',
   layout: 'fitColumns',
-  locale: true,
+  // locale: true,
   groupToggleElement: 'header',
   // TODO change language from en-gb to hr-hr
   langs: {
-    'en-gb': {
+    'hr-hr': {
       pagination: {
         first: 'Prva',
         first_title: 'Prva stranica',

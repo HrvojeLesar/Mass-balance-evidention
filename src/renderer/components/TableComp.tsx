@@ -231,6 +231,9 @@ class TableComp extends React.Component<TableCompProps, TableCompState> {
                 this.tableRef?.table
               );
             }}
+            tableBuilt={() => {
+              this.tableRef?.table.setLocale('hr-hr');
+            }}
           />
 
           {del && (
