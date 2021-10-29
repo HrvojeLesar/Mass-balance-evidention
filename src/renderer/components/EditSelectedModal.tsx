@@ -70,7 +70,19 @@ class EditSelectedModal extends React.Component<
             />
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={this.closeModal}>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                if (additionalTableData) {
+                  Object.keys(additionalTableData).forEach((key) => {
+                    if (additionalTableData[key].resetData) {
+                      additionalTableData[key].resetData();
+                    }
+                  });
+                }
+                this.closeModal();
+              }}
+            >
               Odustani
             </Button>
             <Button
