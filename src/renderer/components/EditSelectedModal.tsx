@@ -40,6 +40,14 @@ class EditSelectedModal extends React.Component<
 
   closeModal = () => {
     const { isDisplayed } = this.state;
+    const { additionalTableData } = this.props;
+    if (additionalTableData) {
+      Object.keys(additionalTableData).forEach((key) => {
+        if (additionalTableData[key].resetData) {
+          additionalTableData[key].resetData();
+        }
+      });
+    }
     if (isDisplayed) {
       this.setState({ isDisplayed: false });
     }
@@ -73,13 +81,6 @@ class EditSelectedModal extends React.Component<
             <Button
               variant="secondary"
               onClick={() => {
-                if (additionalTableData) {
-                  Object.keys(additionalTableData).forEach((key) => {
-                    if (additionalTableData[key].resetData) {
-                      additionalTableData[key].resetData();
-                    }
-                  });
-                }
                 this.closeModal();
               }}
             >
