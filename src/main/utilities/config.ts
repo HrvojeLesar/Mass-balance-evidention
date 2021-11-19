@@ -59,7 +59,12 @@ export default class Config {
         alias: Config.DEFAULT_DB_ALIAS,
         path: Config.DEFAULT_DB_PATH,
       },
-      databases: [],
+      databases: [
+        {
+          alias: Config.DEFAULT_DB_ALIAS,
+          path: Config.DEFAULT_DB_PATH,
+        },
+      ],
     };
   }
 
