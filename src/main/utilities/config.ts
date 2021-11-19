@@ -16,6 +16,9 @@ export type ConfigJSONOld = {
 };
 
 export type ConfigJSON = {
+  // initial version startup field
+  startup?: string;
+
   version: number;
   currentDb: DatabaseConfigInfo;
   databases: DatabaseConfigInfo[];
