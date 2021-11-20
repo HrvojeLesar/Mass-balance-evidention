@@ -14,28 +14,38 @@ export interface FilterState {
   value: string;
 }
 
-const numberFilterType = ['=', '<', '<=', '>', '>=', '!='];
+const numberFilterType = [
+  { tabulatorType: '=', value: 'Jednako' },
+  { tabulatorType: '<', value: 'Manje' },
+  { tabulatorType: '<=', value: 'Manje ili jednako' },
+  { tabulatorType: '>', value: 'Veće' },
+  { tabulatorType: '>=', value: 'Veće ili jednako' },
+  { tabulatorType: '!=', value: 'Različito od' },
+];
+
 const stringFilterType = [
   { tabulatorType: 'like', value: 'Poput' },
   { tabulatorType: '=', value: 'Jednako' },
 ];
 
+const dateFilterType = [
+  { tabulatorType: '=', value: 'Jednako' },
+  { tabulatorType: '<', value: 'Prije' },
+  { tabulatorType: '<=', value: 'Prije (uključujući upisani datum)' },
+  { tabulatorType: '>', value: 'Poslije' },
+  { tabulatorType: '>=', value: 'Poslije (uključujući upisani datum)' },
+  { tabulatorType: '!=', value: 'Različito od' },
+];
+
 const getFilterTypes = (
   input: string
-):
-  | string[]
-  | (
-      | string
-      | {
-          tabulatorType: string;
-          value: string;
-        }
-    )[] => {
+): { tabulatorType: string; value: string }[] => {
   switch (input) {
     case 'number':
     case 'float':
-    case 'date':
       return numberFilterType;
+    case 'date':
+      return dateFilterType;
     case 'text':
     case 'select':
     case 'bindingSelect':
@@ -66,9 +76,7 @@ class Filter extends React.Component<FilterProps, FilterState> {
       }
     }
 
-    const type = getFilterTypes(selectedFilterType)[0].tabulatorType
-      ? getFilterTypes(selectedFilterType)[0].tabulatorType
-      : getFilterTypes(selectedFilterType)[0];
+    const type = getFilterTypes(selectedFilterType)[0].tabulatorType;
 
     this.currentFilter = {
       field: selectedFieldValue,
@@ -136,12 +144,7 @@ class Filter extends React.Component<FilterProps, FilterState> {
       const newTypes = getFilterTypes(selectFilterType);
       if (newTypes !== selectedFilterTypes) {
         this.removeFilter();
-        if (newTypes[0].tabulatorType) {
-          this.currentFilter.type = newTypes[0].tabulatorType;
-        } else {
-          // eslint-disable-next-line prefer-destructuring
-          this.currentFilter.type = newTypes[0];
-        }
+        this.currentFilter.type = newTypes[0].tabulatorType;
         this.addFilter();
         this.setState({
           selectedFilterTypes: newTypes,
@@ -191,15 +194,12 @@ class Filter extends React.Component<FilterProps, FilterState> {
           }}
         >
           {selectedFilterTypes.map((filterValue: any) => {
-            const type = filterValue.tabulatorType
-              ? filterValue.tabulatorType
-              : filterValue;
-            const val = filterValue.tabulatorType
-              ? filterValue.value
-              : filterValue;
             return (
-              <option key={type} value={val}>
-                {val}
+              <option
+                key={filterValue.tabulatorType}
+                value={filterValue.tabulatorType}
+              >
+                {filterValue.value}
               </option>
             );
           })}
