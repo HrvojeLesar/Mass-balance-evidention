@@ -13,6 +13,8 @@ export interface BindingSelectProps {
   selectPlaceholder: string;
   setBoundSelect: any;
   resetBound: any;
+  isBound: boolean;
+  clearBindingSelect?: any;
 }
 
 export interface BindingSelectState {}
@@ -48,12 +50,17 @@ class BindingSelect extends React.Component<
   };
 
   onChangeHandler = (newValue: any, actionMeta: any) => {
-    const { onSelectChange, resetBound } = this.props;
+    const { onSelectChange, resetBound, isBound, clearBindingSelect, bindTo } =
+      this.props;
     onSelectChange(newValue, actionMeta);
     if (actionMeta.action === 'select-option') {
       this.setBoundSelect(newValue.id);
     } else if (actionMeta.action === 'clear') {
       resetBound();
+    }
+
+    if (actionMeta.action === 'clear' && isBound) {
+      clearBindingSelect();
     }
   };
 

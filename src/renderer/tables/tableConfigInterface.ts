@@ -16,6 +16,10 @@ export interface Table {
     dataIdentifier?: string;
     newSelectRow?: any;
     selectPlaceholder?: string;
+    bindingSelectConfig?: {
+      isBound: boolean;
+      bountTo: string;
+    };
   }[];
   options: any;
   primaryKey?: string;

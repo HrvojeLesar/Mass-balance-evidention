@@ -132,22 +132,6 @@ export default class EntryInsertTable implements Table {
       type: 'text' as const,
     },
     {
-      title: 'Id čestica',
-      bindTo: 'id_cestica',
-      insertable: false,
-      searchable: false,
-      type: 'text' as const,
-    },
-    {
-      title: 'Čestica',
-      bindTo: 'cNaziv',
-      insertable: true,
-      searchable: true,
-      type: 'bindingSelect' as const,
-      dataIdentifier: 'cestica',
-      selectPlaceholder: 'Odabir čestice',
-    },
-    {
       title: 'Id kultura',
       bindTo: 'id_kultura',
       insertable: false,
@@ -162,6 +146,30 @@ export default class EntryInsertTable implements Table {
       type: 'bindingSelect' as const,
       dataIdentifier: 'kultura',
       selectPlaceholder: 'Odabir kulture',
+      bindingSelectConfig: {
+        isBound: true,
+        bountTo: 'cNaziv',
+      },
+    },
+    {
+      title: 'Id čestica',
+      bindTo: 'id_cestica',
+      insertable: false,
+      searchable: false,
+      type: 'text' as const,
+    },
+    {
+      title: 'Čestica',
+      bindTo: 'cNaziv',
+      insertable: true,
+      searchable: true,
+      type: 'bindingSelect' as const,
+      dataIdentifier: 'cestica',
+      selectPlaceholder: 'Odabir čestice',
+      bindingSelectConfig: {
+        isBound: false,
+        bountTo: 'kNaziv',
+      },
     },
     {
       title: 'Id kupac',
@@ -171,6 +179,13 @@ export default class EntryInsertTable implements Table {
       type: 'text' as const,
     },
     {
+      title: 'Težina (kg)',
+      bindTo: 'tezina',
+      insertable: true,
+      searchable: true,
+      type: 'float' as const,
+    },
+    {
       title: 'Kupac',
       bindTo: 'bNaziv',
       insertable: true,
@@ -178,13 +193,6 @@ export default class EntryInsertTable implements Table {
       type: 'select' as const,
       dataIdentifier: 'kupac',
       selectPlaceholder: 'Odabir kupca',
-    },
-    {
-      title: 'Težina (kg)',
-      bindTo: 'tezina',
-      insertable: true,
-      searchable: true,
-      type: 'float' as const,
     },
     {
       title: 'Datum',

@@ -28,6 +28,7 @@ export interface InputsState {
       skipClearing: boolean;
       dataIdentifier?: string;
       ref?: any;
+      boundTo?: string;
     };
   };
   rowData: any;
@@ -46,6 +47,7 @@ class Inputs extends React.Component<InputsProps, InputsState> {
         type: input.type,
         skipClearing: input.type === 'bindingSelect',
         dataIdentifier: input.dataIdentifier,
+        boundTo: input.bindingSelectConfig?.bountTo,
       };
     });
 
@@ -209,6 +211,22 @@ class Inputs extends React.Component<InputsProps, InputsState> {
     return 'col-6 mb-2';
   };
 
+  clearBindingSelect = (selectName: string) => {
+    const { inputs } = this.state;
+    const { tableConfig, additionalTableData } = this.props;
+    inputs[selectName].value = '';
+    inputs[selectName].isInvalid = false;
+    for (const input of tableConfig.inputs) {
+      if (input.bindTo === selectName) {
+        const { dataIdentifier } = input;
+        additionalTableData[dataIdentifier].resetData();
+        break;
+      }
+    }
+
+    this.setState({ inputs });
+  };
+
   render() {
     const { tableConfig, additionalTableData } = this.props;
     const { inputs } = this.state;
@@ -284,6 +302,16 @@ class Inputs extends React.Component<InputsProps, InputsState> {
                           resetBound={
                             additionalTableData[input.dataIdentifier].resetData
                           }
+                          isBound={
+                            input.bindingSelectConfig
+                              ? input.bindingSelectConfig.isBound
+                              : true
+                          }
+                          clearBindingSelect={() => {
+                            this.clearBindingSelect(
+                              inputs[input.bindTo].boundTo
+                            );
+                          }}
                         />
                       </Form.Group>
                     </Col>
