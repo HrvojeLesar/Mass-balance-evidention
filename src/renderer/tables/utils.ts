@@ -25,8 +25,8 @@ export const globalOptions = {
       pagination: {
         first: 'Prva',
         first_title: 'Prva stranica',
-        last: 'Poslijednja',
-        last_title: 'Poslijednja stranica',
+        last: 'Posljednja',
+        last_title: 'Posljednja stranica',
         prev: '<-',
         prev_title: 'Prethodna stranica',
         next: '->',
