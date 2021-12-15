@@ -30,7 +30,7 @@ export const globalOptions = {
         prev: '<-',
         prev_title: 'Prethodna stranica',
         next: '->',
-        next_title: 'Slijedeća stranica',
+        next_title: 'Sljedeća stranica',
         all: 'All',
       },
     },
