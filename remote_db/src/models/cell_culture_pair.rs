@@ -13,7 +13,7 @@ impl CellCulturePair {
         transaction: &mut Transaction<'_, Postgres>,
         id_cell: &i32,
         id_culture: &i32,
-        date: Option<&DateTime<Utc>>
+        date: Option<&DateTime<Utc>>,
     ) -> Result<Self> {
         Ok(sqlx::query_as!(
             Self,

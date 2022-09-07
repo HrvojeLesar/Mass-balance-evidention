@@ -11,7 +11,7 @@ impl Weight {
     async fn insert_new(
         transaction: &mut Transaction<'_, Postgres>,
         short_name: &String,
-        name: Option<&String>
+        name: Option<&String>,
     ) -> Result<Self> {
         Ok(sqlx::query_as!(
             Self,
