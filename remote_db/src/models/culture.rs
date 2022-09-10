@@ -6,7 +6,7 @@ struct Cell {
     id: i32,
     name: String,
     description: Option<String>,
-    date: DateTime<Utc>,
+    created_at: DateTime<Utc>,
 }
 
 impl Cell {
@@ -14,18 +14,18 @@ impl Cell {
         transaction: &mut Transaction<'_, Postgres>,
         name: &String,
         description: Option<&String>,
-        date: Option<&DateTime<Utc>>,
+        created_at: Option<&DateTime<Utc>>,
     ) -> Result<Self> {
         Ok(sqlx::query_as!(
             Self,
             "
-            INSERT INTO cell (name, description, date)
+            INSERT INTO cell (name, description, created_at)
             VALUES ($1, $2, $3)
             RETURNING *
             ",
             name,
             description,
-            date
+            created_at
         )
         .fetch_one(transaction)
         .await?)

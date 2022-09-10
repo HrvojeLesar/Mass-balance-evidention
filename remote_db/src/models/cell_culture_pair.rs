@@ -5,7 +5,7 @@ use sqlx::{Database, Postgres, Transaction};
 struct CellCulturePair {
     id_cell: i32,
     id_culture: i32,
-    date: DateTime<Utc>,
+    created_at: DateTime<Utc>,
 }
 
 impl CellCulturePair {
@@ -13,18 +13,18 @@ impl CellCulturePair {
         transaction: &mut Transaction<'_, Postgres>,
         id_cell: &i32,
         id_culture: &i32,
-        date: Option<&DateTime<Utc>>,
+        created_at: Option<&DateTime<Utc>>,
     ) -> Result<Self> {
         Ok(sqlx::query_as!(
             Self,
             "
-            INSERT INTO cell_culture_pair (id_cell, id_culture, date)
+            INSERT INTO cell_culture_pair (id_cell, id_culture, created_at)
             VALUES ($1, $2, $3)
             RETURNING *
             ",
             id_cell,
             id_culture,
-            date
+            created_at
         )
         .fetch_one(transaction)
         .await?)

@@ -7,7 +7,7 @@ struct Buyer {
     name: Option<String>,
     address: Option<String>,
     contact: Option<String>,
-    date: DateTime<Utc>,
+    created_at: DateTime<Utc>,
     // note: Option<String>,
 }
 
@@ -17,20 +17,20 @@ impl Buyer {
         name: Option<&String>,
         address: Option<&String>,
         contact: Option<&String>,
-        date: Option<&DateTime<Utc>>,
+        created_at: Option<&DateTime<Utc>>,
         note: Option<&String>,
     ) -> Result<Self> {
         Ok(sqlx::query_as!(
             Self,
             "
-            INSERT INTO buyer (name, address, contact, date)
+            INSERT INTO buyer (name, address, contact, created_at)
             VALUES ($1, $2, $3, $4)
             RETURNING *
             ",
             name,
             address,
             contact,
-            date
+            created_at
         )
         .fetch_one(transaction)
         .await?)

@@ -1,5 +1,6 @@
-use anyhow::Result;
-use async_graphql::Object;
+use async_graphql::MergedObject;
+
+use self::cell::{CellMutation, CellQuery};
 
 pub mod buyer;
 pub mod cell;
@@ -7,17 +8,13 @@ pub mod cell_culture_pair;
 pub mod culture;
 pub mod entry;
 pub mod weight_types;
+pub mod db_query;
 
-pub struct QueryRoot;
+pub const MAX_LIMIT: i64 = 100;
+pub const DEFAULT_LIMIT: i64 = 10;
 
-#[Object]
-impl QueryRoot {
-    async fn empty(&self) -> Result<&str> {
-        unimplemented!()
-    }
-}
+#[derive(MergedObject, Default)]
+pub struct QueryRoot(CellQuery);
 
-// pub struct MutationRoot;
-
-// #[Object]
-// impl MutationRoot {}
+#[derive(MergedObject, Default)]
+pub struct MutationRoot(CellMutation);

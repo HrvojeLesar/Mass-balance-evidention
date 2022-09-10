@@ -6,7 +6,7 @@ struct Entry {
     id: i32,
     weight: Option<f64>,
     weight_type: Option<String>,
-    date: DateTime<Utc>,
+    created_at: DateTime<Utc>,
     id_buyer: Option<i32>,
     id_cell: Option<i32>,
     id_culture: Option<i32>,
@@ -17,7 +17,7 @@ impl Entry {
         transaction: &mut Transaction<'_, Postgres>,
         weight: f64,
         weight_type: String,
-        date: Option<&DateTime<Utc>>,
+        created_at: Option<&DateTime<Utc>>,
         id_buyer: i32,
         id_cell: i32,
         id_culture: i32,
@@ -25,13 +25,13 @@ impl Entry {
         Ok(sqlx::query_as!(
             Self,
             "
-            INSERT INTO entry (weight, weight_type, date, id_buyer, id_cell, id_culture)
+            INSERT INTO entry (weight, weight_type, created_at, id_buyer, id_cell, id_culture)
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *
             ",
             weight,
             weight_type,
-            date,
+            created_at,
             id_buyer,
             id_cell,
             id_culture,
