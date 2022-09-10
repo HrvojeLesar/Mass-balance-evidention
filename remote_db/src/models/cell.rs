@@ -1,16 +1,16 @@
 use anyhow::Result;
-use async_graphql::{Context, InputObject, Object, SelectionField, SimpleObject};
+use async_graphql::{Context, InputObject, Object, SimpleObject};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use log::info;
-use sqlx::{FromRow, Postgres, Transaction};
+
+use sqlx::{FromRow, Postgres};
 
 use crate::{
     models::{DEFAULT_LIMIT, MAX_LIMIT},
     DatabasePool,
 };
 
-use super::db_query::{DatabaseQueries, EmptyUpdateOptions, GetOptions, InputOptions, QueryResult};
+use super::db_query::DatabaseQueries;
 
 #[derive(SimpleObject, InputObject, Default, FromRow)]
 #[graphql(input_name = "CellInput")]

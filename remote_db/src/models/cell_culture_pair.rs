@@ -1,6 +1,6 @@
 use anyhow::Result;
 use chrono::{DateTime, Utc};
-use sqlx::{Database, Postgres, Transaction};
+use sqlx::{Postgres, Transaction};
 
 struct CellCulturePair {
     id_cell: i32,

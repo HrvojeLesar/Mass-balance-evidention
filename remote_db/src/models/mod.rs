@@ -6,9 +6,9 @@ pub mod buyer;
 pub mod cell;
 pub mod cell_culture_pair;
 pub mod culture;
+pub mod db_query;
 pub mod entry;
 pub mod weight_types;
-pub mod db_query;
 
 pub const MAX_LIMIT: i64 = 100;
 pub const DEFAULT_LIMIT: i64 = 10;

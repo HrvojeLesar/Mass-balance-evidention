@@ -1,6 +1,6 @@
 use anyhow::Result;
 use chrono::{DateTime, Utc};
-use sqlx::{Database, Postgres, Transaction};
+use sqlx::{Postgres, Transaction};
 
 struct Buyer {
     id: i32,
@@ -18,7 +18,7 @@ impl Buyer {
         address: Option<&String>,
         contact: Option<&String>,
         created_at: Option<&DateTime<Utc>>,
-        note: Option<&String>,
+        _note: Option<&String>,
     ) -> Result<Self> {
         Ok(sqlx::query_as!(
             Self,

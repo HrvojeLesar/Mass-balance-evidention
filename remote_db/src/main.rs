@@ -7,10 +7,10 @@ use actix_web::{
     web::{self, Data},
     App, HttpResponse, HttpServer,
 };
-use async_graphql::{http::GraphiQLSource, EmptyMutation, EmptySubscription, Schema};
+use async_graphql::{http::GraphiQLSource, EmptySubscription, Schema};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use dotenvy::dotenv;
-use models::{QueryRoot, MutationRoot};
+use models::{MutationRoot, QueryRoot};
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 
 mod models;
@@ -26,10 +26,7 @@ async fn graphql_playground() -> actix_web::Result<HttpResponse> {
 }
 
 #[post("/graphiql")]
-async fn index(
-    schema: web::Data<GQLSchema>,
-    req: GraphQLRequest,
-) -> GraphQLResponse {
+async fn index(schema: web::Data<GQLSchema>, req: GraphQLRequest) -> GraphQLResponse {
     schema.execute(req.into_inner()).await.into()
 }
 
@@ -47,14 +44,16 @@ async fn main() -> std::io::Result<()> {
             .unwrap(),
     );
 
-    let schema = 
-        // Schema::build(QueryRoot, EmptyMutation, EmptySubscription)
-        Schema::build(QueryRoot::default(), MutationRoot::default(), EmptySubscription)
-            .data(pool.clone())
-            .extension(async_graphql::extensions::Logger)
-            .finish();
+    let schema = Schema::build(
+        QueryRoot::default(),
+        MutationRoot::default(),
+        EmptySubscription,
+    )
+    .data(pool.clone())
+    .extension(async_graphql::extensions::Logger)
+    .finish();
 
-    return HttpServer::new(move || {
+    HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
             .app_data(Data::new(schema.clone()))
@@ -64,5 +63,5 @@ async fn main() -> std::io::Result<()> {
     })
     .bind("127.0.0.1:8000")?
     .run()
-    .await;
+    .await
 }
