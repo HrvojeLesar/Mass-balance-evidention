@@ -41,9 +41,10 @@ CREATE TABLE entry (
     id SERIAL PRIMARY KEY,
     weight DOUBLE PRECISION,
     weight_type VARCHAR(5) REFERENCES weight_types(id) DEFAULT 'kg',
+    date TIMESTAMPTZ NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     id_buyer INT REFERENCES buyer(id),
-    id_cell INT,
-    id_culture INT,
+    id_cell INT NOT NULL,
+    id_culture INT NOT NULL,
     FOREIGN KEY(id_cell, id_culture) REFERENCES cell_culture_pair(id_cell, id_culture)
 );

@@ -1,6 +1,12 @@
 use async_graphql::MergedObject;
 
-use self::cell::{CellMutation, CellQuery};
+use self::{
+    buyer::{BuyerMutation, BuyerQuery},
+    cell::{CellMutation, CellQuery},
+    cell_culture_pair::{CellCulturePairMutation, CellCulturePairQuery},
+    culture::{CultureMutation, CultureQuery},
+    entry::{EntryMutation, EntryQuery},
+};
 
 pub mod buyer;
 pub mod cell;
@@ -14,7 +20,19 @@ pub const MAX_LIMIT: i64 = 100;
 pub const DEFAULT_LIMIT: i64 = 10;
 
 #[derive(MergedObject, Default)]
-pub struct QueryRoot(CellQuery);
+pub struct QueryRoot(
+    BuyerQuery,
+    CellCulturePairQuery,
+    CellQuery,
+    CultureQuery,
+    EntryQuery,
+);
 
 #[derive(MergedObject, Default)]
-pub struct MutationRoot(CellMutation);
+pub struct MutationRoot(
+    BuyerMutation,
+    CellCulturePairMutation,
+    CellMutation,
+    CultureMutation,
+    EntryMutation,
+);

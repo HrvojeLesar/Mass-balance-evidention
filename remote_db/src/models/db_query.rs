@@ -1,6 +1,6 @@
 use anyhow::Result;
 use async_trait::async_trait;
-use sqlx::Executor;
+use sqlx::{Database, Transaction};
 
 pub(crate) trait InputOptions {}
 pub(crate) trait GetOptions {}
@@ -20,27 +20,20 @@ impl QueryResult for EmptyQueryResult {}
 #[async_trait]
 pub(crate) trait DatabaseQueries<DB>
 where
+    DB: Database,
     Self: Sized,
 {
     type IO;
 
-    type GO;
+    type FO;
 
     type UO;
 
-    async fn insert<'e, 'c: 'e, E>(executor: E, options: &Self::IO) -> Result<Self>
-    where
-        E: 'e + Executor<'c, Database = DB>;
+    async fn insert(executor: &mut Transaction<'_, DB>, options: &Self::IO) -> Result<Self>;
 
-    async fn get_many<'e, 'c: 'e, E>(executor: E, options: &Self::GO) -> Result<Vec<Self>>
-    where
-        E: 'e + Executor<'c, Database = DB>;
+    async fn get_many(executor: &mut Transaction<'_, DB>, options: &Self::FO) -> Result<Vec<Self>>;
 
-    async fn get<'e, 'c: 'e, E>(executor: E, options: &Self::GO) -> Result<Option<Self>>
-    where
-        E: 'e + Executor<'c, Database = DB>;
+    async fn get(executor: &mut Transaction<'_, DB>, options: &Self::FO) -> Result<Self>;
 
-    async fn update<'e, 'c: 'e, E>(executor: E, options: &Self::UO) -> Result<Option<Self>>
-    where
-        E: 'e + Executor<'c, Database = DB>;
+    async fn update(executor: &mut Transaction<'_, DB>, options: &Self::UO) -> Result<Self>;
 }
