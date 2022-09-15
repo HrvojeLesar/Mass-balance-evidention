@@ -1,0 +1,30 @@
+query getCells($fetchOptions: CellFetchOptions!) {
+    cells(fetchOptions: $fetchOptions) {
+        ...CellParts
+    }
+}
+
+query getCell($fetchOptions: CellFetchOptions!) {
+    cell(fetchOptions: $fetchOptions) {
+        ...CellParts
+    }
+}
+
+mutation insertCell($insertOptions: CellInsertOptions!) {
+    insertCell(insertOptions: $insertOptions) {
+        ...CellParts
+    }
+}   
+
+mutation updateCell($updateOptions: CellUpdateOptions!) {
+    updateCell(updateOptions: $updateOptions) {
+        ...CellParts
+    }
+}
+
+fragment CellParts on Cell {
+    id
+    name
+    description
+    createdAt
+}

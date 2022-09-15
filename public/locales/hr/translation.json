@@ -1,0 +1,11 @@
+{
+    "save": "Spremi",
+    "buyer": {
+        "name": "Kupac",
+        "address": "Adresa",
+        "contact": "Kontakt",
+        "errors": {
+            "name": "Ovo polje je obavezno!"
+        }
+    }
+}

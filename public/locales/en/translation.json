@@ -1,0 +1,11 @@
+{
+    "save": "Save",
+    "buyer": {
+        "name": "Buyer",
+        "address": "Address",
+        "contact": "Contact",
+        "errors": {
+            "name": "This field is required!"
+        }
+    }
+}
