@@ -1,15 +1,13 @@
-use std::collections::HashSet;
-
 use anyhow::Result;
 use async_graphql::{Context, InputObject, Object, SimpleObject};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use sqlx::{FromRow, Postgres, Transaction, Row};
+use sqlx::{FromRow, Postgres, Row, Transaction};
 
 use crate::{models::MAX_LIMIT, DatabasePool};
 
 use super::{
-    buyer::{Buyer, BuyerFetchOptions},
+    buyer::Buyer,
     cell::Cell,
     cell_culture_pair::{
         CellCulturePair, CellCulturePairFetchOptions, CellCulturePairInsertOptions,
