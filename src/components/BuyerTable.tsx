@@ -3,22 +3,27 @@ import {
     flexRender,
     getCoreRowModel,
     getPaginationRowModel,
+    PaginationState,
     useReactTable,
 } from "@tanstack/react-table";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button, Card, Form, Table } from "react-bootstrap";
+import { Button, Card, Pagination, Table } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Buyer, useGetBuyersQuery } from "../generated/graphql";
 import { LANGUAGES } from "../main";
 import BuyerForm from "./forms/BuyerForm";
+import TablePagination from "./TablePagination";
 
 const columnHelper = createColumnHelper<Buyer>();
-
-let fakeId = 46;
 
 export default function BuyerTable() {
     const { t, i18n } = useTranslation();
     const [buyers, setBuyers] = useState<Buyer[]>([]);
+
+    const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
+        pageIndex: 0,
+        pageSize: 10,
+    });
 
     const { status, data, error, isSuccess } = useGetBuyersQuery(
         { endpoint: "http://localhost:8000/graphiql" },
@@ -34,6 +39,13 @@ export default function BuyerTable() {
         }
     }, [data]);
 
+    const pagination = useMemo(() => {
+        return {
+            pageIndex,
+            pageSize,
+        };
+    }, [pageIndex, pageSize]);
+
     const columns = useMemo(() => {
         return [
             columnHelper.accessor("name", {
@@ -43,25 +55,12 @@ export default function BuyerTable() {
 
             columnHelper.accessor("address", {
                 cell: (info) => info.getValue(),
-                header: "Address",
+                header: t("buyer.address").toString(),
             }),
 
             columnHelper.accessor("contact", {
-                header: "Contact",
-                cell: ({ getValue, row: { index }, column: { id }, table }) => {
-                    return (
-                        <Form.Control
-                            type="input"
-                            value={getValue() ?? ""}
-                            placeholder="Contact"
-                        />
-                    );
-                },
-            }),
-
-            columnHelper.accessor("createdAt", {
                 cell: (info) => info.getValue(),
-                header: "Created at",
+                header: t("buyer.contact").toString(),
             }),
         ];
     }, [t]);
@@ -72,26 +71,24 @@ export default function BuyerTable() {
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         autoResetPageIndex: false,
+        initialState: {
+            pagination: {
+                pageSize: 2,
+                pageIndex: 0,
+            },
+        },
+        // TODO: pagination
+        pageCount: 23,
+        // state: {
+        //     pagination,
+        // },
+        // manualPagination: true,
+        // onPaginationChange: setPagination,
     });
 
     return (
         <Card className="p-2 shadow">
             <BuyerForm />
-            <Button
-                variant="secondary"
-                onClick={() => {
-                    setBuyers([
-                        ...buyers,
-                        {
-                            createdAt: "123",
-                            id: fakeId++,
-                            name: "FakeJon",
-                        },
-                    ]);
-                }}
-            >
-                Append to buyers
-            </Button>
             <Button
                 variant="primary"
                 onClick={() => {
@@ -139,22 +136,9 @@ export default function BuyerTable() {
                     ))}
                 </tbody>
             </Table>
-            <Button
-                variant="primary"
-                onClick={() => {
-                    table.nextPage();
-                }}
-            >
-                {">"}
-            </Button>
-            <Button
-                variant="primary"
-                onClick={() => {
-                    table.previousPage();
-                }}
-            >
-                {"<"}
-            </Button>
+            <div>{table.getCanNextPage().toString()}</div>
+            <div>{table.getCanPreviousPage().toString()}</div>
+            <TablePagination table={table} />
         </Card>
     );
 }
