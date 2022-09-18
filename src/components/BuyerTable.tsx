@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import {
     createColumnHelper,
     flexRender,
@@ -11,6 +12,7 @@ import { Button, Card, Pagination, Table } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Buyer, useGetBuyersQuery } from "../generated/graphql";
 import { LANGUAGES } from "../main";
+import BaseTable from "./BaseTable";
 import BuyerForm from "./forms/BuyerForm";
 import TablePagination from "./TablePagination";
 
@@ -25,26 +27,26 @@ export default function BuyerTable() {
         pageSize: 10,
     });
 
-    const { status, data, error, isSuccess } = useGetBuyersQuery(
-        { endpoint: "http://localhost:8000/graphiql" },
-        {
-            fetchOptions: {},
-        },
-        {}
-    );
-
-    useEffect(() => {
-        if (data?.buyers) {
-            setBuyers([...data.buyers]);
-        }
-    }, [data]);
-
     const pagination = useMemo(() => {
         return {
             pageIndex,
             pageSize,
         };
     }, [pageIndex, pageSize]);
+
+    const { data } = useGetBuyersQuery(
+        { endpoint: "http://localhost:8000/graphiql" },
+        {
+            fetchOptions: {
+                limit: pageSize,
+                page: pageIndex + 1,
+            },
+        },
+        {
+            queryKey: ["getBuyers", pagination],
+            keepPreviousData: true,
+        }
+    );
 
     const columns = useMemo(() => {
         return [
@@ -68,26 +70,24 @@ export default function BuyerTable() {
     const table = useReactTable({
         data: buyers,
         columns,
+        pageCount: data ? Math.ceil(data.buyers.total / pageSize) : -1,
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        autoResetPageIndex: false,
-        initialState: {
-            pagination: {
-                pageSize: 2,
-                pageIndex: 0,
-            },
+        state: {
+            pagination,
         },
-        // TODO: pagination
-        pageCount: 23,
-        // state: {
-        //     pagination,
-        // },
-        // manualPagination: true,
-        // onPaginationChange: setPagination,
+        manualPagination: true,
+        onPaginationChange: setPagination,
     });
+
+    useEffect(() => {
+        if (data?.buyers.buyers) {
+            setBuyers([...data.buyers.buyers]);
+        }
+    }, [data]);
 
     return (
         <Card className="p-2 shadow">
+        <div>Renders: {renderCount}</div>
             <BuyerForm />
             <Button
                 variant="primary"
@@ -102,42 +102,7 @@ export default function BuyerTable() {
             >
                 Change language
             </Button>
-            <Table hover responsive striped bordered>
-                <thead>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                        <tr key={headerGroup.id}>
-                            {headerGroup.headers.map((header) => (
-                                <th key={header.id}>
-                                    {header.isPlaceholder ? (
-                                        <></>
-                                    ) : (
-                                        flexRender(
-                                            header.column.columnDef.header,
-                                            header.getContext()
-                                        )
-                                    )}
-                                </th>
-                            ))}
-                        </tr>
-                    ))}
-                </thead>
-                <tbody>
-                    {table.getRowModel().rows.map((row) => (
-                        <tr key={row.id}>
-                            {row.getVisibleCells().map((cell) => (
-                                <td key={cell.id}>
-                                    {flexRender(
-                                        cell.column.columnDef.cell,
-                                        cell.getContext()
-                                    )}
-                                </td>
-                            ))}
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
-            <div>{table.getCanNextPage().toString()}</div>
-            <div>{table.getCanPreviousPage().toString()}</div>
+            <BaseTable table={table}/>
             <TablePagination table={table} />
         </Card>
     );

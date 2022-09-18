@@ -51,6 +51,7 @@ export type Buyer = {
 export type BuyerFetchOptions = {
   id?: InputMaybe<Scalars['Int']>;
   limit?: InputMaybe<Scalars['Int']>;
+  page?: InputMaybe<Scalars['Int']>;
 };
 
 export type BuyerInsertOptions = {
@@ -64,6 +65,14 @@ export type BuyerUpdateOptions = {
   contact?: InputMaybe<Scalars['String']>;
   id: Scalars['Int'];
   name?: InputMaybe<Scalars['String']>;
+};
+
+export type Buyers = {
+  __typename?: 'Buyers';
+  buyers: Array<Buyer>;
+  limit: Scalars['Int'];
+  page: Scalars['Int'];
+  total: Scalars['Int'];
 };
 
 export type Cell = {
@@ -239,7 +248,7 @@ export type MutationRootUpdateEntryArgs = {
 export type QueryRoot = {
   __typename?: 'QueryRoot';
   buyer: Buyer;
-  buyers: Array<Buyer>;
+  buyers: Buyers;
   cell: Cell;
   cellCulture: CellCulturePair;
   cellCulturePairs: Array<CellCulturePair>;
@@ -305,7 +314,7 @@ export type GetBuyersQueryVariables = Exact<{
 }>;
 
 
-export type GetBuyersQuery = { __typename?: 'QueryRoot', buyers: Array<{ __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any }> };
+export type GetBuyersQuery = { __typename?: 'QueryRoot', buyers: { __typename?: 'Buyers', total: number, page: number, limit: number, buyers: Array<{ __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any }> } };
 
 export type GetBuyerQueryVariables = Exact<{
   fetchOptions: BuyerFetchOptions;
@@ -380,7 +389,12 @@ export const CellPartsFragmentDoc = `
 export const GetBuyersDocument = `
     query getBuyers($fetchOptions: BuyerFetchOptions!) {
   buyers(fetchOptions: $fetchOptions) {
-    ...BuyerParts
+    total
+    page
+    limit
+    buyers {
+      ...BuyerParts
+    }
   }
 }
     ${BuyerPartsFragmentDoc}`;

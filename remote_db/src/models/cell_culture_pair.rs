@@ -43,6 +43,7 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
     type FO = CellCulturePairFetchOptions;
 
     type UO = CellCulturePairUpdateOptions;
+    type GetManyResult = Vec<Self>;
 
     async fn insert(
         executor: &mut Transaction<'_, Postgres>,

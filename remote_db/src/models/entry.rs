@@ -61,6 +61,8 @@ impl DatabaseQueries<Postgres> for Entry {
 
     type UO = EntryUpdateOptions;
 
+    type GetManyResult = Vec<Self>;
+
     async fn insert(
         executor: &mut Transaction<'_, Postgres>,
         options: &EntryInsertOptions,

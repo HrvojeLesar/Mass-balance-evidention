@@ -43,6 +43,8 @@ impl DatabaseQueries<Postgres> for Culture {
 
     type UO = CultureUpdateOptions;
 
+    type GetManyResult = Vec<Self>;
+
     async fn insert(
         executor: &mut Transaction<'_, Postgres>,
         options: &CultureInsertOptions,

@@ -9,7 +9,7 @@ use crate::{
     DatabasePool,
 };
 
-use super::db_query::DatabaseQueries;
+use super::{calc_limit, calc_offset, db_query::DatabaseQueries, Pagination};
 
 #[derive(SimpleObject, FromRow, Debug)]
 pub(super) struct Buyer {
@@ -19,6 +19,13 @@ pub(super) struct Buyer {
     pub(super) contact: Option<String>,
     pub(super) created_at: DateTime<Utc>,
     // note: Option<String>,
+}
+
+#[derive(SimpleObject, FromRow, Debug)]
+pub(super) struct Buyers {
+    #[graphql(flatten)]
+    pub(super) pagination: Pagination,
+    pub(super) buyers: Vec<Buyer>,
 }
 
 #[derive(InputObject)]
@@ -32,6 +39,7 @@ pub(super) struct BuyerInsertOptions {
 pub(super) struct BuyerFetchOptions {
     pub(super) id: Option<i32>,
     pub(super) limit: Option<i64>,
+    pub(super) page: Option<i64>,
 }
 
 #[derive(InputObject)]
@@ -49,6 +57,8 @@ impl DatabaseQueries<Postgres> for Buyer {
     type FO = BuyerFetchOptions;
 
     type UO = BuyerUpdateOptions;
+
+    type GetManyResult = Buyers;
 
     async fn insert(
         executor: &mut Transaction<'_, Postgres>,
@@ -72,25 +82,39 @@ impl DatabaseQueries<Postgres> for Buyer {
     async fn get_many(
         executor: &mut Transaction<'_, Postgres>,
         options: &BuyerFetchOptions,
-    ) -> Result<Vec<Self>> {
-        let limit = options.limit.unwrap_or(DEFAULT_LIMIT);
-        Ok(sqlx::query_as!(
-            Self,
+    ) -> Result<Buyers> {
+        let r = sqlx::query!(
             "
-            SELECT * FROM buyer
-            WHERE id >= $1
+            SELECT *, COUNT(*) OVER() as total_count FROM buyer
             ORDER BY id ASC
-            LIMIT $2
+            LIMIT $1
+            OFFSET $2
             ",
-            options.id.unwrap_or(0),
-            if limit <= MAX_LIMIT {
-                limit
-            } else {
-                DEFAULT_LIMIT
-            }
+            calc_limit(options.limit),
+            calc_offset(options.page, options.limit)
         )
         .fetch_all(executor)
-        .await?)
+        .await?;
+        Ok(Buyers {
+            pagination: Pagination {
+                total: match r.first() {
+                    Some(b) => b.total_count.unwrap_or_default(),
+                    None => 0,
+                },
+                limit: options.limit.unwrap_or_default(),
+                page: options.page.unwrap_or_default(),
+            },
+            buyers: r
+                .into_iter()
+                .map(|b| Buyer {
+                    id: b.id,
+                    name: b.name,
+                    address: b.address,
+                    contact: b.contact,
+                    created_at: b.created_at,
+                })
+                .collect(),
+        })
     }
 
     async fn get(
@@ -140,11 +164,7 @@ pub struct BuyerQuery;
 
 #[Object]
 impl BuyerQuery {
-    async fn buyers(
-        &self,
-        ctx: &Context<'_>,
-        fetch_options: BuyerFetchOptions,
-    ) -> Result<Vec<Buyer>> {
+    async fn buyers(&self, ctx: &Context<'_>, fetch_options: BuyerFetchOptions) -> Result<Buyers> {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
@@ -154,11 +174,7 @@ impl BuyerQuery {
         Ok(buyer)
     }
 
-    async fn buyer(
-        &self,
-        ctx: &Context<'_>,
-        fetch_options: BuyerFetchOptions,
-    ) -> Result<Buyer> {
+    async fn buyer(&self, ctx: &Context<'_>, fetch_options: BuyerFetchOptions) -> Result<Buyer> {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 

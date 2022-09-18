@@ -29,9 +29,11 @@ where
 
     type UO;
 
+    type GetManyResult;
+
     async fn insert(executor: &mut Transaction<'_, DB>, options: &Self::IO) -> Result<Self>;
 
-    async fn get_many(executor: &mut Transaction<'_, DB>, options: &Self::FO) -> Result<Vec<Self>>;
+    async fn get_many(executor: &mut Transaction<'_, DB>, options: &Self::FO) -> Result<Self::GetManyResult>;
 
     async fn get(executor: &mut Transaction<'_, DB>, options: &Self::FO) -> Result<Self>;
 

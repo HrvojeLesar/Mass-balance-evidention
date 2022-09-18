@@ -15,9 +15,7 @@ const range = (start: number, end: number) => {
 
 const SIBLINGCOUNT = 2;
 
-export default function TablePagination<T extends {}>({
-    table,
-}: TablePaginationProps<T>) {
+export default function TablePagination<T>({ table }: TablePaginationProps<T>) {
     const currentPage = useMemo(() => {
         return table.getState().pagination.pageIndex + 1;
     }, [table.getState().pagination.pageIndex]);
@@ -61,6 +59,13 @@ export default function TablePagination<T extends {}>({
         return [1, "...", ...middleRange, "...", totalPages];
     }, [table.getPageCount(), currentPage]);
 
+    const handleOnClick = (pageNumber: number) => {
+        if (currentPage === pageNumber) {
+            return;
+        }
+        table.setPageIndex(pageNumber - 1);
+    };
+
     return (
         <Pagination>
             <Pagination.Prev
@@ -78,7 +83,7 @@ export default function TablePagination<T extends {}>({
                     <Pagination.Item
                         key={idx}
                         onClick={() => {
-                            table.setPageIndex(item - 1);
+                            handleOnClick(item);
                         }}
                         active={currentPage === item}
                     >

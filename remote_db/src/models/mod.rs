@@ -1,4 +1,4 @@
-use async_graphql::MergedObject;
+use async_graphql::{MergedObject, SimpleObject};
 
 use self::{
     buyer::{BuyerMutation, BuyerQuery},
@@ -36,3 +36,34 @@ pub struct MutationRoot(
     CultureMutation,
     EntryMutation,
 );
+
+#[derive(SimpleObject, Debug)]
+pub struct Pagination {
+    limit: i64,
+    page: i64,
+    total: i64,
+}
+
+pub(crate) fn calc_limit(limit: Option<i64>) -> i64 {
+    match limit {
+        Some(l) => {
+            if l <= MAX_LIMIT {
+                l
+            } else {
+                DEFAULT_LIMIT
+            }
+        }
+        None => DEFAULT_LIMIT
+    }
+}
+
+pub(crate) fn calc_offset(page: Option<i64>, limit: Option<i64>) -> i64 {
+    let page = match page {
+        Some(p) => {
+            if p < 1 { 0 } else { p - 1}
+        }
+        None => 0
+    };
+
+    page * calc_limit(limit)
+}

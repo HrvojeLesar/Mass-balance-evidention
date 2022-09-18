@@ -48,6 +48,8 @@ impl DatabaseQueries<Postgres> for Cell {
 
     type UO = CellUpdateOptions;
 
+    type GetManyResult = Vec<Self>;
+
     async fn insert(
         executor: &mut Transaction<'_, Postgres>,
         options: &CellInsertOptions,
