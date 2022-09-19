@@ -2,13 +2,21 @@ import { Button, Col, Form, Row } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
+    Buyer,
     BuyerInsertOptions,
+    Exact,
+    InsertBuyerMutation,
     useInsertBuyerMutation,
 } from "../../generated/graphql";
 import { FaSave } from "react-icons/fa";
 import BaseForm from "./BaseForm";
+import { Dispatch, SetStateAction } from "react";
 
-export default function BuyerForm() {
+type BuyerFormProps = {
+    onSuccess: (data: InsertBuyerMutation, variables: Exact<{ insertOptions: BuyerInsertOptions; }>, context: unknown) => unknown;
+}
+
+export default function BuyerForm({ onSuccess }: BuyerFormProps) {
     const { t } = useTranslation();
     const {
         register,
@@ -25,7 +33,9 @@ export default function BuyerForm() {
     });
     const insert = useInsertBuyerMutation(
         { endpoint: "http://localhost:8000/graphiql" },
-        {}
+        {
+            onSuccess,
+        }
     );
 
     return (

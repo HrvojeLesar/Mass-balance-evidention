@@ -1,15 +1,32 @@
 use anyhow::Result;
-use async_graphql::{Context, InputObject, Object, SimpleObject};
+use async_graphql::{Context, Enum, InputObject, Object, SimpleObject};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use sqlx::{FromRow, Postgres, Transaction};
+use sqlx::{Encode, FromRow, Postgres, Row, Transaction};
 
 use crate::{
     models::{DEFAULT_LIMIT, MAX_LIMIT},
     DatabasePool,
 };
 
-use super::{calc_limit, calc_offset, db_query::DatabaseQueries, Pagination};
+use super::{calc_limit, calc_offset, db_query::DatabaseQueries, Pagination, Ordering};
+
+#[derive(Enum, Clone, Copy, PartialEq, Eq)]
+pub(super) enum BuyerOrderBy {
+    Name,
+    Address,
+    Contact,
+}
+
+impl Into<String> for BuyerOrderBy {
+    fn into(self) -> String {
+        match self {
+            BuyerOrderBy::Name => "name".to_string(),
+            BuyerOrderBy::Address => "address".to_string(),
+            BuyerOrderBy::Contact => "contact".to_string(),
+        }
+    }
+}
 
 #[derive(SimpleObject, FromRow, Debug)]
 pub(super) struct Buyer {
@@ -36,10 +53,17 @@ pub(super) struct BuyerInsertOptions {
 }
 
 #[derive(InputObject)]
+pub(super) struct OrderingOptions {
+    order: Ordering,
+    order_by: BuyerOrderBy,
+}
+
+#[derive(InputObject)]
 pub(super) struct BuyerFetchOptions {
     pub(super) id: Option<i32>,
     pub(super) limit: Option<i64>,
     pub(super) page: Option<i64>,
+    pub(super) ordering: Option<OrderingOptions>,
 }
 
 #[derive(InputObject)]
@@ -83,37 +107,51 @@ impl DatabaseQueries<Postgres> for Buyer {
         executor: &mut Transaction<'_, Postgres>,
         options: &BuyerFetchOptions,
     ) -> Result<Buyers> {
-        let r = sqlx::query!(
-            "
-            SELECT *, COUNT(*) OVER() as total_count FROM buyer
-            ORDER BY id ASC
-            LIMIT $1
-            OFFSET $2
-            ",
-            calc_limit(options.limit),
-            calc_offset(options.page, options.limit)
-        )
-        .fetch_all(executor)
-        .await?;
+        let mut builder: sqlx::QueryBuilder<Postgres> =
+            sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER() as total_count FROM buyer ");
+        match &options.ordering {
+            Some(ord) => {
+                builder.push("ORDER BY ").push(
+                    format!("{} {} ",
+                    Into::<String>::into(ord.order_by),
+                    Into::<String>::into(ord.order),
+                ));
+            }
+            None => {
+                builder.push("ORDER BY id ASC ");
+            }
+        }
+        builder
+            .push("LIMIT ")
+            .push_bind(calc_limit(options.limit))
+            .push("OFFSET ")
+            .push_bind(calc_offset(options.page, options.limit));
+
+        let r = builder.build().fetch_all(executor).await?;
+
+        let total = match r.first() {
+            Some(b) => b.try_get("total_count")?,
+            None => 0,
+        };
+
+        let mut buyers = Vec::with_capacity(r.len());
+        for b in r.into_iter() {
+            buyers.push(Buyer {
+                id: b.try_get("id")?,
+                name: b.try_get("name")?,
+                address: b.try_get("address")?,
+                contact: b.try_get("contact")?,
+                created_at: b.try_get("created_at")?,
+            });
+        }
+
         Ok(Buyers {
             pagination: Pagination {
-                total: match r.first() {
-                    Some(b) => b.total_count.unwrap_or_default(),
-                    None => 0,
-                },
                 limit: options.limit.unwrap_or_default(),
                 page: options.page.unwrap_or_default(),
+                total,
             },
-            buyers: r
-                .into_iter()
-                .map(|b| Buyer {
-                    id: b.id,
-                    name: b.name,
-                    address: b.address,
-                    contact: b.contact,
-                    created_at: b.created_at,
-                })
-                .collect(),
+            buyers,
         })
     }
 

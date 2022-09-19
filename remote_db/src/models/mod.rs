@@ -1,4 +1,4 @@
-use async_graphql::{MergedObject, SimpleObject};
+use async_graphql::{MergedObject, SimpleObject, Enum};
 
 use self::{
     buyer::{BuyerMutation, BuyerQuery},
@@ -43,6 +43,22 @@ pub struct Pagination {
     page: i64,
     total: i64,
 }
+
+#[derive(Enum, Clone, Copy, PartialEq, Eq)]
+pub(super) enum Ordering {
+    Asc,
+    Desc,
+}
+
+impl Into<String> for Ordering {
+    fn into(self) -> String {
+        match self {
+            Ordering::Asc => "ASC".to_string(),
+            Ordering::Desc => "DESC".to_string(),
+        }
+    }
+}
+
 
 pub(crate) fn calc_limit(limit: Option<i64>) -> i64 {
     match limit {

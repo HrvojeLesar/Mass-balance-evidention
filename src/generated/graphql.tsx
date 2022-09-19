@@ -51,6 +51,7 @@ export type Buyer = {
 export type BuyerFetchOptions = {
   id?: InputMaybe<Scalars['Int']>;
   limit?: InputMaybe<Scalars['Int']>;
+  ordering?: InputMaybe<OrderingOptions>;
   page?: InputMaybe<Scalars['Int']>;
 };
 
@@ -59,6 +60,12 @@ export type BuyerInsertOptions = {
   contact?: InputMaybe<Scalars['String']>;
   name: Scalars['String'];
 };
+
+export enum BuyerOrderBy {
+  Address = 'ADDRESS',
+  Contact = 'CONTACT',
+  Name = 'NAME'
+}
 
 export type BuyerUpdateOptions = {
   address?: InputMaybe<Scalars['String']>;
@@ -243,6 +250,16 @@ export type MutationRootUpdateCultureArgs = {
 
 export type MutationRootUpdateEntryArgs = {
   updateOptions: EntryUpdateOptions;
+};
+
+export enum Ordering {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
+
+export type OrderingOptions = {
+  order: Ordering;
+  orderBy: BuyerOrderBy;
 };
 
 export type QueryRoot = {
