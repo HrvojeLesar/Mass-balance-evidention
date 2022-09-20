@@ -4,39 +4,16 @@ use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use sqlx::{Encode, FromRow, Postgres, Row, Transaction};
 
-use crate::{
-    models::{DEFAULT_LIMIT, MAX_LIMIT},
-    DatabasePool,
+use crate::DatabasePool;
+
+use super::{
+    calc_limit, calc_offset,
+    db_query::{DatabaseQueries, QueryBuilderHelpers},
+    FetchMany, FetchOptions, FieldsToSql, Ordering, OrderingOptions, Pagination,
 };
 
-use super::{calc_limit, calc_offset, db_query::DatabaseQueries, Ordering, Pagination};
-
-#[derive(Enum, Clone, Copy, PartialEq, Eq)]
-pub(super) enum BuyerFields {
-    Name,
-    Address,
-    Contact,
-}
-
-impl Into<String> for BuyerFields {
-    fn into(self) -> String {
-        match self {
-            BuyerFields::Name => "name".to_string(),
-            BuyerFields::Address => "address".to_string(),
-            BuyerFields::Contact => "contact".to_string(),
-        }
-    }
-}
-
-impl BuyerFields {
-    fn to_sql(&self) -> String {
-        match self {
-            BuyerFields::Name => "name % ".to_string(),
-            BuyerFields::Address => "address % ".to_string(),
-            BuyerFields::Contact => "contact % ".to_string(),
-        }
-    }
-}
+type BuyerFetchOptions = FetchOptions<BuyerFields>;
+type Buyers = FetchMany<Buyer>;
 
 #[derive(SimpleObject, FromRow, Debug)]
 pub(super) struct Buyer {
@@ -48,11 +25,31 @@ pub(super) struct Buyer {
     // note: Option<String>,
 }
 
-#[derive(SimpleObject, FromRow, Debug)]
-pub(super) struct Buyers {
-    #[graphql(flatten)]
-    pub(super) pagination: Pagination,
-    pub(super) buyers: Vec<Buyer>,
+#[derive(Enum, Clone, Copy, PartialEq, Eq)]
+pub(super) enum BuyerFields {
+    Name,
+    Address,
+    Contact,
+}
+
+impl FieldsToSql for BuyerFields {
+    fn to_sql(&self) -> String {
+        match self {
+            Self::Name => "name % ".to_string(),
+            Self::Address => "address % ".to_string(),
+            Self::Contact => "contact % ".to_string(),
+        }
+    }
+}
+
+impl Into<String> for BuyerFields {
+    fn into(self) -> String {
+        match self {
+            Self::Name => "name".to_string(),
+            Self::Address => "address".to_string(),
+            Self::Contact => "contact".to_string(),
+        }
+    }
 }
 
 #[derive(InputObject)]
@@ -63,34 +60,14 @@ pub(super) struct BuyerInsertOptions {
 }
 
 #[derive(InputObject)]
-pub(super) struct OrderingOptions {
-    order: Ordering,
-    order_by: BuyerFields,
-}
-
-// TODO: value might need to be generic
-#[derive(InputObject)]
-pub(super) struct BuyerFilter {
-    pub(super) field: BuyerFields,
-    pub(super) value: String,
-}
-
-#[derive(InputObject)]
-pub(super) struct BuyerFetchOptions {
-    pub(super) id: Option<i32>,
-    pub(super) limit: Option<i64>,
-    pub(super) page: Option<i64>,
-    pub(super) ordering: Option<OrderingOptions>,
-    pub(super) filters: Option<Vec<BuyerFilter>>,
-}
-
-#[derive(InputObject)]
 pub(super) struct BuyerUpdateOptions {
     pub(super) id: i32,
     pub(super) name: Option<String>,
     pub(super) address: Option<String>,
     pub(super) contact: Option<String>,
 }
+
+impl QueryBuilderHelpers<'_, Postgres> for Buyer {}
 
 #[async_trait]
 impl DatabaseQueries<Postgres> for Buyer {
@@ -125,36 +102,9 @@ impl DatabaseQueries<Postgres> for Buyer {
         executor: &mut Transaction<'_, Postgres>,
         options: &BuyerFetchOptions,
     ) -> Result<Buyers> {
-        let mut builder: sqlx::QueryBuilder<Postgres> =
+        let mut builder =
             sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER() as total_count FROM buyer ");
-
-        if let Some(filters) = &options.filters {
-            builder.push("WHERE ");
-            let mut sep = builder.separated(" AND ");
-            for filter in filters {
-                sep.push(&filter.field.to_sql())
-                    .push_bind_unseparated(&filter.value);
-            }
-        }
-
-        match &options.ordering {
-            Some(ord) => {
-                builder.push("ORDER BY ").push(format!(
-                    "{} {} ",
-                    Into::<String>::into(ord.order_by),
-                    Into::<String>::into(ord.order),
-                ));
-            }
-            None => {
-                builder.push("ORDER BY id ASC ");
-            }
-        }
-        builder
-            .push("LIMIT ")
-            .push_bind(calc_limit(options.limit))
-            .push("OFFSET ")
-            .push_bind(calc_offset(options.page, options.limit));
-
+        Self::handle_fetch_options(&options, "id", &mut builder);
         let r = builder.build().fetch_all(executor).await?;
 
         let total = match r.first() {
@@ -179,7 +129,7 @@ impl DatabaseQueries<Postgres> for Buyer {
                 page: options.page.unwrap_or_default(),
                 total,
             },
-            buyers,
+            results: buyers,
         })
     }
 

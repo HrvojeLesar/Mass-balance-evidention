@@ -1,19 +1,20 @@
 use anyhow::Result;
-use async_graphql::{Context, InputObject, Object, SimpleObject};
+use async_graphql::{Context, Enum, InputObject, Object, SimpleObject};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 
 use sqlx::{FromRow, Postgres, Transaction};
 
-use crate::{
-    models::{DEFAULT_LIMIT, MAX_LIMIT},
-    DatabasePool,
+use crate::DatabasePool;
+
+use super::{
+    calc_limit, calc_offset, db_query::DatabaseQueries, FetchOptions, FieldsToSql, Pagination, FetchMany,
 };
 
-use super::db_query::DatabaseQueries;
+type CellFetchOptions = FetchOptions<CellFields>;
+type Cells = FetchMany<CellFields>;
 
 #[derive(SimpleObject, FromRow, Debug)]
-#[graphql(input_name = "CellInput")]
 pub(super) struct Cell {
     pub(super) id: i32,
     pub(super) name: String,
@@ -21,16 +22,34 @@ pub(super) struct Cell {
     pub(super) created_at: DateTime<Utc>,
 }
 
+#[derive(Enum, Clone, Copy, PartialEq, Eq)]
+pub(super) enum CellFields {
+    Name,
+    Description,
+}
+
+impl FieldsToSql for CellFields {
+    fn to_sql(&self) -> String {
+        match self {
+            Self::Name => "name % ".to_string(),
+            Self::Description => "description % ".to_string(),
+        }
+    }
+}
+
+impl Into<String> for CellFields {
+    fn into(self) -> String {
+        match self {
+            Self::Name => "name % ".to_string(),
+            Self::Description => "description % ".to_string(),
+        }
+    }
+}
+
 #[derive(InputObject)]
 pub(super) struct CellInsertOptions {
     pub(super) name: String,
     pub(super) description: Option<String>,
-}
-
-#[derive(InputObject)]
-pub(super) struct CellFetchOptions {
-    pub(super) id: Option<i32>,
-    pub(super) limit: Option<i64>,
 }
 
 #[derive(InputObject)]
@@ -48,7 +67,7 @@ impl DatabaseQueries<Postgres> for Cell {
 
     type UO = CellUpdateOptions;
 
-    type GetManyResult = Vec<Self>;
+    type GetManyResult = Cells;
 
     async fn insert(
         executor: &mut Transaction<'_, Postgres>,
@@ -71,28 +90,41 @@ impl DatabaseQueries<Postgres> for Cell {
     async fn get_many(
         executor: &mut Transaction<'_, Postgres>,
         options: &CellFetchOptions,
-    ) -> Result<Vec<Self>> {
-        let limit = options.limit.unwrap_or(DEFAULT_LIMIT);
-        Ok(sqlx::query_as!(
-            Self,
-            "
-            SELECT * FROM cell
-            WHERE id >= $1
-            ORDER BY id ASC
-            LIMIT $2
-            ",
-            options.id.unwrap_or(0),
-            if limit <= MAX_LIMIT {
-                limit
-            } else {
-                DEFAULT_LIMIT
-            }
-        )
-        .fetch_all(executor)
-        .await?)
+    ) -> Result<Cells> {
+        // let limit = calc_limit(options.limit);
+        // let offset = calc_offset(options.page, options.limit);
+        // let mut builder =
+        //     sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER () as total_count FROM cell");
+        //
+        // if let Some(filters) = &options.filters {
+        //     builder.push("WHERE ");
+        //     let mut sep = builder.separated(" AND ");
+        // }
+        // let limit = options.limit.unwrap_or(DEFAULT_LIMIT);
+        // Ok(sqlx::query_as!(
+        //     Self,
+        //     "
+        //     SELECT * FROM cell
+        //     WHERE id >= $1
+        //     ORDER BY id ASC
+        //     LIMIT $2
+        //     ",
+        //     options.id.unwrap_or(0),
+        //     if limit <= MAX_LIMIT {
+        //         limit
+        //     } else {
+        //         DEFAULT_LIMIT
+        //     }
+        // )
+        // .fetch_all(executor)
+        // .await?)
+        todo!()
     }
 
-    async fn get(executor: &mut Transaction<'_, Postgres>, options: &CellFetchOptions) -> Result<Self> {
+    async fn get(
+        executor: &mut Transaction<'_, Postgres>,
+        options: &CellFetchOptions,
+    ) -> Result<Self> {
         Ok(sqlx::query_as!(
             Self,
             "
@@ -133,25 +165,18 @@ pub struct CellQuery;
 
 #[Object]
 impl CellQuery {
-    async fn cells(
-        &self,
-        ctx: &Context<'_>,
-        fetch_options: CellFetchOptions,
-    ) -> Result<Vec<Cell>> {
-        let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
-        let mut transaction = pool.begin().await?;
-
-        let cells = Cell::get_many(&mut transaction, &fetch_options).await?;
-
-        transaction.commit().await?;
-        Ok(cells)
+    async fn cells(&self, ctx: &Context<'_>, fetch_options: CellFetchOptions) -> Result<Vec<Cell>> {
+        // let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
+        // let mut transaction = pool.begin().await?;
+        //
+        // let cells = Cell::get_many(&mut transaction, &fetch_options).await?;
+        //
+        // transaction.commit().await?;
+        // Ok(cells)
+        todo!()
     }
 
-    async fn cell(
-        &self,
-        ctx: &Context<'_>,
-        fetch_options: CellFetchOptions,
-    ) -> Result<Cell> {
+    async fn cell(&self, ctx: &Context<'_>, fetch_options: CellFetchOptions) -> Result<Cell> {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
@@ -165,20 +190,30 @@ impl CellQuery {
 #[derive(Default)]
 pub struct CellMutation;
 
+#[derive(InputObject)]
+#[graphql(input_name = "MyObjectInput")]
+struct MyObject {
+    value: i32,
+}
+
+#[Object]
+impl MyObject {
+    async fn value(&self) -> String {
+        self.value.to_string()
+    }
+}
+
 #[Object]
 impl CellMutation {
-    async fn insert_cell(
-        &self,
-        ctx: &Context<'_>,
-        insert_options: CellInsertOptions,
-    ) -> Result<Cell> {
-        let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
-        let mut transaction = pool.begin().await?;
-
-        let cell = Cell::insert(&mut transaction, &insert_options).await?;
-
-        transaction.commit().await?;
-        Ok(cell)
+    async fn insert_cell(&self, ctx: &Context<'_>, insert_options: MyObject) -> Result<Cell> {
+        todo!()
+        // let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
+        // let mut transaction = pool.begin().await?;
+        //
+        // let cell = Cell::insert(&mut transaction, &insert_options).await?;
+        //
+        // transaction.commit().await?;
+        // Ok(cell)
     }
 
     async fn update_cell(
