@@ -7,5 +7,8 @@
         "errors": {
             "name": "Ovo polje je obavezno!"
         }
+    },
+    "search": {
+        "tooShort": "Vrijednost mora imati minimalno 2 znaka!"
     }
 }

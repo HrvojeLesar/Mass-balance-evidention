@@ -1,9 +1,0 @@
-.cursor-pointer {
-    cursor: pointer;
-}
-
-.prevent-select {
-    user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
-}

@@ -35,7 +35,7 @@ export default function TablePagination<T>({ table }: TablePaginationProps<T>) {
         );
 
         const shouldShowLeftDots = leftSiblingIndex > 2 + 1;
-        const shouldShowRightDots = rightSiblingIndex < totalPages - (2 + 1);
+        const shouldShowRightDots = rightSiblingIndex < totalPages - 2;
 
         if (!shouldShowLeftDots && shouldShowRightDots) {
             const leftItemCount = SIBLINGCOUNT + 1 + 2;

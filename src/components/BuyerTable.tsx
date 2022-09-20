@@ -3,6 +3,7 @@ import {
     ColumnDef,
     ColumnFiltersState,
     createColumnHelper,
+    FilterFn,
     flexRender,
     getCoreRowModel,
     getPaginationRowModel,
@@ -13,18 +14,23 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Card, Pagination, Table, Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { Buyer, InsertBuyerMutation, useGetBuyersQuery, OrderingOptions, Ordering, BuyerOrderBy } from "../generated/graphql";
+import {
+    Buyer,
+    InsertBuyerMutation,
+    useGetBuyersQuery,
+    OrderingOptions,
+    Ordering,
+    BuyerFields,
+    BuyerFilter,
+} from "../generated/graphql";
 import { usePagination } from "../hooks/usePagination";
 import { LANGUAGES } from "../main";
 import BaseTable from "./BaseTable";
 import BuyerForm from "./forms/BuyerForm";
-import TableCheckbox from "./TableCheckbox";
 import TablePagination from "./TablePagination";
 
-// const columnHelper = createColumnHelper<Buyer>();
-
 export default function BuyerTable() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [buyers, setBuyers] = useState<Buyer[]>([]);
 
     const { pagination, setPagination } = usePagination();
@@ -37,14 +43,27 @@ export default function BuyerTable() {
             fetchOptions: {
                 limit: pagination.pageSize,
                 page: pagination.pageIndex + 1,
-                ordering: sorting[0] ? {
-                    order: !sorting[0].desc ?  Ordering.Asc : Ordering.Desc,
-                    orderBy: sorting[0].id.toUpperCase() as BuyerOrderBy,
-                    } : undefined,
+                ordering: sorting[0]
+                    ? {
+                          order: !sorting[0].desc
+                              ? Ordering.Asc
+                              : Ordering.Desc,
+                          orderBy: sorting[0].id.toUpperCase() as BuyerFields,
+                      }
+                    : undefined,
+                filters:
+                    columnFilters.length > 0
+                        ? columnFilters.map((filter) => {
+                              return {
+                                  value: filter.value,
+                                  field: filter.id.toUpperCase() as BuyerFields,
+                              } as BuyerFilter;
+                          })
+                        : undefined,
             },
         },
         {
-            queryKey: ["getBuyers", pagination, sorting],
+            queryKey: ["getBuyers", pagination, sorting, columnFilters],
             keepPreviousData: true,
         }
     );
@@ -71,10 +90,12 @@ export default function BuyerTable() {
     );
 
     const onSuccess = (data: InsertBuyerMutation) => {
-        // TODO: Change 9 to actual dynamic value
         // TODO: Pagination needs to change based on added new values not
         // only from fetched values
-        setBuyers([data.insertBuyer, ...buyers.slice(0, pagination.pageSize - 1)]);
+        setBuyers([
+            data.insertBuyer,
+            ...buyers.slice(0, pagination.pageSize - 1),
+        ]);
     };
 
     const table = useReactTable({
@@ -92,19 +113,38 @@ export default function BuyerTable() {
         manualSorting: true,
         manualFiltering: true,
         sortDescFirst: false,
+        enableColumnResizing: true,
         onPaginationChange: setPagination,
         onSortingChange: setSorting,
-        onColumnFiltersChange: setColumnFilters,
+        onColumnFiltersChange: (filter) => {
+            setPagination({ ...pagination, pageIndex: 0 });
+            setColumnFilters(filter);
+        },
     });
 
     useEffect(() => {
         if (data?.buyers.buyers) {
-            setBuyers([...data.buyers.buyers.slice(0, pagination.pageSize - 1)]);
+            setBuyers([
+                ...data.buyers.buyers.slice(0, pagination.pageSize - 1),
+            ]);
         }
     }, [data, pagination.pageSize]);
 
     return (
         <Card className="p-2 shadow">
+            <Button
+                variant="primary"
+                onClick={() => {
+                    const i = LANGUAGES.findIndex(
+                        (val) => val === i18n.language
+                    );
+                    i18n.changeLanguage(
+                        LANGUAGES[(i === -1 ? 0 : i + 1) % LANGUAGES.length]
+                    );
+                }}
+            >
+                Change language
+            </Button>
             <BuyerForm onSuccess={onSuccess} />
             <BaseTable table={table} />
             <TablePagination table={table} />

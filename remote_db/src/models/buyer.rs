@@ -9,21 +9,31 @@ use crate::{
     DatabasePool,
 };
 
-use super::{calc_limit, calc_offset, db_query::DatabaseQueries, Pagination, Ordering};
+use super::{calc_limit, calc_offset, db_query::DatabaseQueries, Ordering, Pagination};
 
 #[derive(Enum, Clone, Copy, PartialEq, Eq)]
-pub(super) enum BuyerOrderBy {
+pub(super) enum BuyerFields {
     Name,
     Address,
     Contact,
 }
 
-impl Into<String> for BuyerOrderBy {
+impl Into<String> for BuyerFields {
     fn into(self) -> String {
         match self {
-            BuyerOrderBy::Name => "name".to_string(),
-            BuyerOrderBy::Address => "address".to_string(),
-            BuyerOrderBy::Contact => "contact".to_string(),
+            BuyerFields::Name => "name".to_string(),
+            BuyerFields::Address => "address".to_string(),
+            BuyerFields::Contact => "contact".to_string(),
+        }
+    }
+}
+
+impl BuyerFields {
+    fn to_sql(&self) -> String {
+        match self {
+            BuyerFields::Name => "name % ".to_string(),
+            BuyerFields::Address => "address % ".to_string(),
+            BuyerFields::Contact => "contact % ".to_string(),
         }
     }
 }
@@ -55,7 +65,14 @@ pub(super) struct BuyerInsertOptions {
 #[derive(InputObject)]
 pub(super) struct OrderingOptions {
     order: Ordering,
-    order_by: BuyerOrderBy,
+    order_by: BuyerFields,
+}
+
+// TODO: value might need to be generic
+#[derive(InputObject)]
+pub(super) struct BuyerFilter {
+    pub(super) field: BuyerFields,
+    pub(super) value: String,
 }
 
 #[derive(InputObject)]
@@ -64,6 +81,7 @@ pub(super) struct BuyerFetchOptions {
     pub(super) limit: Option<i64>,
     pub(super) page: Option<i64>,
     pub(super) ordering: Option<OrderingOptions>,
+    pub(super) filters: Option<Vec<BuyerFilter>>,
 }
 
 #[derive(InputObject)]
@@ -109,10 +127,20 @@ impl DatabaseQueries<Postgres> for Buyer {
     ) -> Result<Buyers> {
         let mut builder: sqlx::QueryBuilder<Postgres> =
             sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER() as total_count FROM buyer ");
+
+        if let Some(filters) = &options.filters {
+            builder.push("WHERE ");
+            let mut sep = builder.separated(" AND ");
+            for filter in filters {
+                sep.push(&filter.field.to_sql())
+                    .push_bind_unseparated(&filter.value);
+            }
+        }
+
         match &options.ordering {
             Some(ord) => {
-                builder.push("ORDER BY ").push(
-                    format!("{} {} ",
+                builder.push("ORDER BY ").push(format!(
+                    "{} {} ",
                     Into::<String>::into(ord.order_by),
                     Into::<String>::into(ord.order),
                 ));

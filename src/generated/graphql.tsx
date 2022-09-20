@@ -49,10 +49,22 @@ export type Buyer = {
 };
 
 export type BuyerFetchOptions = {
+  filters?: InputMaybe<Array<BuyerFilter>>;
   id?: InputMaybe<Scalars['Int']>;
   limit?: InputMaybe<Scalars['Int']>;
   ordering?: InputMaybe<OrderingOptions>;
   page?: InputMaybe<Scalars['Int']>;
+};
+
+export enum BuyerFields {
+  Address = 'ADDRESS',
+  Contact = 'CONTACT',
+  Name = 'NAME'
+}
+
+export type BuyerFilter = {
+  field: BuyerFields;
+  value: Scalars['String'];
 };
 
 export type BuyerInsertOptions = {
@@ -60,12 +72,6 @@ export type BuyerInsertOptions = {
   contact?: InputMaybe<Scalars['String']>;
   name: Scalars['String'];
 };
-
-export enum BuyerOrderBy {
-  Address = 'ADDRESS',
-  Contact = 'CONTACT',
-  Name = 'NAME'
-}
 
 export type BuyerUpdateOptions = {
   address?: InputMaybe<Scalars['String']>;
@@ -259,7 +265,7 @@ export enum Ordering {
 
 export type OrderingOptions = {
   order: Ordering;
-  orderBy: BuyerOrderBy;
+  orderBy: BuyerFields;
 };
 
 export type QueryRoot = {
