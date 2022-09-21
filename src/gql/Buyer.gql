@@ -3,7 +3,7 @@ query getBuyers($fetchOptions: BuyerFetchOptions!) {
         total
         page
         limit
-        buyers {
+        results { 
             ...BuyerParts
         }
     }
@@ -19,7 +19,7 @@ mutation insertBuyer($insertOptions: BuyerInsertOptions!) {
     insertBuyer(insertOptions: $insertOptions) {
         ...BuyerParts
     }
-}
+}   
 
 mutation updateBuyer($updateOptions: BuyerUpdateOptions!) {
     updateBuyer(updateOptions: $updateOptions) {

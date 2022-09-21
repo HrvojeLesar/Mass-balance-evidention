@@ -1,5 +1,5 @@
 use anyhow::Result;
-use async_graphql::{Context, InputObject, Object, SimpleObject};
+use async_graphql::{Context, Enum, InputObject, Object, SimpleObject};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use sqlx::{FromRow, Postgres, Row, Transaction};
@@ -7,51 +7,81 @@ use sqlx::{FromRow, Postgres, Row, Transaction};
 use crate::{models::MAX_LIMIT, DatabasePool};
 
 use super::{
-    buyer::Buyer,
+    buyer::{Buyer, BuyerFields},
     cell::Cell,
     cell_culture_pair::{
         CellCulturePair, CellCulturePairFetchOptions, CellCulturePairInsertOptions,
     },
     culture::Culture,
-    db_query::DatabaseQueries,
-    DEFAULT_LIMIT,
+    db_query::{DatabaseQueries, QueryBuilderHelpers},
+    FetchMany, FetchOptions, FieldsToSql, DEFAULT_LIMIT, Pagination,
 };
 
+type EntryFetchOptions = FetchOptions<EntryFields>;
+type Entries = FetchMany<Entry>;
+
 #[derive(SimpleObject, FromRow)]
-struct Entry {
-    id: i32,
-    weight: Option<f64>,
-    weight_type: Option<String>,
-    date: DateTime<Utc>,
-    created_at: DateTime<Utc>,
-    buyer: Option<Buyer>,
-    cell_culture_pair: Option<CellCulturePair>,
+pub(super) struct Entry {
+    pub(super) id: i32,
+    pub(super) weight: Option<f64>,
+    pub(super) weight_type: Option<String>,
+    pub(super) date: DateTime<Utc>,
+    pub(super) created_at: DateTime<Utc>,
+    pub(super) buyer: Option<Buyer>,
+    pub(super) cell_culture_pair: Option<CellCulturePair>,
+}
+
+#[derive(Enum, Clone, Copy, PartialEq, Eq)]
+pub(super) enum EntryFields {
+    Weight,
+    Date,
+    BuyerName,
+    BuyerAddress,
+    BuyerContact,
+    CellName,
+    CellDescription,
+    CultureName,
+    CultureDescription,
+}
+
+impl FieldsToSql for EntryFields {}
+
+impl ToString for EntryFields {
+    fn to_string(&self) -> String {
+        match self {
+            EntryFields::Weight => "weight".to_string(),
+            EntryFields::Date => "date".to_string(),
+            EntryFields::BuyerName => "buyer.name".to_string(),
+            EntryFields::BuyerAddress => "buyer.address".to_string(),
+            EntryFields::BuyerContact => "buyer.contact".to_string(),
+            EntryFields::CellName => "cell.name".to_string(),
+            EntryFields::CellDescription => "cell.description".to_string(),
+            EntryFields::CultureName => "culture.name".to_string(),
+            EntryFields::CultureDescription => "culture.description".to_string(),
+        }
+    }
 }
 
 #[derive(InputObject)]
-struct EntryInsertOptions {
-    date: DateTime<Utc>,
-    weight: Option<f64>,
-    weight_type: Option<String>,
-    id_buyer: Option<i32>,
-    cell_culture_pair: CellCulturePairInsertOptions,
+pub(super) struct EntryInsertOptions {
+    pub(super) date: DateTime<Utc>,
+    pub(super) weight: Option<f64>,
+    pub(super) weight_type: Option<String>,
+    pub(super) id_buyer: Option<i32>,
+    pub(super) cell_culture_pair: CellCulturePairInsertOptions,
 }
 
 #[derive(InputObject)]
-struct EntryFetchOptions {
-    id: Option<i32>,
-    limit: Option<i64>,
+pub(super) struct EntryUpdateOptions {
+    pub(super) id: i32,
+    pub(super) weight: Option<f64>,
+    pub(super) weight_type: Option<String>,
+    pub(super) date: Option<DateTime<Utc>>,
+    pub(super) id_buyer: Option<i32>,
+    pub(super) cell_culture_pair: Option<CellCulturePairInsertOptions>,
 }
 
-#[derive(InputObject)]
-struct EntryUpdateOptions {
-    id: i32,
-    weight: Option<f64>,
-    weight_type: Option<String>,
-    date: Option<DateTime<Utc>>,
-    id_buyer: Option<i32>,
-    cell_culture_pair: Option<CellCulturePairInsertOptions>,
-}
+impl QueryBuilderHelpers<'_, Postgres> for Entry {}
 
 #[async_trait]
 impl DatabaseQueries<Postgres> for Entry {
@@ -61,7 +91,7 @@ impl DatabaseQueries<Postgres> for Entry {
 
     type UO = EntryUpdateOptions;
 
-    type GetManyResult = Vec<Self>;
+    type GetManyResult = Entries;
 
     async fn insert(
         executor: &mut Transaction<'_, Postgres>,
@@ -86,8 +116,13 @@ impl DatabaseQueries<Postgres> for Entry {
         Ok(Self::get(
             &mut *executor,
             &EntryFetchOptions {
-                id: Some(partial_entry.id),
+                id: super::Id {
+                    id: Some(partial_entry.id),
+                },
+                page: None,
                 limit: None,
+                filters: None,
+                ordering: None,
             },
         )
         .await?)
@@ -96,11 +131,10 @@ impl DatabaseQueries<Postgres> for Entry {
     async fn get_many(
         executor: &mut Transaction<'_, Postgres>,
         options: &EntryFetchOptions,
-    ) -> Result<Vec<Self>> {
-        let limit = options.limit.unwrap_or(DEFAULT_LIMIT);
-        Ok(sqlx::query!(
+    ) -> Result<Entries> {
+        let mut builder = sqlx::QueryBuilder::new(
             "
-            SELECT 
+            SELECT
                 entry.id as e_id,
                 entry.weight as e_weight,
                 entry.weight_type as e_weight_type,
@@ -122,58 +156,67 @@ impl DatabaseQueries<Postgres> for Entry {
                 culture.name as cu_name,
                 culture.description as cu_desc,
                 culture.created_at as cu_created_at,
-                cell_culture_pair.created_at as ccp_created_at
+                cell_culture_pair.created_at as ccp_created_at,
+                COUNT(*) OVER() as total_count
             FROM entry
             INNER JOIN buyer ON buyer.id = entry.id_buyer
             INNER JOIN cell ON cell.id = entry.id_cell
             INNER JOIN culture ON culture.id = entry.id_culture
-            INNER JOIN cell_culture_pair ON 
-                cell_culture_pair.id_cell = entry.id_cell AND 
+            INNER JOIN cell_culture_pair ON
+                cell_culture_pair.id_cell = entry.id_cell AND
                 cell_culture_pair.id_culture = entry.id_culture
-            WHERE entry.id >= $1
-            ORDER BY entry.id ASC
-            LIMIT $2
             ",
-            options.id.unwrap_or(0),
-            if limit <= MAX_LIMIT {
-                limit
-            } else {
-                DEFAULT_LIMIT
-            }
-        )
-        .fetch_all(&mut *executor)
-        .await?
-        .into_iter()
-        .map(|r| Self {
-            id: r.e_id,
-            weight: r.e_weight,
-            weight_type: r.e_weight_type,
-            date: r.e_date,
-            created_at: r.e_created_at,
-            buyer: Some(Buyer {
-                id: r.b_id,
-                name: r.b_name,
-                address: r.b_address,
-                contact: r.b_contact,
-                created_at: r.c_created_at,
-            }),
-            cell_culture_pair: Some(CellCulturePair {
-                created_at: r.ccp_created_at,
-                cell: Some(Cell {
-                    id: r.c_id,
-                    name: r.c_name,
-                    description: r.c_desc,
-                    created_at: r.c_created_at,
+        );
+
+        Self::handle_fetch_options(&options, "entry.id", &mut builder);
+        let rows = builder.build().fetch_all(executor).await?;
+
+        let total = match rows.first() {
+            Some(t) => t.try_get("total_count")?,
+            None => 0,
+        };
+
+        let mut entries = Vec::with_capacity(rows.len());
+        for e in rows.into_iter() {
+            entries.push(Entry {
+                id: e.try_get("e_id")?,
+                weight: e.try_get("e_weight")?,
+                weight_type: e.try_get("e_weight_type")?,
+                date: e.try_get("e_date")?,
+                created_at: e.try_get("e_created_at")?,
+                buyer: Some(Buyer {
+                    id: e.try_get("b_id")?,
+                    name: e.try_get("b_name")?,
+                    address: e.try_get("b_address")?,
+                    contact: e.try_get("b_contact")?,
+                    created_at: e.try_get("c_created_at")?,
                 }),
-                culture: Some(Culture {
-                    id: r.cu_id,
-                    name: r.cu_name,
-                    description: r.cu_desc,
-                    created_at: r.cu_created_at,
+                cell_culture_pair: Some(CellCulturePair {
+                    created_at: e.try_get("ccp_created_at")?,
+                    cell: Some(Cell {
+                        id: e.try_get("c_id")?,
+                        name: e.try_get("c_name")?,
+                        description: e.try_get("c_desc")?,
+                        created_at: e.try_get("c_created_at")?,
+                    }),
+                    culture: Some(Culture {
+                        id: e.try_get("cu_id")?,
+                        name: e.try_get("cu_name")?,
+                        description: e.try_get("cu_desc")?,
+                        created_at: e.try_get("cu_created_at")?,
+                    }),
                 }),
-            }),
+            })
+        }
+
+        Ok(Entries {
+            pagination: Pagination {
+                limit: options.limit.unwrap_or_default(),
+                page: options.page.unwrap_or_default(),
+                total,
+            },
+            results: entries,
         })
-        .collect())
     }
 
     async fn get(
@@ -214,7 +257,7 @@ impl DatabaseQueries<Postgres> for Entry {
                 cell_culture_pair.id_culture = entry.id_culture
             WHERE entry.id = $1
             ",
-            options.id,
+            options.id.id,
         )
         .fetch_one(&mut *executor)
         .await?;
@@ -286,8 +329,13 @@ impl DatabaseQueries<Postgres> for Entry {
         Ok(Self::get(
             &mut *executor,
             &EntryFetchOptions {
-                id: Some(r.try_get("id")?),
+                id: super::Id {
+                    id: Some(r.try_get("id")?),
+                },
+                page: None,
                 limit: None,
+                filters: None,
+                ordering: None,
             },
         )
         .await?)
@@ -303,7 +351,7 @@ impl EntryQuery {
         &self,
         ctx: &Context<'_>,
         fetch_options: EntryFetchOptions,
-    ) -> Result<Vec<Entry>> {
+    ) -> Result<Entries> {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 

@@ -7,9 +7,8 @@ use sqlx::{Encode, FromRow, Postgres, Row, Transaction};
 use crate::DatabasePool;
 
 use super::{
-    calc_limit, calc_offset,
     db_query::{DatabaseQueries, QueryBuilderHelpers},
-    FetchMany, FetchOptions, FieldsToSql, Ordering, OrderingOptions, Pagination,
+    FetchMany, FetchOptions, FieldsToSql, Pagination,
 };
 
 type BuyerFetchOptions = FetchOptions<BuyerFields>;
@@ -32,18 +31,10 @@ pub(super) enum BuyerFields {
     Contact,
 }
 
-impl FieldsToSql for BuyerFields {
-    fn to_sql(&self) -> String {
-        match self {
-            Self::Name => "name % ".to_string(),
-            Self::Address => "address % ".to_string(),
-            Self::Contact => "contact % ".to_string(),
-        }
-    }
-}
+impl FieldsToSql for BuyerFields {}
 
-impl Into<String> for BuyerFields {
-    fn into(self) -> String {
+impl ToString for BuyerFields {
+    fn to_string(&self) -> String {
         match self {
             Self::Name => "name".to_string(),
             Self::Address => "address".to_string(),
@@ -143,7 +134,7 @@ impl DatabaseQueries<Postgres> for Buyer {
             SELECT * FROM buyer
             WHERE id = $1
             ",
-            options.id
+            options.id.id
         )
         .fetch_one(executor)
         .await?)

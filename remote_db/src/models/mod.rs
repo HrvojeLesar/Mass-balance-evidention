@@ -1,11 +1,16 @@
-use async_graphql::{Enum, InputObject, InputType, MergedObject, SimpleObject, OutputType};
+use anyhow::Result;
+use async_graphql::{Enum, InputObject, InputType, MergedObject, OutputType, SimpleObject};
+use sqlx::{postgres::PgRow, Row};
 
 use self::{
-    buyer::{BuyerFields, BuyerMutation, BuyerQuery, Buyer},
-    cell::{CellMutation, CellQuery, CellFields, Cell},
-    cell_culture_pair::{CellCulturePairMutation, CellCulturePairQuery},
-    culture::{CultureMutation, CultureQuery},
-    entry::{EntryMutation, EntryQuery},
+    buyer::{Buyer, BuyerFields, BuyerMutation, BuyerQuery},
+    cell::{Cell, CellFields, CellMutation, CellQuery},
+    cell_culture_pair::{
+        CellCulturePair, CellCulturePairFields, CellCulturePairIds, CellCulturePairMutation,
+        CellCulturePairQuery,
+    },
+    culture::{Culture, CultureFields, CultureMutation, CultureQuery},
+    entry::{EntryMutation, EntryQuery, EntryFields, Entry},
 };
 
 pub mod buyer;
@@ -50,8 +55,8 @@ pub(super) enum Ordering {
     Desc,
 }
 
-impl Into<String> for Ordering {
-    fn into(self) -> String {
+impl ToString for Ordering {
+    fn to_string(&self) -> String {
         match self {
             Ordering::Asc => "ASC".to_string(),
             Ordering::Desc => "DESC".to_string(),
@@ -62,7 +67,10 @@ impl Into<String> for Ordering {
 #[derive(InputObject)]
 #[graphql(concrete(name = "BuyerOrderingOptions", params(BuyerFields)))]
 #[graphql(concrete(name = "CellOrderingOptions", params(CellFields)))]
-pub(super) struct OrderingOptions<T: InputType + Into<String>> {
+#[graphql(concrete(name = "CultureOrderingOptions", params(CultureFields)))]
+#[graphql(concrete(name = "CellCulturePairOrderingOptions", params(CellCulturePairFields)))]
+#[graphql(concrete(name = "EntryOrderingOptions", params(EntryFields)))]
+pub(super) struct OrderingOptions<T: InputType + ToString> {
     order: Ordering,
     order_by: T,
 }
@@ -70,20 +78,36 @@ pub(super) struct OrderingOptions<T: InputType + Into<String>> {
 #[derive(InputObject)]
 #[graphql(concrete(name = "BuyerFilterOptions", params(BuyerFields)))]
 #[graphql(concrete(name = "CellFilterOptions", params(CellFields)))]
+#[graphql(concrete(name = "CultureFilterOptions", params(CultureFields)))]
+#[graphql(concrete(name = "CellCulturePairFilterOptions", params(CellCulturePairFields)))]
+#[graphql(concrete(name = "EntryFilterOptions", params(EntryFields)))]
 pub(super) struct Filter<T: InputType + FieldsToSql> {
     pub(super) field: T,
     pub(super) value: String,
 }
 
 #[derive(InputObject)]
+pub struct Id {
+    pub id: Option<i32>,
+}
+
+#[derive(InputObject)]
 #[graphql(concrete(name = "BuyerFetchOptions", params(BuyerFields)))]
 #[graphql(concrete(name = "CellFetchOptions", params(CellFields)))]
-pub(super) struct FetchOptions<T: InputType + FieldsToSql + Into<String>>
+#[graphql(concrete(name = "CultureFetchOptions", params(CultureFields)))]
+#[graphql(concrete(
+    name = "CellCulturePairFetchOptions",
+    params(CellCulturePairFields, CellCulturePairIds)
+))]
+#[graphql(concrete(name = "EntryFetchOptions", params(EntryFields)))]
+pub(super) struct FetchOptions<T, I = Id>
 where
+    T: InputType + FieldsToSql + ToString,
+    I: InputType,
     Filter<T>: InputType,
     OrderingOptions<T>: InputType,
 {
-    pub(super) id: Option<i32>,
+    pub(super) id: I,
     pub(super) limit: Option<i64>,
     pub(super) page: Option<i64>,
     pub(super) ordering: Option<OrderingOptions<T>>,
@@ -93,41 +117,17 @@ where
 #[derive(SimpleObject, Debug)]
 #[graphql(concrete(name = "Buyers", params(Buyer)))]
 #[graphql(concrete(name = "Cells", params(Cell)))]
-pub(super) struct FetchMany<T: OutputType> 
-{
+#[graphql(concrete(name = "Cultures", params(Culture)))]
+#[graphql(concrete(name = "CellCulturePairs", params(CellCulturePair)))]
+#[graphql(concrete(name = "Entries", params(Entry)))]
+pub(super) struct FetchMany<T: OutputType> {
     #[graphql(flatten)]
     pub(super) pagination: Pagination,
     pub(super) results: Vec<T>,
 }
 
-pub(crate) fn calc_limit(limit: Option<i64>) -> i64 {
-    match limit {
-        Some(l) => {
-            if l <= MAX_LIMIT {
-                l
-            } else {
-                DEFAULT_LIMIT
-            }
-        }
-        None => DEFAULT_LIMIT,
+pub trait FieldsToSql: ToString {
+    fn to_sql(&self) -> String {
+        format!("{} % ", self.to_string())
     }
-}
-
-pub(crate) fn calc_offset(page: Option<i64>, limit: Option<i64>) -> i64 {
-    let page = match page {
-        Some(p) => {
-            if p < 1 {
-                0
-            } else {
-                p - 1
-            }
-        }
-        None => 0,
-    };
-
-    page * calc_limit(limit)
-}
-
-pub trait FieldsToSql {
-    fn to_sql(&self) -> String;
 }

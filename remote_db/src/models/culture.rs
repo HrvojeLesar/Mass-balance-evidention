@@ -1,12 +1,18 @@
 use anyhow::Result;
-use async_graphql::{Context, InputObject, SimpleObject, Object};
+use async_graphql::{Context, Enum, InputObject, Object, SimpleObject};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use sqlx::{Postgres, Transaction, FromRow};
+use sqlx::{FromRow, Postgres, Row, Transaction};
 
 use crate::{models::MAX_LIMIT, DatabasePool};
 
-use super::{db_query::DatabaseQueries, DEFAULT_LIMIT};
+use super::{
+    db_query::{DatabaseQueries, QueryBuilderHelpers},
+    FetchMany, FetchOptions, FieldsToSql, Pagination, DEFAULT_LIMIT
+};
+
+type CultureFetchOptions = FetchOptions<CultureFields>;
+type Cultures = FetchMany<Culture>;
 
 #[derive(SimpleObject, FromRow, Debug)]
 pub(super) struct Culture {
@@ -16,16 +22,27 @@ pub(super) struct Culture {
     pub(super) created_at: DateTime<Utc>,
 }
 
+#[derive(Enum, Clone, Copy, PartialEq, Eq)]
+pub(super) enum CultureFields {
+    Name,
+    Description,
+}
+
+impl FieldsToSql for CultureFields {}
+
+impl ToString for CultureFields {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Name => "name".to_string(),
+            Self::Description => "description".to_string(),
+        }
+    }
+}
+
 #[derive(InputObject)]
 pub(super) struct CultureInsertOptions {
     pub(super) name: String,
     pub(super) description: Option<String>,
-}
-
-#[derive(InputObject)]
-pub(super) struct CultureFetchOptions {
-    pub(super) id: Option<i32>,
-    pub(super) limit: Option<i64>,
 }
 
 #[derive(InputObject)]
@@ -35,6 +52,8 @@ pub(super) struct CultureUpdateOptions {
     pub(super) description: Option<String>,
 }
 
+impl QueryBuilderHelpers<'_, Postgres> for Culture {}
+
 #[async_trait]
 impl DatabaseQueries<Postgres> for Culture {
     type IO = CultureInsertOptions;
@@ -43,7 +62,7 @@ impl DatabaseQueries<Postgres> for Culture {
 
     type UO = CultureUpdateOptions;
 
-    type GetManyResult = Vec<Self>;
+    type GetManyResult = Cultures;
 
     async fn insert(
         executor: &mut Transaction<'_, Postgres>,
@@ -66,25 +85,35 @@ impl DatabaseQueries<Postgres> for Culture {
     async fn get_many(
         executor: &mut Transaction<'_, Postgres>,
         options: &CultureFetchOptions,
-    ) -> Result<Vec<Self>> {
-        let limit = options.limit.unwrap_or(DEFAULT_LIMIT);
-        Ok(sqlx::query_as!(
-            Self,
-            "
-            SELECT * FROM culture
-            WHERE id >= $1
-            ORDER BY id ASC
-            LIMIT $2
-            ",
-            options.id.unwrap_or(0),
-            if limit <= MAX_LIMIT {
-                limit
-            } else {
-                DEFAULT_LIMIT
-            }
-        )
-        .fetch_all(executor)
-        .await?)
+    ) -> Result<Cultures> {
+        let mut builder =
+            sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER () as total_count FROM culture ");
+        Self::handle_fetch_options(&options, "id", &mut builder);
+        let r = builder.build().fetch_all(executor).await?;
+
+        let total = match r.first() {
+            Some(t) => t.try_get("total_count")?,
+            None => 0,
+        };
+
+        let mut cultures = Vec::with_capacity(r.len());
+        for c in r.into_iter() {
+            cultures.push(Culture {
+                id: c.try_get("id")?,
+                name: c.try_get("name")?,
+                description: c.try_get("description")?,
+                created_at: c.try_get("created_at")?,
+            });
+        }
+
+        Ok(Cultures {
+            pagination: Pagination {
+                limit: options.limit.unwrap_or_default(),
+                page: options.page.unwrap_or_default(),
+                total,
+            },
+            results: cultures,
+        })
     }
 
     async fn get(
@@ -97,7 +126,7 @@ impl DatabaseQueries<Postgres> for Culture {
             SELECT * FROM culture
             WHERE id = $1
             ",
-            options.id
+            options.id.id
         )
         .fetch_one(executor)
         .await?)
@@ -136,7 +165,7 @@ impl CultureQuery {
         &self,
         ctx: &Context<'_>,
         fetch_options: CultureFetchOptions,
-    ) -> Result<Vec<Culture>> {
+    ) -> Result<Cultures> {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
@@ -146,7 +175,11 @@ impl CultureQuery {
         Ok(cells)
     }
 
-    async fn culture(&self, ctx: &Context<'_>, fetch_options: CultureFetchOptions) -> Result<Culture> {
+    async fn culture(
+        &self,
+        ctx: &Context<'_>,
+        fetch_options: CultureFetchOptions,
+    ) -> Result<Culture> {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 

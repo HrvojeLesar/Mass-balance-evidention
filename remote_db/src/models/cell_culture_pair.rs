@@ -1,12 +1,27 @@
 use anyhow::Result;
-use async_graphql::{Context, InputObject, Object, SimpleObject};
+use async_graphql::{Context, Enum, InputObject, Object, SimpleObject};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use sqlx::{FromRow, Postgres, Transaction};
+use sqlx::{FromRow, Postgres, Row, Transaction};
 
 use crate::{models::MAX_LIMIT, DatabasePool};
 
-use super::{cell::Cell, culture::Culture, db_query::DatabaseQueries, DEFAULT_LIMIT};
+use super::{
+    cell::Cell,
+    culture::Culture,
+    db_query::{DatabaseQueries, QueryBuilderHelpers},
+    FetchMany, FetchOptions, FieldsToSql, Pagination, DEFAULT_LIMIT,
+};
+
+pub(super) type CellCulturePairFetchOptions =
+    FetchOptions<CellCulturePairFields, CellCulturePairIds>;
+type CellCulturePairs = FetchMany<CellCulturePair>;
+
+#[derive(InputObject)]
+pub struct CellCulturePairIds {
+    pub cell_id: Option<i32>,
+    pub culture_id: Option<i32>,
+}
 
 #[derive(SimpleObject, FromRow, Debug)]
 pub(super) struct CellCulturePair {
@@ -15,17 +30,31 @@ pub(super) struct CellCulturePair {
     pub(super) created_at: DateTime<Utc>,
 }
 
+#[derive(Enum, Clone, Copy, PartialEq, Eq)]
+pub(super) enum CellCulturePairFields {
+    CellName,
+    CellDescription,
+    CultureName,
+    CultureDescription,
+}
+
+impl FieldsToSql for CellCulturePairFields {}
+
+impl ToString for CellCulturePairFields {
+    fn to_string(&self) -> String {
+        match self {
+            Self::CellName => "cell.name".to_string(),
+            Self::CellDescription => "cell.description".to_string(),
+            Self::CultureName => "culture.name".to_string(),
+            Self::CultureDescription => "culture.description".to_string(),
+        }
+    }
+}
+
 #[derive(InputObject)]
 pub(super) struct CellCulturePairInsertOptions {
     pub(super) id_cell: i32,
     pub(super) id_culture: i32,
-}
-
-#[derive(InputObject)]
-pub(super) struct CellCulturePairFetchOptions {
-    pub(super) id_cell: i32,
-    pub(super) id_culture: i32,
-    pub(super) limit: Option<i64>,
 }
 
 #[derive(InputObject)]
@@ -36,6 +65,8 @@ pub(super) struct CellCulturePairUpdateOptions {
     pub(super) id_culture_old: i32,
 }
 
+impl QueryBuilderHelpers<'_, Postgres> for CellCulturePair {}
+
 #[async_trait]
 impl DatabaseQueries<Postgres> for CellCulturePair {
     type IO = CellCulturePairInsertOptions;
@@ -43,7 +74,8 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
     type FO = CellCulturePairFetchOptions;
 
     type UO = CellCulturePairUpdateOptions;
-    type GetManyResult = Vec<Self>;
+
+    type GetManyResult = CellCulturePairs;
 
     async fn insert(
         executor: &mut Transaction<'_, Postgres>,
@@ -103,9 +135,8 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
     async fn get_many(
         executor: &mut Transaction<'_, Postgres>,
         options: &CellCulturePairFetchOptions,
-    ) -> Result<Vec<Self>> {
-        let limit = options.limit.unwrap_or(DEFAULT_LIMIT);
-        Ok(sqlx::query!(
+    ) -> Result<CellCulturePairs> {
+        let mut builder = sqlx::QueryBuilder::new(
             "
             SELECT 
                 id_cell,
@@ -118,44 +149,50 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
                 culture.id as cu_id,
                 culture.name as cu_name,
                 culture.description as cu_desc,
-                culture.created_at as cu_created_at
+                culture.created_at as cu_created_at,
+                COUNT(*) OVER() as total_count
             FROM 
                 cell_culture_pair
             INNER JOIN cell ON cell.id = cell_culture_pair.id_cell
             INNER JOIN culture ON culture.id = cell_culture_pair.id_culture
-            WHERE 
-                cell_culture_pair.id_cell >= $1 AND
-                cell_culture_pair.id_culture >= $2
-            ORDER BY cell_culture_pair.id_cell ASC
-            LIMIT $3
             ",
-            options.id_cell,
-            options.id_culture,
-            if limit <= MAX_LIMIT {
-                limit
-            } else {
-                DEFAULT_LIMIT
-            }
-        )
-        .fetch_all(executor)
-        .await?
-        .into_iter()
-        .map(|r| Self {
-            created_at: r.created_at,
-            cell: Some(Cell {
-                id: r.c_id,
-                name: r.c_name,
-                description: r.c_desc,
-                created_at: r.c_created_at,
-            }),
-            culture: Some(Culture {
-                id: r.cu_id,
-                name: r.cu_name,
-                description: r.cu_desc,
-                created_at: r.cu_created_at,
-            }),
+        );
+        Self::handle_fetch_options(&options, "id_cell", &mut builder);
+
+        let rows = builder.build().fetch_all(executor).await?;
+
+        let total = match rows.first() {
+            Some(t) => t.try_get("total_count")?,
+            None => 0,
+        };
+
+        let mut pairs = Vec::with_capacity(rows.len());
+        for p in rows.into_iter() {
+            pairs.push(CellCulturePair {
+                created_at: p.try_get("created_at")?,
+                cell: Some(Cell {
+                    id: p.try_get("c_id")?,
+                    name: p.try_get("c_name")?,
+                    description: p.try_get("c_desc")?,
+                    created_at: p.try_get("c_created_at")?,
+                }),
+                culture: Some(Culture {
+                    id: p.try_get("cu_id")?,
+                    name: p.try_get("cu_name")?,
+                    description: p.try_get("cu_desc")?,
+                    created_at: p.try_get("cu_created_at")?,
+                }),
+            });
+        }
+
+        Ok(CellCulturePairs {
+            pagination: Pagination {
+                limit: options.limit.unwrap_or_default(),
+                page: options.page.unwrap_or_default(),
+                total,
+            },
+            results: pairs,
         })
-        .collect())
     }
 
     async fn get(
@@ -184,8 +221,8 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
                 cell_culture_pair.id_cell = $1 AND
                 cell_culture_pair.id_culture = $2
             ",
-            options.id_cell,
-            options.id_culture,
+            options.id.cell_id,
+            options.id.culture_id,
         )
         .fetch_one(executor)
         .await?;
@@ -228,12 +265,16 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
         .fetch_one(&mut *executor)
         .await?;
 
-        Ok(Self::get(&mut *executor, &CellCulturePairFetchOptions {
-            id_cell: rec.id_cell,
-            id_culture: rec.id_culture,
-            limit: None
-        }).await?)
-
+        todo!()
+        // Ok(Self::get(
+        //     &mut *executor,
+        //     &CellCulturePairFetchOptions {
+        //         id_cell: rec.id_cell,
+        //         id_culture: rec.id_culture,
+        //         limit: None,
+        //     },
+        // )
+        // .await?)
     }
 }
 
@@ -246,7 +287,7 @@ impl CellCulturePairQuery {
         &self,
         ctx: &Context<'_>,
         fetch_options: CellCulturePairFetchOptions,
-    ) -> Result<Vec<CellCulturePair>> {
+    ) -> Result<CellCulturePairs> {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 

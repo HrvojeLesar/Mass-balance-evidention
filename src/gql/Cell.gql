@@ -1,6 +1,11 @@
 query getCells($fetchOptions: CellFetchOptions!) {
     cells(fetchOptions: $fetchOptions) {
-        ...CellParts
+        total
+        page
+        limit
+        results {
+            ...CellParts
+        }
     }
 }
 
@@ -14,7 +19,7 @@ mutation insertCell($insertOptions: CellInsertOptions!) {
     insertCell(insertOptions: $insertOptions) {
         ...CellParts
     }
-}   
+}
 
 mutation updateCell($updateOptions: CellUpdateOptions!) {
     updateCell(updateOptions: $updateOptions) {

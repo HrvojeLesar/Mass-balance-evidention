@@ -57,7 +57,7 @@ where
         }
     }
 
-    fn order_by<T: InputType + Into<String> + Copy>(
+    fn order_by<T: InputType + ToString + Copy>(
         ordering: &Option<OrderingOptions<T>>,
         order_by_default_column: &str,
         builder: &mut QueryBuilder<'q, DB>,
@@ -66,8 +66,8 @@ where
             Some(ord) => {
                 builder.push("ORDER BY ").push(format!(
                     "{} {} ",
-                    Into::<String>::into(ord.order_by),
-                    Into::<String>::into(ord.order),
+                    ord.order_by.to_string(),
+                    ord.order.to_string(),
                 ));
             }
             None => {
@@ -88,12 +88,13 @@ where
             .push_bind(Self::calc_offset(page, limit));
     }
 
-    fn handle_fetch_options<T: Copy>(
-        options: &'q FetchOptions<T>,
+    fn handle_fetch_options<T: Copy, I>(
+        options: &'q FetchOptions<T, I>,
         order_by_default_column: &str,
         builder: &mut QueryBuilder<'q, DB>,
     ) where
-        T: InputType + FieldsToSql + Into<String>,
+        T: InputType + FieldsToSql + ToString,
+        I: InputType,
         Filter<T>: InputType,
         OrderingOptions<T>: InputType,
     {
