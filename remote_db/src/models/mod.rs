@@ -1,6 +1,5 @@
-use anyhow::Result;
 use async_graphql::{Enum, InputObject, InputType, MergedObject, OutputType, SimpleObject};
-use sqlx::{postgres::PgRow, Row};
+use sqlx::Row;
 
 use self::{
     buyer::{Buyer, BuyerFields, BuyerMutation, BuyerQuery},
@@ -10,7 +9,7 @@ use self::{
         CellCulturePairQuery,
     },
     culture::{Culture, CultureFields, CultureMutation, CultureQuery},
-    entry::{EntryMutation, EntryQuery, EntryFields, Entry},
+    entry::{Entry, EntryFields, EntryMutation, EntryQuery},
 };
 
 pub mod buyer;
@@ -20,9 +19,6 @@ pub mod culture;
 pub mod db_query;
 pub mod entry;
 pub mod weight_types;
-
-pub const MAX_LIMIT: i64 = 100;
-pub const DEFAULT_LIMIT: i64 = 10;
 
 #[derive(MergedObject, Default)]
 pub struct QueryRoot(

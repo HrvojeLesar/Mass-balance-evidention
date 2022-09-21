@@ -42,7 +42,6 @@ where
     i64: sqlx::Encode<'q, DB>,
     i64: sqlx::Type<DB>,
 {
-
     fn filter<T: InputType + FieldsToSql>(
         filters: &'q Option<Vec<Filter<T>>>,
         builder: &mut QueryBuilder<'q, DB>,
@@ -76,11 +75,7 @@ where
         };
     }
 
-    fn paginate(
-        limit: Option<i64>,
-        page: Option<i64>,
-        builder: &mut QueryBuilder<'q, DB>,
-    ) {
+    fn paginate(limit: Option<i64>, page: Option<i64>, builder: &mut QueryBuilder<'q, DB>) {
         builder
             .push("LIMIT ")
             .push_bind(Self::calc_limit(limit))

@@ -89,7 +89,7 @@ impl DatabaseQueries<Postgres> for Cell {
     ) -> Result<Cells> {
         let mut builder =
             sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER () as total_count FROM cell ");
-        Self::handle_fetch_options(&options, "id", &mut builder);
+        Self::handle_fetch_options(options, "id", &mut builder);
         let r = builder.build().fetch_all(executor).await?;
 
         let total = match r.first() {

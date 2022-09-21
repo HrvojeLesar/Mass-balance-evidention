@@ -2,7 +2,7 @@ use anyhow::Result;
 use async_graphql::{Context, Enum, InputObject, Object, SimpleObject};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use sqlx::{Encode, FromRow, Postgres, Row, Transaction};
+use sqlx::{FromRow, Postgres, Row, Transaction};
 
 use crate::DatabasePool;
 
@@ -95,7 +95,7 @@ impl DatabaseQueries<Postgres> for Buyer {
     ) -> Result<Buyers> {
         let mut builder =
             sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER() as total_count FROM buyer ");
-        Self::handle_fetch_options(&options, "id", &mut builder);
+        Self::handle_fetch_options(options, "id", &mut builder);
         let r = builder.build().fetch_all(executor).await?;
 
         let total = match r.first() {

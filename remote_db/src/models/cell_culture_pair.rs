@@ -4,13 +4,13 @@ use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use sqlx::{FromRow, Postgres, Row, Transaction};
 
-use crate::{models::MAX_LIMIT, DatabasePool};
+use crate::DatabasePool;
 
 use super::{
     cell::Cell,
     culture::Culture,
     db_query::{DatabaseQueries, QueryBuilderHelpers},
-    FetchMany, FetchOptions, FieldsToSql, Pagination, DEFAULT_LIMIT,
+    FetchMany, FetchOptions, FieldsToSql, Pagination,
 };
 
 pub(super) type CellCulturePairFetchOptions =
@@ -157,7 +157,7 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
             INNER JOIN culture ON culture.id = cell_culture_pair.id_culture
             ",
         );
-        Self::handle_fetch_options(&options, "id_cell", &mut builder);
+        Self::handle_fetch_options(options, "id_cell", &mut builder);
 
         let rows = builder.build().fetch_all(executor).await?;
 
@@ -248,7 +248,7 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
         executor: &mut Transaction<'_, Postgres>,
         options: &CellCulturePairUpdateOptions,
     ) -> Result<Self> {
-        let rec = sqlx::query!(
+        let _rec = sqlx::query!(
             "
             UPDATE cell_culture_pair
             SET id_cell = $1, id_culture = $2 

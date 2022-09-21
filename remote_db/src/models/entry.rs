@@ -4,17 +4,15 @@ use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use sqlx::{FromRow, Postgres, Row, Transaction};
 
-use crate::{models::MAX_LIMIT, DatabasePool};
+use crate::DatabasePool;
 
 use super::{
-    buyer::{Buyer, BuyerFields},
+    buyer::Buyer,
     cell::Cell,
-    cell_culture_pair::{
-        CellCulturePair, CellCulturePairFetchOptions, CellCulturePairInsertOptions,
-    },
+    cell_culture_pair::{CellCulturePair, CellCulturePairInsertOptions},
     culture::Culture,
     db_query::{DatabaseQueries, QueryBuilderHelpers},
-    FetchMany, FetchOptions, FieldsToSql, DEFAULT_LIMIT, Pagination,
+    FetchMany, FetchOptions, FieldsToSql, Pagination,
 };
 
 type EntryFetchOptions = FetchOptions<EntryFields>;
@@ -168,7 +166,7 @@ impl DatabaseQueries<Postgres> for Entry {
             ",
         );
 
-        Self::handle_fetch_options(&options, "entry.id", &mut builder);
+        Self::handle_fetch_options(options, "entry.id", &mut builder);
         let rows = builder.build().fetch_all(executor).await?;
 
         let total = match rows.first() {

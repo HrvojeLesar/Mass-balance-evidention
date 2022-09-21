@@ -4,11 +4,11 @@ use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use sqlx::{FromRow, Postgres, Row, Transaction};
 
-use crate::{models::MAX_LIMIT, DatabasePool};
+use crate::DatabasePool;
 
 use super::{
     db_query::{DatabaseQueries, QueryBuilderHelpers},
-    FetchMany, FetchOptions, FieldsToSql, Pagination, DEFAULT_LIMIT
+    FetchMany, FetchOptions, FieldsToSql, Pagination,
 };
 
 type CultureFetchOptions = FetchOptions<CultureFields>;
@@ -88,7 +88,7 @@ impl DatabaseQueries<Postgres> for Culture {
     ) -> Result<Cultures> {
         let mut builder =
             sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER () as total_count FROM culture ");
-        Self::handle_fetch_options(&options, "id", &mut builder);
+        Self::handle_fetch_options(options, "id", &mut builder);
         let r = builder.build().fetch_all(executor).await?;
 
         let total = match r.first() {

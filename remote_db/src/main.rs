@@ -1,4 +1,4 @@
-use std::{env, fs};
+use std::env;
 
 use actix_cors::Cors;
 use actix_web::{
@@ -35,7 +35,6 @@ async fn index(schema: web::Data<GQLSchema>, req: GraphQLRequest) -> GraphQLResp
 async fn get_schema(schema: web::Data<GQLSchema>) -> String {
     schema.sdl()
 }
-
 
 #[cfg(debug_assertions)]
 fn build_schema(pool: Data<Pool<Postgres>>) -> GQLSchema {
