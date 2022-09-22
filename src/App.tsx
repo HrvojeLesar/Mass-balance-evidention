@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import { Button } from "react-bootstrap";
-import BuyerTable from "./components/BuyerTable";
+import BuyerTable from "./components/tables/BuyerTable";
+import CellTable from "./components/tables/CellTable";
+import CultureTable from "./components/tables/Culture";
+import CellCulturePairTable from "./components/tables/CellCulturePairTable";
+import EntryTable from "./components/tables/EntryTable";
 
 function App() {
     const [greetMsg, setGreetMsg] = useState("");
@@ -32,6 +36,10 @@ function App() {
             </div>
             <p>{greetMsg}</p>
             <BuyerTable />
+            <CellTable />
+            <CultureTable />
+            <CellCulturePairTable />
+            <EntryTable />
         </div>
     );
 }

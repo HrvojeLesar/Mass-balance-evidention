@@ -1,0 +1,42 @@
+#import "./Cell.gql"
+#import "./Culture.gql"
+
+query getCellCulturesPairs($fetchOptions: CellCulturePairFetchOptions!) {
+    cellCulturePairs(fetchOptions: $fetchOptions) {
+        total
+        page
+        limit
+        results {
+            ...CellCultureParts
+        }
+    }
+}
+
+query getCellCulturePair($fetchOptions: CellCulturePairFetchOptions!) {
+    cellCulture(fetchOptions: $fetchOptions) {
+        ...CellCultureParts
+    }
+}
+
+mutation insertCellCulturePair($insertOptions: CellCulturePairInsertOptions!) {
+    insertCellCulturePair(insertOptions: $insertOptions) {
+        ...CellCultureParts
+    }
+}
+
+mutation updateCellCulturePair($updateOptions: CellCulturePairUpdateOptions!) {
+    updateCellCulturePair(updateOptions: $updateOptions) {
+        ...CellCultureParts
+    }
+}
+
+
+fragment CellCultureParts on CellCulturePair {
+    cell {
+        ...CellParts
+    }
+    culture {
+        ...CultureParts
+    }
+    createdAt
+}

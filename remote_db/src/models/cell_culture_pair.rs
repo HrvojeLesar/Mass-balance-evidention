@@ -248,7 +248,7 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
         executor: &mut Transaction<'_, Postgres>,
         options: &CellCulturePairUpdateOptions,
     ) -> Result<Self> {
-        let _rec = sqlx::query!(
+        let cell_culture_new_ids = sqlx::query!(
             "
             UPDATE cell_culture_pair
             SET id_cell = $1, id_culture = $2 
@@ -265,16 +265,19 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
         .fetch_one(&mut *executor)
         .await?;
 
-        todo!()
-        // Ok(Self::get(
-        //     &mut *executor,
-        //     &CellCulturePairFetchOptions {
-        //         id_cell: rec.id_cell,
-        //         id_culture: rec.id_culture,
-        //         limit: None,
-        //     },
-        // )
-        // .await?)
+        Self::get(
+            executor,
+            &CellCulturePairFetchOptions {
+                id: CellCulturePairIds {
+                    cell_id: Some(cell_culture_new_ids.id_cell),
+                    culture_id: Some(cell_culture_new_ids.id_culture),
+                },
+                page: None,
+                limit: None,
+                filters: None,
+                ordering: None,
+            },
+        ).await
     }
 }
 

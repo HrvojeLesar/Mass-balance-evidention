@@ -1,5 +1,8 @@
 {
     "save": "Save",
+    "search": {
+        "tooShort": "Value needs to be at least 2 characters!"
+    },
     "buyer": {
         "name": "Buyer",
         "address": "Address",
@@ -8,7 +11,16 @@
             "name": "This field is required!"
         }
     },
-    "search": {
-        "tooShort": "Value needs to be at least 2 characters!"
+    "cell": {
+        "name": "Cell",
+        "description": "Description"
+    },
+    "culture": {
+        "name": "Culture",
+        "description": "Description"
+    },
+    "entry": {
+        "weight": "Weight",
+        "date": "Date"
     }
 }

@@ -1,64 +1,63 @@
-import { useQuery } from "@tanstack/react-query";
 import {
     ColumnDef,
     ColumnFiltersState,
-    createColumnHelper,
-    FilterFn,
-    flexRender,
-    getCoreRowModel,
-    getPaginationRowModel,
-    PaginationState,
     SortingState,
-    useReactTable,
 } from "@tanstack/react-table";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button, Card, Pagination, Table, Form } from "react-bootstrap";
+import { useEffect, useMemo, useState } from "react";
+import { Button, Card } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import {
     Buyer,
     InsertBuyerMutation,
     useGetBuyersQuery,
-    OrderingOptions,
     Ordering,
     BuyerFields,
-    BuyerFilter,
-} from "../generated/graphql";
-import { usePagination } from "../hooks/usePagination";
-import { LANGUAGES } from "../main";
-import BaseTable from "./BaseTable";
-import BuyerForm from "./forms/BuyerForm";
-import TablePagination from "./TablePagination";
+    BuyerFilterOptions,
+} from "../../generated/graphql";
+import { usePagination } from "../../hooks/usePagination";
+import { LANGUAGES } from "../../main";
+import BuyerForm from "../forms/BuyerForm";
+import DataTable from "../DataTable";
+
+type T = Buyer;
+type TFields = BuyerFields;
+type TFilterOptions = BuyerFilterOptions;
+
+let renderCount = 0;
 
 export default function BuyerTable() {
     const { t, i18n } = useTranslation();
-    const [buyers, setBuyers] = useState<Buyer[]>([]);
+    const [tableData, setTableData] = useState<T[]>([]);
 
     const { pagination, setPagination } = usePagination();
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
+    renderCount++;
+
     const { data } = useGetBuyersQuery(
         { endpoint: "http://localhost:8000/graphiql" },
         {
             fetchOptions: {
+                id: {},
                 limit: pagination.pageSize,
                 page: pagination.pageIndex + 1,
                 ordering: sorting[0]
                     ? {
-                          order: !sorting[0].desc
-                              ? Ordering.Asc
-                              : Ordering.Desc,
-                          orderBy: sorting[0].id.toUpperCase() as BuyerFields,
-                      }
+                        order: !sorting[0].desc
+                            ? Ordering.Asc
+                            : Ordering.Desc,
+                        orderBy: sorting[0].id.toUpperCase() as TFields,
+                    }
                     : undefined,
                 filters:
                     columnFilters.length > 0
                         ? columnFilters.map((filter) => {
-                              return {
-                                  value: filter.value,
-                                  field: filter.id.toUpperCase() as BuyerFields,
-                              } as BuyerFilter;
-                          })
+                            return {
+                                value: filter.value,
+                                field: filter.id.toUpperCase() as TFields,
+                            } as TFilterOptions;
+                        })
                         : undefined,
             },
         },
@@ -68,7 +67,7 @@ export default function BuyerTable() {
         }
     );
 
-    const columns = useMemo<ColumnDef<Buyer>[]>(
+    const columns = useMemo<ColumnDef<T>[]>(
         () => [
             {
                 accessorKey: "name",
@@ -89,49 +88,30 @@ export default function BuyerTable() {
         [t]
     );
 
+    const total = useMemo<number>(() => {
+        return data?.buyers.total ?? -1;
+    }, [data]);
+
     const onSuccess = (data: InsertBuyerMutation) => {
         // TODO: Pagination needs to change based on added new values not
         // only from fetched values
-        setBuyers([
+        setTableData([
             data.insertBuyer,
-            ...buyers.slice(0, pagination.pageSize - 1),
+            ...tableData.slice(0, pagination.pageSize - 1),
         ]);
     };
 
-    const table = useReactTable({
-        data: buyers,
-        columns,
-        pageCount: data
-            ? Math.ceil(data.buyers.total / pagination.pageSize)
-            : -1,
-        getCoreRowModel: getCoreRowModel(),
-        state: {
-            pagination,
-            sorting,
-        },
-        manualPagination: true,
-        manualSorting: true,
-        manualFiltering: true,
-        sortDescFirst: false,
-        enableColumnResizing: true,
-        onPaginationChange: setPagination,
-        onSortingChange: setSorting,
-        onColumnFiltersChange: (filter) => {
-            setPagination({ ...pagination, pageIndex: 0 });
-            setColumnFilters(filter);
-        },
-    });
-
     useEffect(() => {
-        if (data?.buyers.buyers) {
-            setBuyers([
-                ...data.buyers.buyers.slice(0, pagination.pageSize - 1),
+        if (data?.buyers.results) {
+            setTableData([
+                ...data.buyers.results.slice(0, pagination.pageSize - 1),
             ]);
         }
     }, [data, pagination.pageSize]);
 
     return (
         <Card className="p-2 shadow">
+            {renderCount}
             <Button
                 variant="primary"
                 onClick={() => {
@@ -146,8 +126,16 @@ export default function BuyerTable() {
                 Change language
             </Button>
             <BuyerForm onSuccess={onSuccess} />
-            <BaseTable table={table} />
-            <TablePagination table={table} />
+            <DataTable
+                columns={columns}
+                data={{ data: tableData, total }}
+                pagination={pagination}
+                setPagination={setPagination}
+                sorting={sorting}
+                setSorting={setSorting}
+                columnFilters={columnFilters}
+                setColumnFilters={setColumnFilters}
+            />
         </Card>
     );
 }

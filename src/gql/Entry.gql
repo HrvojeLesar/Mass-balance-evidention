@@ -1,0 +1,44 @@
+#import "./CellCulturePair.gql"
+
+query getEntries($fetchOptions: EntryFetchOptions!) {
+    entries(fetchOptions: $fetchOptions) {
+        total
+        page
+        limit
+        results {
+            ...EntryParts
+        }
+    }
+}
+
+query getEntry($fetchOptions: EntryFetchOptions!) {
+    entry(fetchOptions: $fetchOptions) {
+        ...EntryParts
+    }
+}
+
+mutation insertEntry($insertOptions: EntryInsertOptions!) {
+    insertEntry(insertOptions: $insertOptions) {
+        ...EntryParts
+    }
+}
+
+mutation updateEntry($updateOptions: EntryUpdateOptions!) {
+    updateEntry(updateOptions: $updateOptions) {
+        ...EntryParts
+    }
+}
+
+fragment EntryParts on Entry {
+    id
+    weight
+    weightType
+    date
+    createdAt
+    buyer {
+        ...BuyerParts
+    }
+    cellCulturePair {
+        ...CellCultureParts
+    }
+}

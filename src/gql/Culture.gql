@@ -1,0 +1,35 @@
+query getCultures($fetchOptions: CultureFetchOptions!) {
+    cultures(fetchOptions: $fetchOptions) {
+        total
+        page
+        limit
+        results {
+            ...CultureParts
+        }
+    }
+}
+
+query getCulture($fetchOptions: CultureFetchOptions!) {
+    culture(fetchOptions: $fetchOptions) {
+        ...CultureParts
+    }
+}
+
+mutation insertCulture($insertOptions: CultureInsertOptions!) {
+    insertCulture(insertOptions: $insertOptions) {
+        ...CultureParts
+    }
+}
+
+mutation updateCulture($updateOptions: CultureUpdateOptions!) {
+    updateCulture(updateOptions: $updateOptions) {
+        ...CultureParts
+    }
+}
+
+fragment CultureParts on Culture {
+    id
+    name
+    description
+    createdAt
+}

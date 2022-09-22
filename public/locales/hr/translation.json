@@ -1,5 +1,8 @@
 {
     "save": "Spremi",
+    "search": {
+        "tooShort": "Vrijednost mora imati minimalno 2 znaka!"
+    },
     "buyer": {
         "name": "Kupac",
         "address": "Adresa",
@@ -8,7 +11,16 @@
             "name": "Ovo polje je obavezno!"
         }
     },
-    "search": {
-        "tooShort": "Vrijednost mora imati minimalno 2 znaka!"
+    "cell": {
+        "name": "Čestica",
+        "description": "Opis"
+    },
+    "culture": {
+        "name": "Kultura",
+        "description": "Opis"
+    },
+    "entry": {
+        "weight": "Težina",
+        "date": "Datum"
     }
 }
