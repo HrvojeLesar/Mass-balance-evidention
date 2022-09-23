@@ -294,10 +294,10 @@ impl CellCulturePairQuery {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let ccp = CellCulturePair::get_many(&mut transaction, &fetch_options).await?;
+        let res = CellCulturePair::get_many(&mut transaction, &fetch_options).await?;
 
         transaction.commit().await?;
-        Ok(ccp)
+        Ok(res)
     }
 
     async fn cell_culture(
@@ -308,10 +308,10 @@ impl CellCulturePairQuery {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let ccp = CellCulturePair::get(&mut transaction, &fetch_options).await?;
+        let res = CellCulturePair::get(&mut transaction, &fetch_options).await?;
 
         transaction.commit().await?;
-        Ok(ccp)
+        Ok(res)
     }
 }
 
@@ -328,11 +328,11 @@ impl CellCulturePairMutation {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let ccp = CellCulturePair::insert(&mut transaction, &insert_options).await?;
+        let res = CellCulturePair::insert(&mut transaction, &insert_options).await?;
 
         transaction.commit().await?;
 
-        Ok(ccp)
+        Ok(res)
     }
 
     async fn update_cell_culture_pair(
@@ -343,9 +343,9 @@ impl CellCulturePairMutation {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let ccp = CellCulturePair::update(&mut transaction, &update_options).await?;
+        let res = CellCulturePair::update(&mut transaction, &update_options).await?;
 
         transaction.commit().await?;
-        Ok(ccp)
+        Ok(res)
     }
 }

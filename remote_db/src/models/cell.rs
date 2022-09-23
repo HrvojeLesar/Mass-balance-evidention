@@ -14,6 +14,14 @@ use super::{
 
 type CellFetchOptions = FetchOptions<CellFields>;
 type Cells = FetchMany<Cell>;
+type CellFetchUnpairedOptions = FetchOptions<CellFields, CellUnpairedId>;
+
+#[derive(InputObject)]
+pub struct CellUnpairedId {
+    /// Id refers to a Culture Id
+    pub id: Option<i32>,
+}
+
 
 #[derive(SimpleObject, FromRow, Debug)]
 pub(super) struct Cell {
@@ -165,20 +173,78 @@ impl CellQuery {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let cells = Cell::get_many(&mut transaction, &fetch_options).await?;
+        let res = Cell::get_many(&mut transaction, &fetch_options).await?;
 
         transaction.commit().await?;
-        Ok(cells)
+        Ok(res)
     }
 
     async fn cell(&self, ctx: &Context<'_>, fetch_options: CellFetchOptions) -> Result<Cell> {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let cells = Cell::get(&mut transaction, &fetch_options).await?;
+        let res = Cell::get(&mut transaction, &fetch_options).await?;
 
         transaction.commit().await?;
-        Ok(cells)
+        Ok(res)
+    }
+
+    async fn unpaired_cells(
+        &self,
+        ctx: &Context<'_>,
+        fetch_options: CellFetchUnpairedOptions,
+    ) -> Result<Cells> {
+        let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
+        let mut transaction = pool.begin().await?;
+
+        let mut builder = sqlx::QueryBuilder::new(
+            "
+            SELECT *, COUNT(*) OVER() as total_count FROM cell 
+            WHERE cell.id NOT IN
+            (
+                SELECT id_culture FROM cell_culture_pair
+                WHERE cell_culture_pair.id_culture = ",
+        );
+        builder.push("").push_bind(fetch_options.id.id).push(" ) ");
+
+        if let Some(filters) = &fetch_options.filters {
+            builder.push("AND ");
+            let mut sep = builder.separated(" AND ");
+            for filter in filters {
+                sep.push(&filter.field.to_sql())
+                    .push_bind_unseparated(&filter.value);
+            }
+        }
+
+        Cell::order_by(&fetch_options.ordering, "name", &mut builder);
+        Cell::paginate(fetch_options.limit, fetch_options.page, &mut builder);
+        let r = builder.build().fetch_all(&mut transaction).await?;
+
+        let total = match r.first() {
+            Some(t) => t.try_get("total_count")?,
+            None => 0,
+        };
+
+        let mut cells = Vec::with_capacity(r.len());
+        for c in r.into_iter() {
+            cells.push(Cell {
+                id: c.try_get("id")?,
+                name: c.try_get("name")?,
+                description: c.try_get("description")?,
+                created_at: c.try_get("created_at")?,
+            });
+        }
+
+        transaction.commit().await?;
+
+        Ok(Cells {
+            pagination: Pagination {
+                limit: fetch_options.limit.unwrap_or_default(),
+                page: fetch_options.page.unwrap_or_default(),
+                total,
+            },
+            results: cells,
+        })
     }
 }
 
@@ -195,10 +261,10 @@ impl CellMutation {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let cell = Cell::insert(&mut transaction, &insert_options).await?;
+        let res = Cell::insert(&mut transaction, &insert_options).await?;
 
         transaction.commit().await?;
-        Ok(cell)
+        Ok(res)
     }
 
     async fn update_cell(
@@ -209,9 +275,9 @@ impl CellMutation {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let cell = Cell::update(&mut transaction, &update_options).await?;
+        let res = Cell::update(&mut transaction, &update_options).await?;
 
         transaction.commit().await?;
-        Ok(cell)
+        Ok(res)
     }
 }

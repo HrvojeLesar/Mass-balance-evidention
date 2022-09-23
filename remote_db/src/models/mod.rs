@@ -3,12 +3,12 @@ use sqlx::Row;
 
 use self::{
     buyer::{Buyer, BuyerFields, BuyerMutation, BuyerQuery},
-    cell::{Cell, CellFields, CellMutation, CellQuery},
+    cell::{Cell, CellFields, CellMutation, CellQuery, CellUnpairedId},
     cell_culture_pair::{
         CellCulturePair, CellCulturePairFields, CellCulturePairIds, CellCulturePairMutation,
         CellCulturePairQuery,
     },
-    culture::{Culture, CultureFields, CultureMutation, CultureQuery},
+    culture::{Culture, CultureFields, CultureMutation, CultureQuery, CultureUnpairedId},
     entry::{Entry, EntryFields, EntryMutation, EntryQuery},
 };
 
@@ -90,7 +90,15 @@ pub struct Id {
 #[derive(InputObject)]
 #[graphql(concrete(name = "BuyerFetchOptions", params(BuyerFields)))]
 #[graphql(concrete(name = "CellFetchOptions", params(CellFields)))]
+#[graphql(concrete(
+    name = "CellFetchUnpairedOptions",
+    params(CellFields, CellUnpairedId)
+))]
 #[graphql(concrete(name = "CultureFetchOptions", params(CultureFields)))]
+#[graphql(concrete(
+    name = "CultureFetchUnpairedOptions",
+    params(CultureFields, CultureUnpairedId)
+))]
 #[graphql(concrete(
     name = "CellCulturePairFetchOptions",
     params(CellCulturePairFields, CellCulturePairIds)

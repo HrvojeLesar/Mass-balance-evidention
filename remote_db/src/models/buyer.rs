@@ -175,20 +175,20 @@ impl BuyerQuery {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let buyer = Buyer::get_many(&mut transaction, &fetch_options).await?;
+        let res = Buyer::get_many(&mut transaction, &fetch_options).await?;
 
         transaction.commit().await?;
-        Ok(buyer)
+        Ok(res)
     }
 
     async fn buyer(&self, ctx: &Context<'_>, fetch_options: BuyerFetchOptions) -> Result<Buyer> {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let buyer = Buyer::get(&mut transaction, &fetch_options).await?;
+        let res = Buyer::get(&mut transaction, &fetch_options).await?;
 
         transaction.commit().await?;
-        Ok(buyer)
+        Ok(res)
     }
 }
 
@@ -205,10 +205,10 @@ impl BuyerMutation {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let buyer = Buyer::insert(&mut transaction, &insert_options).await?;
+        let res = Buyer::insert(&mut transaction, &insert_options).await?;
 
         transaction.commit().await?;
-        Ok(buyer)
+        Ok(res)
     }
 
     async fn update_buyer(
@@ -219,9 +219,9 @@ impl BuyerMutation {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let buyer = Buyer::update(&mut transaction, &update_options).await?;
+        let res = Buyer::update(&mut transaction, &update_options).await?;
 
         transaction.commit().await?;
-        Ok(buyer)
+        Ok(res)
     }
 }

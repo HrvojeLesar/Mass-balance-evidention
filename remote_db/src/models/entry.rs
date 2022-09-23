@@ -353,20 +353,20 @@ impl EntryQuery {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let entry = Entry::get_many(&mut transaction, &fetch_options).await?;
+        let res = Entry::get_many(&mut transaction, &fetch_options).await?;
 
         transaction.commit().await?;
-        Ok(entry)
+        Ok(res)
     }
 
     async fn entry(&self, ctx: &Context<'_>, fetch_options: EntryFetchOptions) -> Result<Entry> {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let entry = Entry::get(&mut transaction, &fetch_options).await?;
+        let res = Entry::get(&mut transaction, &fetch_options).await?;
 
         transaction.commit().await?;
-        Ok(entry)
+        Ok(res)
     }
 }
 
@@ -383,11 +383,11 @@ impl EntryMutation {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let entry = Entry::insert(&mut transaction, &insert_options).await?;
+        let res = Entry::insert(&mut transaction, &insert_options).await?;
 
         transaction.commit().await?;
 
-        Ok(entry)
+        Ok(res)
     }
 
     async fn update_entry(
@@ -398,9 +398,9 @@ impl EntryMutation {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let entry = Entry::update(&mut transaction, &update_options).await?;
+        let res = Entry::update(&mut transaction, &update_options).await?;
 
         transaction.commit().await?;
-        Ok(entry)
+        Ok(res)
     }
 }

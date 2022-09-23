@@ -13,6 +13,13 @@ use super::{
 
 type CultureFetchOptions = FetchOptions<CultureFields>;
 type Cultures = FetchMany<Culture>;
+type CultureFetchUnpairedOptions = FetchOptions<CultureFields, CultureUnpairedId>;
+
+#[derive(InputObject)]
+pub struct CultureUnpairedId {
+    /// Id refers to a Cell Id
+    pub id: Option<i32>,
+}
 
 #[derive(SimpleObject, FromRow, Debug)]
 pub(super) struct Culture {
@@ -169,10 +176,10 @@ impl CultureQuery {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let cells = Culture::get_many(&mut transaction, &fetch_options).await?;
+        let res = Culture::get_many(&mut transaction, &fetch_options).await?;
 
         transaction.commit().await?;
-        Ok(cells)
+        Ok(res)
     }
 
     async fn culture(
@@ -183,10 +190,68 @@ impl CultureQuery {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let cells = Culture::get(&mut transaction, &fetch_options).await?;
+        let res = Culture::get(&mut transaction, &fetch_options).await?;
 
         transaction.commit().await?;
-        Ok(cells)
+        Ok(res)
+    }
+
+    async fn unpaired_cultures(
+        &self,
+        ctx: &Context<'_>,
+        fetch_options: CultureFetchUnpairedOptions,
+    ) -> Result<Cultures> {
+        let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
+        let mut transaction = pool.begin().await?;
+
+        let mut builder = sqlx::QueryBuilder::new(
+            "
+            SELECT *, COUNT(*) OVER() as total_count FROM culture 
+            WHERE culture.id NOT IN
+            (
+                SELECT id_culture FROM cell_culture_pair
+                WHERE cell_culture_pair.id_cell = ",
+        );
+        builder.push("").push_bind(fetch_options.id.id).push(" ) ");
+
+        if let Some(filters) = &fetch_options.filters {
+            builder.push("AND ");
+            let mut sep = builder.separated(" AND ");
+            for filter in filters {
+                sep.push(&filter.field.to_sql())
+                    .push_bind_unseparated(&filter.value);
+            }
+        }
+
+        Culture::order_by(&fetch_options.ordering, "name", &mut builder);
+        Culture::paginate(fetch_options.limit, fetch_options.page, &mut builder);
+        let r = builder.build().fetch_all(&mut transaction).await?;
+
+        let total = match r.first() {
+            Some(t) => t.try_get("total_count")?,
+            None => 0,
+        };
+
+        let mut cultures = Vec::with_capacity(r.len());
+        for c in r.into_iter() {
+            cultures.push(Culture {
+                id: c.try_get("id")?,
+                name: c.try_get("name")?,
+                description: c.try_get("description")?,
+                created_at: c.try_get("created_at")?,
+            });
+        }
+
+        transaction.commit().await?;
+
+        Ok(Cultures {
+            pagination: Pagination {
+                limit: fetch_options.limit.unwrap_or_default(),
+                page: fetch_options.page.unwrap_or_default(),
+                total,
+            },
+            results: cultures,
+        })
     }
 }
 
@@ -203,10 +268,10 @@ impl CultureMutation {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let cell = Culture::insert(&mut transaction, &insert_options).await?;
+        let res = Culture::insert(&mut transaction, &insert_options).await?;
 
         transaction.commit().await?;
-        Ok(cell)
+        Ok(res)
     }
 
     async fn update_culture(
@@ -217,9 +282,9 @@ impl CultureMutation {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let cell = Culture::update(&mut transaction, &update_options).await?;
+        let res = Culture::update(&mut transaction, &update_options).await?;
 
         transaction.commit().await?;
-        Ok(cell)
+        Ok(res)
     }
 }
