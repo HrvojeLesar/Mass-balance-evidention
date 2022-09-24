@@ -79,7 +79,7 @@ export default function EntryTable() {
             },
             {
                 accessorKey: "date",
-                cell: (info) => info.getValue(),
+                cell: (info) => new Date(info.getValue() as Date).toLocaleDateString(),
                 header: t("entry.date").toString(),
             },
             {

@@ -15,6 +15,7 @@ import {
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import DataTable from "../DataTable";
+import CellCulturePairForm from "../forms/CellCulturePairForm";
 
 type T = CellCulturePair;
 type TFields = CellCulturePairFields;
@@ -99,6 +100,7 @@ export default function CellCulturePairTable() {
 
     return (
         <Card className="p-2 shadow">
+        <CellCulturePairForm />
             <DataTable
                 columns={columns}
                 data={{ data: tableData, total }}

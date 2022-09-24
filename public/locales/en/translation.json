@@ -13,11 +13,17 @@
     },
     "cell": {
         "name": "Cell",
-        "description": "Description"
+        "description": "Description",
+        "errors": {
+            "name": "This field is required!"
+        }
     },
     "culture": {
         "name": "Culture",
-        "description": "Description"
+        "description": "Description",
+        "errors": {
+            "name": "This field is required!"
+        }
     },
     "entry": {
         "weight": "Weight",

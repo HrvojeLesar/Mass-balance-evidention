@@ -16,6 +16,7 @@ import {
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import DataTable from "../DataTable";
+import CultureForm from "../forms/CultureForm";
 
 type T = Culture;
 type TFields = CultureFields;
@@ -38,20 +39,20 @@ export default function CultureTable() {
                 page: pagination.pageIndex + 1,
                 ordering: sorting[0]
                     ? {
-                        order: !sorting[0].desc
-                            ? Ordering.Asc
-                            : Ordering.Desc,
-                        orderBy: sorting[0].id.toUpperCase() as TFields,
-                    }
+                          order: !sorting[0].desc
+                              ? Ordering.Asc
+                              : Ordering.Desc,
+                          orderBy: sorting[0].id.toUpperCase() as TFields,
+                      }
                     : undefined,
                 filters:
                     columnFilters.length > 0
                         ? columnFilters.map((filter) => {
-                            return {
-                                value: filter.value,
-                                field: filter.id.toUpperCase() as TFields,
-                            } as TFilterOptions;
-                        })
+                              return {
+                                  value: filter.value,
+                                  field: filter.id.toUpperCase() as TFields,
+                              } as TFilterOptions;
+                          })
                         : undefined,
             },
         },
@@ -100,6 +101,7 @@ export default function CultureTable() {
 
     return (
         <Card className="p-2 shadow">
+            <CultureForm />
             <DataTable
                 columns={columns}
                 data={{ data: tableData, total }}

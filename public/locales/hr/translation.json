@@ -13,11 +13,17 @@
     },
     "cell": {
         "name": "Čestica",
-        "description": "Opis"
+        "description": "Opis",
+        "errors": {
+            "name": "Ovo polje je obavezno!"
+        }
     },
     "culture": {
         "name": "Kultura",
-        "description": "Opis"
+        "description": "Opis",
+        "errors": {
+            "name": "Ovo polje je obavezno!"
+        }
     },
     "entry": {
         "weight": "Težina",

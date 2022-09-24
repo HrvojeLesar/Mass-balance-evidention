@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 type PaginationParams = {
     pageIndex?: number;
@@ -21,5 +21,9 @@ export function usePagination(
         pageSize,
     });
 
-    return { pagination, setPagination };
+    const resetPagination = useCallback(() => {
+        setPagination({ pageIndex, pageSize });
+    }, [pageIndex, pageSize, setPagination]);
+
+    return { pagination, setPagination, resetPagination };
 }

@@ -166,6 +166,14 @@ export type CellFetchOptions = {
   page?: InputMaybe<Scalars['Int']>;
 };
 
+export type CellFetchUnpairedOptions = {
+  filters?: InputMaybe<Array<CellFilterOptions>>;
+  id: CellUnpairedId;
+  limit?: InputMaybe<Scalars['Int']>;
+  ordering?: InputMaybe<CellOrderingOptions>;
+  page?: InputMaybe<Scalars['Int']>;
+};
+
 export enum CellFields {
   Description = 'DESCRIPTION',
   Name = 'NAME'
@@ -184,6 +192,11 @@ export type CellInsertOptions = {
 export type CellOrderingOptions = {
   order: Ordering;
   orderBy: CellFields;
+};
+
+export type CellUnpairedId = {
+  /** Id refers to a Culture Id */
+  id?: InputMaybe<Scalars['Int']>;
 };
 
 export type CellUpdateOptions = {
@@ -216,6 +229,14 @@ export type CultureFetchOptions = {
   page?: InputMaybe<Scalars['Int']>;
 };
 
+export type CultureFetchUnpairedOptions = {
+  filters?: InputMaybe<Array<CultureFilterOptions>>;
+  id: CultureUnpairedId;
+  limit?: InputMaybe<Scalars['Int']>;
+  ordering?: InputMaybe<CultureOrderingOptions>;
+  page?: InputMaybe<Scalars['Int']>;
+};
+
 export enum CultureFields {
   Description = 'DESCRIPTION',
   Name = 'NAME'
@@ -234,6 +255,11 @@ export type CultureInsertOptions = {
 export type CultureOrderingOptions = {
   order: Ordering;
   orderBy: CultureFields;
+};
+
+export type CultureUnpairedId = {
+  /** Id refers to a Cell Id */
+  id?: InputMaybe<Scalars['Int']>;
 };
 
 export type CultureUpdateOptions = {
@@ -401,6 +427,8 @@ export type QueryRoot = {
   cultures: Cultures;
   entries: Entries;
   entry: Entry;
+  unpairedCells: Cells;
+  unpairedCultures: Cultures;
 };
 
 
@@ -453,6 +481,16 @@ export type QueryRootEntryArgs = {
   fetchOptions: EntryFetchOptions;
 };
 
+
+export type QueryRootUnpairedCellsArgs = {
+  fetchOptions: CellFetchUnpairedOptions;
+};
+
+
+export type QueryRootUnpairedCulturesArgs = {
+  fetchOptions: CultureFetchUnpairedOptions;
+};
+
 export type GetBuyersQueryVariables = Exact<{
   fetchOptions: BuyerFetchOptions;
 }>;
@@ -496,6 +534,13 @@ export type GetCellQueryVariables = Exact<{
 
 
 export type GetCellQuery = { __typename?: 'QueryRoot', cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } };
+
+export type GetUnpairedCellsQueryVariables = Exact<{
+  fetchOptions: CellFetchUnpairedOptions;
+}>;
+
+
+export type GetUnpairedCellsQuery = { __typename?: 'QueryRoot', unpairedCells: { __typename?: 'Cells', total: number, page: number, limit: number, results: Array<{ __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any }> } };
 
 export type InsertCellMutationVariables = Exact<{
   insertOptions: CellInsertOptions;
@@ -556,6 +601,13 @@ export type GetCultureQueryVariables = Exact<{
 
 
 export type GetCultureQuery = { __typename?: 'QueryRoot', culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } };
+
+export type GetUnpairedCulturesQueryVariables = Exact<{
+  fetchOptions: CultureFetchUnpairedOptions;
+}>;
+
+
+export type GetUnpairedCulturesQuery = { __typename?: 'QueryRoot', unpairedCultures: { __typename?: 'Cultures', total: number, page: number, limit: number, results: Array<{ __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any }> } };
 
 export type InsertCultureMutationVariables = Exact<{
   insertOptions: CultureInsertOptions;
@@ -784,6 +836,31 @@ export const useGetCellQuery = <
       fetcher<GetCellQuery, GetCellQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetCellDocument, variables),
       options
     );
+export const GetUnpairedCellsDocument = `
+    query getUnpairedCells($fetchOptions: CellFetchUnpairedOptions!) {
+  unpairedCells(fetchOptions: $fetchOptions) {
+    total
+    page
+    limit
+    results {
+      ...CellParts
+    }
+  }
+}
+    ${CellPartsFragmentDoc}`;
+export const useGetUnpairedCellsQuery = <
+      TData = GetUnpairedCellsQuery,
+      TError = unknown
+    >(
+      dataSource: { endpoint: string, fetchParams?: RequestInit },
+      variables: GetUnpairedCellsQueryVariables,
+      options?: UseQueryOptions<GetUnpairedCellsQuery, TError, TData>
+    ) =>
+    useQuery<GetUnpairedCellsQuery, TError, TData>(
+      ['getUnpairedCells', variables],
+      fetcher<GetUnpairedCellsQuery, GetUnpairedCellsQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetUnpairedCellsDocument, variables),
+      options
+    );
 export const InsertCellDocument = `
     mutation insertCell($insertOptions: CellInsertOptions!) {
   insertCell(insertOptions: $insertOptions) {
@@ -948,6 +1025,31 @@ export const useGetCultureQuery = <
     useQuery<GetCultureQuery, TError, TData>(
       ['getCulture', variables],
       fetcher<GetCultureQuery, GetCultureQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetCultureDocument, variables),
+      options
+    );
+export const GetUnpairedCulturesDocument = `
+    query getUnpairedCultures($fetchOptions: CultureFetchUnpairedOptions!) {
+  unpairedCultures(fetchOptions: $fetchOptions) {
+    total
+    page
+    limit
+    results {
+      ...CultureParts
+    }
+  }
+}
+    ${CulturePartsFragmentDoc}`;
+export const useGetUnpairedCulturesQuery = <
+      TData = GetUnpairedCulturesQuery,
+      TError = unknown
+    >(
+      dataSource: { endpoint: string, fetchParams?: RequestInit },
+      variables: GetUnpairedCulturesQueryVariables,
+      options?: UseQueryOptions<GetUnpairedCulturesQuery, TError, TData>
+    ) =>
+    useQuery<GetUnpairedCulturesQuery, TError, TData>(
+      ['getUnpairedCultures', variables],
+      fetcher<GetUnpairedCulturesQuery, GetUnpairedCulturesQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetUnpairedCulturesDocument, variables),
       options
     );
 export const InsertCultureDocument = `

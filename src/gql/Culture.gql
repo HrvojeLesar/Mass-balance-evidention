@@ -15,6 +15,17 @@ query getCulture($fetchOptions: CultureFetchOptions!) {
     }
 }
 
+query getUnpairedCultures($fetchOptions: CultureFetchUnpairedOptions!) {
+    unpairedCultures(fetchOptions: $fetchOptions) {
+        total
+        page
+        limit
+        results {
+            ...CultureParts
+        }
+    }
+}
+
 mutation insertCulture($insertOptions: CultureInsertOptions!) {
     insertCulture(insertOptions: $insertOptions) {
         ...CultureParts

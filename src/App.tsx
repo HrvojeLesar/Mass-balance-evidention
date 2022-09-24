@@ -3,7 +3,7 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { Button } from "react-bootstrap";
 import BuyerTable from "./components/tables/BuyerTable";
 import CellTable from "./components/tables/CellTable";
-import CultureTable from "./components/tables/Culture";
+import CultureTable from "./components/tables/CultureTable";
 import CellCulturePairTable from "./components/tables/CellCulturePairTable";
 import EntryTable from "./components/tables/EntryTable";
 
@@ -35,11 +35,7 @@ function App() {
                 </div>
             </div>
             <p>{greetMsg}</p>
-            <BuyerTable />
-            <CellTable />
-            <CultureTable />
             <CellCulturePairTable />
-            <EntryTable />
         </div>
     );
 }

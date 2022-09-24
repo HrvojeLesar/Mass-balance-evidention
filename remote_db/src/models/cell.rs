@@ -202,7 +202,7 @@ impl CellQuery {
             SELECT *, COUNT(*) OVER() as total_count FROM cell 
             WHERE cell.id NOT IN
             (
-                SELECT id_culture FROM cell_culture_pair
+                SELECT id_cell FROM cell_culture_pair
                 WHERE cell_culture_pair.id_culture = ",
         );
         builder.push("").push_bind(fetch_options.id.id).push(" ) ");
