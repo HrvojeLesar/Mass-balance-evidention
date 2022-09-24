@@ -3,8 +3,8 @@ import {
     ColumnFiltersState,
     SortingState,
 } from "@tanstack/react-table";
-import { useEffect, useMemo, useState } from "react";
-import { Button, Card } from "react-bootstrap";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Card } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import {
     Ordering,
@@ -29,7 +29,7 @@ export default function CellTable() {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-    const { data } = useGetCellsQuery(
+    const { data, refetch } = useGetCellsQuery(
         { endpoint: "http://localhost:8000/graphiql" },
         {
             fetchOptions: {
@@ -81,14 +81,9 @@ export default function CellTable() {
         return data?.cells.total ?? -1;
     }, [data]);
 
-    // const onSuccess = (data: InsertBuyerMutation) => {
-    //     // TODO: Pagination needs to change based on added new values not
-    //     // only from fetched values
-    //     setBuyers([
-    //         data.insertBuyer,
-    //         ...buyers.slice(0, pagination.pageSize - 1),
-    //     ]);
-    // };
+    const onSuccess = useCallback(() => {
+        refetch();
+    }, [refetch]);
 
     useEffect(() => {
         if (data?.cells.results) {
@@ -100,7 +95,7 @@ export default function CellTable() {
 
     return (
         <Card className="p-2 shadow">
-            <CellForm />
+            <CellForm onSuccess={onSuccess}/>
             <DataTable
                 columns={columns}
                 data={{ data: tableData, total }}

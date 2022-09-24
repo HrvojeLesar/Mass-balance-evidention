@@ -3,12 +3,11 @@ import {
     ColumnFiltersState,
     SortingState,
 } from "@tanstack/react-table";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Card } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import {
     Buyer,
-    InsertBuyerMutation,
     useGetBuyersQuery,
     Ordering,
     BuyerFields,
@@ -35,7 +34,7 @@ export default function BuyerTable() {
 
     renderCount++;
 
-    const { data } = useGetBuyersQuery(
+    const { data, refetch } = useGetBuyersQuery(
         { endpoint: "http://localhost:8000/graphiql" },
         {
             fetchOptions: {
@@ -44,20 +43,20 @@ export default function BuyerTable() {
                 page: pagination.pageIndex + 1,
                 ordering: sorting[0]
                     ? {
-                        order: !sorting[0].desc
-                            ? Ordering.Asc
-                            : Ordering.Desc,
-                        orderBy: sorting[0].id.toUpperCase() as TFields,
-                    }
+                          order: !sorting[0].desc
+                              ? Ordering.Asc
+                              : Ordering.Desc,
+                          orderBy: sorting[0].id.toUpperCase() as TFields,
+                      }
                     : undefined,
                 filters:
                     columnFilters.length > 0
                         ? columnFilters.map((filter) => {
-                            return {
-                                value: filter.value,
-                                field: filter.id.toUpperCase() as TFields,
-                            } as TFilterOptions;
-                        })
+                              return {
+                                  value: filter.value,
+                                  field: filter.id.toUpperCase() as TFields,
+                              } as TFilterOptions;
+                          })
                         : undefined,
             },
         },
@@ -92,14 +91,9 @@ export default function BuyerTable() {
         return data?.buyers.total ?? -1;
     }, [data]);
 
-    const onSuccess = (data: InsertBuyerMutation) => {
-        // TODO: Pagination needs to change based on added new values not
-        // only from fetched values
-        setTableData([
-            data.insertBuyer,
-            ...tableData.slice(0, pagination.pageSize - 1),
-        ]);
-    };
+    const onSuccess = useCallback(() => {
+        refetch();
+    }, [refetch]);
 
     useEffect(() => {
         if (data?.buyers.results) {

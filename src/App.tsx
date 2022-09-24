@@ -35,7 +35,11 @@ function App() {
                 </div>
             </div>
             <p>{greetMsg}</p>
+            <BuyerTable />
+            <CellTable />
+            <CultureTable />
             <CellCulturePairTable />
+            <EntryTable />
         </div>
     );
 }

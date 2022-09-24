@@ -1,42 +1,25 @@
-import { Button, Col, Form, Row } from "react-bootstrap";
-import { useForm } from "react-hook-form";
+import { Col, Form, Row } from "react-bootstrap";
+import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
-    Buyer,
-    BuyerInsertOptions,
     Cell,
+    CellCulturePairInsertOptions,
     CellFields,
-    CellInsertOptions,
     Culture,
     CultureFields,
-    Exact,
-    GetUnpairedCellsQuery,
-    GetUnpairedCulturesDocument,
-    GetUnpairedCulturesQuery,
-    InsertBuyerMutation,
+    InsertCellCulturePairMutation,
     Ordering,
-    useGetCellsQuery,
-    useGetCulturesQuery,
     useGetUnpairedCellsQuery,
     useGetUnpairedCulturesQuery,
-    useInsertBuyerMutation,
-    useInsertCellMutation,
+    useInsertCellCulturePairMutation,
 } from "../../generated/graphql";
-import { FaSave } from "react-icons/fa";
 import BaseForm from "./BaseForm";
-import {
-    Dispatch,
-    SetStateAction,
-    useCallback,
-    useEffect,
-    useMemo,
-    useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Select from "react-select";
-import { usePagination } from "../../hooks/usePagination";
+import { FormSuccessCallback } from "./FormUtils";
 
 type SelectState<T> = {
-    selected: T | undefined;
+    selected: Option<T> | undefined | null;
     limit: number;
     page: number;
     maxPage: number;
@@ -49,10 +32,54 @@ type Option<T> = {
     label: string;
 };
 
+type FormInput = {
+    cell: Option<Cell> | undefined;
+    culture: Option<Culture> | undefined;
+};
+
 const LIMIT = 10;
 
-export default function CellCulturePairForm() {
+// TODO: Invalid cell/culture can be selected when other field is loading
+export default function CellCulturePairForm({
+    onSuccess,
+}: FormSuccessCallback<
+    InsertCellCulturePairMutation,
+    CellCulturePairInsertOptions
+>) {
     const { t } = useTranslation();
+
+    const {
+        control,
+        handleSubmit,
+        setValue,
+        formState: { errors },
+    } = useForm<FormInput>({
+        mode: "onSubmit",
+    });
+
+    const insert = useInsertCellCulturePairMutation(
+        { endpoint: "http://localhost:8000/graphiql" },
+        {
+            onSuccess: (data, variables, context) => {
+                resetSelects();
+                onSuccess(data, variables, context);
+            },
+        }
+    );
+
+    const onSubmit = useCallback((data: FormInput) => {
+        console.log(data);
+        if (data.cell && data.culture) {
+            insert.mutate({
+                insertOptions: {
+                    idCell: data.cell?.value.id,
+                    idCulture: data.culture?.value.id,
+                },
+            });
+        } else {
+            console.log("Cell and culture should always be set here: ", data);
+        }
+    }, []);
 
     const [cellSelectState, setCellSelectState] = useState<SelectState<Cell>>({
         selected: undefined,
@@ -74,8 +101,21 @@ export default function CellCulturePairForm() {
         maxPage: 1,
     });
 
+    const resetSelects = useCallback(() => {
+        console.log("called");
+        setCellSelectState((old) => ({
+            ...old,
+            selected: null,
+        }));
+        setCultureSelectState((old) => ({
+            ...old,
+            selected: null,
+        }));
+    }, [setCellSelectState, setCultureSelectState]);
+
     const [debouncedCellInputValue, setDebouncedCellInputValue] = useState("");
-    const [debouncedCultureInputValue, setDebouncedCultureInputValue] = useState("");
+    const [debouncedCultureInputValue, setDebouncedCultureInputValue] =
+        useState("");
 
     const makeOptions = useCallback(
         <T extends Cell | Culture>(
@@ -112,7 +152,9 @@ export default function CellCulturePairForm() {
             { endpoint: "http://localhost:8000/graphiql" },
             {
                 fetchOptions: {
-                    id: { id: cultureSelectState.selected?.id ?? undefined },
+                    id: {
+                        id: cultureSelectState.selected?.value.id ?? undefined,
+                    },
                     limit: cellSelectState.limit,
                     page: cellSelectState.page,
                     ordering: {
@@ -146,7 +188,7 @@ export default function CellCulturePairForm() {
             { endpoint: "http://localhost:8000/graphiql" },
             {
                 fetchOptions: {
-                    id: { id: cellSelectState.selected?.id ?? undefined },
+                    id: { id: cellSelectState.selected?.value.id ?? undefined },
                     limit: cultureSelectState.limit,
                     page: cultureSelectState.page,
                     ordering: {
@@ -193,7 +235,9 @@ export default function CellCulturePairForm() {
         if (cultureData) {
             setCultureSelectState((old) => ({
                 ...old,
-                maxPage: Math.ceil(cultureData.unpairedCultures.total / old.limit),
+                maxPage: Math.ceil(
+                    cultureData.unpairedCultures.total / old.limit
+                ),
                 pages: {
                     ...old.pages,
                     [cultureData.unpairedCultures.page]:
@@ -229,104 +273,152 @@ export default function CellCulturePairForm() {
         };
     }, [debouncedCultureInputValue]);
 
-
     useEffect(() => {
         console.log(cellSelectState);
     }, [cellSelectState]);
 
     useEffect(() => {
         console.log(cultureSelectState);
+        console.log("Selected: ", cultureSelectState.selected);
     }, [cultureSelectState]);
 
-
     return (
-        <BaseForm onSubmit={() => {}}>
+        <BaseForm onSubmit={handleSubmit(onSubmit)}>
             <Row className="mb-3">
                 <Col>
                     <Form.Group>
                         <Form.Label>{t("cell.name")}*</Form.Label>
-                        <Select
-                            options={cellOptions}
-                            onMenuClose={() => {
-                                setCellSelectState((old) => ({
-                                    ...old,
-                                    page: 1,
-                                }));
-                            }}
-                            onMenuScrollToBottom={
-                                cellSelectState.page < cellSelectState.maxPage
-                                    ? () => {
-                                          setCellSelectState((old) => ({
-                                              ...old,
-                                              page: old.page + 1,
-                                          }));
-                                      }
-                                    : undefined
-                            }
-                            onInputChange={(value, actionMeta) => {
-                                if (actionMeta.action === "input-change") {
-                                    setDebouncedCellInputValue(value);
-                                }
-                            }}
-                            onChange={(value, actionMeta) => {
-                                if (
-                                    actionMeta.action === "select-option" ||
-                                    actionMeta.action === "clear"
-                                ) {
-                                    setCellSelectState((old) => ({
-                                        ...old,
-                                        selected: value?.value ?? undefined,
-                                    }));
-                                }
-                            }}
-                            isLoading={isFetchingCells}
-                            isClearable
+                        <Controller
+                            name="cell"
+                            control={control}
+                            rules={{ required: t("buyer.errors.name") }}
+                            render={() => (
+                                <Select
+                                    value={cellSelectState.selected}
+                                    className={
+                                        errors.cell ? "is-invalid" : undefined
+                                    }
+                                    options={cellOptions}
+                                    onMenuClose={() => {
+                                        setCellSelectState((old) => ({
+                                            ...old,
+                                            page: 1,
+                                        }));
+                                    }}
+                                    onMenuScrollToBottom={
+                                        cellSelectState.page <
+                                        cellSelectState.maxPage
+                                            ? () => {
+                                                  setCellSelectState((old) => ({
+                                                      ...old,
+                                                      page: old.page + 1,
+                                                  }));
+                                              }
+                                            : undefined
+                                    }
+                                    onInputChange={(value, actionMeta) => {
+                                        if (
+                                            actionMeta.action === "input-change"
+                                        ) {
+                                            setDebouncedCellInputValue(value);
+                                        }
+                                    }}
+                                    onChange={(value, actionMeta) => {
+                                        if (
+                                            actionMeta.action ===
+                                                "select-option" ||
+                                            actionMeta.action === "clear"
+                                        ) {
+                                            setCellSelectState((old) => ({
+                                                ...old,
+                                                selected: value ?? undefined,
+                                            }));
+                                            setValue(
+                                                "cell",
+                                                value ?? undefined,
+                                                { shouldValidate: true }
+                                            );
+                                        }
+                                    }}
+                                    isLoading={isFetchingCells}
+                                    isClearable
+                                />
+                            )}
                         />
-                        <Form.Control.Feedback type="invalid">
+                        <div className="invalid-feedback">
                             {t("cell.errors.name")}
-                        </Form.Control.Feedback>
+                        </div>
                     </Form.Group>
                 </Col>
                 <Col>
                     <Form.Group>
-                        <Form.Label>{t("culture.name")}</Form.Label>
-                        <Select 
-                            options={cultureOptions}
-                            onMenuClose={() => {
-                                setCultureSelectState((old) => ({
-                                    ...old,
-                                    page: 1,
-                                }));
-                            }}
-                            onMenuScrollToBottom={
-                                cultureSelectState.page < cultureSelectState.maxPage
-                                    ? () => {
-                                          setCultureSelectState((old) => ({
-                                              ...old,
-                                              page: old.page + 1,
-                                          }));
-                                      }
-                                    : undefined
-                            }
-                            onInputChange={(value, actionMeta) => {
-                                if (actionMeta.action === "input-change") {
-                                    setDebouncedCultureInputValue(value);
-                                }
-                            }}
-                            onChange={(value, actionMeta) => {
-                                if (
-                                    actionMeta.action === "select-option" ||
-                                    actionMeta.action === "clear"
-                                ) {
-                                    setCultureSelectState((old) => ({
-                                        ...old,
-                                        selected: value?.value ?? undefined,
-                                    }));
-                                }
-                            }}
-                            isLoading={isFetchingCultures}
-                            isClearable
+                        <Form.Label>{t("culture.name")}*</Form.Label>
+                        <Controller
+                            name="culture"
+                            control={control}
+                            rules={{ required: t("buyer.errors.name") }}
+                            render={() => (
+                                <Select
+                                    className={
+                                        errors.culture
+                                            ? "is-invalid"
+                                            : undefined
+                                    }
+                                    value={cultureSelectState.selected}
+                                    options={cultureOptions}
+                                    onMenuClose={() => {
+                                        setCultureSelectState((old) => ({
+                                            ...old,
+                                            page: 1,
+                                        }));
+                                    }}
+                                    onMenuScrollToBottom={
+                                        cultureSelectState.page <
+                                        cultureSelectState.maxPage
+                                            ? () => {
+                                                  setCultureSelectState(
+                                                      (old) => ({
+                                                          ...old,
+                                                          page: old.page + 1,
+                                                      })
+                                                  );
+                                              }
+                                            : undefined
+                                    }
+                                    onInputChange={(value, actionMeta) => {
+                                        if (
+                                            actionMeta.action === "input-change"
+                                        ) {
+                                            setDebouncedCultureInputValue(
+                                                value
+                                            );
+                                        }
+                                    }}
+                                    onChange={(value, actionMeta) => {
+                                        if (
+                                            actionMeta.action ===
+                                                "select-option" ||
+                                            actionMeta.action === "clear"
+                                        ) {
+                                            setCultureSelectState((old) => ({
+                                                ...old,
+                                                selected: value ?? undefined,
+                                            }));
+                                            setValue(
+                                                "culture",
+                                                value ?? undefined,
+                                                { shouldValidate: true }
+                                            );
+                                        }
+                                    }}
+                                    isLoading={isFetchingCultures}
+                                    isClearable
+                                />
+                            )}
                         />
+                        <div className="invalid-feedback">
+                            {t("cell.errors.name")}
+                        </div>
                     </Form.Group>
                 </Col>
             </Row>

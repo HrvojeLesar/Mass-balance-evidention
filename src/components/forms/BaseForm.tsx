@@ -24,7 +24,7 @@ export default function BaseForm({
                 className="d-flex align-items-center"
                 disabled={submitDisabled}
             >
-                <FaSave className="me-1"/>
+                <FaSave className="me-1" />
                 {t("save")}
             </Button>
         </Form>

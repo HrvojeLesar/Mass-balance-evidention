@@ -5,9 +5,8 @@ import {
     SortingState,
     useReactTable,
 } from "@tanstack/react-table";
-import { Dispatch, SetStateAction, useState } from "react";
-import { Button, Card } from "react-bootstrap";
-import { Pagination, usePagination } from "../hooks/usePagination";
+import { Dispatch, SetStateAction } from "react";
+import { Pagination } from "../hooks/usePagination";
 import BaseTable from "./BaseTable";
 import TablePagination from "./TablePagination";
 

@@ -1,26 +1,22 @@
-import { Button, Col, Form, Row } from "react-bootstrap";
+import { Col, Form, Row } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
-    Buyer,
-    BuyerInsertOptions,
-    CellInsertOptions,
     CultureInsertOptions,
-    Exact,
-    InsertBuyerMutation,
-    useInsertBuyerMutation,
-    useInsertCellMutation,
+    InsertCultureMutation,
     useInsertCultureMutation,
 } from "../../generated/graphql";
-import { FaSave } from "react-icons/fa";
 import BaseForm from "./BaseForm";
-import { Dispatch, SetStateAction } from "react";
+import { FormSuccessCallback } from "./FormUtils";
 
-export default function CultureForm() {
+export default function CultureForm({
+    onSuccess,
+}: FormSuccessCallback<InsertCultureMutation, CultureInsertOptions>) {
     const { t } = useTranslation();
     const {
         register,
         handleSubmit,
+        reset,
         formState: { errors },
     } = useForm<CultureInsertOptions>({
         mode: "onChange",
@@ -33,7 +29,10 @@ export default function CultureForm() {
     const insert = useInsertCultureMutation(
         { endpoint: "http://localhost:8000/graphiql" },
         {
-            // onSuccess,
+            onSuccess: (data, variables, context) => {
+                reset();
+                onSuccess(data, variables, context);
+            },
         }
     );
 
