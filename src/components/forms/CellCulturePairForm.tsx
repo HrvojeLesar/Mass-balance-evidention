@@ -23,6 +23,7 @@ import {
     onChange,
     SelectOption,
     SelectState,
+    selectStyle,
 } from "./FormUtils";
 
 type FormInput = {
@@ -260,6 +261,8 @@ export default function CellCulturePairForm({
                                     placeholder={t("cell.selectPlaceholder")}
                                     loadingMessage={() => t("loading")}
                                     noOptionsMessage={() => t("noOptions")}
+                                    styles={selectStyle(errors.cell)}
+                                    isMulti={false}
                                     className={
                                         errors.cell ? "is-invalid" : undefined
                                     }
@@ -321,6 +324,8 @@ export default function CellCulturePairForm({
                                     placeholder={t("culture.selectPlaceholder")}
                                     loadingMessage={() => t("loading")}
                                     noOptionsMessage={() => t("noOptions")}
+                                    styles={selectStyle(errors.culture)}
+                                    isMulti={false}
                                     className={
                                         errors.culture
                                             ? "is-invalid"
