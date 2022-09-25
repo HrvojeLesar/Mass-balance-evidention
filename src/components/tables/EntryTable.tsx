@@ -29,6 +29,7 @@ export default function EntryTable() {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
+    console.log(sorting);
     const { data, refetch } = useGetEntriesQuery(
         { endpoint: "http://localhost:8000/graphiql" },
         {
@@ -67,11 +68,13 @@ export default function EntryTable() {
                 accessorKey: "cellCulturePair.cell.name",
                 cell: (info) => info.getValue(),
                 header: t("cell.name").toString(),
+                id: "cell_name",
             },
             {
                 accessorKey: "cellCulturePair.culture.name",
                 cell: (info) => info.getValue(),
                 header: t("culture.name").toString(),
+                id: "culture_name",
             },
             {
                 accessorKey: "buyer.name",
