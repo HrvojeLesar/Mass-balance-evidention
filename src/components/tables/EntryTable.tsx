@@ -15,6 +15,7 @@ import {
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import DataTable from "../DataTable";
+import EntryForm from "../forms/EntryForm";
 
 type T = Entry;
 type TFields = EntryFields;
@@ -110,6 +111,7 @@ export default function EntryTable() {
 
     return (
         <Card className="p-2 shadow">
+            <EntryForm onSuccess={onSuccess} />
             <DataTable
                 columns={columns}
                 data={{ data: tableData, total }}

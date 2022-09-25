@@ -8,7 +8,7 @@ use crate::DatabasePool;
 
 use super::{
     db_query::{DatabaseQueries, QueryBuilderHelpers},
-    FetchMany, FetchOptions, FieldsToSql, Pagination,
+    FetchMany, FetchOptions, FieldsToSql, Pagination, Id,
 };
 
 type CultureFetchOptions = FetchOptions<CultureFields>;
@@ -252,6 +252,75 @@ impl CultureQuery {
             },
             results: cultures,
         })
+    }
+
+    async fn paired_cultures(
+        &self,
+        ctx: &Context<'_>,
+        fetch_options: CultureFetchUnpairedOptions,
+    ) -> Result<Cultures> {
+        let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
+        let mut transaction = pool.begin().await?;
+
+        let resp;
+        if fetch_options.id.id.is_none() {
+            let fetch_options = CultureFetchOptions {
+                id: Id { id: None },
+                limit: fetch_options.limit,
+                page: fetch_options.page,
+                ordering: fetch_options.ordering,
+                filters: fetch_options.filters,
+            };
+            resp = Culture::get_many(&mut transaction, &fetch_options).await;
+        } else {
+            let mut builder = sqlx::QueryBuilder::new(
+                "
+                SELECT *, COUNT(*) OVER() as total_count FROM culture 
+                WHERE culture.id IN
+                (
+                    SELECT id_culture FROM cell_culture_pair
+                    WHERE cell_culture_pair.id_cell = ",
+            );
+            builder.push("").push_bind(fetch_options.id.id).push(" ) ");
+
+            if let Some(filters) = &fetch_options.filters {
+                builder.push("AND ");
+                let mut sep = builder.separated(" AND ");
+                for filter in filters {
+                    sep.push(&filter.field.to_sql())
+                        .push_bind_unseparated(&filter.value);
+                }
+            }
+
+            Culture::order_by(&fetch_options.ordering, "name", &mut builder);
+            Culture::paginate(fetch_options.limit, fetch_options.page, &mut builder);
+            let r = builder.build().fetch_all(&mut transaction).await?;
+
+            let total = match r.first() {
+                Some(t) => t.try_get("total_count")?,
+                None => 0,
+            };
+
+            let mut cultures = Vec::with_capacity(r.len());
+            for c in r.into_iter() {
+                cultures.push(Culture {
+                    id: c.try_get("id")?,
+                    name: c.try_get("name")?,
+                    description: c.try_get("description")?,
+                    created_at: c.try_get("created_at")?,
+                });
+            }
+            resp = Ok(Cultures {
+                pagination: Pagination {
+                    limit: fetch_options.limit.unwrap_or_default(),
+                    page: fetch_options.page.unwrap_or_default(),
+                    total,
+                },
+                results: cultures,
+            });
+        }
+        transaction.commit().await?;
+        resp
     }
 }
 

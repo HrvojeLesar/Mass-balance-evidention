@@ -26,6 +26,18 @@ query getUnpairedCultures($fetchOptions: CultureFetchUnpairedOptions!) {
     }
 }
 
+query getPairedCultures($fetchOptions: CultureFetchUnpairedOptions!) {
+    pairedCultures(fetchOptions: $fetchOptions) {
+        total
+        page
+        limit
+        results {
+            ...CultureParts
+        }
+    }
+}
+
+
 mutation insertCulture($insertOptions: CultureInsertOptions!) {
     insertCulture(insertOptions: $insertOptions) {
         ...CultureParts

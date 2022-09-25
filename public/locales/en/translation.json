@@ -1,5 +1,7 @@
 {
     "save": "Save",
+    "loading": "Loading...",
+    "noOptions": "No options",
     "search": {
         "tooShort": "Value needs to be at least 2 characters!"
     },
@@ -7,6 +9,7 @@
         "name": "Buyer",
         "address": "Address",
         "contact": "Contact",
+        "selectPlaceholder": "Select a buyer",
         "errors": {
             "name": "This field is required!"
         }
@@ -14,6 +17,7 @@
     "cell": {
         "name": "Cell",
         "description": "Description",
+        "selectPlaceholder": "Select a cell",
         "errors": {
             "name": "This field is required!"
         }
@@ -21,6 +25,7 @@
     "culture": {
         "name": "Culture",
         "description": "Description",
+        "selectPlaceholder": "Select a culture",
         "errors": {
             "name": "This field is required!"
         }
@@ -28,5 +33,15 @@
     "entry": {
         "weight": "Weight",
         "date": "Date"
+    },
+    "weight": {
+        "errors": {
+            "name": "This field is required!"
+        }
+    },
+    "date": {
+        "errors": {
+            "name": "This field is required!"
+        }
     }
 }

@@ -95,7 +95,7 @@ export default function CellTable() {
 
     return (
         <Card className="p-2 shadow">
-            <CellForm onSuccess={onSuccess}/>
+            <CellForm onSuccess={onSuccess} />
             <DataTable
                 columns={columns}
                 data={{ data: tableData, total }}

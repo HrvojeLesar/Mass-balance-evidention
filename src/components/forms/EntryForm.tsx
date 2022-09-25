@@ -2,16 +2,19 @@ import { Col, Form, Row } from "react-bootstrap";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
+    Buyer,
+    BuyerFields,
     Cell,
-    CellCulturePairInsertOptions,
     CellFields,
     Culture,
     CultureFields,
-    InsertCellCulturePairMutation,
+    EntryInsertOptions,
+    InsertEntryMutation,
     Ordering,
-    useGetUnpairedCellsQuery,
-    useGetUnpairedCulturesQuery,
-    useInsertCellCulturePairMutation,
+    useGetBuyersQuery,
+    useGetPairedCellsQuery,
+    useGetPairedCulturesQuery,
+    useInsertEntryMutation,
 } from "../../generated/graphql";
 import BaseForm from "./BaseForm";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -28,45 +31,53 @@ import {
 type FormInput = {
     cell: SelectOption<Cell> | undefined;
     culture: SelectOption<Culture> | undefined;
+    weight: number;
+    buyer: SelectOption<Buyer> | undefined;
+    date: Date;
 };
 
 const LIMIT = 10;
 
 // TODO: Invalid cell/culture can be selected when other field is loading
-export default function CellCulturePairForm({
+export default function EntryForm({
     onSuccess,
-}: FormSuccessCallback<
-    InsertCellCulturePairMutation,
-    CellCulturePairInsertOptions
->) {
+}: FormSuccessCallback<InsertEntryMutation, EntryInsertOptions>) {
     const { t } = useTranslation();
 
     const {
         control,
         handleSubmit,
         setValue,
+        register,
+        reset,
         formState: { errors },
     } = useForm<FormInput>({
         mode: "onSubmit",
     });
 
-    const insert = useInsertCellCulturePairMutation(
+    const insert = useInsertEntryMutation(
         { endpoint: "http://localhost:8000/graphiql" },
         {
             onSuccess: (data, variables, context) => {
                 resetSelects();
+                reset();
                 onSuccess(data, variables, context);
             },
         }
     );
 
     const onSubmit = useCallback((data: FormInput) => {
-        console.log(data);
-        if (data.cell && data.culture) {
+        if (data.cell && data.culture && data.buyer) {
             insert.mutate({
                 insertOptions: {
-                    idCell: data.cell?.value.id,
-                    idCulture: data.culture?.value.id,
+                    cellCulturePair: {
+                        idCell: data.cell.value.id,
+                        idCulture: data.culture.value.id,
+                    },
+                    date: new Date(data.date),
+                    weight: Number(data.weight),
+                    idBuyer: data.buyer.value.id,
+                    // weightType: "kg",
                 },
             });
         } else {
@@ -94,21 +105,36 @@ export default function CellCulturePairForm({
         maxPage: 1,
     });
 
+    const [buyerSelectState, setBuyerSelectState] = useState<
+        SelectState<Buyer>
+    >({
+        selected: undefined,
+        page: 1,
+        pages: {},
+        limit: LIMIT,
+        filter: "",
+        maxPage: 1,
+    });
+
     const resetSelects = useCallback(() => {
         setCellSelectState((old) => ({
             ...old,
-            filter: "",
             selected: null,
         }));
         setCultureSelectState((old) => ({
             ...old,
-            filter: "",
             selected: null,
         }));
-    }, [setCellSelectState, setCultureSelectState]);
+        setBuyerSelectState((old) => ({
+            ...old,
+            selected: null,
+        }));
+    }, [setCellSelectState, setCultureSelectState, setBuyerSelectState]);
 
     const [debouncedCellInputValue, setDebouncedCellInputValue] = useState("");
     const [debouncedCultureInputValue, setDebouncedCultureInputValue] =
+        useState("");
+    const [debouncedBuyerInputValue, setDebouncedBuyerInputValue] =
         useState("");
 
     const cellOptions = useMemo(() => {
@@ -119,8 +145,12 @@ export default function CellCulturePairForm({
         return makeOptions(cultureSelectState.page, cultureSelectState.pages);
     }, [cultureSelectState.page, cultureSelectState.pages]);
 
+    const buyerOptions = useMemo(() => {
+        return makeOptions(buyerSelectState.page, buyerSelectState.pages);
+    }, [buyerSelectState.page, buyerSelectState.pages]);
+
     const { data: cellData, isFetching: isFetchingCells } =
-        useGetUnpairedCellsQuery(
+        useGetPairedCellsQuery(
             { endpoint: "http://localhost:8000/graphiql" },
             {
                 fetchOptions: {
@@ -146,7 +176,7 @@ export default function CellCulturePairForm({
             },
             {
                 queryKey: [
-                    "getUnpairedCellsForm",
+                    "getPairedCellsForm",
                     cellSelectState.limit,
                     cellSelectState.page,
                     cultureSelectState.selected,
@@ -156,7 +186,7 @@ export default function CellCulturePairForm({
         );
 
     const { data: cultureData, isFetching: isFetchingCultures } =
-        useGetUnpairedCulturesQuery(
+        useGetPairedCulturesQuery(
             { endpoint: "http://localhost:8000/graphiql" },
             {
                 fetchOptions: {
@@ -180,7 +210,7 @@ export default function CellCulturePairForm({
             },
             {
                 queryKey: [
-                    "getUnpairedCulturesForm",
+                    "getPairedCulturesForm",
                     cultureSelectState.limit,
                     cultureSelectState.page,
                     cellSelectState.selected,
@@ -189,15 +219,46 @@ export default function CellCulturePairForm({
             }
         );
 
+    const { data: buyerData, isFetching: isFetchingBuyers } = useGetBuyersQuery(
+        { endpoint: "http://localhost:8000/graphiql" },
+        {
+            fetchOptions: {
+                id: {},
+                limit: buyerSelectState.limit,
+                page: buyerSelectState.page,
+                ordering: {
+                    order: Ordering.Asc,
+                    orderBy: BuyerFields.Name,
+                },
+                filters:
+                    buyerSelectState.filter !== ""
+                        ? [
+                              {
+                                  value: buyerSelectState.filter,
+                                  field: BuyerFields.Name,
+                              },
+                          ]
+                        : undefined,
+            },
+        },
+        {
+            queryKey: [
+                "getBuyersForm",
+                buyerSelectState.limit,
+                buyerSelectState.page,
+            ],
+            keepPreviousData: true,
+        }
+    );
+
     useEffect(() => {
         if (cellData) {
             setCellSelectState((old) => ({
                 ...old,
-                maxPage: Math.ceil(cellData.unpairedCells.total / old.limit),
+                maxPage: Math.ceil(cellData.pairedCells.total / old.limit),
                 pages: {
                     ...old.pages,
-                    [cellData.unpairedCells.page]:
-                        cellData.unpairedCells.results,
+                    [cellData.pairedCells.page]: cellData.pairedCells.results,
                 },
             }));
         }
@@ -208,16 +269,29 @@ export default function CellCulturePairForm({
             setCultureSelectState((old) => ({
                 ...old,
                 maxPage: Math.ceil(
-                    cultureData.unpairedCultures.total / old.limit
+                    cultureData.pairedCultures.total / old.limit
                 ),
                 pages: {
                     ...old.pages,
-                    [cultureData.unpairedCultures.page]:
-                        cultureData.unpairedCultures.results,
+                    [cultureData.pairedCultures.page]:
+                        cultureData.pairedCultures.results,
                 },
             }));
         }
     }, [cultureData, setCultureSelectState]);
+
+    useEffect(() => {
+        if (buyerData) {
+            setBuyerSelectState((old) => ({
+                ...old,
+                maxPage: Math.ceil(buyerData.buyers.total / old.limit),
+                pages: {
+                    ...old.pages,
+                    [buyerData.buyers.page]: buyerData.buyers.results,
+                },
+            }));
+        }
+    }, [buyerData, setBuyerSelectState]);
 
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -245,9 +319,98 @@ export default function CellCulturePairForm({
         };
     }, [debouncedCultureInputValue]);
 
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setBuyerSelectState((old) => ({
+                ...old,
+                page: 1,
+                filter: debouncedBuyerInputValue.trim(),
+            }));
+        }, DEBOUNCE_TIME);
+        return () => {
+            clearTimeout(timeout);
+        };
+    }, [debouncedBuyerInputValue]);
+
     return (
         <BaseForm onSubmit={handleSubmit(onSubmit)}>
             <Row className="mb-3">
+                <Col>
+                    <Form.Group>
+                        <Form.Label>{t("culture.name")}*</Form.Label>
+                        <Controller
+                            name="culture"
+                            control={control}
+                            rules={{ required: t("culture.errors.name") }}
+                            render={() => (
+                                <Select
+                                    placeholder={t("culture.selectPlaceholder")}
+                                    loadingMessage={() => t("loading")}
+                                    noOptionsMessage={() => t("noOptions")}
+                                    className={
+                                        errors.culture
+                                            ? "is-invalid"
+                                            : undefined
+                                    }
+                                    value={cultureSelectState.selected}
+                                    options={cultureOptions}
+                                    onMenuClose={() => {
+                                        setCultureSelectState((old) => ({
+                                            ...old,
+                                            page: 1,
+                                        }));
+                                    }}
+                                    onMenuScrollToBottom={
+                                        cultureSelectState.page <
+                                        cultureSelectState.maxPage
+                                            ? () => {
+                                                  setCultureSelectState(
+                                                      (old) => ({
+                                                          ...old,
+                                                          page: old.page + 1,
+                                                      })
+                                                  );
+                                              }
+                                            : undefined
+                                    }
+                                    onInputChange={(value, actionMeta) => {
+                                        if (
+                                            actionMeta.action === "input-change"
+                                        ) {
+                                            setDebouncedCultureInputValue(
+                                                value
+                                            );
+                                        }
+                                    }}
+                                    onChange={(value, actionMeta) => {
+                                        onChange(
+                                            value,
+                                            actionMeta,
+                                            setCultureSelectState
+                                        );
+                                        setValue(
+                                            "culture",
+                                            value ?? undefined,
+                                            { shouldValidate: true }
+                                        );
+                                        if (actionMeta.action === "clear") {
+                                            setCellSelectState((old) => ({
+                                                ...old,
+                                                filter: "",
+                                                selected: null,
+                                            }));
+                                        }
+                                    }}
+                                    isLoading={isFetchingCultures}
+                                    isClearable
+                                />
+                            )}
+                        />
+                        <div className="invalid-feedback">
+                            {t("culture.errors.name")}
+                        </div>
+                    </Form.Group>
+                </Col>
                 <Col>
                     <Form.Group>
                         <Form.Label>{t("cell.name")}*</Form.Label>
@@ -309,36 +472,54 @@ export default function CellCulturePairForm({
                         </div>
                     </Form.Group>
                 </Col>
+            </Row>
+            <Row className="mb-3">
                 <Col>
                     <Form.Group>
-                        <Form.Label>{t("culture.name")}*</Form.Label>
+                        <Form.Label>{t("entry.weight")}*</Form.Label>
+                        <Form.Control
+                            {...register("weight", {
+                                required: t("weight.errors.name"),
+                            })}
+                            type="number"
+                            step="any"
+                            placeholder={t("entry.weight")}
+                            autoComplete="off"
+                            isInvalid={errors.weight !== undefined}
+                        />
+                        <Form.Control.Feedback type="invalid">
+                            {t("weight.errors.name")}
+                        </Form.Control.Feedback>
+                    </Form.Group>
+                </Col>
+                <Col>
+                    <Form.Group>
+                        <Form.Label>{t("buyer.name")}*</Form.Label>
                         <Controller
-                            name="culture"
+                            name="buyer"
                             control={control}
-                            rules={{ required: t("culture.errors.name") }}
+                            rules={{ required: t("buyer.errors.name") }}
                             render={() => (
                                 <Select
-                                    placeholder={t("culture.selectPlaceholder")}
+                                    placeholder={t("buyer.selectPlaceholder")}
                                     loadingMessage={() => t("loading")}
                                     noOptionsMessage={() => t("noOptions")}
                                     className={
-                                        errors.culture
-                                            ? "is-invalid"
-                                            : undefined
+                                        errors.buyer ? "is-invalid" : undefined
                                     }
-                                    value={cultureSelectState.selected}
-                                    options={cultureOptions}
+                                    value={buyerSelectState.selected}
+                                    options={buyerOptions}
                                     onMenuClose={() => {
-                                        setCultureSelectState((old) => ({
+                                        setBuyerSelectState((old) => ({
                                             ...old,
                                             page: 1,
                                         }));
                                     }}
                                     onMenuScrollToBottom={
-                                        cultureSelectState.page <
-                                        cultureSelectState.maxPage
+                                        buyerSelectState.page <
+                                        buyerSelectState.maxPage
                                             ? () => {
-                                                  setCultureSelectState(
+                                                  setBuyerSelectState(
                                                       (old) => ({
                                                           ...old,
                                                           page: old.page + 1,
@@ -351,31 +532,46 @@ export default function CellCulturePairForm({
                                         if (
                                             actionMeta.action === "input-change"
                                         ) {
-                                            setDebouncedCultureInputValue(
-                                                value
-                                            );
+                                            setDebouncedBuyerInputValue(value);
                                         }
                                     }}
                                     onChange={(value, actionMeta) => {
                                         onChange(
                                             value,
                                             actionMeta,
-                                            setCultureSelectState
+                                            setBuyerSelectState
                                         );
-                                        setValue(
-                                            "culture",
-                                            value ?? undefined,
-                                            { shouldValidate: true }
-                                        );
+                                        setValue("buyer", value ?? undefined, {
+                                            shouldValidate: true,
+                                        });
                                     }}
-                                    isLoading={isFetchingCultures}
+                                    isLoading={isFetchingBuyers}
                                     isClearable
                                 />
                             )}
                         />
                         <div className="invalid-feedback">
-                            {t("culture.errors.name")}
+                            {t("buyer.errors.name")}
                         </div>
+                    </Form.Group>
+                </Col>
+            </Row>
+            <Row className="mb-3">
+                <Col>
+                    <Form.Group>
+                        <Form.Label>{t("entry.date")}*</Form.Label>
+                        <Form.Control
+                            {...register("date", {
+                                required: t("date.errors.name"),
+                            })}
+                            type="date"
+                            placeholder={t("entry.date")}
+                            autoComplete="off"
+                            isInvalid={errors.date !== undefined}
+                        />
+                        <Form.Control.Feedback type="invalid">
+                            {t("date.errors.name")}
+                        </Form.Control.Feedback>
                     </Form.Group>
                 </Col>
             </Row>

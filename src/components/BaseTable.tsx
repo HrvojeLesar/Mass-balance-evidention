@@ -4,6 +4,7 @@ import { Form, Table as BSTable } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
 import { IoMdArrowDropup, IoMdArrowDropdown } from "react-icons/io";
+import { DEBOUNCE_TIME } from "./forms/FormUtils";
 
 type DebouncedInputPorps = {
     value: string | number;
@@ -14,7 +15,7 @@ type DebouncedInputPorps = {
 function DebouncedInput({
     value: initialValue,
     onChange,
-    debounce = 500,
+    debounce = DEBOUNCE_TIME,
     ...props
 }: DebouncedInputPorps &
     Omit<InputHTMLAttributes<HTMLImageElement>, "onChange">) {

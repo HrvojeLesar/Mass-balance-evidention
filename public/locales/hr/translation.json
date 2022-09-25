@@ -1,5 +1,7 @@
 {
     "save": "Spremi",
+    "loading": "Učitavanje...",
+    "noOptions": "Nema opcija",
     "search": {
         "tooShort": "Vrijednost mora imati minimalno 2 znaka!"
     },
@@ -7,6 +9,7 @@
         "name": "Kupac",
         "address": "Adresa",
         "contact": "Kontakt",
+        "selectPlaceholder": "Odabir kupca",
         "errors": {
             "name": "Ovo polje je obavezno!"
         }
@@ -14,6 +17,7 @@
     "cell": {
         "name": "Čestica",
         "description": "Opis",
+        "selectPlaceholder": "Odabir čestice",
         "errors": {
             "name": "Ovo polje je obavezno!"
         }
@@ -21,6 +25,7 @@
     "culture": {
         "name": "Kultura",
         "description": "Opis",
+        "selectPlaceholder": "Odabir kulture",
         "errors": {
             "name": "Ovo polje je obavezno!"
         }
@@ -28,5 +33,15 @@
     "entry": {
         "weight": "Težina",
         "date": "Datum"
+    },
+    "weight": {
+        "errors": {
+            "name": "Ovo polje je obavezno!"
+        }
+    },
+    "date": {
+        "errors": {
+            "name": "Ovo polje je obavezno!"
+        }
     }
 }

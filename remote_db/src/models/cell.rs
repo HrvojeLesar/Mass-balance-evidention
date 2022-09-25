@@ -9,7 +9,7 @@ use crate::DatabasePool;
 
 use super::{
     db_query::{DatabaseQueries, QueryBuilderHelpers},
-    FetchMany, FetchOptions, FieldsToSql, Pagination,
+    FetchMany, FetchOptions, FieldsToSql, Id, Pagination,
 };
 
 type CellFetchOptions = FetchOptions<CellFields>;
@@ -21,7 +21,6 @@ pub struct CellUnpairedId {
     /// Id refers to a Culture Id
     pub id: Option<i32>,
 }
-
 
 #[derive(SimpleObject, FromRow, Debug)]
 pub(super) struct Cell {
@@ -245,6 +244,76 @@ impl CellQuery {
             },
             results: cells,
         })
+    }
+
+    async fn paired_cells(
+        &self,
+        ctx: &Context<'_>,
+        fetch_options: CellFetchUnpairedOptions,
+    ) -> Result<Cells> {
+        let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
+        let mut transaction = pool.begin().await?;
+
+        let resp;
+        if fetch_options.id.id.is_none() {
+            let fetch_options = CellFetchOptions {
+                id: Id { id: None },
+                limit: fetch_options.limit,
+                page: fetch_options.page,
+                ordering: fetch_options.ordering,
+                filters: fetch_options.filters,
+            };
+            resp = Cell::get_many(&mut transaction, &fetch_options).await;
+        } else {
+            let mut builder = sqlx::QueryBuilder::new(
+                "
+                SELECT *, COUNT(*) OVER() as total_count FROM cell 
+                WHERE cell.id IN
+                (
+                    SELECT id_cell FROM cell_culture_pair
+                    WHERE cell_culture_pair.id_culture = ",
+            );
+            builder.push("").push_bind(fetch_options.id.id).push(" ) ");
+
+            if let Some(filters) = &fetch_options.filters {
+                builder.push("AND ");
+                let mut sep = builder.separated(" AND ");
+                for filter in filters {
+                    sep.push(&filter.field.to_sql())
+                        .push_bind_unseparated(&filter.value);
+                }
+            }
+
+            Cell::order_by(&fetch_options.ordering, "name", &mut builder);
+            Cell::paginate(fetch_options.limit, fetch_options.page, &mut builder);
+            let r = builder.build().fetch_all(&mut transaction).await?;
+
+            let total = match r.first() {
+                Some(t) => t.try_get("total_count")?,
+                None => 0,
+            };
+
+            let mut cells = Vec::with_capacity(r.len());
+            for c in r.into_iter() {
+                cells.push(Cell {
+                    id: c.try_get("id")?,
+                    name: c.try_get("name")?,
+                    description: c.try_get("description")?,
+                    created_at: c.try_get("created_at")?,
+                });
+            }
+
+            resp = Ok(Cells {
+                pagination: Pagination {
+                    limit: fetch_options.limit.unwrap_or_default(),
+                    page: fetch_options.page.unwrap_or_default(),
+                    total,
+                },
+                results: cells,
+            });
+        }
+        transaction.commit().await?;
+        resp
     }
 }
 

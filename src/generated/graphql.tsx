@@ -427,6 +427,8 @@ export type QueryRoot = {
   cultures: Cultures;
   entries: Entries;
   entry: Entry;
+  pairedCells: Cells;
+  pairedCultures: Cultures;
   unpairedCells: Cells;
   unpairedCultures: Cultures;
 };
@@ -479,6 +481,16 @@ export type QueryRootEntriesArgs = {
 
 export type QueryRootEntryArgs = {
   fetchOptions: EntryFetchOptions;
+};
+
+
+export type QueryRootPairedCellsArgs = {
+  fetchOptions: CellFetchUnpairedOptions;
+};
+
+
+export type QueryRootPairedCulturesArgs = {
+  fetchOptions: CultureFetchUnpairedOptions;
 };
 
 
@@ -541,6 +553,13 @@ export type GetUnpairedCellsQueryVariables = Exact<{
 
 
 export type GetUnpairedCellsQuery = { __typename?: 'QueryRoot', unpairedCells: { __typename?: 'Cells', total: number, page: number, limit: number, results: Array<{ __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any }> } };
+
+export type GetPairedCellsQueryVariables = Exact<{
+  fetchOptions: CellFetchUnpairedOptions;
+}>;
+
+
+export type GetPairedCellsQuery = { __typename?: 'QueryRoot', pairedCells: { __typename?: 'Cells', total: number, page: number, limit: number, results: Array<{ __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any }> } };
 
 export type InsertCellMutationVariables = Exact<{
   insertOptions: CellInsertOptions;
@@ -608,6 +627,13 @@ export type GetUnpairedCulturesQueryVariables = Exact<{
 
 
 export type GetUnpairedCulturesQuery = { __typename?: 'QueryRoot', unpairedCultures: { __typename?: 'Cultures', total: number, page: number, limit: number, results: Array<{ __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any }> } };
+
+export type GetPairedCulturesQueryVariables = Exact<{
+  fetchOptions: CultureFetchUnpairedOptions;
+}>;
+
+
+export type GetPairedCulturesQuery = { __typename?: 'QueryRoot', pairedCultures: { __typename?: 'Cultures', total: number, page: number, limit: number, results: Array<{ __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any }> } };
 
 export type InsertCultureMutationVariables = Exact<{
   insertOptions: CultureInsertOptions;
@@ -861,6 +887,31 @@ export const useGetUnpairedCellsQuery = <
       fetcher<GetUnpairedCellsQuery, GetUnpairedCellsQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetUnpairedCellsDocument, variables),
       options
     );
+export const GetPairedCellsDocument = `
+    query getPairedCells($fetchOptions: CellFetchUnpairedOptions!) {
+  pairedCells(fetchOptions: $fetchOptions) {
+    total
+    page
+    limit
+    results {
+      ...CellParts
+    }
+  }
+}
+    ${CellPartsFragmentDoc}`;
+export const useGetPairedCellsQuery = <
+      TData = GetPairedCellsQuery,
+      TError = unknown
+    >(
+      dataSource: { endpoint: string, fetchParams?: RequestInit },
+      variables: GetPairedCellsQueryVariables,
+      options?: UseQueryOptions<GetPairedCellsQuery, TError, TData>
+    ) =>
+    useQuery<GetPairedCellsQuery, TError, TData>(
+      ['getPairedCells', variables],
+      fetcher<GetPairedCellsQuery, GetPairedCellsQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetPairedCellsDocument, variables),
+      options
+    );
 export const InsertCellDocument = `
     mutation insertCell($insertOptions: CellInsertOptions!) {
   insertCell(insertOptions: $insertOptions) {
@@ -1050,6 +1101,31 @@ export const useGetUnpairedCulturesQuery = <
     useQuery<GetUnpairedCulturesQuery, TError, TData>(
       ['getUnpairedCultures', variables],
       fetcher<GetUnpairedCulturesQuery, GetUnpairedCulturesQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetUnpairedCulturesDocument, variables),
+      options
+    );
+export const GetPairedCulturesDocument = `
+    query getPairedCultures($fetchOptions: CultureFetchUnpairedOptions!) {
+  pairedCultures(fetchOptions: $fetchOptions) {
+    total
+    page
+    limit
+    results {
+      ...CultureParts
+    }
+  }
+}
+    ${CulturePartsFragmentDoc}`;
+export const useGetPairedCulturesQuery = <
+      TData = GetPairedCulturesQuery,
+      TError = unknown
+    >(
+      dataSource: { endpoint: string, fetchParams?: RequestInit },
+      variables: GetPairedCulturesQueryVariables,
+      options?: UseQueryOptions<GetPairedCulturesQuery, TError, TData>
+    ) =>
+    useQuery<GetPairedCulturesQuery, TError, TData>(
+      ['getPairedCultures', variables],
+      fetcher<GetPairedCulturesQuery, GetPairedCulturesQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetPairedCulturesDocument, variables),
       options
     );
 export const InsertCultureDocument = `

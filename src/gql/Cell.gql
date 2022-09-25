@@ -26,6 +26,18 @@ query getUnpairedCells($fetchOptions: CellFetchUnpairedOptions!) {
     }
 }
 
+query getPairedCells($fetchOptions: CellFetchUnpairedOptions!) {
+    pairedCells(fetchOptions: $fetchOptions) {
+        total
+        page
+        limit
+        results {
+            ...CellParts
+        }
+    }
+}
+
+
 mutation insertCell($insertOptions: CellInsertOptions!) {
     insertCell(insertOptions: $insertOptions) {
         ...CellParts
