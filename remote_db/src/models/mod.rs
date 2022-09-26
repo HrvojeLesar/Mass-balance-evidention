@@ -1,5 +1,4 @@
 use async_graphql::{Enum, InputObject, InputType, MergedObject, OutputType, SimpleObject};
-use sqlx::Row;
 
 use self::{
     buyer::{Buyer, BuyerFields, BuyerMutation, BuyerQuery},
@@ -9,7 +8,10 @@ use self::{
         CellCulturePairQuery,
     },
     culture::{Culture, CultureFields, CultureMutation, CultureQuery, CultureUnpairedId},
-    entry::{Entry, EntryFields, EntryMutation, EntryQuery},
+    entry::{
+        Entry, EntryFetchIdOptions, EntryFields, EntryGroup, EntryGroupFields, EntryMutation,
+        EntryQuery,
+    },
 };
 
 pub mod buyer;
@@ -66,6 +68,7 @@ impl ToString for Ordering {
 #[graphql(concrete(name = "CultureOrderingOptions", params(CultureFields)))]
 #[graphql(concrete(name = "CellCulturePairOrderingOptions", params(CellCulturePairFields)))]
 #[graphql(concrete(name = "EntryOrderingOptions", params(EntryFields)))]
+#[graphql(concrete(name = "EntryGroupOrderingOptionsBase", params(EntryGroupFields)))]
 pub(super) struct OrderingOptions<T: InputType + ToString> {
     order: Ordering,
     order_by: T,
@@ -77,6 +80,7 @@ pub(super) struct OrderingOptions<T: InputType + ToString> {
 #[graphql(concrete(name = "CultureFilterOptions", params(CultureFields)))]
 #[graphql(concrete(name = "CellCulturePairFilterOptions", params(CellCulturePairFields)))]
 #[graphql(concrete(name = "EntryFilterOptions", params(EntryFields)))]
+#[graphql(concrete(name = "EntryGroupFilterOptionsBase", params(EntryGroupFields)))]
 pub(super) struct Filter<T: InputType + FieldsToSql> {
     pub(super) field: T,
     pub(super) value: String,
@@ -90,10 +94,7 @@ pub struct Id {
 #[derive(InputObject)]
 #[graphql(concrete(name = "BuyerFetchOptions", params(BuyerFields)))]
 #[graphql(concrete(name = "CellFetchOptions", params(CellFields)))]
-#[graphql(concrete(
-    name = "CellFetchUnpairedOptions",
-    params(CellFields, CellUnpairedId)
-))]
+#[graphql(concrete(name = "CellFetchUnpairedOptions", params(CellFields, CellUnpairedId)))]
 #[graphql(concrete(name = "CultureFetchOptions", params(CultureFields)))]
 #[graphql(concrete(
     name = "CultureFetchUnpairedOptions",
@@ -103,7 +104,8 @@ pub struct Id {
     name = "CellCulturePairFetchOptions",
     params(CellCulturePairFields, CellCulturePairIds)
 ))]
-#[graphql(concrete(name = "EntryFetchOptions", params(EntryFields)))]
+#[graphql(concrete(name = "EntryFetchOptions", params(EntryFields, EntryFetchIdOptions)))]
+#[graphql(concrete(name = "EntryGroupFetchOptionsBase", params(EntryGroupFields)))]
 pub(super) struct FetchOptions<T, I = Id>
 where
     T: InputType + FieldsToSql + ToString,
@@ -124,6 +126,7 @@ where
 #[graphql(concrete(name = "Cultures", params(Culture)))]
 #[graphql(concrete(name = "CellCulturePairs", params(CellCulturePair)))]
 #[graphql(concrete(name = "Entries", params(Entry)))]
+#[graphql(concrete(name = "EntryGroups", params(EntryGroup)))]
 pub(super) struct FetchMany<T: OutputType> {
     #[graphql(flatten)]
     pub(super) pagination: Pagination,

@@ -1,5 +1,5 @@
 use anyhow::Result;
-use async_graphql::{Context, Enum, InputObject, Object, SimpleObject};
+use async_graphql::{Context, Enum, InputObject, Object, OneofObject, SimpleObject};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use sqlx::{FromRow, Postgres, Row, Transaction};
@@ -12,11 +12,12 @@ use super::{
     cell_culture_pair::{CellCulturePair, CellCulturePairInsertOptions},
     culture::Culture,
     db_query::{DatabaseQueries, QueryBuilderHelpers},
-    FetchMany, FetchOptions, FieldsToSql, Pagination,
+    FetchMany, FetchOptions, FieldsToSql, Id, Pagination,
 };
 
-type EntryFetchOptions = FetchOptions<EntryFields>;
+type EntryFetchOptions = FetchOptions<EntryFields, EntryFetchIdOptions>;
 type Entries = FetchMany<Entry>;
+type EntryGroups = FetchMany<EntryGroup>;
 
 #[derive(SimpleObject, FromRow)]
 pub(super) struct Entry {
@@ -79,6 +80,74 @@ pub(super) struct EntryUpdateOptions {
     pub(super) cell_culture_pair: Option<CellCulturePairInsertOptions>,
 }
 
+#[derive(Enum, Clone, Copy, PartialEq, Eq)]
+pub(super) enum EntryGroupOptions {
+    Cell,
+    Culture,
+    Buyer,
+}
+
+impl FieldsToSql for EntryGroupOptions {
+    fn to_sql(&self) -> String {
+        match self {
+            EntryGroupOptions::Cell => "entry.id_cell, cell.name ".to_string(),
+            EntryGroupOptions::Culture => "entry.id_culture, culture.name ".to_string(),
+            EntryGroupOptions::Buyer => "entry.id_buyer, buyer.name ".to_string(),
+        }
+    }
+}
+
+impl ToString for EntryGroupOptions {
+    fn to_string(&self) -> String {
+        match self {
+            EntryGroupOptions::Cell => "cell".to_string(),
+            EntryGroupOptions::Culture => "culture".to_string(),
+            EntryGroupOptions::Buyer => "buyer".to_string(),
+        }
+    }
+}
+
+#[derive(InputObject)]
+#[graphql(name = "EntryGroupFetchOptions")]
+pub(super) struct EntryGroupFetchOptions {
+    #[graphql(flatten)]
+    options: FetchOptions<EntryGroupFields>,
+    grouping: EntryGroupOptions,
+}
+
+#[derive(SimpleObject)]
+pub(super) struct EntryGroup {
+    pub(super) id: i32,
+    pub(super) name: String,
+}
+
+#[derive(Enum, Clone, Copy, PartialEq, Eq)]
+pub(super) enum EntryGroupFields {
+    Name,
+}
+
+impl FieldsToSql for EntryGroupFields {}
+
+impl ToString for EntryGroupFields {
+    fn to_string(&self) -> String {
+        match self {
+            EntryGroupFields::Name => "name".to_string(),
+        }
+    }
+}
+
+#[derive(OneofObject)]
+pub(super) enum EntryFetchIdOptionsEnum {
+    CellId(Id),
+    CultureId(Id),
+    Id(Id),
+}
+
+#[derive(InputObject)]
+pub(super) struct EntryFetchIdOptions {
+    id_type: Option<EntryFetchIdOptionsEnum>,
+}
+
 impl QueryBuilderHelpers<'_, Postgres> for Entry {}
 
 #[async_trait]
@@ -114,8 +183,10 @@ impl DatabaseQueries<Postgres> for Entry {
         Ok(Self::get(
             &mut *executor,
             &EntryFetchOptions {
-                id: super::Id {
-                    id: Some(partial_entry.id),
+                id: EntryFetchIdOptions {
+                    id_type: Some(EntryFetchIdOptionsEnum::Id(super::Id {
+                        id: Some(partial_entry.id),
+                    })),
                 },
                 page: None,
                 limit: None,
@@ -166,7 +237,27 @@ impl DatabaseQueries<Postgres> for Entry {
             ",
         );
 
-        Self::handle_fetch_options(options, "entry.id", &mut builder);
+        let push_where = match &options.id.id_type {
+            Some(i) => match i {
+                EntryFetchIdOptionsEnum::CellId(id) => {
+                    builder.push("WHERE entry.id_cell = ").push_bind(id.id);
+                    false
+                }
+                EntryFetchIdOptionsEnum::CultureId(id) => {
+                    builder.push("WHERE entry.id_culture = ").push_bind(id.id);
+                    false
+                }
+                EntryFetchIdOptionsEnum::Id(id) => {
+                    builder.push("WHERE entry.id = ").push_bind(id.id);
+                    false
+                }
+            },
+            None => true,
+        };
+
+        Self::filter(&options.filters, &mut builder, push_where);
+        Self::order_by(&options.ordering, "entry.id", &mut builder);
+        Self::paginate(options.limit, options.page, &mut builder);
         let rows = builder.build().fetch_all(executor).await?;
 
         let total = match rows.first() {
@@ -221,6 +312,15 @@ impl DatabaseQueries<Postgres> for Entry {
         executor: &mut Transaction<'_, Postgres>,
         options: &EntryFetchOptions,
     ) -> Result<Self> {
+        let id_options = match &options.id.id_type {
+            Some(i) => match i {
+                EntryFetchIdOptionsEnum::CellId(id)
+                | EntryFetchIdOptionsEnum::CultureId(id)
+                | EntryFetchIdOptionsEnum::Id(id) => id,
+            },
+            None => &Id { id: None },
+        };
+
         let r = sqlx::query!(
             "
             SELECT 
@@ -255,7 +355,7 @@ impl DatabaseQueries<Postgres> for Entry {
                 cell_culture_pair.id_culture = entry.id_culture
             WHERE entry.id = $1
             ",
-            options.id.id,
+            id_options.id,
         )
         .fetch_one(&mut *executor)
         .await?;
@@ -327,8 +427,10 @@ impl DatabaseQueries<Postgres> for Entry {
         Ok(Self::get(
             &mut *executor,
             &EntryFetchOptions {
-                id: super::Id {
-                    id: Some(r.try_get("id")?),
+                id: EntryFetchIdOptions {
+                    id_type: Some(EntryFetchIdOptionsEnum::Id(super::Id {
+                        id: Some(r.try_get("id")?),
+                    })),
                 },
                 page: None,
                 limit: None,
@@ -364,6 +466,58 @@ impl EntryQuery {
         let mut transaction = pool.begin().await?;
 
         let res = Entry::get(&mut transaction, &fetch_options).await?;
+
+        transaction.commit().await?;
+        Ok(res)
+    }
+
+    async fn get_entry_groups(
+        &self,
+        ctx: &Context<'_>,
+        fetch_options: EntryGroupFetchOptions,
+    ) -> Result<EntryGroups> {
+        let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
+        let mut transaction = pool.begin().await?;
+
+        let grouping = fetch_options.grouping.to_sql();
+        let grouping_descriptor = fetch_options.grouping.to_string();
+        let mut builder = sqlx::QueryBuilder::new("SELECT COUNT(*) OVER() as total_count, ");
+        builder.push(&grouping).push("FROM entry ").push(format!(
+            "INNER JOIN {0} ON {0}.id = id_{0} ",
+            grouping_descriptor
+        ));
+        Entry::filter(&fetch_options.options.filters, &mut builder, true);
+        builder.push("GROUP BY ").push(grouping);
+        Entry::order_by(&fetch_options.options.ordering, "name", &mut builder);
+        Entry::paginate(
+            fetch_options.options.limit,
+            fetch_options.options.page,
+            &mut builder,
+        );
+        let rows = builder.build().fetch_all(&mut transaction).await?;
+
+        let total = match rows.first() {
+            Some(t) => t.try_get("total_count")?,
+            None => 0,
+        };
+
+        let mut groups = Vec::with_capacity(rows.len());
+        let id_descriptor = format!("id_{}", grouping_descriptor);
+        for g in rows.into_iter() {
+            groups.push(EntryGroup {
+                id: g.try_get(id_descriptor.as_str())?,
+                name: g.try_get("name")?,
+            });
+        }
+
+        let res = EntryGroups {
+            results: groups,
+            pagination: Pagination {
+                limit: fetch_options.options.limit.unwrap_or_default(),
+                page: fetch_options.options.page.unwrap_or_default(),
+                total,
+            },
+        };
 
         transaction.commit().await?;
         Ok(res)

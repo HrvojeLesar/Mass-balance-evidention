@@ -45,9 +45,12 @@ where
     fn filter<T: InputType + FieldsToSql>(
         filters: &'q Option<Vec<Filter<T>>>,
         builder: &mut QueryBuilder<'q, DB>,
+        push_where: bool,
     ) {
         if let Some(filters) = filters {
-            builder.push("WHERE ");
+            if push_where {
+                builder.push("WHERE ");
+            }
             let mut sep = builder.separated(" AND ");
             for filter in filters {
                 sep.push(&filter.field.to_sql())
@@ -93,7 +96,7 @@ where
         Filter<T>: InputType,
         OrderingOptions<T>: InputType,
     {
-        Self::filter(&options.filters, builder);
+        Self::filter(&options.filters, builder, true);
         Self::order_by(&options.ordering, order_by_default_column, builder);
         Self::paginate(options.limit, options.page, builder);
     }
