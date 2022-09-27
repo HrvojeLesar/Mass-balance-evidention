@@ -101,10 +101,8 @@ export default function CellTable() {
                 data={{ data: tableData, total }}
                 pagination={pagination}
                 setPagination={setPagination}
-                sorting={sorting}
-                setSorting={setSorting}
-                columnFilters={columnFilters}
-                setColumnFilters={setColumnFilters}
+                sortingState={{sorting, setSorting}}
+                filterState={{columnFilters, setColumnFilters}}
             />
         </Card>
     );

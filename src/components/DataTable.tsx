@@ -1,36 +1,54 @@
 import {
     ColumnDef,
     ColumnFiltersState,
+    createRow,
     getCoreRowModel,
+    getExpandedRowModel,
+    getGroupedRowModel,
+    GroupingState,
+    memo,
+    RowData,
+    RowModel,
     SortingState,
+    Table,
     useReactTable,
 } from "@tanstack/react-table";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import { Button } from "react-bootstrap";
 import { Pagination } from "../hooks/usePagination";
 import BaseTable from "./BaseTable";
 import TablePagination from "./TablePagination";
 
-type SomeTableProps<T> = {
+type SomeTableProps<T, G> = {
     columns: ColumnDef<T, unknown>[];
-    data: { data: T[]; total: number };
+    data: { data: T[]; total: number; grouping?: any[] };
     pagination: Pagination;
     setPagination: Dispatch<SetStateAction<Pagination>>;
-    sorting?: SortingState;
-    setSorting?: Dispatch<SetStateAction<SortingState>>;
-    columnFilters?: ColumnFiltersState;
-    setColumnFilters?: Dispatch<SetStateAction<ColumnFiltersState>>;
+    sortingState?: {
+        sorting: SortingState;
+        setSorting: Dispatch<SetStateAction<SortingState>>;
+    };
+    filterState?: {
+        columnFilters: ColumnFiltersState;
+        setColumnFilters: Dispatch<SetStateAction<ColumnFiltersState>>;
+    };
+    groupingState?: {
+        grouping: GroupingState;
+        setGrouping: Dispatch<SetStateAction<GroupingState>>;
+    };
+    toggleGroupExpand?: (id: number) => void;
 };
 
-export default function DataTable<T>({
+export default function DataTable<T, G>({
     columns,
     data,
     pagination,
     setPagination,
-    sorting,
-    setSorting,
-    columnFilters,
-    setColumnFilters,
-}: SomeTableProps<T>) {
+    sortingState,
+    filterState,
+    groupingState,
+    toggleGroupExpand,
+}: SomeTableProps<T, G>) {
     const table = useReactTable({
         data: data.data,
         columns,
@@ -38,26 +56,35 @@ export default function DataTable<T>({
         getCoreRowModel: getCoreRowModel(),
         state: {
             pagination,
-            sorting,
+            sorting: sortingState?.sorting,
+            grouping: groupingState?.grouping,
+            columnFilters: filterState?.columnFilters,
         },
         manualPagination: true,
-        manualSorting: true,
-        manualFiltering: true,
+        manualSorting: sortingState !== undefined ? true : undefined,
+        manualFiltering: filterState !== undefined ? true : undefined,
+        manualGrouping: groupingState !== undefined ? true : undefined,
+        getExpandedRowModel: getExpandedRowModel(),
+        onGroupingChange: groupingState?.setGrouping,
         sortDescFirst: false,
         enableColumnResizing: true,
         onPaginationChange: setPagination,
-        onSortingChange: setSorting,
+        onSortingChange: sortingState?.setSorting,
         onColumnFiltersChange: (filter) => {
             setPagination({ ...pagination, pageIndex: 0 });
-            if (setColumnFilters) {
-                setColumnFilters(filter);
+            if (filterState) {
+                filterState.setColumnFilters(filter);
             }
         },
     });
 
     return (
         <>
-            <BaseTable table={table} />
+            <BaseTable
+                table={table}
+                groups={data.grouping}
+                toggleGroupExpand={toggleGroupExpand}
+            />
             <TablePagination table={table} />
         </>
     );

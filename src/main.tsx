@@ -24,11 +24,9 @@ i18n.use(Backend)
     });
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-    <React.StrictMode>
         <React.Suspense fallback="loading">
             <QueryClientProvider client={queryClient}>
                 <App />
             </QueryClientProvider>
         </React.Suspense>
-    </React.StrictMode>
 );

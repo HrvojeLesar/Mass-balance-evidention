@@ -62,7 +62,6 @@ export default function CellCulturePairForm({
     );
 
     const onSubmit = useCallback((data: FormInput) => {
-        console.log(data);
         if (data.cell && data.culture) {
             insert.mutate({
                 insertOptions: {

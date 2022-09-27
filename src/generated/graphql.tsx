@@ -295,9 +295,19 @@ export type Entry = {
   weightType?: Maybe<Scalars['String']>;
 };
 
+export type EntryFetchIdOptions = {
+  idType?: InputMaybe<EntryFetchIdOptionsEnum>;
+};
+
+export type EntryFetchIdOptionsEnum = {
+  cellId?: InputMaybe<Id>;
+  cultureId?: InputMaybe<Id>;
+  id?: InputMaybe<Id>;
+};
+
 export type EntryFetchOptions = {
   filters?: InputMaybe<Array<EntryFilterOptions>>;
-  id: Id;
+  id: EntryFetchIdOptions;
   limit?: InputMaybe<Scalars['Int']>;
   ordering?: InputMaybe<EntryOrderingOptions>;
   page?: InputMaybe<Scalars['Int']>;
@@ -318,6 +328,49 @@ export enum EntryFields {
 export type EntryFilterOptions = {
   field: EntryFields;
   value: Scalars['String'];
+};
+
+export type EntryGroup = {
+  __typename?: 'EntryGroup';
+  id: Scalars['Int'];
+  name: Scalars['String'];
+};
+
+export type EntryGroupFetchOptions = {
+  filters?: InputMaybe<Array<EntryGroupFilterOptionsBase>>;
+  grouping: EntryGroupOptions;
+  id: Id;
+  limit?: InputMaybe<Scalars['Int']>;
+  ordering?: InputMaybe<EntryGroupOrderingOptionsBase>;
+  page?: InputMaybe<Scalars['Int']>;
+};
+
+export enum EntryGroupFields {
+  Name = 'NAME'
+}
+
+export type EntryGroupFilterOptionsBase = {
+  field: EntryGroupFields;
+  value: Scalars['String'];
+};
+
+export enum EntryGroupOptions {
+  Buyer = 'BUYER',
+  Cell = 'CELL',
+  Culture = 'CULTURE'
+}
+
+export type EntryGroupOrderingOptionsBase = {
+  order: Ordering;
+  orderBy: EntryGroupFields;
+};
+
+export type EntryGroups = {
+  __typename?: 'EntryGroups';
+  limit: Scalars['Int'];
+  page: Scalars['Int'];
+  results: Array<EntryGroup>;
+  total: Scalars['Int'];
 };
 
 export type EntryInsertOptions = {
@@ -427,6 +480,7 @@ export type QueryRoot = {
   cultures: Cultures;
   entries: Entries;
   entry: Entry;
+  getEntryGroups: EntryGroups;
   pairedCells: Cells;
   pairedCultures: Cultures;
   unpairedCells: Cells;
@@ -481,6 +535,11 @@ export type QueryRootEntriesArgs = {
 
 export type QueryRootEntryArgs = {
   fetchOptions: EntryFetchOptions;
+};
+
+
+export type QueryRootGetEntryGroupsArgs = {
+  fetchOptions: EntryGroupFetchOptions;
 };
 
 
@@ -664,6 +723,13 @@ export type GetEntryQueryVariables = Exact<{
 
 
 export type GetEntryQuery = { __typename?: 'QueryRoot', entry: { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } | null } };
+
+export type GetEntryGroupsQueryVariables = Exact<{
+  fetchOptions: EntryGroupFetchOptions;
+}>;
+
+
+export type GetEntryGroupsQuery = { __typename?: 'QueryRoot', getEntryGroups: { __typename?: 'EntryGroups', total: number, page: number, limit: number, results: Array<{ __typename?: 'EntryGroup', id: number, name: string }> } };
 
 export type InsertEntryMutationVariables = Exact<{
   insertOptions: EntryInsertOptions;
@@ -1209,6 +1275,32 @@ export const useGetEntryQuery = <
     useQuery<GetEntryQuery, TError, TData>(
       ['getEntry', variables],
       fetcher<GetEntryQuery, GetEntryQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetEntryDocument, variables),
+      options
+    );
+export const GetEntryGroupsDocument = `
+    query getEntryGroups($fetchOptions: EntryGroupFetchOptions!) {
+  getEntryGroups(fetchOptions: $fetchOptions) {
+    total
+    page
+    limit
+    results {
+      id
+      name
+    }
+  }
+}
+    `;
+export const useGetEntryGroupsQuery = <
+      TData = GetEntryGroupsQuery,
+      TError = unknown
+    >(
+      dataSource: { endpoint: string, fetchParams?: RequestInit },
+      variables: GetEntryGroupsQueryVariables,
+      options?: UseQueryOptions<GetEntryGroupsQuery, TError, TData>
+    ) =>
+    useQuery<GetEntryGroupsQuery, TError, TData>(
+      ['getEntryGroups', variables],
+      fetcher<GetEntryGroupsQuery, GetEntryGroupsQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetEntryGroupsDocument, variables),
       options
     );
 export const InsertEntryDocument = `

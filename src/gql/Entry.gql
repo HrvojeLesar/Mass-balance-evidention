@@ -17,6 +17,18 @@ query getEntry($fetchOptions: EntryFetchOptions!) {
     }
 }
 
+query getEntryGroups($fetchOptions: EntryGroupFetchOptions!) {
+    getEntryGroups(fetchOptions: $fetchOptions) {
+        total
+        page
+        limit
+        results {
+            id
+            name
+        }
+    }
+}
+
 mutation insertEntry($insertOptions: EntryInsertOptions!) {
     insertEntry(insertOptions: $insertOptions) {
         ...EntryParts
