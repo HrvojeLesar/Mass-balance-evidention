@@ -30,7 +30,6 @@ export default function CultureTable() {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
     const { data, refetch } = useGetCulturesQuery(
-        { endpoint: "http://localhost:8000/graphiql" },
         {
             fetchOptions: {
                 id: {},

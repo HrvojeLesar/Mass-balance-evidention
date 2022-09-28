@@ -5,11 +5,10 @@ export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K]
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 
-function fetcher<TData, TVariables>(endpoint: string, requestInit: RequestInit, query: string, variables?: TVariables) {
+function fetcher<TData, TVariables>(query: string, variables?: TVariables) {
   return async (): Promise<TData> => {
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      ...requestInit,
+    const res = await fetch("http://localhost:8000/graphiql", {
+    method: "POST",
       body: JSON.stringify({ query, variables }),
     });
 
@@ -660,7 +659,7 @@ export type GetAllCellCultureParisQueryVariables = Exact<{
 }>;
 
 
-export type GetAllCellCultureParisQuery = { __typename?: 'QueryRoot', getAllCellCulturePairs: { __typename?: 'CellCulturePairs', total: number, page: number, limit: number, results: Array<{ __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null }> } };
+export type GetAllCellCultureParisQuery = { __typename?: 'QueryRoot', getAllCellCulturePairs: { __typename?: 'CellCulturePairs', total: number, results: Array<{ __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null }> } };
 
 export type GetCellCulturePairQueryVariables = Exact<{
   fetchOptions: CellCulturePairFetchOptions;
@@ -741,7 +740,7 @@ export type GetAllEntriesQueryVariables = Exact<{
 }>;
 
 
-export type GetAllEntriesQuery = { __typename?: 'QueryRoot', getAllEntries: { __typename?: 'Entries', total: number, page: number, limit: number, results: Array<{ __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } | null }> } };
+export type GetAllEntriesQuery = { __typename?: 'QueryRoot', getAllEntries: { __typename?: 'Entries', total: number, results: Array<{ __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } | null }> } };
 
 export type GetEntryQueryVariables = Exact<{
   fetchOptions: EntryFetchOptions;
@@ -842,13 +841,12 @@ export const useGetBuyersQuery = <
       TData = GetBuyersQuery,
       TError = unknown
     >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
       variables: GetBuyersQueryVariables,
       options?: UseQueryOptions<GetBuyersQuery, TError, TData>
     ) =>
     useQuery<GetBuyersQuery, TError, TData>(
       ['getBuyers', variables],
-      fetcher<GetBuyersQuery, GetBuyersQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetBuyersDocument, variables),
+      fetcher<GetBuyersQuery, GetBuyersQueryVariables>(GetBuyersDocument, variables),
       options
     );
 export const GetBuyerDocument = `
@@ -862,13 +860,12 @@ export const useGetBuyerQuery = <
       TData = GetBuyerQuery,
       TError = unknown
     >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
       variables: GetBuyerQueryVariables,
       options?: UseQueryOptions<GetBuyerQuery, TError, TData>
     ) =>
     useQuery<GetBuyerQuery, TError, TData>(
       ['getBuyer', variables],
-      fetcher<GetBuyerQuery, GetBuyerQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetBuyerDocument, variables),
+      fetcher<GetBuyerQuery, GetBuyerQueryVariables>(GetBuyerDocument, variables),
       options
     );
 export const InsertBuyerDocument = `
@@ -881,13 +878,10 @@ export const InsertBuyerDocument = `
 export const useInsertBuyerMutation = <
       TError = unknown,
       TContext = unknown
-    >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
-      options?: UseMutationOptions<InsertBuyerMutation, TError, InsertBuyerMutationVariables, TContext>
-    ) =>
+    >(options?: UseMutationOptions<InsertBuyerMutation, TError, InsertBuyerMutationVariables, TContext>) =>
     useMutation<InsertBuyerMutation, TError, InsertBuyerMutationVariables, TContext>(
       ['insertBuyer'],
-      (variables?: InsertBuyerMutationVariables) => fetcher<InsertBuyerMutation, InsertBuyerMutationVariables>(dataSource.endpoint, dataSource.fetchParams || {}, InsertBuyerDocument, variables)(),
+      (variables?: InsertBuyerMutationVariables) => fetcher<InsertBuyerMutation, InsertBuyerMutationVariables>(InsertBuyerDocument, variables)(),
       options
     );
 export const UpdateBuyerDocument = `
@@ -900,13 +894,10 @@ export const UpdateBuyerDocument = `
 export const useUpdateBuyerMutation = <
       TError = unknown,
       TContext = unknown
-    >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
-      options?: UseMutationOptions<UpdateBuyerMutation, TError, UpdateBuyerMutationVariables, TContext>
-    ) =>
+    >(options?: UseMutationOptions<UpdateBuyerMutation, TError, UpdateBuyerMutationVariables, TContext>) =>
     useMutation<UpdateBuyerMutation, TError, UpdateBuyerMutationVariables, TContext>(
       ['updateBuyer'],
-      (variables?: UpdateBuyerMutationVariables) => fetcher<UpdateBuyerMutation, UpdateBuyerMutationVariables>(dataSource.endpoint, dataSource.fetchParams || {}, UpdateBuyerDocument, variables)(),
+      (variables?: UpdateBuyerMutationVariables) => fetcher<UpdateBuyerMutation, UpdateBuyerMutationVariables>(UpdateBuyerDocument, variables)(),
       options
     );
 export const GetCellsDocument = `
@@ -925,13 +916,12 @@ export const useGetCellsQuery = <
       TData = GetCellsQuery,
       TError = unknown
     >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
       variables: GetCellsQueryVariables,
       options?: UseQueryOptions<GetCellsQuery, TError, TData>
     ) =>
     useQuery<GetCellsQuery, TError, TData>(
       ['getCells', variables],
-      fetcher<GetCellsQuery, GetCellsQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetCellsDocument, variables),
+      fetcher<GetCellsQuery, GetCellsQueryVariables>(GetCellsDocument, variables),
       options
     );
 export const GetCellDocument = `
@@ -945,13 +935,12 @@ export const useGetCellQuery = <
       TData = GetCellQuery,
       TError = unknown
     >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
       variables: GetCellQueryVariables,
       options?: UseQueryOptions<GetCellQuery, TError, TData>
     ) =>
     useQuery<GetCellQuery, TError, TData>(
       ['getCell', variables],
-      fetcher<GetCellQuery, GetCellQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetCellDocument, variables),
+      fetcher<GetCellQuery, GetCellQueryVariables>(GetCellDocument, variables),
       options
     );
 export const GetUnpairedCellsDocument = `
@@ -970,13 +959,12 @@ export const useGetUnpairedCellsQuery = <
       TData = GetUnpairedCellsQuery,
       TError = unknown
     >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
       variables: GetUnpairedCellsQueryVariables,
       options?: UseQueryOptions<GetUnpairedCellsQuery, TError, TData>
     ) =>
     useQuery<GetUnpairedCellsQuery, TError, TData>(
       ['getUnpairedCells', variables],
-      fetcher<GetUnpairedCellsQuery, GetUnpairedCellsQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetUnpairedCellsDocument, variables),
+      fetcher<GetUnpairedCellsQuery, GetUnpairedCellsQueryVariables>(GetUnpairedCellsDocument, variables),
       options
     );
 export const GetPairedCellsDocument = `
@@ -995,13 +983,12 @@ export const useGetPairedCellsQuery = <
       TData = GetPairedCellsQuery,
       TError = unknown
     >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
       variables: GetPairedCellsQueryVariables,
       options?: UseQueryOptions<GetPairedCellsQuery, TError, TData>
     ) =>
     useQuery<GetPairedCellsQuery, TError, TData>(
       ['getPairedCells', variables],
-      fetcher<GetPairedCellsQuery, GetPairedCellsQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetPairedCellsDocument, variables),
+      fetcher<GetPairedCellsQuery, GetPairedCellsQueryVariables>(GetPairedCellsDocument, variables),
       options
     );
 export const InsertCellDocument = `
@@ -1014,13 +1001,10 @@ export const InsertCellDocument = `
 export const useInsertCellMutation = <
       TError = unknown,
       TContext = unknown
-    >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
-      options?: UseMutationOptions<InsertCellMutation, TError, InsertCellMutationVariables, TContext>
-    ) =>
+    >(options?: UseMutationOptions<InsertCellMutation, TError, InsertCellMutationVariables, TContext>) =>
     useMutation<InsertCellMutation, TError, InsertCellMutationVariables, TContext>(
       ['insertCell'],
-      (variables?: InsertCellMutationVariables) => fetcher<InsertCellMutation, InsertCellMutationVariables>(dataSource.endpoint, dataSource.fetchParams || {}, InsertCellDocument, variables)(),
+      (variables?: InsertCellMutationVariables) => fetcher<InsertCellMutation, InsertCellMutationVariables>(InsertCellDocument, variables)(),
       options
     );
 export const UpdateCellDocument = `
@@ -1033,13 +1017,10 @@ export const UpdateCellDocument = `
 export const useUpdateCellMutation = <
       TError = unknown,
       TContext = unknown
-    >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
-      options?: UseMutationOptions<UpdateCellMutation, TError, UpdateCellMutationVariables, TContext>
-    ) =>
+    >(options?: UseMutationOptions<UpdateCellMutation, TError, UpdateCellMutationVariables, TContext>) =>
     useMutation<UpdateCellMutation, TError, UpdateCellMutationVariables, TContext>(
       ['updateCell'],
-      (variables?: UpdateCellMutationVariables) => fetcher<UpdateCellMutation, UpdateCellMutationVariables>(dataSource.endpoint, dataSource.fetchParams || {}, UpdateCellDocument, variables)(),
+      (variables?: UpdateCellMutationVariables) => fetcher<UpdateCellMutation, UpdateCellMutationVariables>(UpdateCellDocument, variables)(),
       options
     );
 export const GetCellCulturesPairsDocument = `
@@ -1058,21 +1039,18 @@ export const useGetCellCulturesPairsQuery = <
       TData = GetCellCulturesPairsQuery,
       TError = unknown
     >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
       variables: GetCellCulturesPairsQueryVariables,
       options?: UseQueryOptions<GetCellCulturesPairsQuery, TError, TData>
     ) =>
     useQuery<GetCellCulturesPairsQuery, TError, TData>(
       ['getCellCulturesPairs', variables],
-      fetcher<GetCellCulturesPairsQuery, GetCellCulturesPairsQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetCellCulturesPairsDocument, variables),
+      fetcher<GetCellCulturesPairsQuery, GetCellCulturesPairsQueryVariables>(GetCellCulturesPairsDocument, variables),
       options
     );
 export const GetAllCellCultureParisDocument = `
     query getAllCellCultureParis($fetchOptions: CellCulturePairFetchOptions!) {
   getAllCellCulturePairs(fetchOptions: $fetchOptions) {
     total
-    page
-    limit
     results {
       ...CellCultureParts
     }
@@ -1083,13 +1061,12 @@ export const useGetAllCellCultureParisQuery = <
       TData = GetAllCellCultureParisQuery,
       TError = unknown
     >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
       variables: GetAllCellCultureParisQueryVariables,
       options?: UseQueryOptions<GetAllCellCultureParisQuery, TError, TData>
     ) =>
     useQuery<GetAllCellCultureParisQuery, TError, TData>(
       ['getAllCellCultureParis', variables],
-      fetcher<GetAllCellCultureParisQuery, GetAllCellCultureParisQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetAllCellCultureParisDocument, variables),
+      fetcher<GetAllCellCultureParisQuery, GetAllCellCultureParisQueryVariables>(GetAllCellCultureParisDocument, variables),
       options
     );
 export const GetCellCulturePairDocument = `
@@ -1103,13 +1080,12 @@ export const useGetCellCulturePairQuery = <
       TData = GetCellCulturePairQuery,
       TError = unknown
     >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
       variables: GetCellCulturePairQueryVariables,
       options?: UseQueryOptions<GetCellCulturePairQuery, TError, TData>
     ) =>
     useQuery<GetCellCulturePairQuery, TError, TData>(
       ['getCellCulturePair', variables],
-      fetcher<GetCellCulturePairQuery, GetCellCulturePairQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetCellCulturePairDocument, variables),
+      fetcher<GetCellCulturePairQuery, GetCellCulturePairQueryVariables>(GetCellCulturePairDocument, variables),
       options
     );
 export const InsertCellCulturePairDocument = `
@@ -1122,13 +1098,10 @@ export const InsertCellCulturePairDocument = `
 export const useInsertCellCulturePairMutation = <
       TError = unknown,
       TContext = unknown
-    >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
-      options?: UseMutationOptions<InsertCellCulturePairMutation, TError, InsertCellCulturePairMutationVariables, TContext>
-    ) =>
+    >(options?: UseMutationOptions<InsertCellCulturePairMutation, TError, InsertCellCulturePairMutationVariables, TContext>) =>
     useMutation<InsertCellCulturePairMutation, TError, InsertCellCulturePairMutationVariables, TContext>(
       ['insertCellCulturePair'],
-      (variables?: InsertCellCulturePairMutationVariables) => fetcher<InsertCellCulturePairMutation, InsertCellCulturePairMutationVariables>(dataSource.endpoint, dataSource.fetchParams || {}, InsertCellCulturePairDocument, variables)(),
+      (variables?: InsertCellCulturePairMutationVariables) => fetcher<InsertCellCulturePairMutation, InsertCellCulturePairMutationVariables>(InsertCellCulturePairDocument, variables)(),
       options
     );
 export const UpdateCellCulturePairDocument = `
@@ -1141,13 +1114,10 @@ export const UpdateCellCulturePairDocument = `
 export const useUpdateCellCulturePairMutation = <
       TError = unknown,
       TContext = unknown
-    >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
-      options?: UseMutationOptions<UpdateCellCulturePairMutation, TError, UpdateCellCulturePairMutationVariables, TContext>
-    ) =>
+    >(options?: UseMutationOptions<UpdateCellCulturePairMutation, TError, UpdateCellCulturePairMutationVariables, TContext>) =>
     useMutation<UpdateCellCulturePairMutation, TError, UpdateCellCulturePairMutationVariables, TContext>(
       ['updateCellCulturePair'],
-      (variables?: UpdateCellCulturePairMutationVariables) => fetcher<UpdateCellCulturePairMutation, UpdateCellCulturePairMutationVariables>(dataSource.endpoint, dataSource.fetchParams || {}, UpdateCellCulturePairDocument, variables)(),
+      (variables?: UpdateCellCulturePairMutationVariables) => fetcher<UpdateCellCulturePairMutation, UpdateCellCulturePairMutationVariables>(UpdateCellCulturePairDocument, variables)(),
       options
     );
 export const GetCulturesDocument = `
@@ -1166,13 +1136,12 @@ export const useGetCulturesQuery = <
       TData = GetCulturesQuery,
       TError = unknown
     >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
       variables: GetCulturesQueryVariables,
       options?: UseQueryOptions<GetCulturesQuery, TError, TData>
     ) =>
     useQuery<GetCulturesQuery, TError, TData>(
       ['getCultures', variables],
-      fetcher<GetCulturesQuery, GetCulturesQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetCulturesDocument, variables),
+      fetcher<GetCulturesQuery, GetCulturesQueryVariables>(GetCulturesDocument, variables),
       options
     );
 export const GetCultureDocument = `
@@ -1186,13 +1155,12 @@ export const useGetCultureQuery = <
       TData = GetCultureQuery,
       TError = unknown
     >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
       variables: GetCultureQueryVariables,
       options?: UseQueryOptions<GetCultureQuery, TError, TData>
     ) =>
     useQuery<GetCultureQuery, TError, TData>(
       ['getCulture', variables],
-      fetcher<GetCultureQuery, GetCultureQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetCultureDocument, variables),
+      fetcher<GetCultureQuery, GetCultureQueryVariables>(GetCultureDocument, variables),
       options
     );
 export const GetUnpairedCulturesDocument = `
@@ -1211,13 +1179,12 @@ export const useGetUnpairedCulturesQuery = <
       TData = GetUnpairedCulturesQuery,
       TError = unknown
     >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
       variables: GetUnpairedCulturesQueryVariables,
       options?: UseQueryOptions<GetUnpairedCulturesQuery, TError, TData>
     ) =>
     useQuery<GetUnpairedCulturesQuery, TError, TData>(
       ['getUnpairedCultures', variables],
-      fetcher<GetUnpairedCulturesQuery, GetUnpairedCulturesQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetUnpairedCulturesDocument, variables),
+      fetcher<GetUnpairedCulturesQuery, GetUnpairedCulturesQueryVariables>(GetUnpairedCulturesDocument, variables),
       options
     );
 export const GetPairedCulturesDocument = `
@@ -1236,13 +1203,12 @@ export const useGetPairedCulturesQuery = <
       TData = GetPairedCulturesQuery,
       TError = unknown
     >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
       variables: GetPairedCulturesQueryVariables,
       options?: UseQueryOptions<GetPairedCulturesQuery, TError, TData>
     ) =>
     useQuery<GetPairedCulturesQuery, TError, TData>(
       ['getPairedCultures', variables],
-      fetcher<GetPairedCulturesQuery, GetPairedCulturesQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetPairedCulturesDocument, variables),
+      fetcher<GetPairedCulturesQuery, GetPairedCulturesQueryVariables>(GetPairedCulturesDocument, variables),
       options
     );
 export const InsertCultureDocument = `
@@ -1255,13 +1221,10 @@ export const InsertCultureDocument = `
 export const useInsertCultureMutation = <
       TError = unknown,
       TContext = unknown
-    >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
-      options?: UseMutationOptions<InsertCultureMutation, TError, InsertCultureMutationVariables, TContext>
-    ) =>
+    >(options?: UseMutationOptions<InsertCultureMutation, TError, InsertCultureMutationVariables, TContext>) =>
     useMutation<InsertCultureMutation, TError, InsertCultureMutationVariables, TContext>(
       ['insertCulture'],
-      (variables?: InsertCultureMutationVariables) => fetcher<InsertCultureMutation, InsertCultureMutationVariables>(dataSource.endpoint, dataSource.fetchParams || {}, InsertCultureDocument, variables)(),
+      (variables?: InsertCultureMutationVariables) => fetcher<InsertCultureMutation, InsertCultureMutationVariables>(InsertCultureDocument, variables)(),
       options
     );
 export const UpdateCultureDocument = `
@@ -1274,13 +1237,10 @@ export const UpdateCultureDocument = `
 export const useUpdateCultureMutation = <
       TError = unknown,
       TContext = unknown
-    >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
-      options?: UseMutationOptions<UpdateCultureMutation, TError, UpdateCultureMutationVariables, TContext>
-    ) =>
+    >(options?: UseMutationOptions<UpdateCultureMutation, TError, UpdateCultureMutationVariables, TContext>) =>
     useMutation<UpdateCultureMutation, TError, UpdateCultureMutationVariables, TContext>(
       ['updateCulture'],
-      (variables?: UpdateCultureMutationVariables) => fetcher<UpdateCultureMutation, UpdateCultureMutationVariables>(dataSource.endpoint, dataSource.fetchParams || {}, UpdateCultureDocument, variables)(),
+      (variables?: UpdateCultureMutationVariables) => fetcher<UpdateCultureMutation, UpdateCultureMutationVariables>(UpdateCultureDocument, variables)(),
       options
     );
 export const GetEntriesDocument = `
@@ -1299,21 +1259,18 @@ export const useGetEntriesQuery = <
       TData = GetEntriesQuery,
       TError = unknown
     >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
       variables: GetEntriesQueryVariables,
       options?: UseQueryOptions<GetEntriesQuery, TError, TData>
     ) =>
     useQuery<GetEntriesQuery, TError, TData>(
       ['getEntries', variables],
-      fetcher<GetEntriesQuery, GetEntriesQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetEntriesDocument, variables),
+      fetcher<GetEntriesQuery, GetEntriesQueryVariables>(GetEntriesDocument, variables),
       options
     );
 export const GetAllEntriesDocument = `
     query getAllEntries($fetchOptions: EntryFetchOptions!) {
   getAllEntries(fetchOptions: $fetchOptions) {
     total
-    page
-    limit
     results {
       ...EntryParts
     }
@@ -1324,13 +1281,12 @@ export const useGetAllEntriesQuery = <
       TData = GetAllEntriesQuery,
       TError = unknown
     >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
       variables: GetAllEntriesQueryVariables,
       options?: UseQueryOptions<GetAllEntriesQuery, TError, TData>
     ) =>
     useQuery<GetAllEntriesQuery, TError, TData>(
       ['getAllEntries', variables],
-      fetcher<GetAllEntriesQuery, GetAllEntriesQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetAllEntriesDocument, variables),
+      fetcher<GetAllEntriesQuery, GetAllEntriesQueryVariables>(GetAllEntriesDocument, variables),
       options
     );
 export const GetEntryDocument = `
@@ -1344,13 +1300,12 @@ export const useGetEntryQuery = <
       TData = GetEntryQuery,
       TError = unknown
     >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
       variables: GetEntryQueryVariables,
       options?: UseQueryOptions<GetEntryQuery, TError, TData>
     ) =>
     useQuery<GetEntryQuery, TError, TData>(
       ['getEntry', variables],
-      fetcher<GetEntryQuery, GetEntryQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetEntryDocument, variables),
+      fetcher<GetEntryQuery, GetEntryQueryVariables>(GetEntryDocument, variables),
       options
     );
 export const GetEntryGroupsDocument = `
@@ -1370,13 +1325,12 @@ export const useGetEntryGroupsQuery = <
       TData = GetEntryGroupsQuery,
       TError = unknown
     >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
       variables: GetEntryGroupsQueryVariables,
       options?: UseQueryOptions<GetEntryGroupsQuery, TError, TData>
     ) =>
     useQuery<GetEntryGroupsQuery, TError, TData>(
       ['getEntryGroups', variables],
-      fetcher<GetEntryGroupsQuery, GetEntryGroupsQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetEntryGroupsDocument, variables),
+      fetcher<GetEntryGroupsQuery, GetEntryGroupsQueryVariables>(GetEntryGroupsDocument, variables),
       options
     );
 export const InsertEntryDocument = `
@@ -1389,13 +1343,10 @@ export const InsertEntryDocument = `
 export const useInsertEntryMutation = <
       TError = unknown,
       TContext = unknown
-    >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
-      options?: UseMutationOptions<InsertEntryMutation, TError, InsertEntryMutationVariables, TContext>
-    ) =>
+    >(options?: UseMutationOptions<InsertEntryMutation, TError, InsertEntryMutationVariables, TContext>) =>
     useMutation<InsertEntryMutation, TError, InsertEntryMutationVariables, TContext>(
       ['insertEntry'],
-      (variables?: InsertEntryMutationVariables) => fetcher<InsertEntryMutation, InsertEntryMutationVariables>(dataSource.endpoint, dataSource.fetchParams || {}, InsertEntryDocument, variables)(),
+      (variables?: InsertEntryMutationVariables) => fetcher<InsertEntryMutation, InsertEntryMutationVariables>(InsertEntryDocument, variables)(),
       options
     );
 export const UpdateEntryDocument = `
@@ -1408,12 +1359,9 @@ export const UpdateEntryDocument = `
 export const useUpdateEntryMutation = <
       TError = unknown,
       TContext = unknown
-    >(
-      dataSource: { endpoint: string, fetchParams?: RequestInit },
-      options?: UseMutationOptions<UpdateEntryMutation, TError, UpdateEntryMutationVariables, TContext>
-    ) =>
+    >(options?: UseMutationOptions<UpdateEntryMutation, TError, UpdateEntryMutationVariables, TContext>) =>
     useMutation<UpdateEntryMutation, TError, UpdateEntryMutationVariables, TContext>(
       ['updateEntry'],
-      (variables?: UpdateEntryMutationVariables) => fetcher<UpdateEntryMutation, UpdateEntryMutationVariables>(dataSource.endpoint, dataSource.fetchParams || {}, UpdateEntryDocument, variables)(),
+      (variables?: UpdateEntryMutationVariables) => fetcher<UpdateEntryMutation, UpdateEntryMutationVariables>(UpdateEntryDocument, variables)(),
       options
     );

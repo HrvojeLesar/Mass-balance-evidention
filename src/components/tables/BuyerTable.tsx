@@ -22,20 +22,15 @@ type T = Buyer;
 type TFields = BuyerFields;
 type TFilterOptions = BuyerFilterOptions;
 
-let renderCount = 0;
-
 export default function BuyerTable() {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const [tableData, setTableData] = useState<T[]>([]);
 
     const { pagination, setPagination } = usePagination();
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-    renderCount++;
-
     const { data, refetch } = useGetBuyersQuery(
-        { endpoint: "http://localhost:8000/graphiql" },
         {
             fetchOptions: {
                 id: {},
@@ -105,20 +100,6 @@ export default function BuyerTable() {
 
     return (
         <Card className="p-2 shadow">
-            {renderCount}
-            <Button
-                variant="primary"
-                onClick={() => {
-                    const i = LANGUAGES.findIndex(
-                        (val) => val === i18n.language
-                    );
-                    i18n.changeLanguage(
-                        LANGUAGES[(i === -1 ? 0 : i + 1) % LANGUAGES.length]
-                    );
-                }}
-            >
-                Change language
-            </Button>
             <BuyerForm onSuccess={onSuccess} />
             <DataTable
                 columns={columns}

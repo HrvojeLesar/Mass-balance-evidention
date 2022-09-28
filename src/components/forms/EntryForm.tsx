@@ -57,7 +57,6 @@ export default function EntryForm({
     });
 
     const insert = useInsertEntryMutation(
-        { endpoint: "http://localhost:8000/graphiql" },
         {
             onSuccess: (data, variables, context) => {
                 resetSelects();
@@ -152,7 +151,6 @@ export default function EntryForm({
 
     const { data: cellData, isFetching: isFetchingCells } =
         useGetPairedCellsQuery(
-            { endpoint: "http://localhost:8000/graphiql" },
             {
                 fetchOptions: {
                     id: {
@@ -188,7 +186,6 @@ export default function EntryForm({
 
     const { data: cultureData, isFetching: isFetchingCultures } =
         useGetPairedCulturesQuery(
-            { endpoint: "http://localhost:8000/graphiql" },
             {
                 fetchOptions: {
                     id: { id: cellSelectState.selected?.value.id ?? undefined },
@@ -221,7 +218,6 @@ export default function EntryForm({
         );
 
     const { data: buyerData, isFetching: isFetchingBuyers } = useGetBuyersQuery(
-        { endpoint: "http://localhost:8000/graphiql" },
         {
             fetchOptions: {
                 id: {},

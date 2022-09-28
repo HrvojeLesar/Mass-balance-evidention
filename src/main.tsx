@@ -1,3 +1,4 @@
+import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -23,7 +24,9 @@ i18n.use(Backend)
     });
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-    <QueryClientProvider client={queryClient}>
-        <App />
-    </QueryClientProvider>
+    <React.StrictMode>
+        <QueryClientProvider client={queryClient}>
+            <App />
+        </QueryClientProvider>
+    </React.StrictMode>
 );

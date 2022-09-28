@@ -27,7 +27,6 @@ export default function CultureForm({
         shouldUnregister: true,
     });
     const insert = useInsertCultureMutation(
-        { endpoint: "http://localhost:8000/graphiql" },
         {
             onSuccess: (data, variables, context) => {
                 reset();

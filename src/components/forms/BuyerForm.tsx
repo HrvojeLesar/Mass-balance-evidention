@@ -28,7 +28,6 @@ export default function BuyerForm({
     });
 
     const insert = useInsertBuyerMutation(
-        { endpoint: "http://localhost:8000/graphiql" },
         {
             onSuccess: (data, variables, context) => {
                 reset();

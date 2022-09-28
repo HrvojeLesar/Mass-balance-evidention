@@ -30,7 +30,6 @@ export default function CellTable() {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
     const { data, refetch } = useGetCellsQuery(
-        { endpoint: "http://localhost:8000/graphiql" },
         {
             fetchOptions: {
                 id: {},

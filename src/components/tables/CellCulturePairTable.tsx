@@ -4,7 +4,7 @@ import {
     GroupingState,
     SortingState,
 } from "@tanstack/react-table";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import {
@@ -23,6 +23,7 @@ export default function CellCulturePairTable() {
     const { t } = useTranslation();
 
     const { pagination, setPagination } = usePagination();
+    const [tableData, setTableData] = useState<T[]>([]);
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -33,7 +34,6 @@ export default function CellCulturePairTable() {
     ]);
 
     const { data, refetch } = useGetAllCellCultureParisQuery(
-        { endpoint: "http://localhost:8000/graphiql" },
         {
             fetchOptions: {
                 id: {},
@@ -44,6 +44,12 @@ export default function CellCulturePairTable() {
             keepPreviousData: true,
         }
     );
+
+    useEffect(() => {
+        if (data) {
+            setTableData([...data.getAllCellCulturePairs.results]);
+        }
+    }, [data]);
 
     const columns = useMemo<ColumnDef<T>[]>(
         () => [
@@ -99,9 +105,7 @@ export default function CellCulturePairTable() {
             </Form>
             <DataTable
                 columns={columns}
-                data={{
-                    data: data?.getAllCellCulturePairs.results ?? [],
-                }}
+                data={{ data: tableData }}
                 paginationState={{ pagination, setPagination, manual: false }}
                 sortingState={{ sorting, setSorting, manual: false }}
                 filterState={{ columnFilters, setColumnFilters, manual: false }}

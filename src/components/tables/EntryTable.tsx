@@ -4,7 +4,7 @@ import {
     GroupingState,
     SortingState,
 } from "@tanstack/react-table";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Entry, useGetAllEntriesQuery } from "../../generated/graphql";
@@ -16,6 +16,8 @@ type SelectValue = "disabled" | "cell_name" | "culture_name" | "buyer_name";
 
 export default function EntryTable() {
     const { t } = useTranslation();
+
+    const [tableData, setTableData] = useState<Entry[]>([]);
     const { pagination, setPagination } = usePagination({ pageSize: 20 });
 
     const [selectValue, setSelectValue] = useState<SelectValue>("cell_name");
@@ -23,11 +25,11 @@ export default function EntryTable() {
     const [groupingState, setGroupingState] = useState<GroupingState>([
         selectValue,
     ]);
+
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
     const { data, refetch } = useGetAllEntriesQuery(
-        { endpoint: "http://localhost:8000/graphiql" },
         {
             fetchOptions: {
                 id: {},
@@ -38,6 +40,12 @@ export default function EntryTable() {
             keepPreviousData: true,
         }
     );
+
+    useEffect(() => {
+        if (data) {
+            setTableData([...data.getAllEntries.results]);
+        }
+    }, [data]);
 
     const columns = useMemo<ColumnDef<Entry>[]>(
         () => [
@@ -124,9 +132,7 @@ export default function EntryTable() {
             </Form>
             <DataTable
                 columns={columns}
-                data={{
-                    data: data?.getAllEntries.results ?? [],
-                }}
+                data={{ data: tableData }}
                 paginationState={{ pagination, setPagination, manual: false }}
                 sortingState={{ sorting, setSorting, manual: false }}
                 filterState={{ columnFilters, setColumnFilters, manual: false }}

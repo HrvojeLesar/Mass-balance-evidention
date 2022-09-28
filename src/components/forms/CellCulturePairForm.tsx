@@ -52,7 +52,6 @@ export default function CellCulturePairForm({
     });
 
     const insert = useInsertCellCulturePairMutation(
-        { endpoint: "http://localhost:8000/graphiql" },
         {
             onSuccess: (data, variables, context) => {
                 resetSelects();
@@ -121,7 +120,6 @@ export default function CellCulturePairForm({
 
     const { data: cellData, isFetching: isFetchingCells } =
         useGetUnpairedCellsQuery(
-            { endpoint: "http://localhost:8000/graphiql" },
             {
                 fetchOptions: {
                     id: {
@@ -157,7 +155,6 @@ export default function CellCulturePairForm({
 
     const { data: cultureData, isFetching: isFetchingCultures } =
         useGetUnpairedCulturesQuery(
-            { endpoint: "http://localhost:8000/graphiql" },
             {
                 fetchOptions: {
                     id: { id: cellSelectState.selected?.value.id ?? undefined },

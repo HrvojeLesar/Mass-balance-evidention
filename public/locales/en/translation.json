@@ -50,5 +50,10 @@
         "culture": "Culture",
         "cell": "Cell",
         "buyer": "Buyer"
+    },
+    "navigation": {
+        "root": "Entry review",
+        "insertEntry": "Entry insertion",
+        "insertOther": "Cell, culture, buyer insertion"
     }
 }

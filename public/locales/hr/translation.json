@@ -50,5 +50,10 @@
         "culture": "Kultura",
         "cell": "Čestica",
         "buyer": "Kupac"
+    },
+    "navigation": {
+        "root": "Pregled zapisa",
+        "insertEntry": "Unos zapisa",
+        "insertOther": "Unos čestica, kultura, kupaca"
     }
 }

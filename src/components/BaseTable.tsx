@@ -1,6 +1,5 @@
 import { Column, flexRender, Table } from "@tanstack/react-table";
-import React from "react";
-import { InputHTMLAttributes, useCallback, useEffect, useState } from "react";
+import { InputHTMLAttributes, useEffect, useState } from "react";
 import { Form, Table as BSTable } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 

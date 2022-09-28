@@ -27,7 +27,6 @@ export default function CellForm({
         shouldUnregister: true,
     });
     const insert = useInsertCellMutation(
-        { endpoint: "http://localhost:8000/graphiql" },
         {
             onSuccess: (data, variables, context) => {
                 reset();

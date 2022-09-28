@@ -11,7 +11,11 @@ import {
     SortingState,
     useReactTable,
 } from "@tanstack/react-table";
-import { Dispatch, SetStateAction, useMemo } from "react";
+import {
+    Dispatch,
+    SetStateAction,
+    useMemo,
+} from "react";
 import { Pagination } from "../hooks/usePagination";
 import BaseTable from "./BaseTable";
 import TablePagination from "./TablePagination";
@@ -50,6 +54,7 @@ export default function DataTable<T>({
     groupingState,
     pageCount,
 }: SomeTableProps<T>) {
+
     const pageCountMemo = useMemo(() => {
         if (data && paginationState && data.total) {
             return data
@@ -93,6 +98,7 @@ export default function DataTable<T>({
         enableColumnResizing: true,
         onPaginationChange: paginationState?.setPagination,
         onSortingChange: sortingState?.setSorting,
+        onGroupingChange: groupingState?.setGroupingState,
         onColumnFiltersChange:
             filterState !== undefined
                 ? (filter) => {
