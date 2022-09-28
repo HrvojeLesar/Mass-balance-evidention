@@ -1,4 +1,3 @@
-import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -6,7 +5,7 @@ import i18n from "i18next";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { initReactI18next } from "react-i18next";
 import Backend from "i18next-http-backend";
-import "./style.css"
+import "./style.css";
 
 const queryClient = new QueryClient();
 
@@ -24,9 +23,7 @@ i18n.use(Backend)
     });
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-        <React.Suspense fallback="loading">
-            <QueryClientProvider client={queryClient}>
-                <App />
-            </QueryClientProvider>
-        </React.Suspense>
+    <QueryClientProvider client={queryClient}>
+        <App />
+    </QueryClientProvider>
 );

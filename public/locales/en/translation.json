@@ -43,5 +43,12 @@
         "errors": {
             "name": "This field is required!"
         }
+    },
+    "selectOptions": {
+        "grouping": "Grouping",
+        "disabled": "Disabled",
+        "culture": "Culture",
+        "cell": "Cell",
+        "buyer": "Buyer"
     }
 }

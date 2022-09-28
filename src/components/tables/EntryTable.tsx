@@ -4,123 +4,42 @@ import {
     GroupingState,
     SortingState,
 } from "@tanstack/react-table";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button, Card } from "react-bootstrap";
+import { useCallback, useMemo, useState } from "react";
+import { Card, Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import {
-    Ordering,
-    EntryFields,
-    EntryFilterOptions,
-    useGetEntriesQuery,
-    Entry,
-    useGetEntryGroupsQuery,
-    EntryGroupFields,
-    EntryGroupFilterOptionsBase,
-    EntryGroupOptions,
-} from "../../generated/graphql";
+import { Entry, useGetAllEntriesQuery } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import DataTable from "../DataTable";
 import EntryForm from "../forms/EntryForm";
 
-type T = Entry;
-type TFields = EntryFields;
-type TFilterOptions = EntryFilterOptions;
+type SelectValue = "disabled" | "cell_name" | "culture_name" | "buyer_name";
 
 export default function EntryTable() {
     const { t } = useTranslation();
-    const [tableData, setTableData] = useState<T[]>([]);
+    const { pagination, setPagination } = usePagination({ pageSize: 20 });
 
-    const { pagination, setPagination } = usePagination();
+    const [selectValue, setSelectValue] = useState<SelectValue>("cell_name");
+
+    const [groupingState, setGroupingState] = useState<GroupingState>([
+        selectValue,
+    ]);
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-    // const [grouping, setGrouping] = useState<GroupingState>([]);
-    const [grouping, setGrouping] = useState<GroupingState>(["cell_name"]);
 
-    const [groups, setGroups] = useState<any[]>([]);
-
-    const [nekaj, setN] = useState(false);
-
-    const { data, refetch } = useGetEntriesQuery(
+    const { data, refetch } = useGetAllEntriesQuery(
         { endpoint: "http://localhost:8000/graphiql" },
         {
             fetchOptions: {
                 id: {},
-                limit: pagination.pageSize,
-                page: pagination.pageIndex + 1,
-                ordering: sorting[0]
-                    ? {
-                          order: !sorting[0].desc
-                              ? Ordering.Asc
-                              : Ordering.Desc,
-                          orderBy: sorting[0].id.toUpperCase() as TFields,
-                      }
-                    : undefined,
-                filters:
-                    columnFilters.length > 0
-                        ? columnFilters.map((filter) => {
-                              return {
-                                  value: filter.value,
-                                  field: filter.id.toUpperCase() as TFields,
-                              } as TFilterOptions;
-                          })
-                        : undefined,
             },
         },
         {
-            queryKey: ["getEntries", pagination, sorting, columnFilters],
+            queryKey: ["getAllEntries"],
             keepPreviousData: true,
         }
     );
 
-    const { data: entryGroupData, refetch: refetchEntryGroupData } =
-        useGetEntryGroupsQuery(
-            { endpoint: "http://localhost:8000/graphiql" },
-            {
-                fetchOptions: {
-                    id: {},
-                    limit: 100,
-                    page: 1,
-                    grouping: EntryGroupOptions.Cell,
-                    ordering: sorting[0]
-                        ? {
-                              order: !sorting[0].desc
-                                  ? Ordering.Asc
-                                  : Ordering.Desc,
-                              orderBy:
-                                  sorting[0].id.toUpperCase() as EntryGroupFields,
-                          }
-                        : undefined,
-                    filters:
-                        columnFilters.length > 0
-                            ? columnFilters.map((filter) => {
-                                  return {
-                                      value: filter.value,
-                                      field: filter.id.toUpperCase() as EntryGroupFields,
-                                  } as EntryGroupFilterOptionsBase;
-                              })
-                            : undefined,
-                },
-            },
-            {
-                queryKey: ["getEntryGroups"],
-                keepPreviousData: true,
-            }
-        );
-
-    useEffect(() => {
-        if (entryGroupData?.getEntryGroups.results) {
-            setGroups([
-                ...entryGroupData.getEntryGroups.results.map((res) => ({
-                    id: res.id,
-                    name: res.name,
-                    groupBy: EntryGroupOptions.Cell,
-                    isExpanded: true,
-                })),
-            ]);
-        }
-    }, [entryGroupData]);
-
-    const columns = useMemo<ColumnDef<any>[]>(
+    const columns = useMemo<ColumnDef<Entry>[]>(
         () => [
             {
                 accessorKey: "cellCulturePair.cell.name",
@@ -148,59 +67,70 @@ export default function EntryTable() {
             },
             {
                 accessorKey: "weight",
-                cell: (info) => info.getValue(),
+                cell: (info) => {
+                    if (info.getValue() !== null) {
+                        return `${info.getValue<number>().toLocaleString()} kg`;
+                    }
+                    return "0 kg";
+                },
                 header: t("entry.weight").toString(),
                 enableColumnFilter: false,
+                aggregationFn: "sum",
+                aggregatedCell: ({ getValue }) =>
+                    `Suma: ${getValue<number>().toLocaleString()} kg`,
             },
         ],
         [t]
     );
 
-    const total = useMemo<number>(() => {
-        return data?.entries.total ?? -1;
-    }, [data]);
-
     const onSuccess = useCallback(() => {
         refetch();
     }, [refetch]);
 
-    useEffect(() => {
-        if (data?.entries.results) {
-            setTableData([
-                ...data.entries.results.slice(0, pagination.pageSize - 1),
-            ]);
-        }
-    }, [data, pagination.pageSize]);
-
-    const toggleExpand = useCallback(
-        (id: number) => {
-            setGroups((old) => {
-                const chosenGroup = old.find((group) => group.id === id);
-                if (chosenGroup !== -1) {
-                    chosenGroup.isExpanded = !chosenGroup.isExpanded;
-                }
-                return [...old];
-            });
-        },
-        [setGroups]
-    );
-
     return (
         <Card className="p-2 shadow">
             <EntryForm onSuccess={onSuccess} />
+            <Form className="d-flex flex-row-reverse mb-2">
+                <div>
+                    <Form.Label>
+                        {t("selectOptions.grouping").toString()}
+                    </Form.Label>
+                    <Form.Select
+                        value={selectValue}
+                        onChange={(e) => {
+                            const value = e.target.value as SelectValue;
+                            setSelectValue(value);
+                            if (value === "disabled") {
+                                setGroupingState([]);
+                            } else {
+                                setGroupingState([value]);
+                            }
+                        }}
+                    >
+                        <option value="disabled">
+                            {t("selectOptions.disabled").toString()}
+                        </option>
+                        <option value="culture_name">
+                            {t("selectOptions.culture").toString()}
+                        </option>
+                        <option value="cell_name">
+                            {t("selectOptions.cell").toString()}
+                        </option>
+                        <option value="buyer_name">
+                            {t("selectOptions.buyer").toString()}
+                        </option>
+                    </Form.Select>
+                </div>
+            </Form>
             <DataTable
                 columns={columns}
                 data={{
-                    data: tableData,
-                    total,
-                    grouping: groups,
+                    data: data?.getAllEntries.results ?? [],
                 }}
-                pagination={pagination}
-                setPagination={setPagination}
-                sortingState={{ sorting, setSorting }}
-                filterState={{ columnFilters, setColumnFilters }}
-                groupingState={{ grouping, setGrouping }}
-                toggleGroupExpand={toggleExpand}
+                paginationState={{ pagination, setPagination, manual: false }}
+                sortingState={{ sorting, setSorting, manual: false }}
+                filterState={{ columnFilters, setColumnFilters, manual: false }}
+                groupingState={{ groupingState, setGroupingState }}
             />
         </Card>
     );

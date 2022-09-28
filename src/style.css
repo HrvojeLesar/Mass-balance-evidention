@@ -6,3 +6,17 @@
     -ms-user-select: none;
     -webkit-user-select: none;
 }
+
+.divider {
+    border-top: 1px solid #00000026;
+    height: 0;
+    margin: .5rem 0;
+    overflow: hidden;
+}
+
+.expand-cell:hover {
+    cursor: pointer;
+    user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+}

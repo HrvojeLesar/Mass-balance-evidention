@@ -43,5 +43,12 @@
         "errors": {
             "name": "Ovo polje je obavezno!"
         }
+    },
+    "selectOptions": {
+        "grouping": "Grupiranje",
+        "disabled": "Isključeno",
+        "culture": "Kultura",
+        "cell": "Čestica",
+        "buyer": "Kupac"
     }
 }

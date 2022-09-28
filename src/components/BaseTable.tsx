@@ -4,7 +4,11 @@ import { InputHTMLAttributes, useCallback, useEffect, useState } from "react";
 import { Form, Table as BSTable } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
-import { IoMdArrowDropup, IoMdArrowDropdown } from "react-icons/io";
+import {
+    IoMdArrowDropup,
+    IoMdArrowDropdown,
+    IoMdArrowDropright,
+} from "react-icons/io";
 import { DEBOUNCE_TIME } from "./forms/FormUtils";
 
 type DebouncedInputPorps = {
@@ -91,81 +95,9 @@ function Filter<T>({ column, table }: FilterProps<T>) {
 
 type BaseTableProps<T> = {
     table: Table<T>;
-    groups?: any[];
-    toggleGroupExpand?: (id: number) => void;
 };
 
-export default function BaseTable<T>({
-    table,
-    groups,
-    toggleGroupExpand,
-}: BaseTableProps<T>) {
-    const drawGroupRows = useCallback(() => {
-        if (groups === undefined) {
-            return <></>;
-        }
-
-        const filterRows = (id: number) => {
-            return table.getRowModel().rows.filter((row) => {
-                return row.original.cellCulturePair.cell.id === id;
-            });
-        };
-
-        const rows = () => {
-            return groups.map((group) => {
-                // WARN: group.id is not unique
-                return (
-                    <React.Fragment key={group.id}>
-                        <tr key={group.id}>
-                            <td
-                                style={{
-                                    background: "#12fc0a",
-                                }}
-                            >
-                                <button
-                                    onClick={() => {
-                                        if (toggleGroupExpand) {
-                                            toggleGroupExpand(group.id);
-                                        }
-                                    }}
-                                >
-                                    {group.name}
-                                    {group.isExpanded ? "👇" : "👉"}
-                                </button>
-                            </td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        {group.isExpanded &&
-                            filterRows(group.id).map((row) => {
-                                return (
-                                    <tr key={row.id}>
-                                        {row.getVisibleCells().map((cell) => {
-                                            return (
-                                                <td key={cell.id}>
-                                                    {cell.getIsPlaceholder()
-                                                        ? null
-                                                        : flexRender(
-                                                              cell.column
-                                                                  .columnDef
-                                                                  .cell,
-                                                              cell.getContext()
-                                                          )}
-                                                </td>
-                                            );
-                                        })}
-                                    </tr>
-                                );
-                            })}
-                    </React.Fragment>
-                );
-            });
-        };
-        return rows();
-    }, [groups, table.getRowModel().rows, toggleGroupExpand]);
-
+export default function BaseTable<T>({ table }: BaseTableProps<T>) {
     return (
         <BSTable hover responsive striped bordered>
             <thead>
@@ -176,32 +108,17 @@ export default function BaseTable<T>({
                                 key={header.id}
                                 className="text-center table-header align-middle"
                                 onClick={
-                                    () => {}
-                                    // header.column.getCanSort()
-                                    //     ? () => {
-                                    //           header.column.toggleSorting();
-                                    //       }
-                                    //     : undefined
+                                    header.column.getCanSort()
+                                        ? () => {
+                                              header.column.toggleSorting();
+                                          }
+                                        : undefined
                                 }
                             >
                                 {header.isPlaceholder ? (
                                     <></>
                                 ) : (
                                     <div className="d-flex flex-column">
-                                        <button
-                                            {...{
-                                                onClick: () => {
-                                                    header.column.toggleGrouping();
-                                                },
-                                                style: {
-                                                    cursor: "pointer",
-                                                },
-                                            }}
-                                        >
-                                            {header.column.getIsGrouped()
-                                                ? `🛑(${header.column.getGroupedIndex()}) `
-                                                : `👊 `}
-                                        </button>
                                         <div className="d-flex flex-row justify-content-center">
                                             <div>
                                                 {header.column.columnDef.header?.toString()}
@@ -219,13 +136,12 @@ export default function BaseTable<T>({
                                                 <IoMdArrowDropdown size={28} />
                                             )}
                                         </div>
-                                        {header.column.getCanFilter() &&
-                                            groups === undefined && (
-                                                <Filter
-                                                    column={header.column}
-                                                    table={table}
-                                                />
-                                            )}
+                                        {header.column.getCanFilter() && (
+                                            <Filter
+                                                column={header.column}
+                                                table={table}
+                                            />
+                                        )}
                                     </div>
                                 )}
                             </th>
@@ -234,54 +150,53 @@ export default function BaseTable<T>({
                 ))}
             </thead>
             <tbody>
-                {groups === undefined &&
-                    table.getRowModel().rows.map((row) => (
-                        <tr key={row.id}>
-                            {row.getVisibleCells().map((cell) => (
-                                <td
-                                    key={cell.id}
-                                    style={{
-                                        background: cell.getIsGrouped()
-                                            ? "#12fc0a"
-                                            : cell.getIsAggregated()
-                                            ? "#ceef10"
-                                            : cell.getIsPlaceholder()
-                                            ? "#f71a16"
-                                            : "white",
-                                    }}
-                                >
-                                    {cell.getIsGrouped() ? (
-                                        <button
-                                            {...{
-                                                onClick:
-                                                    row.getToggleExpandedHandler(),
-                                                style: {
-                                                    cursor: row.getCanExpand()
-                                                        ? "pointer"
-                                                        : "normal",
-                                                },
-                                            }}
-                                        >
-                                            {row.getIsExpanded() ? "👇" : "👉"}{" "}
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                            ({row.subRows.length})
-                                        </button>
-                                    ) : cell.getIsAggregated() ? (
-                                        <></>
-                                    ) : cell.getIsPlaceholder() ? null : (
-                                        flexRender(
+                {table.getRowModel().rows.map((row) => (
+                    <tr key={row.id}>
+                        {row.getVisibleCells().map((cell) => (
+                            <td
+                                key={cell.id}
+                                className={
+                                    cell.getIsGrouped()
+                                        ? "bg-info bg-opacity-75"
+                                        : cell.getIsAggregated()
+                                        ? "bg-warning bg-opacity-50"
+                                        : cell.getIsPlaceholder()
+                                        ? "bg-danger bg-opacity-50"
+                                        : ""
+                                }
+                            >
+                                {cell.getIsGrouped() ? (
+                                    <div
+                                        onClick={row.getToggleExpandedHandler()}
+                                        className="expand-cell"
+                                    >
+                                        {row.getIsExpanded() ? (
+                                            <IoMdArrowDropdown size={28} />
+                                        ) : (
+                                            <IoMdArrowDropright size={28} />
+                                        )}
+                                        {flexRender(
                                             cell.column.columnDef.cell,
                                             cell.getContext()
-                                        )
-                                    )}
-                                </td>
-                            ))}
-                        </tr>
-                    ))}
-                {drawGroupRows()}
+                                        )}
+                                        {` (${row.subRows.length})`}
+                                    </div>
+                                ) : cell.getIsAggregated() ? (
+                                    flexRender(
+                                        cell.column.columnDef.aggregatedCell ??
+                                            cell.column.columnDef.cell,
+                                        cell.getContext()
+                                    )
+                                ) : cell.getIsPlaceholder() ? null : (
+                                    flexRender(
+                                        cell.column.columnDef.cell,
+                                        cell.getContext()
+                                    )
+                                )}
+                            </td>
+                        ))}
+                    </tr>
+                ))}
             </tbody>
         </BSTable>
     );

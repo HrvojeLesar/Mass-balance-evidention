@@ -1,62 +1,46 @@
 import {
     ColumnDef,
     ColumnFiltersState,
+    GroupingState,
     SortingState,
 } from "@tanstack/react-table";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Card } from "react-bootstrap";
+import { useCallback, useMemo, useState } from "react";
+import { Card, Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import {
-    Ordering,
     CellCulturePair,
-    CellCulturePairFields,
-    CellCulturePairFilterOptions,
-    useGetCellCulturesPairsQuery,
+    useGetAllCellCultureParisQuery,
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import DataTable from "../DataTable";
 import CellCulturePairForm from "../forms/CellCulturePairForm";
 
 type T = CellCulturePair;
-type TFields = CellCulturePairFields;
-type TFilterOptions = CellCulturePairFilterOptions;
+
+type SelectValue = "disabled" | "cell_name" | "culture_name";
 
 export default function CellCulturePairTable() {
     const { t } = useTranslation();
-    const [tableData, setTableData] = useState<T[]>([]);
 
     const { pagination, setPagination } = usePagination();
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-    const { data, refetch } = useGetCellCulturesPairsQuery(
+    const [selectValue, setSelectValue] = useState<SelectValue>("cell_name");
+
+    const [groupingState, setGroupingState] = useState<GroupingState>([
+        selectValue,
+    ]);
+
+    const { data, refetch } = useGetAllCellCultureParisQuery(
         { endpoint: "http://localhost:8000/graphiql" },
         {
             fetchOptions: {
                 id: {},
-                limit: pagination.pageSize,
-                page: pagination.pageIndex + 1,
-                ordering: sorting[0]
-                    ? {
-                        order: !sorting[0].desc
-                            ? Ordering.Asc
-                            : Ordering.Desc,
-                        orderBy: sorting[0].id.toUpperCase() as TFields,
-                    }
-                    : undefined,
-                filters:
-                    columnFilters.length > 0
-                        ? columnFilters.map((filter) => {
-                            return {
-                                value: filter.value,
-                                field: filter.id.toUpperCase() as TFields,
-                            } as TFilterOptions;
-                        })
-                        : undefined,
             },
         },
         {
-            queryKey: ["getCellCulturePairs", pagination, sorting, columnFilters],
+            queryKey: ["getAllCellCulturePairs"],
             keepPreviousData: true,
         }
     );
@@ -77,32 +61,51 @@ export default function CellCulturePairTable() {
         [t]
     );
 
-    const total = useMemo<number>(() => {
-        return data?.cellCulturePairs.total ?? -1;
-    }, [data]);
-
     const onSuccess = useCallback(() => {
         refetch();
     }, [refetch]);
 
-    useEffect(() => {
-        if (data?.cellCulturePairs.results) {
-            setTableData([
-                ...data.cellCulturePairs.results.slice(0, pagination.pageSize - 1),
-            ]);
-        }
-    }, [data, pagination.pageSize]);
-
     return (
         <Card className="p-2 shadow">
-        <CellCulturePairForm onSuccess={onSuccess}/>
+            <CellCulturePairForm onSuccess={onSuccess} />
+            <Form className="d-flex flex-row-reverse mb-2">
+                <div>
+                    <Form.Label>
+                        {t("selectOptions.grouping").toString()}
+                    </Form.Label>
+                    <Form.Select
+                        value={selectValue}
+                        onChange={(e) => {
+                            const value = e.target.value as SelectValue;
+                            setSelectValue(value);
+                            if (value === "disabled") {
+                                setGroupingState([]);
+                            } else {
+                                setGroupingState([value]);
+                            }
+                        }}
+                    >
+                        <option value="disabled">
+                            {t("selectOptions.disabled").toString()}
+                        </option>
+                        <option value="culture_name">
+                            {t("selectOptions.culture").toString()}
+                        </option>
+                        <option value="cell_name">
+                            {t("selectOptions.cell").toString()}
+                        </option>
+                    </Form.Select>
+                </div>
+            </Form>
             <DataTable
                 columns={columns}
-                data={{ data: tableData, total }}
-                pagination={pagination}
-                setPagination={setPagination}
-                sortingState={{sorting, setSorting}}
-                filterState={{columnFilters, setColumnFilters}}
+                data={{
+                    data: data?.getAllCellCulturePairs.results ?? [],
+                }}
+                paginationState={{ pagination, setPagination, manual: false }}
+                sortingState={{ sorting, setSorting, manual: false }}
+                filterState={{ columnFilters, setColumnFilters, manual: false }}
+                groupingState={{ groupingState, setGroupingState }}
             />
         </Card>
     );

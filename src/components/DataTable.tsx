@@ -1,90 +1,115 @@
 import {
     ColumnDef,
     ColumnFiltersState,
-    createRow,
     getCoreRowModel,
     getExpandedRowModel,
+    getFilteredRowModel,
     getGroupedRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
     GroupingState,
-    memo,
-    RowData,
-    RowModel,
     SortingState,
-    Table,
     useReactTable,
 } from "@tanstack/react-table";
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
-import { Button } from "react-bootstrap";
+import { Dispatch, SetStateAction, useMemo } from "react";
 import { Pagination } from "../hooks/usePagination";
 import BaseTable from "./BaseTable";
 import TablePagination from "./TablePagination";
 
-type SomeTableProps<T, G> = {
+type SomeTableProps<T> = {
     columns: ColumnDef<T, unknown>[];
-    data: { data: T[]; total: number; grouping?: any[] };
-    pagination: Pagination;
-    setPagination: Dispatch<SetStateAction<Pagination>>;
+    data: { data: T[]; total?: number };
+    paginationState: {
+        pagination: Pagination;
+        setPagination: Dispatch<SetStateAction<Pagination>>;
+        manual?: boolean;
+    };
     sortingState?: {
         sorting: SortingState;
         setSorting: Dispatch<SetStateAction<SortingState>>;
+        manual?: boolean;
     };
     filterState?: {
         columnFilters: ColumnFiltersState;
         setColumnFilters: Dispatch<SetStateAction<ColumnFiltersState>>;
+        manual?: boolean;
     };
     groupingState?: {
-        grouping: GroupingState;
-        setGrouping: Dispatch<SetStateAction<GroupingState>>;
+        groupingState: GroupingState;
+        setGroupingState: Dispatch<SetStateAction<GroupingState>>;
     };
-    toggleGroupExpand?: (id: number) => void;
+    pageCount?: number;
 };
 
-export default function DataTable<T, G>({
+export default function DataTable<T>({
     columns,
     data,
-    pagination,
-    setPagination,
+    paginationState,
     sortingState,
     filterState,
     groupingState,
-    toggleGroupExpand,
-}: SomeTableProps<T, G>) {
+    pageCount,
+}: SomeTableProps<T>) {
+    const pageCountMemo = useMemo(() => {
+        if (data && paginationState && data.total) {
+            return data
+                ? Math.ceil(data.total / paginationState.pagination.pageSize)
+                : -1;
+        }
+        if (pageCount) {
+            return pageCount ?? -1;
+        }
+        return undefined;
+    }, [data, data.total, paginationState, pageCount]);
+
     const table = useReactTable({
         data: data.data,
         columns,
-        pageCount: data ? Math.ceil(data.total / pagination.pageSize) : -1,
+        pageCount: pageCountMemo,
         getCoreRowModel: getCoreRowModel(),
         state: {
-            pagination,
+            pagination: paginationState?.pagination,
             sorting: sortingState?.sorting,
-            grouping: groupingState?.grouping,
             columnFilters: filterState?.columnFilters,
+            grouping: groupingState?.groupingState,
         },
-        manualPagination: true,
-        manualSorting: sortingState !== undefined ? true : undefined,
-        manualFiltering: filterState !== undefined ? true : undefined,
-        manualGrouping: groupingState !== undefined ? true : undefined,
+        manualPagination: paginationState.manual ?? true,
+        getPaginationRowModel: paginationState.manual
+            ? undefined
+            : getPaginationRowModel(),
+        manualSorting: sortingState?.manual ?? true,
+        getSortedRowModel: sortingState?.manual
+            ? undefined
+            : getSortedRowModel(),
+        manualFiltering: filterState?.manual ?? true,
+        getFilteredRowModel: filterState?.manual
+            ? undefined
+            : getFilteredRowModel(),
+        getGroupedRowModel: groupingState?.groupingState
+            ? getGroupedRowModel()
+            : undefined,
         getExpandedRowModel: getExpandedRowModel(),
-        onGroupingChange: groupingState?.setGrouping,
         sortDescFirst: false,
         enableColumnResizing: true,
-        onPaginationChange: setPagination,
+        onPaginationChange: paginationState?.setPagination,
         onSortingChange: sortingState?.setSorting,
-        onColumnFiltersChange: (filter) => {
-            setPagination({ ...pagination, pageIndex: 0 });
-            if (filterState) {
-                filterState.setColumnFilters(filter);
-            }
-        },
+        onColumnFiltersChange:
+            filterState !== undefined
+                ? (filter) => {
+                      paginationState.setPagination({
+                          ...paginationState.pagination,
+                          pageIndex: 0,
+                      });
+                      if (filterState) {
+                          filterState.setColumnFilters(filter);
+                      }
+                  }
+                : undefined,
     });
 
     return (
         <>
-            <BaseTable
-                table={table}
-                groups={data.grouping}
-                toggleGroupExpand={toggleGroupExpand}
-            />
+            <BaseTable table={table} />
             <TablePagination table={table} />
         </>
     );

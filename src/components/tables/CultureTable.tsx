@@ -99,10 +99,9 @@ export default function CultureTable() {
             <DataTable
                 columns={columns}
                 data={{ data: tableData, total }}
-                pagination={pagination}
-                setPagination={setPagination}
-                sortingState={{sorting, setSorting}}
-                filterState={{columnFilters, setColumnFilters}}
+                paginationState={{ pagination, setPagination }}
+                sortingState={{ sorting, setSorting }}
+                filterState={{ columnFilters, setColumnFilters }}
             />
         </Card>
     );

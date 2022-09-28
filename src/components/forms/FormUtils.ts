@@ -6,7 +6,6 @@ import {
     GroupBase,
     MultiValue,
     SingleValue,
-    StylesConfig,
 } from "react-select";
 import { Buyer, Cell, Culture, Exact } from "../../generated/graphql";
 
