@@ -277,7 +277,8 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
                 filters: None,
                 ordering: None,
             },
-        ).await
+        )
+        .await
     }
 }
 
@@ -312,6 +313,79 @@ impl CellCulturePairQuery {
 
         transaction.commit().await?;
         Ok(res)
+    }
+
+    async fn get_all_cell_culture_pairs(
+        &self,
+        ctx: &Context<'_>,
+        fetch_options: CellCulturePairFetchOptions,
+    ) -> Result<CellCulturePairs> {
+        let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
+        let mut transaction = pool.begin().await?;
+
+        let mut builder = sqlx::QueryBuilder::new(
+            "
+            SELECT 
+                id_cell,
+                id_culture,
+                cell_culture_pair.created_at,
+                cell.id as c_id,
+                cell.name as c_name,
+                cell.description as c_desc,
+                cell.created_at as c_created_at,
+                culture.id as cu_id,
+                culture.name as cu_name,
+                culture.description as cu_desc,
+                culture.created_at as cu_created_at,
+                COUNT(*) OVER() as total_count
+            FROM 
+                cell_culture_pair
+            INNER JOIN cell ON cell.id = cell_culture_pair.id_cell
+            INNER JOIN culture ON culture.id = cell_culture_pair.id_culture
+            ",
+        );
+
+        CellCulturePair::filter(&fetch_options.filters, &mut builder, true);
+        CellCulturePair::order_by(&fetch_options.ordering, "id_cell", &mut builder);
+
+        let rows = builder.build().fetch_all(&mut transaction).await?;
+
+        let total = match rows.first() {
+            Some(t) => t.try_get("total_count")?,
+            None => 0,
+        };
+
+        let mut pairs = Vec::with_capacity(rows.len());
+        for p in rows.into_iter() {
+            pairs.push(CellCulturePair {
+                created_at: p.try_get("created_at")?,
+                cell: Some(Cell {
+                    id: p.try_get("c_id")?,
+                    name: p.try_get("c_name")?,
+                    description: p.try_get("c_desc")?,
+                    created_at: p.try_get("c_created_at")?,
+                }),
+                culture: Some(Culture {
+                    id: p.try_get("cu_id")?,
+                    name: p.try_get("cu_name")?,
+                    description: p.try_get("cu_desc")?,
+                    created_at: p.try_get("cu_created_at")?,
+                }),
+            });
+        }
+
+        let res = Ok(CellCulturePairs {
+            pagination: Pagination {
+                limit: fetch_options.limit.unwrap_or_default(),
+                page: fetch_options.page.unwrap_or_default(),
+                total,
+            },
+            results: pairs,
+        });
+
+        transaction.commit().await?;
+
+        res
     }
 }
 

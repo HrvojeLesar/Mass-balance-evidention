@@ -522,6 +522,106 @@ impl EntryQuery {
         transaction.commit().await?;
         Ok(res)
     }
+
+    async fn get_all_entries(
+        &self,
+        ctx: &Context<'_>,
+        fetch_options: EntryFetchOptions,
+    ) -> Result<Entries> {
+        let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
+        let mut transaction = pool.begin().await?;
+
+        let mut builder = sqlx::QueryBuilder::new(
+            "
+            SELECT
+                entry.id as e_id,
+                entry.weight as e_weight,
+                entry.weight_type as e_weight_type,
+                entry.date as e_date,
+                entry.created_at as e_created_at,
+                entry.id_buyer as e_id_buyer,
+                entry.id_cell as e_id_cell,
+                entry.id_culture as e_id_culture,
+                buyer.id as b_id,
+                buyer.name as b_name,
+                buyer.address as b_address,
+                buyer.contact as b_contact,
+                buyer.created_at as b_created_at,
+                cell.id as c_id,
+                cell.name as c_name,
+                cell.description as c_desc,
+                cell.created_at as c_created_at,
+                culture.id as cu_id,
+                culture.name as cu_name,
+                culture.description as cu_desc,
+                culture.created_at as cu_created_at,
+                cell_culture_pair.created_at as ccp_created_at,
+                COUNT(*) OVER() as total_count
+            FROM entry
+            INNER JOIN buyer ON buyer.id = entry.id_buyer
+            INNER JOIN cell ON cell.id = entry.id_cell
+            INNER JOIN culture ON culture.id = entry.id_culture
+            INNER JOIN cell_culture_pair ON
+                cell_culture_pair.id_cell = entry.id_cell AND
+                cell_culture_pair.id_culture = entry.id_culture
+            ",
+        );
+
+        Entry::filter(&fetch_options.filters, &mut builder, true);
+        Entry::order_by(&fetch_options.ordering, "entry.id", &mut builder);
+        let rows = builder.build().fetch_all(&mut transaction).await?;
+
+        let total = match rows.first() {
+            Some(t) => t.try_get("total_count")?,
+            None => 0,
+        };
+
+        let mut entries = Vec::with_capacity(rows.len());
+        for e in rows.into_iter() {
+            entries.push(Entry {
+                id: e.try_get("e_id")?,
+                weight: e.try_get("e_weight")?,
+                weight_type: e.try_get("e_weight_type")?,
+                date: e.try_get("e_date")?,
+                created_at: e.try_get("e_created_at")?,
+                buyer: Some(Buyer {
+                    id: e.try_get("b_id")?,
+                    name: e.try_get("b_name")?,
+                    address: e.try_get("b_address")?,
+                    contact: e.try_get("b_contact")?,
+                    created_at: e.try_get("c_created_at")?,
+                }),
+                cell_culture_pair: Some(CellCulturePair {
+                    created_at: e.try_get("ccp_created_at")?,
+                    cell: Some(Cell {
+                        id: e.try_get("c_id")?,
+                        name: e.try_get("c_name")?,
+                        description: e.try_get("c_desc")?,
+                        created_at: e.try_get("c_created_at")?,
+                    }),
+                    culture: Some(Culture {
+                        id: e.try_get("cu_id")?,
+                        name: e.try_get("cu_name")?,
+                        description: e.try_get("cu_desc")?,
+                        created_at: e.try_get("cu_created_at")?,
+                    }),
+                }),
+            })
+        }
+
+        let res = Ok(Entries {
+            pagination: Pagination {
+                limit: fetch_options.limit.unwrap_or_default(),
+                page: fetch_options.page.unwrap_or_default(),
+                total,
+            },
+            results: entries,
+        });
+
+        transaction.commit().await?;
+
+        res
+    }
 }
 
 #[derive(Default)]

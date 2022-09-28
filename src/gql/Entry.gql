@@ -11,6 +11,16 @@ query getEntries($fetchOptions: EntryFetchOptions!) {
     }
 }
 
+query getAllEntries($fetchOptions: EntryFetchOptions!) {
+     getAllEntries(fetchOptions: $fetchOptions) {
+        total
+        results {
+            ...EntryParts
+        }
+    }
+}
+
+
 query getEntry($fetchOptions: EntryFetchOptions!) {
     entry(fetchOptions: $fetchOptions) {
         ...EntryParts

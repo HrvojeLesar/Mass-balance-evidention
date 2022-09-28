@@ -480,6 +480,8 @@ export type QueryRoot = {
   cultures: Cultures;
   entries: Entries;
   entry: Entry;
+  getAllCellCulturePairs: CellCulturePairs;
+  getAllEntries: Entries;
   getEntryGroups: EntryGroups;
   pairedCells: Cells;
   pairedCultures: Cultures;
@@ -534,6 +536,16 @@ export type QueryRootEntriesArgs = {
 
 
 export type QueryRootEntryArgs = {
+  fetchOptions: EntryFetchOptions;
+};
+
+
+export type QueryRootGetAllCellCulturePairsArgs = {
+  fetchOptions: CellCulturePairFetchOptions;
+};
+
+
+export type QueryRootGetAllEntriesArgs = {
   fetchOptions: EntryFetchOptions;
 };
 
@@ -643,6 +655,13 @@ export type GetCellCulturesPairsQueryVariables = Exact<{
 
 export type GetCellCulturesPairsQuery = { __typename?: 'QueryRoot', cellCulturePairs: { __typename?: 'CellCulturePairs', total: number, page: number, limit: number, results: Array<{ __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null }> } };
 
+export type GetAllCellCultureParisQueryVariables = Exact<{
+  fetchOptions: CellCulturePairFetchOptions;
+}>;
+
+
+export type GetAllCellCultureParisQuery = { __typename?: 'QueryRoot', getAllCellCulturePairs: { __typename?: 'CellCulturePairs', total: number, page: number, limit: number, results: Array<{ __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null }> } };
+
 export type GetCellCulturePairQueryVariables = Exact<{
   fetchOptions: CellCulturePairFetchOptions;
 }>;
@@ -716,6 +735,13 @@ export type GetEntriesQueryVariables = Exact<{
 
 
 export type GetEntriesQuery = { __typename?: 'QueryRoot', entries: { __typename?: 'Entries', total: number, page: number, limit: number, results: Array<{ __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } | null }> } };
+
+export type GetAllEntriesQueryVariables = Exact<{
+  fetchOptions: EntryFetchOptions;
+}>;
+
+
+export type GetAllEntriesQuery = { __typename?: 'QueryRoot', getAllEntries: { __typename?: 'Entries', total: number, page: number, limit: number, results: Array<{ __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } | null }> } };
 
 export type GetEntryQueryVariables = Exact<{
   fetchOptions: EntryFetchOptions;
@@ -1041,6 +1067,31 @@ export const useGetCellCulturesPairsQuery = <
       fetcher<GetCellCulturesPairsQuery, GetCellCulturesPairsQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetCellCulturesPairsDocument, variables),
       options
     );
+export const GetAllCellCultureParisDocument = `
+    query getAllCellCultureParis($fetchOptions: CellCulturePairFetchOptions!) {
+  getAllCellCulturePairs(fetchOptions: $fetchOptions) {
+    total
+    page
+    limit
+    results {
+      ...CellCultureParts
+    }
+  }
+}
+    ${CellCulturePartsFragmentDoc}`;
+export const useGetAllCellCultureParisQuery = <
+      TData = GetAllCellCultureParisQuery,
+      TError = unknown
+    >(
+      dataSource: { endpoint: string, fetchParams?: RequestInit },
+      variables: GetAllCellCultureParisQueryVariables,
+      options?: UseQueryOptions<GetAllCellCultureParisQuery, TError, TData>
+    ) =>
+    useQuery<GetAllCellCultureParisQuery, TError, TData>(
+      ['getAllCellCultureParis', variables],
+      fetcher<GetAllCellCultureParisQuery, GetAllCellCultureParisQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetAllCellCultureParisDocument, variables),
+      options
+    );
 export const GetCellCulturePairDocument = `
     query getCellCulturePair($fetchOptions: CellCulturePairFetchOptions!) {
   cellCulture(fetchOptions: $fetchOptions) {
@@ -1255,6 +1306,31 @@ export const useGetEntriesQuery = <
     useQuery<GetEntriesQuery, TError, TData>(
       ['getEntries', variables],
       fetcher<GetEntriesQuery, GetEntriesQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetEntriesDocument, variables),
+      options
+    );
+export const GetAllEntriesDocument = `
+    query getAllEntries($fetchOptions: EntryFetchOptions!) {
+  getAllEntries(fetchOptions: $fetchOptions) {
+    total
+    page
+    limit
+    results {
+      ...EntryParts
+    }
+  }
+}
+    ${EntryPartsFragmentDoc}`;
+export const useGetAllEntriesQuery = <
+      TData = GetAllEntriesQuery,
+      TError = unknown
+    >(
+      dataSource: { endpoint: string, fetchParams?: RequestInit },
+      variables: GetAllEntriesQueryVariables,
+      options?: UseQueryOptions<GetAllEntriesQuery, TError, TData>
+    ) =>
+    useQuery<GetAllEntriesQuery, TError, TData>(
+      ['getAllEntries', variables],
+      fetcher<GetAllEntriesQuery, GetAllEntriesQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, GetAllEntriesDocument, variables),
       options
     );
 export const GetEntryDocument = `

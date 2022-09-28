@@ -12,6 +12,16 @@ query getCellCulturesPairs($fetchOptions: CellCulturePairFetchOptions!) {
     }
 }
 
+query getAllCellCultureParis($fetchOptions: CellCulturePairFetchOptions!) {
+    getAllCellCulturePairs(fetchOptions: $fetchOptions) {
+        total
+        results {
+            ...CellCultureParts
+        }
+    }
+}
+
+
 query getCellCulturePair($fetchOptions: CellCulturePairFetchOptions!) {
     cellCulture(fetchOptions: $fetchOptions) {
         ...CellCultureParts
