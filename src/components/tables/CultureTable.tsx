@@ -16,12 +16,13 @@ import {
 import { usePagination } from "../../hooks/usePagination";
 import DataTable from "../DataTable";
 import CultureForm from "../forms/CultureForm";
+import { TableProps } from "./TableUtils";
 
 type T = Culture;
 type TFields = CultureFields;
 type TFilterOptions = CultureFilterOptions;
 
-export default function CultureTable() {
+export default function CultureTable({ isInsertable, isEditable }: TableProps) {
     const { t } = useTranslation();
     const [tableData, setTableData] = useState<T[]>([]);
 
@@ -67,11 +68,11 @@ export default function CultureTable() {
                 cell: (info) => info.getValue(),
                 header: t("culture.name").toString(),
             },
-            {
-                accessorKey: "description",
-                cell: (info) => info.getValue(),
-                header: t("culture.description").toString(),
-            },
+            // {
+            //     accessorKey: "description",
+            //     cell: (info) => info.getValue(),
+            //     header: t("culture.description").toString(),
+            // },
         ],
         [t]
     );
@@ -94,7 +95,7 @@ export default function CultureTable() {
 
     return (
         <Card className="p-2 shadow">
-            <CultureForm onSuccess={onSuccess} />
+            {isInsertable && <CultureForm onSuccess={onSuccess} />}
             <DataTable
                 columns={columns}
                 data={{ data: tableData, total }}

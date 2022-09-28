@@ -7,16 +7,16 @@ import CultureTable from "../components/tables/CultureTable";
 export default function CellCultureBuyerView() {
     return (
         <>
-            <CellCulturePairTable />
+            <CellCulturePairTable isInsertable={true}/>
             <Row className="my-4">
                 <Col>
-                    <CellTable />
+                    <CellTable isInsertable={true}/>
                 </Col>
                 <Col>
-                    <CultureTable />
+                    <CultureTable isInsertable={true}/>
                 </Col>
             </Row>
-            <BuyerTable />
+            <BuyerTable isInsertable={true}/>
         </>
     );
 }

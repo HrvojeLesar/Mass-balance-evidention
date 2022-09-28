@@ -17,12 +17,13 @@ import { usePagination } from "../../hooks/usePagination";
 import { LANGUAGES } from "../../main";
 import BuyerForm from "../forms/BuyerForm";
 import DataTable from "../DataTable";
+import { TableProps } from "./TableUtils";
 
 type T = Buyer;
 type TFields = BuyerFields;
 type TFilterOptions = BuyerFilterOptions;
 
-export default function BuyerTable() {
+export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
     const { t } = useTranslation();
     const [tableData, setTableData] = useState<T[]>([]);
 
@@ -68,16 +69,16 @@ export default function BuyerTable() {
                 cell: (info) => info.getValue(),
                 header: t("buyer.name").toString(),
             },
-            {
-                accessorKey: "address",
-                cell: (info) => info.getValue(),
-                header: t("buyer.address").toString(),
-            },
-            {
-                accessorKey: "contact",
-                cell: (info) => info.getValue(),
-                header: t("buyer.contact").toString(),
-            },
+            // {
+            //     accessorKey: "address",
+            //     cell: (info) => info.getValue(),
+            //     header: t("buyer.address").toString(),
+            // },
+            // {
+            //     accessorKey: "contact",
+            //     cell: (info) => info.getValue(),
+            //     header: t("buyer.contact").toString(),
+            // },
         ],
         [t]
     );
@@ -100,7 +101,7 @@ export default function BuyerTable() {
 
     return (
         <Card className="p-2 shadow">
-            <BuyerForm onSuccess={onSuccess} />
+            {isInsertable && <BuyerForm onSuccess={onSuccess} />}
             <DataTable
                 columns={columns}
                 data={{ data: tableData, total }}

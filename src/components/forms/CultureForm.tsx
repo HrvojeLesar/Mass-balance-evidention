@@ -59,7 +59,7 @@ export default function CultureForm({
                         </Form.Control.Feedback>
                     </Form.Group>
                 </Col>
-                <Col>
+                {/* <Col>
                     <Form.Group>
                         <Form.Label>{t("culture.description")}</Form.Label>
                         <Form.Control
@@ -69,7 +69,7 @@ export default function CultureForm({
                             autoComplete="off"
                         />
                     </Form.Group>
-                </Col>
+                </Col> */}
             </Row>
         </BaseForm>
     );

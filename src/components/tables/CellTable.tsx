@@ -16,12 +16,13 @@ import {
 import { usePagination } from "../../hooks/usePagination";
 import DataTable from "../DataTable";
 import CellForm from "../forms/CellForm";
+import { TableProps } from "./TableUtils";
 
 type T = Cell;
 type TFields = CellFields;
 type TFilterOptions = CellFilterOptions;
 
-export default function CellTable() {
+export default function CellTable({ isInsertable, isEditable }: TableProps) {
     const { t } = useTranslation();
     const [tableData, setTableData] = useState<T[]>([]);
 
@@ -67,11 +68,11 @@ export default function CellTable() {
                 cell: (info) => info.getValue(),
                 header: t("cell.name").toString(),
             },
-            {
-                accessorKey: "description",
-                cell: (info) => info.getValue(),
-                header: t("cell.description").toString(),
-            },
+            // {
+            //     accessorKey: "description",
+            //     cell: (info) => info.getValue(),
+            //     header: t("cell.description").toString(),
+            // },
         ],
         [t]
     );
@@ -94,7 +95,7 @@ export default function CellTable() {
 
     return (
         <Card className="p-2 shadow">
-            <CellForm onSuccess={onSuccess} />
+            {isInsertable && <CellForm onSuccess={onSuccess} />}
             <DataTable
                 columns={columns}
                 data={{ data: tableData, total }}

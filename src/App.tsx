@@ -2,6 +2,7 @@ import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import AppNavbar from "./AppNavbar";
 import CellCultureBuyerView from "./views/CellCultureBuyerView";
 import EntryView from "./views/EntryView";
+import InsertEntryView from "./views/InsertEntryView";
 
 export default function App() {
     return (
@@ -9,7 +10,7 @@ export default function App() {
             <Routes>
                 <Route element={<AppNavbar children={<Outlet />} />}>
                     <Route path="/" element={<EntryView />} />
-                    <Route path="/insert-entry" element={<EntryView />} />
+                    <Route path="/insert-entry" element={<InsertEntryView />} />
                     <Route path="/insert-cell-culture-buyer" element={<CellCultureBuyerView />} />
                 </Route>
             </Routes>

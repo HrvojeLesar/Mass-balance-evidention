@@ -11,10 +11,11 @@ import { Entry, useGetAllEntriesQuery } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import DataTable from "../DataTable";
 import EntryForm from "../forms/EntryForm";
+import { TableProps } from "./TableUtils";
 
 type SelectValue = "disabled" | "cell_name" | "culture_name" | "buyer_name";
 
-export default function EntryTable() {
+export default function EntryTable({ isInsertable, isEditable }: TableProps) {
     const { t } = useTranslation();
 
     const [tableData, setTableData] = useState<Entry[]>([]);
@@ -97,7 +98,7 @@ export default function EntryTable() {
 
     return (
         <Card className="p-2 shadow">
-            <EntryForm onSuccess={onSuccess} />
+            {isInsertable && <EntryForm onSuccess={onSuccess} />}
             <Form className="d-flex flex-row-reverse mb-2">
                 <div>
                     <Form.Label>

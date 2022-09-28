@@ -14,12 +14,16 @@ import {
 import { usePagination } from "../../hooks/usePagination";
 import DataTable from "../DataTable";
 import CellCulturePairForm from "../forms/CellCulturePairForm";
+import { TableProps } from "./TableUtils";
 
 type T = CellCulturePair;
 
 type SelectValue = "disabled" | "cell_name" | "culture_name";
 
-export default function CellCulturePairTable() {
+export default function CellCulturePairTable({
+    isInsertable,
+    isEditable,
+}: TableProps) {
     const { t } = useTranslation();
 
     const { pagination, setPagination } = usePagination();
@@ -73,7 +77,7 @@ export default function CellCulturePairTable() {
 
     return (
         <Card className="p-2 shadow">
-            <CellCulturePairForm onSuccess={onSuccess} />
+            {isInsertable && <CellCulturePairForm onSuccess={onSuccess} />}
             <Form className="d-flex flex-row-reverse mb-2">
                 <div>
                     <Form.Label>

@@ -61,7 +61,7 @@ export default function BuyerForm({
                     </Form.Group>
                 </Col>
             </Row>
-            <Row className="mb-3">
+            {/* <Row className="mb-3">
                 <Col>
                     <Form.Group>
                         <Form.Label>{t("buyer.address")}</Form.Label>
@@ -84,7 +84,7 @@ export default function BuyerForm({
                         />
                     </Form.Group>
                 </Col>
-            </Row>
+            </Row> */}
         </BaseForm>
     );
 }

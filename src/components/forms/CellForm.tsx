@@ -59,7 +59,7 @@ export default function CellForm({
                         </Form.Control.Feedback>
                     </Form.Group>
                 </Col>
-                <Col>
+                {/* <Col>
                     <Form.Group>
                         <Form.Label>{t("cell.description")}</Form.Label>
                         <Form.Control
@@ -69,7 +69,7 @@ export default function CellForm({
                             autoComplete="off"
                         />
                     </Form.Group>
-                </Col>
+                </Col> */}
             </Row>
         </BaseForm>
     );
