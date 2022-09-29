@@ -33,20 +33,16 @@ function DebouncedInput({
 
     useEffect(() => {
         const timeout = setTimeout(() => {
-            console.log("debug");
             if (
                 typeof value === "string" &&
                 value.trim().length < 2 &&
                 value.trim().length !== 0
             ) {
-                console.log("debug1");
                 setIsValueTooShort(true);
             } else {
-                console.log("debug2");
                 if (isValueTooShort) {
                     setIsValueTooShort(false);
                 }
-                console.log("debug3");
                 onChange(value);
             }
         }, debounce);
