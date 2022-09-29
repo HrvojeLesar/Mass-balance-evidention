@@ -41,7 +41,7 @@ export const makeOptions = <T extends Cell | Culture | Buyer>(
     for (let i = 0; i <= currentPage; i++) {
         const results: T[] | undefined = pages[i];
         if (results) {
-            results.map((res) => {
+            results.forEach((res) => {
                 options.push({
                     value: res,
                     label: res.name ?? "",

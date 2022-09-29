@@ -83,7 +83,7 @@ export default function EntryForm({
         } else {
             console.log("Cell and culture should always be set here: ", data);
         }
-    }, []);
+    }, [insert]);
 
     const [cellSelectState, setCellSelectState] = useState<SelectState<Cell>>({
         selected: undefined,

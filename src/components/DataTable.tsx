@@ -65,7 +65,7 @@ export default function DataTable<T>({
             return pageCount ?? -1;
         }
         return undefined;
-    }, [data, data.total, paginationState, pageCount]);
+    }, [data, paginationState, pageCount]);
 
     const table = useReactTable({
         data: data.data,

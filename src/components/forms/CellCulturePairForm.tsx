@@ -71,7 +71,7 @@ export default function CellCulturePairForm({
         } else {
             console.log("Cell and culture should always be set here: ", data);
         }
-    }, []);
+    }, [insert]);
 
     const [cellSelectState, setCellSelectState] = useState<SelectState<Cell>>({
         selected: undefined,

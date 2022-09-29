@@ -1,5 +1,5 @@
 import { Column, flexRender, Table } from "@tanstack/react-table";
-import { InputHTMLAttributes, useEffect, useState } from "react";
+import { InputHTMLAttributes, useCallback, useEffect, useState } from "react";
 import { Form, Table as BSTable } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
@@ -33,16 +33,20 @@ function DebouncedInput({
 
     useEffect(() => {
         const timeout = setTimeout(() => {
+            console.log("debug");
             if (
                 typeof value === "string" &&
                 value.trim().length < 2 &&
                 value.trim().length !== 0
             ) {
+                console.log("debug1");
                 setIsValueTooShort(true);
             } else {
+                console.log("debug2");
                 if (isValueTooShort) {
                     setIsValueTooShort(false);
                 }
+                console.log("debug3");
                 onChange(value);
             }
         }, debounce);
@@ -50,7 +54,7 @@ function DebouncedInput({
         return () => {
             clearTimeout(timeout);
         };
-    }, [value]);
+    }, [value, debounce, isValueTooShort, onChange]);
 
     return (
         <Form.Group
@@ -81,12 +85,16 @@ type FilterProps<T> = {
 };
 
 function Filter<T>({ column, table }: FilterProps<T>) {
+    const onChange = useCallback(
+        (value: string | number) => {
+            column.setFilterValue(value);
+        },
+        [column]
+    );
     return (
         <DebouncedInput
             value={""}
-            onChange={(value) => {
-                column.setFilterValue(value);
-            }}
+            onChange={onChange}
             placeholder={column.columnDef.header?.toString()}
         />
     );
