@@ -55,5 +55,17 @@
         "root": "Entry review",
         "insertEntry": "Entry insertion",
         "insertOther": "Cell, culture, buyer insertion"
+    },
+    "titles": {
+        "entry": "Entry review",
+        "entryInsertable": "Entry insertion",
+        "cellCulturePair": "Cell, culture pair review",
+        "cellCulturePairInsertable": "Cell, culture pair review",
+        "cell": "Cell review",
+        "cellInsertable": "Cell insertion",
+        "culture": "Culture review",
+        "cultureInsertable": "Culture insertion",
+        "buyer": "Buyer review",
+        "buyerInsertable": "Buyer insertion"
     }
 }

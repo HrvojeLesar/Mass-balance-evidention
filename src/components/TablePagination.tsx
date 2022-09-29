@@ -7,21 +7,21 @@ type TablePaginationProps<T> = {
 };
 
 const range = (start: number, end: number) => {
-    
-        return Array.from({ length: end - start + 1 }, (_, i) => i + start);
-   
+    return Array.from({ length: end - start + 1 }, (_, i) => i + start);
 };
 
 const SIBLINGCOUNT = 2;
 
 export default function TablePagination<T>({ table }: TablePaginationProps<T>) {
+    const pageIndex = table.getState().pagination.pageIndex;
+    const totalPages = table.getPageCount();
+
+
     const currentPage = useMemo(() => {
-        return table.getState().pagination.pageIndex + 1;
-    }, [table]);
+        return pageIndex + 1;
+    }, [pageIndex]);
 
     const paginate = useMemo(() => {
-        const totalPages = table.getPageCount();
-
         const totalPageNumbers = 2 * SIBLINGCOUNT + 3;
         if (totalPageNumbers >= totalPages) {
             return range(1, totalPages);
@@ -56,7 +56,7 @@ export default function TablePagination<T>({ table }: TablePaginationProps<T>) {
 
         let middleRange = range(leftSiblingIndex, rightSiblingIndex);
         return [1, "...", ...middleRange, "...", totalPages];
-    }, [table, currentPage]);
+    }, [totalPages, currentPage]);
 
     const handleOnClick = (pageNumber: number) => {
         if (currentPage === pageNumber) {

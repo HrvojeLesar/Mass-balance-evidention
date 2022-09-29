@@ -55,5 +55,17 @@
         "root": "Pregled zapisa",
         "insertEntry": "Unos zapisa",
         "insertOther": "Unos čestica, kultura, kupaca"
+    },
+    "titles": {
+        "entry": "Pregled zapisa",
+        "entryInsertable": "Unos zapisa",
+        "cellCulturePair": "Pregled para čestica i kultura",
+        "cellCulturePairInsertable": "Unos para čestica i kultura",
+        "cell": "Pregled čestica",
+        "cellInsertable": "Unos čestica",
+        "culture": "Pregled kultura",
+        "cultureInsertable": "Unos kultura",
+        "buyer": "Pregled kupaca",
+        "buyerInsertable": "Unos kupaca"
     }
 }

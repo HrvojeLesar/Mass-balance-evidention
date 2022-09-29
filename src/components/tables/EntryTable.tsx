@@ -98,6 +98,12 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
 
     return (
         <Card className="p-2 shadow">
+            {isInsertable ? (
+                <div className="h5 mb-1">{t("titles.entryInsertable").toString()}</div>
+            ) : (
+                <div className="h5 mb-1">{t("titles.entry").toString()}</div>
+            )}
+            <div className="divider"></div>
             {isInsertable && <EntryForm onSuccess={onSuccess} />}
             <Form className="d-flex flex-row-reverse mb-2">
                 <div>

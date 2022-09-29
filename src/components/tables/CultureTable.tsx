@@ -95,6 +95,12 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
 
     return (
         <Card className="p-2 shadow">
+            {isInsertable ? (
+                <div className="h5 mb-1">{t("titles.cultureInsertable").toString()}</div>
+            ) : (
+                <div className="h5 mb-1">{t("titles.culture").toString()}</div>
+            )}
+            <div className="divider"></div>
             {isInsertable && <CultureForm onSuccess={onSuccess} />}
             <DataTable
                 columns={columns}

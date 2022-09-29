@@ -4,7 +4,7 @@ import {
     SortingState,
 } from "@tanstack/react-table";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button, Card } from "react-bootstrap";
+import { Card } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import {
     Buyer,
@@ -14,7 +14,6 @@ import {
     BuyerFilterOptions,
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
-import { LANGUAGES } from "../../main";
 import BuyerForm from "../forms/BuyerForm";
 import DataTable from "../DataTable";
 import { TableProps } from "./TableUtils";
@@ -101,6 +100,14 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
 
     return (
         <Card className="p-2 shadow">
+            {isInsertable ? (
+                <div className="h5 mb-1">
+                    {t("titles.buyerInsertable").toString()}
+                </div>
+            ) : (
+                <div className="h5 mb-1">{t("titles.buyer").toString()}</div>
+            )}
+            <div className="divider"></div>
             {isInsertable && <BuyerForm onSuccess={onSuccess} />}
             <DataTable
                 columns={columns}

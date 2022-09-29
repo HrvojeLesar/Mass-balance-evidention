@@ -77,6 +77,12 @@ export default function CellCulturePairTable({
 
     return (
         <Card className="p-2 shadow">
+            {isInsertable ? (
+                <div className="h5 mb-1">{t("titles.cellCulturePairInsertable").toString()}</div>
+            ) : (
+                <div className="h5 mb-1">{t("titles.cellCulturePair").toString()}</div>
+            )}
+            <div className="divider"></div>
             {isInsertable && <CellCulturePairForm onSuccess={onSuccess} />}
             <Form className="d-flex flex-row-reverse mb-2">
                 <div>
