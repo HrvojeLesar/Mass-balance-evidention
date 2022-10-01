@@ -14,7 +14,9 @@ import {
     useGetCulturesQuery,
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
+import ActionButtons from "../ActionButtons";
 import DataTable from "../DataTable";
+import EditModal from "../EditModal";
 import CultureForm from "../forms/CultureForm";
 import { TableProps } from "./TableUtils";
 
@@ -29,6 +31,9 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
     const { pagination, setPagination } = usePagination();
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+    const [isModalShown, setIsModalShown] = useState(false);
+    const [selectedCulture, setSelectedCulture] = useState<T | undefined>();
 
     const { data, refetch } = useGetCulturesQuery(
         {
@@ -61,8 +66,8 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
         }
     );
 
-    const columns = useMemo<ColumnDef<T>[]>(
-        () => [
+    const columns = useMemo<ColumnDef<T>[]>(() => {
+        let columns: ColumnDef<T>[] = [
             {
                 accessorKey: "name",
                 cell: (info) => info.getValue(),
@@ -73,9 +78,26 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
             //     cell: (info) => info.getValue(),
             //     header: t("culture.description").toString(),
             // },
-        ],
-        [t]
-    );
+        ];
+        if (isEditable) {
+            columns.push({
+                id: "edit",
+                enableSorting: false,
+                cell: ({ row }) => {
+                    return (
+                        <ActionButtons
+                            editFn={() => {
+                                setIsModalShown(true);
+                                setSelectedCulture(row.original);
+                            }}
+                        />
+                    );
+                },
+                size: 20,
+            });
+        }
+        return columns;
+    }, [t, isEditable]);
 
     const total = useMemo<number>(() => {
         return data?.cultures.total ?? -1;
@@ -83,25 +105,45 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
 
     const onSuccess = useCallback(() => {
         refetch();
-    }, [refetch]);
+        if (isModalShown) {
+            setIsModalShown(false);
+        }
+    }, [refetch, isModalShown, setIsModalShown]);
 
     useEffect(() => {
         if (data?.cultures.results) {
             setTableData([
-                ...data.cultures.results.slice(0, pagination.pageSize - 1),
+                ...data.cultures.results.slice(0, pagination.pageSize),
             ]);
         }
     }, [data, pagination.pageSize]);
 
     return (
         <Card className="p-2 shadow">
+            <EditModal
+                title={t("titles.edit").toString()}
+                show={isModalShown}
+                onHide={() => setIsModalShown(false)}
+            >
+                <CultureForm
+                    onUpdateSuccess={onSuccess}
+                    edit={selectedCulture}
+                />
+            </EditModal>
             {isInsertable ? (
-                <div className="h5 mb-1">{t("titles.cultureInsertable").toString()}</div>
+                <div className="h5 mb-1">
+                    {t("titles.cultureInsertable").toString()}
+                </div>
             ) : (
                 <div className="h5 mb-1">{t("titles.culture").toString()}</div>
             )}
             <div className="divider"></div>
-            {isInsertable && <CultureForm onSuccess={onSuccess} />}
+            {isInsertable && (
+                <>
+                    <CultureForm onInsertSuccess={onSuccess} />
+                    <div className="divider"></div>
+                </>
+            )}
             <DataTable
                 columns={columns}
                 data={{ data: tableData, total }}

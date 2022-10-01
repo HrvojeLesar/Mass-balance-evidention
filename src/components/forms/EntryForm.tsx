@@ -8,41 +8,54 @@ import {
     CellFields,
     Culture,
     CultureFields,
+    Entry,
     EntryInsertOptions,
+    EntryUpdateOptions,
     InsertEntryMutation,
     Ordering,
+    UpdateEntryMutation,
     useGetBuyersQuery,
     useGetPairedCellsQuery,
     useGetPairedCulturesQuery,
     useInsertEntryMutation,
+    useUpdateEntryMutation,
 } from "../../generated/graphql";
 import BaseForm from "./BaseForm";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Select from "react-select";
 import {
     DEBOUNCE_TIME,
-    FormSuccessCallback,
+    FormProps,
     makeOptions,
     onChange,
     SelectOption,
     SelectState,
     selectStyle,
 } from "./FormUtils";
+import moment from "moment";
 
 type FormInput = {
     cell: SelectOption<Cell> | undefined;
     culture: SelectOption<Culture> | undefined;
     weight: number;
     buyer: SelectOption<Buyer> | undefined;
-    date: Date;
+    date: Date | string;
 };
 
 const LIMIT = 10;
 
 // TODO: Invalid cell/culture can be selected when other field is loading
 export default function EntryForm({
-    onSuccess,
-}: FormSuccessCallback<InsertEntryMutation, EntryInsertOptions>) {
+    edit,
+    onInsertSuccess,
+    onUpdateSuccess,
+}: FormProps<
+    Entry,
+    InsertEntryMutation,
+    EntryInsertOptions,
+    UpdateEntryMutation,
+    EntryUpdateOptions
+>) {
     const { t } = useTranslation();
 
     const {
@@ -54,39 +67,104 @@ export default function EntryForm({
         formState: { errors },
     } = useForm<FormInput>({
         mode: "onSubmit",
+        defaultValues: {
+            cell: {
+                value: edit?.cellCulturePair?.cell ?? undefined,
+                label: edit?.cellCulturePair?.cell?.name ?? undefined,
+            },
+            culture: {
+                value: edit?.cellCulturePair?.culture ?? undefined,
+                label: edit?.cellCulturePair?.culture?.name ?? undefined,
+            },
+            buyer: {
+                value: edit?.buyer ?? undefined,
+                label: edit?.buyer?.name ?? undefined,
+            },
+            date:
+                edit !== undefined
+                    ? moment(edit.date as Date).format("YYYY-MM-DD")
+                    : undefined,
+            weight: edit?.weight ?? undefined,
+        },
     });
 
-    const insert = useInsertEntryMutation(
-        {
-            onSuccess: (data, variables, context) => {
-                resetSelects();
-                reset();
-                onSuccess(data, variables, context);
-            },
-        }
+    const insert = useInsertEntryMutation({
+        onSuccess: (data, variables, context) => {
+            resetSelects();
+            reset();
+            if (onInsertSuccess) {
+                onInsertSuccess(data, variables, context);
+            }
+        },
+    });
+
+    const update = useUpdateEntryMutation({
+        onSuccess: (data, variables, context) => {
+            if (onUpdateSuccess) {
+                onUpdateSuccess(data, variables, context);
+            }
+        },
+    });
+
+    const onInsertSubmit = useCallback(
+        (data: FormInput) => {
+            if (data.cell && data.culture && data.buyer) {
+                insert.mutate({
+                    insertOptions: {
+                        cellCulturePair: {
+                            idCell: data.cell.value.id,
+                            idCulture: data.culture.value.id,
+                        },
+                        date: new Date(data.date),
+                        weight: Number(data.weight),
+                        idBuyer: data.buyer.value.id,
+                        // weightType: "kg",
+                    },
+                });
+            } else {
+                console.log(
+                    "Cell and culture should always be set here: ",
+                    data
+                );
+            }
+        },
+        [insert]
     );
 
-    const onSubmit = useCallback((data: FormInput) => {
-        if (data.cell && data.culture && data.buyer) {
-            insert.mutate({
-                insertOptions: {
-                    cellCulturePair: {
-                        idCell: data.cell.value.id,
-                        idCulture: data.culture.value.id,
+    const onUpdateSubmit = useCallback(
+        (data: FormInput) => {
+            if (data.cell && data.culture && data.buyer && edit) {
+                update.mutate({
+                    updateOptions: {
+                        id: edit?.id,
+                        cellCulturePair: {
+                            idCell: data.cell.value.id,
+                            idCulture: data.culture.value.id,
+                        },
+                        date: new Date(data.date),
+                        weight: Number(data.weight),
+                        idBuyer: data.buyer.value.id,
+                        // weightType: "kg",
                     },
-                    date: new Date(data.date),
-                    weight: Number(data.weight),
-                    idBuyer: data.buyer.value.id,
-                    // weightType: "kg",
-                },
-            });
-        } else {
-            console.log("Cell and culture should always be set here: ", data);
-        }
-    }, [insert]);
+                });
+            } else {
+                console.log(
+                    "Cell and culture should always be set here: ",
+                    data
+                );
+            }
+        },
+        [edit, update]
+    );
 
     const [cellSelectState, setCellSelectState] = useState<SelectState<Cell>>({
-        selected: undefined,
+        selected:
+            edit === undefined
+                ? undefined
+                : ({
+                      value: edit?.cellCulturePair?.cell,
+                      label: edit?.cellCulturePair?.cell?.name ?? "",
+                  } as SelectOption<Cell>),
         page: 1,
         pages: {},
         limit: LIMIT,
@@ -97,7 +175,13 @@ export default function EntryForm({
     const [cultureSelectState, setCultureSelectState] = useState<
         SelectState<Culture>
     >({
-        selected: undefined,
+        selected:
+            edit === undefined
+                ? undefined
+                : ({
+                      value: edit?.cellCulturePair?.culture,
+                      label: edit?.cellCulturePair?.culture?.name ?? "",
+                  } as SelectOption<Culture>),
         page: 1,
         pages: {},
         limit: LIMIT,
@@ -108,7 +192,13 @@ export default function EntryForm({
     const [buyerSelectState, setBuyerSelectState] = useState<
         SelectState<Buyer>
     >({
-        selected: undefined,
+        selected:
+            edit === undefined
+                ? undefined
+                : ({
+                      value: edit?.buyer,
+                      label: edit?.buyer?.name ?? "",
+                  } as SelectOption<Buyer>),
         page: 1,
         pages: {},
         limit: LIMIT,
@@ -330,7 +420,14 @@ export default function EntryForm({
     }, [debouncedBuyerInputValue]);
 
     return (
-        <BaseForm onSubmit={handleSubmit(onSubmit)}>
+        <BaseForm
+            submitDisabled={insert.isLoading || update.isLoading}
+            onSubmit={
+                edit
+                    ? handleSubmit(onUpdateSubmit)
+                    : handleSubmit(onInsertSubmit)
+            }
+        >
             <Row className="mb-3">
                 <Col>
                     <Form.Group>

@@ -14,7 +14,9 @@ import {
     Cell,
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
+import ActionButtons from "../ActionButtons";
 import DataTable from "../DataTable";
+import EditModal from "../EditModal";
 import CellForm from "../forms/CellForm";
 import { TableProps } from "./TableUtils";
 
@@ -29,6 +31,9 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
     const { pagination, setPagination } = usePagination();
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+    const [isModalShown, setIsModalShown] = useState(false);
+    const [selectedCell, setSelectedCell] = useState<T | undefined>();
 
     const { data, refetch } = useGetCellsQuery(
         {
@@ -61,8 +66,8 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
         }
     );
 
-    const columns = useMemo<ColumnDef<T>[]>(
-        () => [
+    const columns = useMemo<ColumnDef<T>[]>(() => {
+        let columns: ColumnDef<T>[] = [
             {
                 accessorKey: "name",
                 cell: (info) => info.getValue(),
@@ -73,9 +78,27 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
             //     cell: (info) => info.getValue(),
             //     header: t("cell.description").toString(),
             // },
-        ],
-        [t]
-    );
+        ];
+        if (isEditable) {
+            columns.push({
+                id: "edit",
+                enableSorting: false,
+                cell: ({ row }) => {
+                    return (
+                        <ActionButtons
+                            editFn={() => {
+                                setIsModalShown(true);
+                                setSelectedCell(row.original);
+                            }}
+                        />
+                    );
+                },
+                size: 20,
+            });
+        }
+
+        return columns;
+    }, [t, isEditable]);
 
     const total = useMemo<number>(() => {
         return data?.cells.total ?? -1;
@@ -83,25 +106,40 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
 
     const onSuccess = useCallback(() => {
         refetch();
-    }, [refetch]);
+        if (isModalShown) {
+            setIsModalShown(false);
+        }
+    }, [refetch, isModalShown, setIsModalShown]);
 
     useEffect(() => {
         if (data?.cells.results) {
-            setTableData([
-                ...data.cells.results.slice(0, pagination.pageSize - 1),
-            ]);
+            setTableData([...data.cells.results.slice(0, pagination.pageSize)]);
         }
     }, [data, pagination.pageSize]);
 
     return (
         <Card className="p-2 shadow">
+            <EditModal
+                title={t("titles.edit").toString()}
+                show={isModalShown}
+                onHide={() => setIsModalShown(false)}
+            >
+                <CellForm onUpdateSuccess={onSuccess} edit={selectedCell} />
+            </EditModal>
             {isInsertable ? (
-                <div className="h5 mb-1">{t("titles.cellInsertable").toString()}</div>
+                <div className="h5 mb-1">
+                    {t("titles.cellInsertable").toString()}
+                </div>
             ) : (
                 <div className="h5 mb-1">{t("titles.cell").toString()}</div>
             )}
             <div className="divider"></div>
-            {isInsertable && <CellForm onSuccess={onSuccess} />}
+            {isInsertable && (
+                <>
+                    <CellForm onInsertSuccess={onSuccess} />
+                    <div className="divider"></div>
+                </>
+            )}
             <DataTable
                 columns={columns}
                 data={{ data: tableData, total }}

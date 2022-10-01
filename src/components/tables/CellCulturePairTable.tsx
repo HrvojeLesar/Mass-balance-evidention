@@ -12,7 +12,9 @@ import {
     useGetAllCellCultureParisQuery,
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
+import ActionButtons from "../ActionButtons";
 import DataTable from "../DataTable";
+import EditModal from "../EditModal";
 import CellCulturePairForm from "../forms/CellCulturePairForm";
 import { TableProps } from "./TableUtils";
 
@@ -37,6 +39,11 @@ export default function CellCulturePairTable({
         selectValue,
     ]);
 
+    const [isModalShown, setIsModalShown] = useState(false);
+    const [selectedCellCulturePair, setSelectedCellCulturePair] = useState<
+        T | undefined
+    >();
+
     const { data, refetch } = useGetAllCellCultureParisQuery(
         {
             fetchOptions: {
@@ -55,8 +62,8 @@ export default function CellCulturePairTable({
         }
     }, [data]);
 
-    const columns = useMemo<ColumnDef<T>[]>(
-        () => [
+    const columns = useMemo<ColumnDef<T>[]>(() => {
+        let columns: ColumnDef<T>[] = [
             {
                 accessorKey: "cell.name",
                 cell: (info) => info.getValue(),
@@ -67,23 +74,62 @@ export default function CellCulturePairTable({
                 cell: (info) => info.getValue(),
                 header: t("culture.name").toString(),
             },
-        ],
-        [t]
-    );
+        ];
+        if (isEditable) {
+            columns.push({
+                id: "edit",
+                enableSorting: false,
+                cell: ({ row }) => {
+                    return (
+                        <ActionButtons
+                            editFn={() => {
+                                setIsModalShown(true);
+                                setSelectedCellCulturePair(row.original);
+                            }}
+                        />
+                    );
+                },
+                size: 20,
+            });
+        }
+        return columns;
+    }, [t, isEditable]);
 
     const onSuccess = useCallback(() => {
         refetch();
-    }, [refetch]);
+        if (isModalShown) {
+            setIsModalShown(false);
+        }
+    }, [refetch, isModalShown, setIsModalShown]);
 
     return (
         <Card className="p-2 shadow">
+            <EditModal
+                title={t("titles.edit").toString()}
+                show={isModalShown}
+                onHide={() => setIsModalShown(false)}
+            >
+                <CellCulturePairForm
+                    onUpdateSuccess={onSuccess}
+                    edit={selectedCellCulturePair}
+                />
+            </EditModal>
             {isInsertable ? (
-                <div className="h5 mb-1">{t("titles.cellCulturePairInsertable").toString()}</div>
+                <div className="h5 mb-1">
+                    {t("titles.cellCulturePairInsertable").toString()}
+                </div>
             ) : (
-                <div className="h5 mb-1">{t("titles.cellCulturePair").toString()}</div>
+                <div className="h5 mb-1">
+                    {t("titles.cellCulturePair").toString()}
+                </div>
             )}
             <div className="divider"></div>
-            {isInsertable && <CellCulturePairForm onSuccess={onSuccess} />}
+            {isInsertable && (
+                <>
+                    <CellCulturePairForm onInsertSuccess={onSuccess} />
+                    <div className="divider"></div>
+                </>
+            )}
             <Form className="d-flex flex-row-reverse mb-2">
                 <div>
                     <Form.Label>

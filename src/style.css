@@ -20,3 +20,10 @@
     -ms-user-select: none;
     -webkit-user-select: none;
 }
+
+.actions-button {
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

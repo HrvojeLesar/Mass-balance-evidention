@@ -7,6 +7,7 @@ type BaseFormProps = {
     onSubmit: FormEventHandler<HTMLFormElement>;
     children: ReactNode;
     submitDisabled?: boolean;
+    customSubmit?: boolean;
 };
 
 export default function BaseForm({
@@ -16,20 +17,17 @@ export default function BaseForm({
 }: BaseFormProps) {
     const { t } = useTranslation();
     return (
-        <>
-            <Form onSubmit={onSubmit}>
-                {children}
-                <Button
-                    variant="success"
-                    type="submit"
-                    className="d-flex align-items-center"
-                    disabled={submitDisabled}
-                >
-                    <FaSave className="me-1" />
-                    {t("save")}
-                </Button>
-            </Form>
-            <div className="divider"></div>
-        </>
+        <Form onSubmit={onSubmit}>
+            {children}
+            <Button
+                variant="success"
+                type="submit"
+                className="d-flex align-items-center"
+                disabled={submitDisabled}
+            >
+                <FaSave className="me-1" />
+                {t("save")}
+            </Button>
+        </Form>
     );
 }

@@ -117,22 +117,20 @@ export default function BaseTable<T>({ table }: BaseTableProps<T>) {
                                           }
                                         : undefined
                                 }
+                                style={{ width: header.getSize() }}
                             >
-                                {header.isPlaceholder ? (
-                                    <></>
-                                ) : (
+                                {header.isPlaceholder ? null : (
                                     <div className="d-flex flex-column">
                                         <div className="d-flex flex-row justify-content-center">
                                             <div>
-                                                {header.column.columnDef.header?.toString()}
+                                                {flexRender(
+                                                    header.column.columnDef
+                                                        .header,
+                                                    header.getContext()
+                                                )}
                                             </div>
-                                            {header.column.getIsSorted() ===
-                                            false ? (
-                                                <IoMdArrowDropup
-                                                    size={28}
-                                                    opacity={0.5}
-                                                />
-                                            ) : header.column.getIsSorted() ===
+                                            {header.column.getCanSort() ===
+                                            false ? null : header.column.getIsSorted() ===
                                               "asc" ? (
                                                 <IoMdArrowDropup size={28} />
                                             ) : (
@@ -160,12 +158,12 @@ export default function BaseTable<T>({ table }: BaseTableProps<T>) {
                                 key={cell.id}
                                 className={
                                     cell.getIsGrouped()
-                                        ? "bg-info bg-opacity-75"
+                                        ? "bg-info bg-opacity-75 align-middle"
                                         : cell.getIsAggregated()
-                                        ? "bg-warning bg-opacity-50"
+                                        ? "bg-warning bg-opacity-50 align-middle"
                                         : cell.getIsPlaceholder()
-                                        ? "bg-danger bg-opacity-50"
-                                        : ""
+                                        ? "bg-danger bg-opacity-50 align-middle"
+                                        : "align-middle"
                                 }
                             >
                                 {cell.getIsGrouped() ? (

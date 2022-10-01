@@ -2,16 +2,28 @@ import { Col, Form, Row } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
+    Cell,
     CellInsertOptions,
+    CellUpdateOptions,
     InsertCellMutation,
+    UpdateCellMutation,
     useInsertCellMutation,
+    useUpdateCellMutation,
 } from "../../generated/graphql";
 import BaseForm from "./BaseForm";
-import { FormSuccessCallback } from "./FormUtils";
+import { FormProps } from "./FormUtils";
 
 export default function CellForm({
-    onSuccess,
-}: FormSuccessCallback<InsertCellMutation, CellInsertOptions>) {
+    edit,
+    onInsertSuccess,
+    onUpdateSuccess,
+}: FormProps<
+    Cell,
+    InsertCellMutation,
+    CellInsertOptions,
+    UpdateCellMutation,
+    CellUpdateOptions
+>) {
     const { t } = useTranslation();
     const {
         register,
@@ -21,25 +33,44 @@ export default function CellForm({
     } = useForm<CellInsertOptions>({
         mode: "onChange",
         defaultValues: {
-            name: "",
-            description: "",
+            name: edit?.name ?? "",
+            description: edit?.description ?? "",
         },
-        shouldUnregister: true,
+        // shouldUnregister: true,
     });
-    const insert = useInsertCellMutation(
-        {
-            onSuccess: (data, variables, context) => {
-                reset();
-                onSuccess(data, variables, context);
-            },
-        }
-    );
+
+    const insert = useInsertCellMutation({
+        onSuccess: (data, variables, context) => {
+            reset();
+            if (onInsertSuccess) {
+                onInsertSuccess(data, variables, context);
+            }
+        },
+    });
+
+    const update = useUpdateCellMutation({
+        onSuccess: (data, variables, context) => {
+            reset();
+            if (onUpdateSuccess) {
+                onUpdateSuccess(data, variables, context);
+            }
+        },
+    });
 
     return (
         <BaseForm
-            onSubmit={handleSubmit((data) => {
-                insert.mutate({ insertOptions: data });
-            })}
+            submitDisabled={insert.isLoading || update.isLoading}
+            onSubmit={
+                edit
+                    ? handleSubmit((data) => {
+                          update.mutate({
+                              updateOptions: { ...data, id: edit.id },
+                          });
+                      })
+                    : handleSubmit((data) => {
+                          insert.mutate({ insertOptions: data });
+                      })
+            }
         >
             <Row className="mb-3">
                 <Col>

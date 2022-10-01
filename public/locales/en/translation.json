@@ -66,6 +66,7 @@
         "culture": "Culture review",
         "cultureInsertable": "Culture insertion",
         "buyer": "Buyer review",
-        "buyerInsertable": "Buyer insertion"
+        "buyerInsertable": "Buyer insertion",
+        "edit": "Editing"
     }
 }

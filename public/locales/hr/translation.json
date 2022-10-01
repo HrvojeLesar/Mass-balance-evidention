@@ -66,6 +66,7 @@
         "culture": "Pregled kultura",
         "cultureInsertable": "Unos kultura",
         "buyer": "Pregled kupaca",
-        "buyerInsertable": "Unos kupaca"
+        "buyerInsertable": "Unos kupaca",
+        "edit": "Uređivanje"
     }
 }

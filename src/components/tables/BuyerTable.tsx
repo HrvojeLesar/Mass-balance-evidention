@@ -17,6 +17,8 @@ import { usePagination } from "../../hooks/usePagination";
 import BuyerForm from "../forms/BuyerForm";
 import DataTable from "../DataTable";
 import { TableProps } from "./TableUtils";
+import ActionButtons from "../ActionButtons";
+import EditModal from "../EditModal";
 
 type T = Buyer;
 type TFields = BuyerFields;
@@ -26,9 +28,12 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
     const { t } = useTranslation();
     const [tableData, setTableData] = useState<T[]>([]);
 
-    const { pagination, setPagination } = usePagination();
+    const { pagination, setPagination } = usePagination({ pageSize: 5 });
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+    const [isModalShown, setIsModalShown] = useState(false);
+    const [selectedBuyer, setSelectedBuyer] = useState<T | undefined>();
 
     const { data, refetch } = useGetBuyersQuery(
         {
@@ -61,8 +66,8 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
         }
     );
 
-    const columns = useMemo<ColumnDef<T>[]>(
-        () => [
+    const columns = useMemo<ColumnDef<T>[]>(() => {
+        let columns: ColumnDef<T>[] = [
             {
                 accessorKey: "name",
                 cell: (info) => info.getValue(),
@@ -78,9 +83,26 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
             //     cell: (info) => info.getValue(),
             //     header: t("buyer.contact").toString(),
             // },
-        ],
-        [t]
-    );
+        ];
+        if (isEditable) {
+            columns.push({
+                id: "edit",
+                enableSorting: false,
+                cell: ({ row }) => {
+                    return (
+                        <ActionButtons
+                            editFn={() => {
+                                setIsModalShown(true);
+                                setSelectedBuyer(row.original);
+                            }}
+                        />
+                    );
+                },
+                size: 20,
+            });
+        }
+        return columns;
+    }, [t, isEditable]);
 
     const total = useMemo<number>(() => {
         return data?.buyers.total ?? -1;
@@ -88,18 +110,28 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
 
     const onSuccess = useCallback(() => {
         refetch();
-    }, [refetch]);
+        if (isModalShown) {
+            setIsModalShown(false);
+        }
+    }, [refetch, isModalShown, setIsModalShown]);
 
     useEffect(() => {
         if (data?.buyers.results) {
             setTableData([
-                ...data.buyers.results.slice(0, pagination.pageSize - 1),
+                ...data.buyers.results.slice(0, pagination.pageSize),
             ]);
         }
     }, [data, pagination.pageSize]);
 
     return (
         <Card className="p-2 shadow">
+            <EditModal
+                title={t("titles.edit").toString()}
+                show={isModalShown}
+                onHide={() => setIsModalShown(false)}
+            >
+                <BuyerForm onUpdateSuccess={onSuccess} edit={selectedBuyer} />
+            </EditModal>
             {isInsertable ? (
                 <div className="h5 mb-1">
                     {t("titles.buyerInsertable").toString()}
@@ -108,7 +140,12 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
                 <div className="h5 mb-1">{t("titles.buyer").toString()}</div>
             )}
             <div className="divider"></div>
-            {isInsertable && <BuyerForm onSuccess={onSuccess} />}
+            {isInsertable && (
+                <>
+                    <BuyerForm onInsertSuccess={onSuccess} />
+                    <div className="divider"></div>
+                </>
+            )}
             <DataTable
                 columns={columns}
                 data={{ data: tableData, total }}

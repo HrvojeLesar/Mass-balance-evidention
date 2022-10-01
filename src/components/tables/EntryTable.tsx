@@ -4,12 +4,15 @@ import {
     GroupingState,
     SortingState,
 } from "@tanstack/react-table";
+import moment from "moment";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Entry, useGetAllEntriesQuery } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
+import ActionButtons from "../ActionButtons";
 import DataTable from "../DataTable";
+import EditModal from "../EditModal";
 import EntryForm from "../forms/EntryForm";
 import { TableProps } from "./TableUtils";
 
@@ -30,6 +33,9 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
+    const [isModalShown, setIsModalShown] = useState(false);
+    const [selectedEntry, setSelectedEntry] = useState<Entry | undefined>();
+
     const { data, refetch } = useGetAllEntriesQuery(
         {
             fetchOptions: {
@@ -48,8 +54,8 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
         }
     }, [data]);
 
-    const columns = useMemo<ColumnDef<Entry>[]>(
-        () => [
+    const columns = useMemo<ColumnDef<Entry>[]>(() => {
+        let columns: ColumnDef<Entry>[] = [
             {
                 accessorKey: "cellCulturePair.cell.name",
                 cell: (info) => info.getValue(),
@@ -70,7 +76,7 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
             {
                 accessorKey: "date",
                 cell: (info) =>
-                    new Date(info.getValue() as Date).toLocaleDateString(),
+                    moment(info.getValue<string>()).format("DD.MM.YYYY"),
                 header: t("entry.date").toString(),
                 enableColumnFilter: false,
             },
@@ -88,23 +94,57 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
                 aggregatedCell: ({ getValue }) =>
                     `Suma: ${getValue<number>().toLocaleString()} kg`,
             },
-        ],
-        [t]
-    );
+        ];
+        if (isEditable) {
+            columns.push({
+                id: "edit",
+                enableSorting: false,
+                cell: ({ row }) => {
+                    return (
+                        <ActionButtons
+                            editFn={() => {
+                                setIsModalShown(true);
+                                setSelectedEntry(row.original);
+                            }}
+                        />
+                    );
+                },
+                size: 20,
+            });
+        }
+        return columns;
+    }, [t, isEditable, setSelectedEntry, setIsModalShown]);
 
     const onSuccess = useCallback(() => {
         refetch();
-    }, [refetch]);
+        if (isModalShown) {
+            setIsModalShown(false);
+        }
+    }, [refetch, isModalShown, setIsModalShown]);
 
     return (
         <Card className="p-2 shadow">
+            <EditModal
+                title={t("titles.edit").toString()}
+                show={isModalShown}
+                onHide={() => setIsModalShown(false)}
+            >
+                <EntryForm onUpdateSuccess={onSuccess} edit={selectedEntry} />
+            </EditModal>
             {isInsertable ? (
-                <div className="h5 mb-1">{t("titles.entryInsertable").toString()}</div>
+                <div className="h5 mb-1">
+                    {t("titles.entryInsertable").toString()}
+                </div>
             ) : (
                 <div className="h5 mb-1">{t("titles.entry").toString()}</div>
             )}
             <div className="divider"></div>
-            {isInsertable && <EntryForm onSuccess={onSuccess} />}
+            {isInsertable && (
+                <>
+                    <EntryForm onInsertSuccess={onSuccess} />
+                    <div className="divider"></div>
+                </>
+            )}
             <Form className="d-flex flex-row-reverse mb-2">
                 <div>
                     <Form.Label>

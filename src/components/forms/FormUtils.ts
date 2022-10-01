@@ -11,10 +11,22 @@ import { Buyer, Cell, Culture, Exact } from "../../generated/graphql";
 
 export const DEBOUNCE_TIME = 350;
 
-export type FormSuccessCallback<InsertMutation, InsertOptions> = {
-    onSuccess: (
+export type FormProps<
+    T,
+    InsertMutation,
+    InsertOptions,
+    UpdateMutation extends unknown,
+    UpdateOptions extends unknown,
+> = {
+    edit?: T | undefined;
+    onInsertSuccess?: (
         data: InsertMutation,
         variables: Exact<{ insertOptions: InsertOptions }>,
+        context: unknown
+    ) => unknown;
+    onUpdateSuccess?: (
+        data: UpdateMutation,
+        variables: Exact<{ updateOptions: UpdateOptions }>,
         context: unknown
     ) => unknown;
 };
