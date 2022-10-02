@@ -8,7 +8,7 @@ use crate::DatabasePool;
 
 use super::{
     db_query::{DatabaseQueries, QueryBuilderHelpers},
-    FetchMany, FetchOptions, FieldsToSql, Pagination,
+    DeleteOptions, FetchMany, FetchOptions, FieldsToSql, Pagination,
 };
 
 type BuyerFetchOptions = FetchOptions<BuyerFields>;
@@ -67,6 +67,8 @@ impl DatabaseQueries<Postgres> for Buyer {
     type FO = BuyerFetchOptions;
 
     type UO = BuyerUpdateOptions;
+
+    type DO = DeleteOptions;
 
     type GetManyResult = Buyers;
 
@@ -164,6 +166,21 @@ impl DatabaseQueries<Postgres> for Buyer {
         let query = builder.build_query_as();
         Ok(query.fetch_one(executor).await?)
     }
+
+    async fn delete(
+        executor: &mut Transaction<'_, Postgres>,
+        options: &DeleteOptions,
+    ) -> Result<Self> {
+        let mut builder: sqlx::QueryBuilder<Postgres> =
+            sqlx::QueryBuilder::new("DELETE FROM buyer ");
+        builder
+            .push("WHERE id = ")
+            .push_bind(options.id)
+            .push("RETURNING *");
+
+        let query = builder.build_query_as();
+        Ok(query.fetch_one(executor).await?)
+    }
 }
 
 #[derive(Default)]
@@ -220,6 +237,20 @@ impl BuyerMutation {
         let mut transaction = pool.begin().await?;
 
         let res = Buyer::update(&mut transaction, &update_options).await?;
+
+        transaction.commit().await?;
+        Ok(res)
+    }
+
+    async fn delete_buyer(
+        &self,
+        ctx: &Context<'_>,
+        delete_options: DeleteOptions,
+    ) -> Result<Buyer> {
+        let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
+        let mut transaction = pool.begin().await?;
+
+        let res = Buyer::delete(&mut transaction, &delete_options).await?;
 
         transaction.commit().await?;
         Ok(res)

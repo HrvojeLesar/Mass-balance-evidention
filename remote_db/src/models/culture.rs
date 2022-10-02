@@ -8,7 +8,7 @@ use crate::DatabasePool;
 
 use super::{
     db_query::{DatabaseQueries, QueryBuilderHelpers},
-    FetchMany, FetchOptions, FieldsToSql, Pagination, Id,
+    DeleteOptions, FetchMany, FetchOptions, FieldsToSql, OptionalId, Pagination,
 };
 
 type CultureFetchOptions = FetchOptions<CultureFields>;
@@ -68,6 +68,8 @@ impl DatabaseQueries<Postgres> for Culture {
     type FO = CultureFetchOptions;
 
     type UO = CultureUpdateOptions;
+
+    type DO = DeleteOptions;
 
     type GetManyResult = Cultures;
 
@@ -153,6 +155,21 @@ impl DatabaseQueries<Postgres> for Culture {
             sep.push("description = ")
                 .push_bind_unseparated(description);
         }
+        builder
+            .push("WHERE id = ")
+            .push_bind(options.id)
+            .push("RETURNING *");
+
+        let query = builder.build_query_as();
+        Ok(query.fetch_one(executor).await?)
+    }
+
+    async fn delete(
+        executor: &mut Transaction<'_, Postgres>,
+        options: &DeleteOptions,
+    ) -> Result<Self> {
+        let mut builder: sqlx::QueryBuilder<Postgres> =
+            sqlx::QueryBuilder::new("DELETE FROM culture ");
         builder
             .push("WHERE id = ")
             .push_bind(options.id)
@@ -265,7 +282,7 @@ impl CultureQuery {
         let resp;
         if fetch_options.id.id.is_none() {
             let fetch_options = CultureFetchOptions {
-                id: Id { id: None },
+                id: OptionalId { id: None },
                 limit: fetch_options.limit,
                 page: fetch_options.page,
                 ordering: fetch_options.ordering,
@@ -352,6 +369,20 @@ impl CultureMutation {
         let mut transaction = pool.begin().await?;
 
         let res = Culture::update(&mut transaction, &update_options).await?;
+
+        transaction.commit().await?;
+        Ok(res)
+    }
+
+    async fn delete_culture(
+        &self,
+        ctx: &Context<'_>,
+        delete_options: DeleteOptions,
+    ) -> Result<Culture> {
+        let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
+        let mut transaction = pool.begin().await?;
+
+        let res = Culture::delete(&mut transaction, &delete_options).await?;
 
         transaction.commit().await?;
         Ok(res)

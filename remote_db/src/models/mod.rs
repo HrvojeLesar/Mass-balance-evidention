@@ -5,7 +5,7 @@ use self::{
     cell::{Cell, CellFields, CellMutation, CellQuery, CellUnpairedId},
     cell_culture_pair::{
         CellCulturePair, CellCulturePairFields, CellCulturePairIds, CellCulturePairMutation,
-        CellCulturePairQuery,
+        CellCulturePairQuery, OptionalCellCulturePairIds,
     },
     culture::{Culture, CultureFields, CultureMutation, CultureQuery, CultureUnpairedId},
     entry::{
@@ -87,7 +87,7 @@ pub(super) struct Filter<T: InputType + FieldsToSql> {
 }
 
 #[derive(InputObject)]
-pub struct Id {
+pub struct OptionalId {
     pub id: Option<i32>,
 }
 
@@ -102,11 +102,11 @@ pub struct Id {
 ))]
 #[graphql(concrete(
     name = "CellCulturePairFetchOptions",
-    params(CellCulturePairFields, CellCulturePairIds)
+    params(CellCulturePairFields, OptionalCellCulturePairIds)
 ))]
 #[graphql(concrete(name = "EntryFetchOptions", params(EntryFields, EntryFetchIdOptions)))]
 #[graphql(concrete(name = "EntryGroupFetchOptionsBase", params(EntryGroupFields)))]
-pub(super) struct FetchOptions<T, I = Id>
+pub(super) struct FetchOptions<T, I = OptionalId>
 where
     T: InputType + FieldsToSql + ToString,
     I: InputType,
@@ -137,4 +137,11 @@ pub trait FieldsToSql: ToString {
     fn to_sql(&self) -> String {
         format!("{} % ", self.to_string())
     }
+}
+
+#[derive(InputObject)]
+#[graphql(concrete(name = "DeleteOptions", params()))]
+#[graphql(concrete(name = "CellCulturePairDeleteOptions", params(CellCulturePairIds)))]
+pub(super) struct DeleteOptions<T: InputType = i32> {
+    id: T,
 }

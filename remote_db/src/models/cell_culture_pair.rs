@@ -7,20 +7,26 @@ use sqlx::{FromRow, Postgres, Row, Transaction};
 use crate::DatabasePool;
 
 use super::{
-    cell::Cell,
-    culture::Culture,
+    cell::{Cell, CellFields},
+    culture::{Culture, CultureFields},
     db_query::{DatabaseQueries, QueryBuilderHelpers},
-    FetchMany, FetchOptions, FieldsToSql, Pagination,
+    DeleteOptions, FetchMany, FetchOptions, FieldsToSql, OptionalId, Pagination,
 };
 
 pub(super) type CellCulturePairFetchOptions =
-    FetchOptions<CellCulturePairFields, CellCulturePairIds>;
+    FetchOptions<CellCulturePairFields, OptionalCellCulturePairIds>;
 type CellCulturePairs = FetchMany<CellCulturePair>;
 
 #[derive(InputObject)]
-pub struct CellCulturePairIds {
+pub(super) struct OptionalCellCulturePairIds {
     pub cell_id: Option<i32>,
     pub culture_id: Option<i32>,
+}
+
+#[derive(InputObject)]
+pub(super) struct CellCulturePairIds {
+    pub cell_id: i32,
+    pub culture_id: i32,
 }
 
 #[derive(SimpleObject, FromRow, Debug)]
@@ -74,6 +80,8 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
     type FO = CellCulturePairFetchOptions;
 
     type UO = CellCulturePairUpdateOptions;
+
+    type DO = DeleteOptions<CellCulturePairIds>;
 
     type GetManyResult = CellCulturePairs;
 
@@ -268,7 +276,7 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
         Self::get(
             executor,
             &CellCulturePairFetchOptions {
-                id: CellCulturePairIds {
+                id: OptionalCellCulturePairIds {
                     cell_id: Some(cell_culture_new_ids.id_cell),
                     culture_id: Some(cell_culture_new_ids.id_culture),
                 },
@@ -279,6 +287,58 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
             },
         )
         .await
+    }
+
+    async fn delete(
+        executor: &mut Transaction<'_, Postgres>,
+        options: &DeleteOptions<CellCulturePairIds>,
+    ) -> Result<Self> {
+        let deleted_data = sqlx::query!(
+            "
+            DELETE FROM cell_culture_pair
+            WHERE 
+            id_cell = $1 AND id_culture = $2
+            RETURNING id_cell, id_culture, created_at
+            ",
+            options.id.cell_id,
+            options.id.culture_id,
+        )
+        .fetch_one(&mut *executor)
+        .await?;
+
+        let cell = Cell::get(
+            &mut *executor,
+            &FetchOptions::<CellFields> {
+                id: OptionalId {
+                    id: Some(deleted_data.id_cell),
+                },
+                page: None,
+                limit: None,
+                filters: None,
+                ordering: None,
+            },
+        )
+        .await?;
+
+        let culture = Culture::get(
+            &mut *executor,
+            &FetchOptions::<CultureFields> {
+                id: OptionalId {
+                    id: Some(deleted_data.id_culture),
+                },
+                page: None,
+                limit: None,
+                filters: None,
+                ordering: None,
+            },
+        )
+        .await?;
+
+        Ok(CellCulturePair {
+            cell: Some(cell),
+            culture: Some(culture),
+            created_at: deleted_data.created_at,
+        })
     }
 }
 
@@ -418,6 +478,20 @@ impl CellCulturePairMutation {
         let mut transaction = pool.begin().await?;
 
         let res = CellCulturePair::update(&mut transaction, &update_options).await?;
+
+        transaction.commit().await?;
+        Ok(res)
+    }
+
+    async fn delete_cell_culture_pair(
+        &self,
+        ctx: &Context<'_>,
+        delete_options: DeleteOptions<CellCulturePairIds>,
+    ) -> Result<CellCulturePair> {
+        let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
+        let mut transaction = pool.begin().await?;
+
+        let res = CellCulturePair::delete(&mut transaction, &delete_options).await?;
 
         transaction.commit().await?;
         Ok(res)

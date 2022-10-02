@@ -12,7 +12,7 @@ use super::{
     cell_culture_pair::{CellCulturePair, CellCulturePairInsertOptions},
     culture::Culture,
     db_query::{DatabaseQueries, QueryBuilderHelpers},
-    FetchMany, FetchOptions, FieldsToSql, Id, Pagination,
+    DeleteOptions, FetchMany, FetchOptions, FieldsToSql, OptionalId, Pagination,
 };
 
 type EntryFetchOptions = FetchOptions<EntryFields, EntryFetchIdOptions>;
@@ -138,9 +138,9 @@ impl ToString for EntryGroupFields {
 
 #[derive(OneofObject)]
 pub(super) enum EntryFetchIdOptionsEnum {
-    CellId(Id),
-    CultureId(Id),
-    Id(Id),
+    CellId(OptionalId),
+    CultureId(OptionalId),
+    Id(OptionalId),
 }
 
 #[derive(InputObject)]
@@ -157,6 +157,8 @@ impl DatabaseQueries<Postgres> for Entry {
     type FO = EntryFetchOptions;
 
     type UO = EntryUpdateOptions;
+
+    type DO = DeleteOptions;
 
     type GetManyResult = Entries;
 
@@ -184,7 +186,7 @@ impl DatabaseQueries<Postgres> for Entry {
             &mut *executor,
             &EntryFetchOptions {
                 id: EntryFetchIdOptions {
-                    id_type: Some(EntryFetchIdOptionsEnum::Id(super::Id {
+                    id_type: Some(EntryFetchIdOptionsEnum::Id(super::OptionalId {
                         id: Some(partial_entry.id),
                     })),
                 },
@@ -318,7 +320,7 @@ impl DatabaseQueries<Postgres> for Entry {
                 | EntryFetchIdOptionsEnum::CultureId(id)
                 | EntryFetchIdOptionsEnum::Id(id) => id,
             },
-            None => &Id { id: None },
+            None => &OptionalId { id: None },
         };
 
         let r = sqlx::query!(
@@ -428,7 +430,7 @@ impl DatabaseQueries<Postgres> for Entry {
             &mut *executor,
             &EntryFetchOptions {
                 id: EntryFetchIdOptions {
-                    id_type: Some(EntryFetchIdOptionsEnum::Id(super::Id {
+                    id_type: Some(EntryFetchIdOptionsEnum::Id(super::OptionalId {
                         id: Some(r.try_get("id")?),
                     })),
                 },
@@ -439,6 +441,85 @@ impl DatabaseQueries<Postgres> for Entry {
             },
         )
         .await?)
+    }
+
+    async fn delete(
+        executor: &mut Transaction<'_, Postgres>,
+        options: &DeleteOptions,
+    ) -> Result<Self> {
+        let mut builder: sqlx::QueryBuilder<Postgres> =
+            sqlx::QueryBuilder::new("DELETE FROM entry ");
+        builder.push("WHERE id = ").push_bind(options.id).push(
+            "RETURNING id, id_cell, id_culture, id_buyer, weight, weight_type, created_at, date",
+        );
+
+        let query = builder.build();
+        let row = query.fetch_one(&mut *executor).await?;
+
+        let id_buyer: i32 = row.try_get("id_buyer")?;
+        let id_cell: i32 = row.try_get("id_cell")?;
+        let id_culture: i32 = row.try_get("id_culture")?;
+
+        let r = sqlx::query!(
+            "
+        SELECT 
+            buyer.id as b_id,
+            buyer.name as b_name,
+            buyer.address as b_address,
+            buyer.contact as b_contact,
+            buyer.created_at as b_created_at,
+            cell.id as c_id,
+            cell.name as c_name,
+            cell.description as c_desc,
+            cell.created_at as c_created_at,
+            culture.id as cu_id,
+            culture.name as cu_name,
+            culture.description as cu_desc,
+            culture.created_at as cu_created_at,
+            cell_culture_pair.created_at as ccp_created_at
+        FROM buyer, cell, culture, cell_culture_pair
+        WHERE 
+            buyer.id = $1 AND
+            cell.id = $2 AND
+            culture.id = $3 AND
+            cell_culture_pair.id_cell = $2 AND cell_culture_pair.id_culture = $3
+        ",
+            id_buyer,
+            id_cell,
+            id_culture,
+        )
+        .fetch_one(&mut *executor)
+        .await?;
+
+        Ok(Self {
+            id: row.try_get("id")?,
+            weight: row.try_get("weight")?,
+            weight_type: row.try_get("weight_type")?,
+            date: row.try_get("date")?,
+            created_at: row.try_get("created_at")?,
+            buyer: Some(Buyer {
+                id: r.b_id,
+                name: r.b_name,
+                address: r.b_address,
+                contact: r.b_contact,
+                created_at: r.b_created_at,
+            }),
+            cell_culture_pair: Some(CellCulturePair {
+                created_at: r.ccp_created_at,
+                cell: Some(Cell {
+                    id: r.c_id,
+                    name: r.c_name,
+                    description: r.c_desc,
+                    created_at: r.c_created_at,
+                }),
+                culture: Some(Culture {
+                    id: r.cu_id,
+                    name: r.cu_name,
+                    description: r.cu_desc,
+                    created_at: r.cu_created_at,
+                }),
+            }),
+        })
     }
 }
 
@@ -653,6 +734,20 @@ impl EntryMutation {
         let mut transaction = pool.begin().await?;
 
         let res = Entry::update(&mut transaction, &update_options).await?;
+
+        transaction.commit().await?;
+        Ok(res)
+    }
+
+    async fn delete_entry(
+        &self,
+        ctx: &Context<'_>,
+        delete_options: DeleteOptions,
+    ) -> Result<Entry> {
+        let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
+        let mut transaction = pool.begin().await?;
+
+        let res = Entry::delete(&mut transaction, &delete_options).await?;
 
         transaction.commit().await?;
         Ok(res)

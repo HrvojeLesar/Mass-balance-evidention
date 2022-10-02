@@ -20,6 +20,8 @@ where
 
     type UO;
 
+    type DO;
+
     type GetManyResult;
 
     async fn insert(executor: &mut Transaction<'_, DB>, options: &Self::IO) -> Result<Self>;
@@ -32,6 +34,8 @@ where
     async fn get(executor: &mut Transaction<'_, DB>, options: &Self::FO) -> Result<Self>;
 
     async fn update(executor: &mut Transaction<'_, DB>, options: &Self::UO) -> Result<Self>;
+
+    async fn delete(executor: &mut Transaction<'_, DB>, options: &Self::DO) -> Result<Self>;
 }
 
 pub(crate) trait QueryBuilderHelpers<'q, DB>
