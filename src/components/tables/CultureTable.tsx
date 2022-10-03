@@ -12,10 +12,12 @@ import {
     Culture,
     CultureFields,
     useGetCulturesQuery,
+    useDeleteCultureMutation,
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import ActionButtons from "../ActionButtons";
 import DataTable from "../DataTable";
+import DeleteModal from "../DeleteModal";
 import EditModal from "../EditModal";
 import CultureForm from "../forms/CultureForm";
 import { TableProps } from "./TableUtils";
@@ -33,6 +35,7 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
     const [isModalShown, setIsModalShown] = useState(false);
+    const [isDeleteModalShown, setIsDeleteModalShown] = useState(false);
     const [selectedCulture, setSelectedCulture] = useState<T | undefined>();
 
     const { data, refetch } = useGetCulturesQuery(
@@ -90,6 +93,10 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
                                 setIsModalShown(true);
                                 setSelectedCulture(row.original);
                             }}
+                            deleteFn={() => {
+                                setIsDeleteModalShown(true);
+                                setSelectedCulture(row.original);
+                            }}
                         />
                     );
                 },
@@ -118,6 +125,13 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
         }
     }, [data, pagination.pageSize]);
 
+    const deleteCulture = useDeleteCultureMutation({
+        onSuccess: () => {
+            refetch();
+            setIsDeleteModalShown(false);
+        },
+    });
+
     return (
         <Card className="p-2 shadow">
             <EditModal
@@ -130,6 +144,20 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
                     edit={selectedCulture}
                 />
             </EditModal>
+            <DeleteModal
+                title={t("titles.edit").toString()}
+                show={isDeleteModalShown}
+                onHide={() => setIsDeleteModalShown(false)}
+                isLoading={deleteCulture.isLoading}
+                errorMsg={undefined}
+                deleteFn={() => {
+                    if (selectedCulture) {
+                        deleteCulture.mutate({
+                            deleteOptions: { id: selectedCulture.id },
+                        });
+                    }
+                }}
+            />
             {isInsertable ? (
                 <div className="h5 mb-1">
                     {t("titles.cultureInsertable").toString()}

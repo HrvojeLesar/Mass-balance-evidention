@@ -297,7 +297,7 @@ export default function CellCulturePairForm({
 
     useEffect(() => {
         const timeout = setTimeout(() => {
-            setCellSelectState((old) => ({
+            setCultureSelectState((old) => ({
                 ...old,
                 page: 1,
                 filter: debouncedCultureInputValue.trim(),

@@ -12,6 +12,7 @@ import {
     Ordering,
     BuyerFields,
     BuyerFilterOptions,
+    useDeleteBuyerMutation,
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import BuyerForm from "../forms/BuyerForm";
@@ -19,6 +20,7 @@ import DataTable from "../DataTable";
 import { TableProps } from "./TableUtils";
 import ActionButtons from "../ActionButtons";
 import EditModal from "../EditModal";
+import DeleteModal from "../DeleteModal";
 
 type T = Buyer;
 type TFields = BuyerFields;
@@ -33,6 +35,7 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
     const [isModalShown, setIsModalShown] = useState(false);
+    const [isDeleteModalShown, setIsDeleteModalShown] = useState(false);
     const [selectedBuyer, setSelectedBuyer] = useState<T | undefined>();
 
     const { data, refetch } = useGetBuyersQuery(
@@ -95,6 +98,10 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
                                 setIsModalShown(true);
                                 setSelectedBuyer(row.original);
                             }}
+                            deleteFn={() => {
+                                setIsDeleteModalShown(true);
+                                setSelectedBuyer(row.original);
+                            }}
                         />
                     );
                 },
@@ -123,6 +130,13 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
         }
     }, [data, pagination.pageSize]);
 
+    const deleteBuyer = useDeleteBuyerMutation({
+        onSuccess: () => {
+            refetch();
+            setIsDeleteModalShown(false);
+        },
+    });
+
     return (
         <Card className="p-2 shadow">
             <EditModal
@@ -132,6 +146,20 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
             >
                 <BuyerForm onUpdateSuccess={onSuccess} edit={selectedBuyer} />
             </EditModal>
+            <DeleteModal
+                title={t("titles.edit").toString()}
+                show={isDeleteModalShown}
+                onHide={() => setIsDeleteModalShown(false)}
+                isLoading={deleteBuyer.isLoading}
+                errorMsg={undefined}
+                deleteFn={() => {
+                    if (selectedBuyer) {
+                        deleteBuyer.mutate({
+                            deleteOptions: { id: selectedBuyer.id },
+                        });
+                    }
+                }}
+            />
             {isInsertable ? (
                 <div className="h5 mb-1">
                     {t("titles.buyerInsertable").toString()}

@@ -67,6 +67,12 @@
         "cultureInsertable": "Unos kultura",
         "buyer": "Pregled kupaca",
         "buyerInsertable": "Unos kupaca",
-        "edit": "Uređivanje"
+        "edit": "Uređivanje",
+        "delete": "Potvrda"
+    },
+    "deleteModal": {
+        "deleteConfirmText": "Jeste li sigurni da želite obrisati odabrani red?",
+        "cancelButton": "Odustani",
+        "confirmButton": "Obriši red"
     }
 }

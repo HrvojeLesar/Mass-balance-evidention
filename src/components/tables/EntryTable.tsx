@@ -8,10 +8,11 @@ import moment from "moment";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { Entry, useGetAllEntriesQuery } from "../../generated/graphql";
+import { Entry, useDeleteEntryMutation, useGetAllEntriesQuery } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import ActionButtons from "../ActionButtons";
 import DataTable from "../DataTable";
+import DeleteModal from "../DeleteModal";
 import EditModal from "../EditModal";
 import EntryForm from "../forms/EntryForm";
 import { TableProps } from "./TableUtils";
@@ -34,6 +35,7 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
     const [isModalShown, setIsModalShown] = useState(false);
+    const [isDeleteModalShown, setIsDeleteModalShown] = useState(false);
     const [selectedEntry, setSelectedEntry] = useState<Entry | undefined>();
 
     const { data, refetch } = useGetAllEntriesQuery(
@@ -106,6 +108,10 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
                                 setIsModalShown(true);
                                 setSelectedEntry(row.original);
                             }}
+                            deleteFn={() => {
+                                setIsDeleteModalShown(true);
+                                setSelectedEntry(row.original);
+                            }}
                         />
                     );
                 },
@@ -122,6 +128,13 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
         }
     }, [refetch, isModalShown, setIsModalShown]);
 
+    const deleteEntry = useDeleteEntryMutation({
+        onSuccess: () => {
+            refetch();
+            setIsDeleteModalShown(false);
+        },
+    });
+
     return (
         <Card className="p-2 shadow">
             <EditModal
@@ -131,6 +144,20 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
             >
                 <EntryForm onUpdateSuccess={onSuccess} edit={selectedEntry} />
             </EditModal>
+            <DeleteModal
+                title={t("titles.edit").toString()}
+                show={isDeleteModalShown}
+                onHide={() => setIsDeleteModalShown(false)}
+                isLoading={deleteEntry.isLoading}
+                errorMsg={undefined}
+                deleteFn={() => {
+                    if (selectedEntry) {
+                        deleteEntry.mutate({
+                            deleteOptions: { id: selectedEntry.id },
+                        });
+                    }
+                }}
+            />
             {isInsertable ? (
                 <div className="h5 mb-1">
                     {t("titles.entryInsertable").toString()}

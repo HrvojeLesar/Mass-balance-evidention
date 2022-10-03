@@ -67,6 +67,12 @@
         "cultureInsertable": "Culture insertion",
         "buyer": "Buyer review",
         "buyerInsertable": "Buyer insertion",
-        "edit": "Editing"
+        "edit": "Editing",
+        "delete": "Confirmation"
+    },
+    "deleteModal": {
+        "deleteConfirmText": "Are you sure you want to delete the selected row?",
+        "cancelButton": "Cancel",
+        "confirmButton": "Delete row"
     }
 }

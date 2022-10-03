@@ -9,11 +9,13 @@ import { Card, Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import {
     CellCulturePair,
+    useDeleteCellCulturePairMutation,
     useGetAllCellCultureParisQuery,
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import ActionButtons from "../ActionButtons";
 import DataTable from "../DataTable";
+import DeleteModal from "../DeleteModal";
 import EditModal from "../EditModal";
 import CellCulturePairForm from "../forms/CellCulturePairForm";
 import { TableProps } from "./TableUtils";
@@ -40,6 +42,7 @@ export default function CellCulturePairTable({
     ]);
 
     const [isModalShown, setIsModalShown] = useState(false);
+    const [isDeleteModalShown, setIsDeleteModalShown] = useState(false);
     const [selectedCellCulturePair, setSelectedCellCulturePair] = useState<
         T | undefined
     >();
@@ -86,6 +89,10 @@ export default function CellCulturePairTable({
                                 setIsModalShown(true);
                                 setSelectedCellCulturePair(row.original);
                             }}
+                            deleteFn={() => {
+                                setIsDeleteModalShown(true);
+                                setSelectedCellCulturePair(row.original);
+                            }}
                         />
                     );
                 },
@@ -102,6 +109,13 @@ export default function CellCulturePairTable({
         }
     }, [refetch, isModalShown, setIsModalShown]);
 
+    const deleteCellCulturePair = useDeleteCellCulturePairMutation({
+        onSuccess: () => {
+            refetch();
+            setIsDeleteModalShown(false);
+        },
+    });
+
     return (
         <Card className="p-2 shadow">
             <EditModal
@@ -114,6 +128,30 @@ export default function CellCulturePairTable({
                     edit={selectedCellCulturePair}
                 />
             </EditModal>
+            <DeleteModal
+                title={t("titles.edit").toString()}
+                show={isDeleteModalShown}
+                onHide={() => setIsDeleteModalShown(false)}
+                isLoading={deleteCellCulturePair.isLoading}
+                errorMsg={undefined}
+                deleteFn={() => {
+                    if (
+                        selectedCellCulturePair &&
+                        selectedCellCulturePair.cell &&
+                        selectedCellCulturePair.culture
+                    ) {
+                        deleteCellCulturePair.mutate({
+                            deleteOptions: {
+                                id: {
+                                    cellId: selectedCellCulturePair.cell.id,
+                                    cultureId:
+                                        selectedCellCulturePair.culture.id,
+                                },
+                            },
+                        });
+                    }
+                }}
+            />
             {isInsertable ? (
                 <div className="h5 mb-1">
                     {t("titles.cellCulturePairInsertable").toString()}

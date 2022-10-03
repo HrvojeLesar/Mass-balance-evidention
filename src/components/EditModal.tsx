@@ -15,7 +15,7 @@ export default function EditModal({
     children,
 }: EditModalProps) {
     return (
-        <Modal show={show} onHide={onHide}>
+        <Modal show={show} onHide={onHide} centered backdrop="static">
             <Modal.Header closeButton>
                 <Modal.Title>{title}</Modal.Title>
             </Modal.Header>

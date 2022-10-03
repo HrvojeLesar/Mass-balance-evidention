@@ -12,10 +12,12 @@ import {
     CellFields,
     CellFilterOptions,
     Cell,
+    useDeleteCellMutation,
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import ActionButtons from "../ActionButtons";
 import DataTable from "../DataTable";
+import DeleteModal from "../DeleteModal";
 import EditModal from "../EditModal";
 import CellForm from "../forms/CellForm";
 import { TableProps } from "./TableUtils";
@@ -33,6 +35,7 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
     const [isModalShown, setIsModalShown] = useState(false);
+    const [isDeleteModalShown, setIsDeleteModalShown] = useState(false);
     const [selectedCell, setSelectedCell] = useState<T | undefined>();
 
     const { data, refetch } = useGetCellsQuery(
@@ -90,6 +93,10 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
                                 setIsModalShown(true);
                                 setSelectedCell(row.original);
                             }}
+                            deleteFn={() => {
+                                setIsDeleteModalShown(true);
+                                setSelectedCell(row.original);
+                            }}
                         />
                     );
                 },
@@ -117,6 +124,13 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
         }
     }, [data, pagination.pageSize]);
 
+    const deleteCell = useDeleteCellMutation({
+        onSuccess: () => {
+            refetch();
+            setIsDeleteModalShown(false);
+        },
+    });
+
     return (
         <Card className="p-2 shadow">
             <EditModal
@@ -126,6 +140,20 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
             >
                 <CellForm onUpdateSuccess={onSuccess} edit={selectedCell} />
             </EditModal>
+            <DeleteModal
+                title={t("titles.edit").toString()}
+                show={isDeleteModalShown}
+                onHide={() => setIsDeleteModalShown(false)}
+                isLoading={deleteCell.isLoading}
+                errorMsg={undefined}
+                deleteFn={() => {
+                    if (selectedCell) {
+                        deleteCell.mutate({
+                            deleteOptions: { id: selectedCell.id },
+                        });
+                    }
+                }}
+            />
             {isInsertable ? (
                 <div className="h5 mb-1">
                     {t("titles.cellInsertable").toString()}

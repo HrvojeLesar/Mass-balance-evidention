@@ -395,7 +395,7 @@ export default function EntryForm({
 
     useEffect(() => {
         const timeout = setTimeout(() => {
-            setCellSelectState((old) => ({
+            setCultureSelectState((old) => ({
                 ...old,
                 page: 1,
                 filter: debouncedCultureInputValue.trim(),
