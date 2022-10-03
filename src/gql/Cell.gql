@@ -37,7 +37,6 @@ query getPairedCells($fetchOptions: CellFetchUnpairedOptions!) {
     }
 }
 
-
 mutation insertCell($insertOptions: CellInsertOptions!) {
     insertCell(insertOptions: $insertOptions) {
         ...CellParts
@@ -46,6 +45,12 @@ mutation insertCell($insertOptions: CellInsertOptions!) {
 
 mutation updateCell($updateOptions: CellUpdateOptions!) {
     updateCell(updateOptions: $updateOptions) {
+        ...CellParts
+    }
+}
+
+mutation deleteCell($deleteOptions: DeleteOptions!) {
+    deleteCell(deleteOptions: $deleteOptions) {
         ...CellParts
     }
 }

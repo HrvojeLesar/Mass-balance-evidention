@@ -40,6 +40,11 @@ mutation updateCellCulturePair($updateOptions: CellCulturePairUpdateOptions!) {
     }
 }
 
+mutation deleteCellCulturePair($deleteOptions: CellCulturePairDeleteOptions!) {
+  deleteCellCulturePair(deleteOptions: $deleteOptions) {
+    ...CellCultureParts
+  }
+}
 
 fragment CellCultureParts on CellCulturePair {
     cell {

@@ -20,7 +20,6 @@ query getAllEntries($fetchOptions: EntryFetchOptions!) {
     }
 }
 
-
 query getEntry($fetchOptions: EntryFetchOptions!) {
     entry(fetchOptions: $fetchOptions) {
         ...EntryParts
@@ -49,6 +48,12 @@ mutation updateEntry($updateOptions: EntryUpdateOptions!) {
     updateEntry(updateOptions: $updateOptions) {
         ...EntryParts
     }
+}
+
+mutation deleteEntry($deleteOptions: DeleteOptions!) {
+  deleteEntry(deleteOptions: $deleteOptions) {
+    ...EntryParts
+  }
 }
 
 fragment EntryParts on Entry {

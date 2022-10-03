@@ -37,7 +37,6 @@ query getPairedCultures($fetchOptions: CultureFetchUnpairedOptions!) {
     }
 }
 
-
 mutation insertCulture($insertOptions: CultureInsertOptions!) {
     insertCulture(insertOptions: $insertOptions) {
         ...CultureParts
@@ -46,6 +45,12 @@ mutation insertCulture($insertOptions: CultureInsertOptions!) {
 
 mutation updateCulture($updateOptions: CultureUpdateOptions!) {
     updateCulture(updateOptions: $updateOptions) {
+        ...CultureParts
+    }
+}
+
+mutation deleteCulture($deleteOptions: DeleteOptions!) {
+    deleteCulture(deleteOptions: $deleteOptions) {
         ...CultureParts
     }
 }

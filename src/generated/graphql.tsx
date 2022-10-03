@@ -49,7 +49,7 @@ export type Buyer = {
 
 export type BuyerFetchOptions = {
   filters?: InputMaybe<Array<BuyerFilterOptions>>;
-  id: Id;
+  id: OptionalId;
   limit?: InputMaybe<Scalars['Int']>;
   ordering?: InputMaybe<BuyerOrderingOptions>;
   page?: InputMaybe<Scalars['Int']>;
@@ -107,9 +107,13 @@ export type CellCulturePair = {
   culture?: Maybe<Culture>;
 };
 
+export type CellCulturePairDeleteOptions = {
+  id: CellCulturePairIds;
+};
+
 export type CellCulturePairFetchOptions = {
   filters?: InputMaybe<Array<CellCulturePairFilterOptions>>;
-  id: CellCulturePairIds;
+  id: OptionalCellCulturePairIds;
   limit?: InputMaybe<Scalars['Int']>;
   ordering?: InputMaybe<CellCulturePairOrderingOptions>;
   page?: InputMaybe<Scalars['Int']>;
@@ -128,8 +132,8 @@ export type CellCulturePairFilterOptions = {
 };
 
 export type CellCulturePairIds = {
-  cellId?: InputMaybe<Scalars['Int']>;
-  cultureId?: InputMaybe<Scalars['Int']>;
+  cellId: Scalars['Int'];
+  cultureId: Scalars['Int'];
 };
 
 export type CellCulturePairInsertOptions = {
@@ -159,7 +163,7 @@ export type CellCulturePairs = {
 
 export type CellFetchOptions = {
   filters?: InputMaybe<Array<CellFilterOptions>>;
-  id: Id;
+  id: OptionalId;
   limit?: InputMaybe<Scalars['Int']>;
   ordering?: InputMaybe<CellOrderingOptions>;
   page?: InputMaybe<Scalars['Int']>;
@@ -222,7 +226,7 @@ export type Culture = {
 
 export type CultureFetchOptions = {
   filters?: InputMaybe<Array<CultureFilterOptions>>;
-  id: Id;
+  id: OptionalId;
   limit?: InputMaybe<Scalars['Int']>;
   ordering?: InputMaybe<CultureOrderingOptions>;
   page?: InputMaybe<Scalars['Int']>;
@@ -275,6 +279,10 @@ export type Cultures = {
   total: Scalars['Int'];
 };
 
+export type DeleteOptions = {
+  id: Scalars['Int'];
+};
+
 export type Entries = {
   __typename?: 'Entries';
   limit: Scalars['Int'];
@@ -299,9 +307,9 @@ export type EntryFetchIdOptions = {
 };
 
 export type EntryFetchIdOptionsEnum = {
-  cellId?: InputMaybe<Id>;
-  cultureId?: InputMaybe<Id>;
-  id?: InputMaybe<Id>;
+  cellId?: InputMaybe<OptionalId>;
+  cultureId?: InputMaybe<OptionalId>;
+  id?: InputMaybe<OptionalId>;
 };
 
 export type EntryFetchOptions = {
@@ -338,7 +346,7 @@ export type EntryGroup = {
 export type EntryGroupFetchOptions = {
   filters?: InputMaybe<Array<EntryGroupFilterOptionsBase>>;
   grouping: EntryGroupOptions;
-  id: Id;
+  id: OptionalId;
   limit?: InputMaybe<Scalars['Int']>;
   ordering?: InputMaybe<EntryGroupOrderingOptionsBase>;
   page?: InputMaybe<Scalars['Int']>;
@@ -394,12 +402,13 @@ export type EntryUpdateOptions = {
   weightType?: InputMaybe<Scalars['String']>;
 };
 
-export type Id = {
-  id?: InputMaybe<Scalars['Int']>;
-};
-
 export type MutationRoot = {
   __typename?: 'MutationRoot';
+  deleteBuyer: Buyer;
+  deleteCell: Cell;
+  deleteCellCulturePair: CellCulturePair;
+  deleteCulture: Culture;
+  deleteEntry: Entry;
   insertBuyer: Buyer;
   insertCell: Cell;
   insertCellCulturePair: CellCulturePair;
@@ -410,6 +419,31 @@ export type MutationRoot = {
   updateCellCulturePair: CellCulturePair;
   updateCulture: Culture;
   updateEntry: Entry;
+};
+
+
+export type MutationRootDeleteBuyerArgs = {
+  deleteOptions: DeleteOptions;
+};
+
+
+export type MutationRootDeleteCellArgs = {
+  deleteOptions: DeleteOptions;
+};
+
+
+export type MutationRootDeleteCellCulturePairArgs = {
+  deleteOptions: CellCulturePairDeleteOptions;
+};
+
+
+export type MutationRootDeleteCultureArgs = {
+  deleteOptions: DeleteOptions;
+};
+
+
+export type MutationRootDeleteEntryArgs = {
+  deleteOptions: DeleteOptions;
 };
 
 
@@ -460,6 +494,15 @@ export type MutationRootUpdateCultureArgs = {
 
 export type MutationRootUpdateEntryArgs = {
   updateOptions: EntryUpdateOptions;
+};
+
+export type OptionalCellCulturePairIds = {
+  cellId?: InputMaybe<Scalars['Int']>;
+  cultureId?: InputMaybe<Scalars['Int']>;
+};
+
+export type OptionalId = {
+  id?: InputMaybe<Scalars['Int']>;
 };
 
 export enum Ordering {
@@ -601,6 +644,13 @@ export type UpdateBuyerMutationVariables = Exact<{
 
 export type UpdateBuyerMutation = { __typename?: 'MutationRoot', updateBuyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } };
 
+export type DeleteBuyerMutationVariables = Exact<{
+  deleteOptions: DeleteOptions;
+}>;
+
+
+export type DeleteBuyerMutation = { __typename?: 'MutationRoot', deleteBuyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } };
+
 export type BuyerPartsFragment = { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any };
 
 export type GetCellsQueryVariables = Exact<{
@@ -645,6 +695,13 @@ export type UpdateCellMutationVariables = Exact<{
 
 export type UpdateCellMutation = { __typename?: 'MutationRoot', updateCell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } };
 
+export type DeleteCellMutationVariables = Exact<{
+  deleteOptions: DeleteOptions;
+}>;
+
+
+export type DeleteCellMutation = { __typename?: 'MutationRoot', deleteCell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } };
+
 export type CellPartsFragment = { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any };
 
 export type GetCellCulturesPairsQueryVariables = Exact<{
@@ -681,6 +738,13 @@ export type UpdateCellCulturePairMutationVariables = Exact<{
 
 
 export type UpdateCellCulturePairMutation = { __typename?: 'MutationRoot', updateCellCulturePair: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } };
+
+export type DeleteCellCulturePairMutationVariables = Exact<{
+  deleteOptions: CellCulturePairDeleteOptions;
+}>;
+
+
+export type DeleteCellCulturePairMutation = { __typename?: 'MutationRoot', deleteCellCulturePair: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } };
 
 export type CellCulturePartsFragment = { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null };
 
@@ -726,6 +790,13 @@ export type UpdateCultureMutationVariables = Exact<{
 
 export type UpdateCultureMutation = { __typename?: 'MutationRoot', updateCulture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } };
 
+export type DeleteCultureMutationVariables = Exact<{
+  deleteOptions: DeleteOptions;
+}>;
+
+
+export type DeleteCultureMutation = { __typename?: 'MutationRoot', deleteCulture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } };
+
 export type CulturePartsFragment = { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any };
 
 export type GetEntriesQueryVariables = Exact<{
@@ -769,6 +840,13 @@ export type UpdateEntryMutationVariables = Exact<{
 
 
 export type UpdateEntryMutation = { __typename?: 'MutationRoot', updateEntry: { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } | null } };
+
+export type DeleteEntryMutationVariables = Exact<{
+  deleteOptions: DeleteOptions;
+}>;
+
+
+export type DeleteEntryMutation = { __typename?: 'MutationRoot', deleteEntry: { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } | null } };
 
 export type EntryPartsFragment = { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } | null };
 
@@ -900,6 +978,22 @@ export const useUpdateBuyerMutation = <
       (variables?: UpdateBuyerMutationVariables) => fetcher<UpdateBuyerMutation, UpdateBuyerMutationVariables>(UpdateBuyerDocument, variables)(),
       options
     );
+export const DeleteBuyerDocument = `
+    mutation deleteBuyer($deleteOptions: DeleteOptions!) {
+  deleteBuyer(deleteOptions: $deleteOptions) {
+    ...BuyerParts
+  }
+}
+    ${BuyerPartsFragmentDoc}`;
+export const useDeleteBuyerMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<DeleteBuyerMutation, TError, DeleteBuyerMutationVariables, TContext>) =>
+    useMutation<DeleteBuyerMutation, TError, DeleteBuyerMutationVariables, TContext>(
+      ['deleteBuyer'],
+      (variables?: DeleteBuyerMutationVariables) => fetcher<DeleteBuyerMutation, DeleteBuyerMutationVariables>(DeleteBuyerDocument, variables)(),
+      options
+    );
 export const GetCellsDocument = `
     query getCells($fetchOptions: CellFetchOptions!) {
   cells(fetchOptions: $fetchOptions) {
@@ -1023,6 +1117,22 @@ export const useUpdateCellMutation = <
       (variables?: UpdateCellMutationVariables) => fetcher<UpdateCellMutation, UpdateCellMutationVariables>(UpdateCellDocument, variables)(),
       options
     );
+export const DeleteCellDocument = `
+    mutation deleteCell($deleteOptions: DeleteOptions!) {
+  deleteCell(deleteOptions: $deleteOptions) {
+    ...CellParts
+  }
+}
+    ${CellPartsFragmentDoc}`;
+export const useDeleteCellMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<DeleteCellMutation, TError, DeleteCellMutationVariables, TContext>) =>
+    useMutation<DeleteCellMutation, TError, DeleteCellMutationVariables, TContext>(
+      ['deleteCell'],
+      (variables?: DeleteCellMutationVariables) => fetcher<DeleteCellMutation, DeleteCellMutationVariables>(DeleteCellDocument, variables)(),
+      options
+    );
 export const GetCellCulturesPairsDocument = `
     query getCellCulturesPairs($fetchOptions: CellCulturePairFetchOptions!) {
   cellCulturePairs(fetchOptions: $fetchOptions) {
@@ -1118,6 +1228,22 @@ export const useUpdateCellCulturePairMutation = <
     useMutation<UpdateCellCulturePairMutation, TError, UpdateCellCulturePairMutationVariables, TContext>(
       ['updateCellCulturePair'],
       (variables?: UpdateCellCulturePairMutationVariables) => fetcher<UpdateCellCulturePairMutation, UpdateCellCulturePairMutationVariables>(UpdateCellCulturePairDocument, variables)(),
+      options
+    );
+export const DeleteCellCulturePairDocument = `
+    mutation deleteCellCulturePair($deleteOptions: CellCulturePairDeleteOptions!) {
+  deleteCellCulturePair(deleteOptions: $deleteOptions) {
+    ...CellCultureParts
+  }
+}
+    ${CellCulturePartsFragmentDoc}`;
+export const useDeleteCellCulturePairMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<DeleteCellCulturePairMutation, TError, DeleteCellCulturePairMutationVariables, TContext>) =>
+    useMutation<DeleteCellCulturePairMutation, TError, DeleteCellCulturePairMutationVariables, TContext>(
+      ['deleteCellCulturePair'],
+      (variables?: DeleteCellCulturePairMutationVariables) => fetcher<DeleteCellCulturePairMutation, DeleteCellCulturePairMutationVariables>(DeleteCellCulturePairDocument, variables)(),
       options
     );
 export const GetCulturesDocument = `
@@ -1243,6 +1369,22 @@ export const useUpdateCultureMutation = <
       (variables?: UpdateCultureMutationVariables) => fetcher<UpdateCultureMutation, UpdateCultureMutationVariables>(UpdateCultureDocument, variables)(),
       options
     );
+export const DeleteCultureDocument = `
+    mutation deleteCulture($deleteOptions: DeleteOptions!) {
+  deleteCulture(deleteOptions: $deleteOptions) {
+    ...CultureParts
+  }
+}
+    ${CulturePartsFragmentDoc}`;
+export const useDeleteCultureMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<DeleteCultureMutation, TError, DeleteCultureMutationVariables, TContext>) =>
+    useMutation<DeleteCultureMutation, TError, DeleteCultureMutationVariables, TContext>(
+      ['deleteCulture'],
+      (variables?: DeleteCultureMutationVariables) => fetcher<DeleteCultureMutation, DeleteCultureMutationVariables>(DeleteCultureDocument, variables)(),
+      options
+    );
 export const GetEntriesDocument = `
     query getEntries($fetchOptions: EntryFetchOptions!) {
   entries(fetchOptions: $fetchOptions) {
@@ -1363,5 +1505,21 @@ export const useUpdateEntryMutation = <
     useMutation<UpdateEntryMutation, TError, UpdateEntryMutationVariables, TContext>(
       ['updateEntry'],
       (variables?: UpdateEntryMutationVariables) => fetcher<UpdateEntryMutation, UpdateEntryMutationVariables>(UpdateEntryDocument, variables)(),
+      options
+    );
+export const DeleteEntryDocument = `
+    mutation deleteEntry($deleteOptions: DeleteOptions!) {
+  deleteEntry(deleteOptions: $deleteOptions) {
+    ...EntryParts
+  }
+}
+    ${EntryPartsFragmentDoc}`;
+export const useDeleteEntryMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<DeleteEntryMutation, TError, DeleteEntryMutationVariables, TContext>) =>
+    useMutation<DeleteEntryMutation, TError, DeleteEntryMutationVariables, TContext>(
+      ['deleteEntry'],
+      (variables?: DeleteEntryMutationVariables) => fetcher<DeleteEntryMutation, DeleteEntryMutationVariables>(DeleteEntryDocument, variables)(),
       options
     );

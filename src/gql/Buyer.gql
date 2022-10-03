@@ -27,6 +27,12 @@ mutation updateBuyer($updateOptions: BuyerUpdateOptions!) {
     }
 }
 
+mutation deleteBuyer($deleteOptions: DeleteOptions!) {
+    deleteBuyer(deleteOptions: $deleteOptions) {
+        ...BuyerParts
+    }
+}
+
 fragment BuyerParts on Buyer {
     id
     name
