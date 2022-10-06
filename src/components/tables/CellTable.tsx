@@ -141,7 +141,7 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
                 <CellForm onUpdateSuccess={onSuccess} edit={selectedCell} />
             </EditModal>
             <DeleteModal
-                title={t("titles.edit").toString()}
+                title={t("titles.delete").toString()}
                 show={isDeleteModalShown}
                 onHide={() => setIsDeleteModalShown(false)}
                 isLoading={deleteCell.isLoading}

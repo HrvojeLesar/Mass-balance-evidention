@@ -68,7 +68,8 @@
         "buyer": "Buyer review",
         "buyerInsertable": "Buyer insertion",
         "edit": "Editing",
-        "delete": "Confirmation"
+        "delete": "Delete",
+        "deleteConfirmation": "Confirmation"
     },
     "deleteModal": {
         "deleteConfirmText": "Are you sure you want to delete the selected row?",

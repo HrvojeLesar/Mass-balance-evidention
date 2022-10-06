@@ -129,7 +129,7 @@ export default function CellCulturePairTable({
                 />
             </EditModal>
             <DeleteModal
-                title={t("titles.edit").toString()}
+                title={t("titles.delete").toString()}
                 show={isDeleteModalShown}
                 onHide={() => setIsDeleteModalShown(false)}
                 isLoading={deleteCellCulturePair.isLoading}

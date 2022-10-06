@@ -11,11 +11,7 @@ import {
     SortingState,
     useReactTable,
 } from "@tanstack/react-table";
-import {
-    Dispatch,
-    SetStateAction,
-    useMemo,
-} from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo } from "react";
 import { Pagination } from "../hooks/usePagination";
 import BaseTable from "./BaseTable";
 import TablePagination from "./TablePagination";
@@ -54,18 +50,31 @@ export default function DataTable<T>({
     groupingState,
     pageCount,
 }: SomeTableProps<T>) {
-
     const pageCountMemo = useMemo(() => {
-        if (data && paginationState && data.total) {
-            return data
-                ? Math.ceil(data.total / paginationState.pagination.pageSize)
-                : -1;
-        }
         if (pageCount) {
-            return pageCount ?? -1;
+            return pageCount ?? 1;
         }
-        return undefined;
+
+        if (paginationState.manual !== false && data && paginationState) {
+            if (data.total !== undefined && data.total !== 0) {
+                return Math.ceil(
+                    data.total / paginationState.pagination.pageSize
+                );
+            } else {
+                return 1;
+            }
+        }
     }, [data, paginationState, pageCount]);
+
+    useEffect(() => {
+        if (
+            paginationState.manual !== false &&
+            data.total !== undefined &&
+            data.total === 0
+        ) {
+            paginationState.setPagination((old) => ({ ...old, pageIndex: 0 }));
+        }
+    }, [paginationState.setPagination, pageCountMemo, data]);
 
     const table = useReactTable({
         data: data.data,

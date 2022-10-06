@@ -145,7 +145,7 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
                 <EntryForm onUpdateSuccess={onSuccess} edit={selectedEntry} />
             </EditModal>
             <DeleteModal
-                title={t("titles.edit").toString()}
+                title={t("titles.delete").toString()}
                 show={isDeleteModalShown}
                 onHide={() => setIsDeleteModalShown(false)}
                 isLoading={deleteEntry.isLoading}

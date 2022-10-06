@@ -68,7 +68,8 @@
         "buyer": "Pregled kupaca",
         "buyerInsertable": "Unos kupaca",
         "edit": "Uređivanje",
-        "delete": "Potvrda"
+        "delete": "Brisanje",
+        "deleteConfirmation": "Potrvrda"
     },
     "deleteModal": {
         "deleteConfirmText": "Jeste li sigurni da želite obrisati odabrani red?",

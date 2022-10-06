@@ -117,7 +117,11 @@ export default function BaseTable<T>({ table }: BaseTableProps<T>) {
                                           }
                                         : undefined
                                 }
-                                style={{ width: header.getSize() }}
+                                style={
+                                    header.id === "edit"
+                                        ? { width: header.getSize() }
+                                        : undefined
+                                }
                             >
                                 {header.isPlaceholder ? null : (
                                     <div className="d-flex flex-column">

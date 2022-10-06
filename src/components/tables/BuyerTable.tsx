@@ -30,7 +30,7 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
     const { t } = useTranslation();
     const [tableData, setTableData] = useState<T[]>([]);
 
-    const { pagination, setPagination } = usePagination({ pageSize: 5 });
+    const { pagination, setPagination } = usePagination();
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -147,7 +147,7 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
                 <BuyerForm onUpdateSuccess={onSuccess} edit={selectedBuyer} />
             </EditModal>
             <DeleteModal
-                title={t("titles.edit").toString()}
+                title={t("titles.delete").toString()}
                 show={isDeleteModalShown}
                 onHide={() => setIsDeleteModalShown(false)}
                 isLoading={deleteBuyer.isLoading}
