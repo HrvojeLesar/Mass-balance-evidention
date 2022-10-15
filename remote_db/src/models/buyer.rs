@@ -95,9 +95,8 @@ impl DatabaseQueries<Postgres> for Buyer {
         executor: &mut Transaction<'_, Postgres>,
         options: &BuyerFetchOptions,
     ) -> Result<Buyers> {
-        let mut builder =
-            sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER() as total_count FROM buyer ");
-        Self::handle_fetch_options(options, "id", &mut builder);
+        let mut builder = sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER() as total_count FROM ");
+        Self::handle_fetch_options_with_score(options, "buyer", "id", &mut builder);
         let r = builder.build().fetch_all(executor).await?;
 
         let total = match r.first() {

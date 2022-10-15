@@ -96,9 +96,12 @@ impl DatabaseQueries<Postgres> for Cell {
         executor: &mut Transaction<'_, Postgres>,
         options: &CellFetchOptions,
     ) -> Result<Cells> {
-        let mut builder =
-            sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER () as total_count FROM cell ");
-        Self::handle_fetch_options(options, "id", &mut builder);
+        // SELECT *, COUNT(*) OVER() as total FROM
+        // (SELECT *, name <-> 'tž1' as score, description <-> 'amazing' as score2 FROM cell) as cells
+        // WHERE cells.score < 0.3 AND cells.score2 < 0.3 ORDER BY score ASC;
+        let mut builder = sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER() as total_count FROM ");
+        Self::handle_fetch_options_with_score(&options, "cell", "id", &mut builder);
+
         let r = builder.build().fetch_all(executor).await?;
 
         let total = match r.first() {

@@ -96,8 +96,8 @@ impl DatabaseQueries<Postgres> for Culture {
         options: &CultureFetchOptions,
     ) -> Result<Cultures> {
         let mut builder =
-            sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER () as total_count FROM culture ");
-        Self::handle_fetch_options(options, "id", &mut builder);
+            sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER () as total_count FROM ");
+        Self::handle_fetch_options_with_score(options, "culture", "id", &mut builder);
         let r = builder.build().fetch_all(executor).await?;
 
         let total = match r.first() {
