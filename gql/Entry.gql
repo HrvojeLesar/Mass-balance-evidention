@@ -1,6 +1,6 @@
 #import "./CellCulturePair.gql"
 
-query getEntries($fetchOptions: EntryFetchOptions!) {
+query GetEntries($fetchOptions: EntryFetchOptions!) {
     entries(fetchOptions: $fetchOptions) {
         total
         page
@@ -11,7 +11,7 @@ query getEntries($fetchOptions: EntryFetchOptions!) {
     }
 }
 
-query getAllEntries($fetchOptions: EntryFetchOptions!) {
+query GetAllEntries($fetchOptions: EntryFetchOptions!) {
      getAllEntries(fetchOptions: $fetchOptions) {
         total
         results {
@@ -20,13 +20,13 @@ query getAllEntries($fetchOptions: EntryFetchOptions!) {
     }
 }
 
-query getEntry($fetchOptions: EntryFetchOptions!) {
+query GetEntry($fetchOptions: EntryFetchOptions!) {
     entry(fetchOptions: $fetchOptions) {
         ...EntryParts
     }
 }
 
-query getEntryGroups($fetchOptions: EntryGroupFetchOptions!) {
+query GetEntryGroups($fetchOptions: EntryGroupFetchOptions!) {
     getEntryGroups(fetchOptions: $fetchOptions) {
         total
         page
@@ -38,19 +38,19 @@ query getEntryGroups($fetchOptions: EntryGroupFetchOptions!) {
     }
 }
 
-mutation insertEntry($insertOptions: EntryInsertOptions!) {
+mutation InsertEntry($insertOptions: EntryInsertOptions!) {
     insertEntry(insertOptions: $insertOptions) {
         ...EntryParts
     }
 }
 
-mutation updateEntry($updateOptions: EntryUpdateOptions!) {
+mutation UpdateEntry($updateOptions: EntryUpdateOptions!) {
     updateEntry(updateOptions: $updateOptions) {
         ...EntryParts
     }
 }
 
-mutation deleteEntry($deleteOptions: DeleteOptions!) {
+mutation DeleteEntry($deleteOptions: DeleteOptions!) {
   deleteEntry(deleteOptions: $deleteOptions) {
     ...EntryParts
   }

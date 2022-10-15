@@ -1,4 +1,4 @@
-query getCultures($fetchOptions: CultureFetchOptions!) {
+query GetCultures($fetchOptions: CultureFetchOptions!) {
     cultures(fetchOptions: $fetchOptions) {
         total
         page
@@ -9,13 +9,13 @@ query getCultures($fetchOptions: CultureFetchOptions!) {
     }
 }
 
-query getCulture($fetchOptions: CultureFetchOptions!) {
+query GetCulture($fetchOptions: CultureFetchOptions!) {
     culture(fetchOptions: $fetchOptions) {
         ...CultureParts
     }
 }
 
-query getUnpairedCultures($fetchOptions: CultureFetchUnpairedOptions!) {
+query GetUnpairedCultures($fetchOptions: CultureFetchUnpairedOptions!) {
     unpairedCultures(fetchOptions: $fetchOptions) {
         total
         page
@@ -26,7 +26,7 @@ query getUnpairedCultures($fetchOptions: CultureFetchUnpairedOptions!) {
     }
 }
 
-query getPairedCultures($fetchOptions: CultureFetchUnpairedOptions!) {
+query GetPairedCultures($fetchOptions: CultureFetchUnpairedOptions!) {
     pairedCultures(fetchOptions: $fetchOptions) {
         total
         page
@@ -37,19 +37,19 @@ query getPairedCultures($fetchOptions: CultureFetchUnpairedOptions!) {
     }
 }
 
-mutation insertCulture($insertOptions: CultureInsertOptions!) {
+mutation InsertCulture($insertOptions: CultureInsertOptions!) {
     insertCulture(insertOptions: $insertOptions) {
         ...CultureParts
     }
 }
 
-mutation updateCulture($updateOptions: CultureUpdateOptions!) {
+mutation UpdateCulture($updateOptions: CultureUpdateOptions!) {
     updateCulture(updateOptions: $updateOptions) {
         ...CultureParts
     }
 }
 
-mutation deleteCulture($deleteOptions: DeleteOptions!) {
+mutation DeleteCulture($deleteOptions: DeleteOptions!) {
     deleteCulture(deleteOptions: $deleteOptions) {
         ...CultureParts
     }

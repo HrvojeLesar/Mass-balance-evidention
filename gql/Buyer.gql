@@ -1,4 +1,4 @@
-query getBuyers($fetchOptions: BuyerFetchOptions!) {
+query GetBuyers($fetchOptions: BuyerFetchOptions!) {
     buyers(fetchOptions: $fetchOptions) {
         total
         page
@@ -9,25 +9,25 @@ query getBuyers($fetchOptions: BuyerFetchOptions!) {
     }
 }
 
-query getBuyer($fetchOptions: BuyerFetchOptions!) {
+query GetBuyer($fetchOptions: BuyerFetchOptions!) {
     buyer(fetchOptions: $fetchOptions) {
         ...BuyerParts
     }
 }
 
-mutation insertBuyer($insertOptions: BuyerInsertOptions!) {
+mutation InsertBuyer($insertOptions: BuyerInsertOptions!) {
     insertBuyer(insertOptions: $insertOptions) {
         ...BuyerParts
     }
 }
 
-mutation updateBuyer($updateOptions: BuyerUpdateOptions!) {
+mutation UpdateBuyer($updateOptions: BuyerUpdateOptions!) {
     updateBuyer(updateOptions: $updateOptions) {
         ...BuyerParts
     }
 }
 
-mutation deleteBuyer($deleteOptions: DeleteOptions!) {
+mutation DeleteBuyer($deleteOptions: DeleteOptions!) {
     deleteBuyer(deleteOptions: $deleteOptions) {
         ...BuyerParts
     }

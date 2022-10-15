@@ -1,4 +1,4 @@
-query getCells($fetchOptions: CellFetchOptions!) {
+query GetCells($fetchOptions: CellFetchOptions!) {
     cells(fetchOptions: $fetchOptions) {
         total
         page
@@ -9,13 +9,13 @@ query getCells($fetchOptions: CellFetchOptions!) {
     }
 }
 
-query getCell($fetchOptions: CellFetchOptions!) {
+query GetCell($fetchOptions: CellFetchOptions!) {
     cell(fetchOptions: $fetchOptions) {
         ...CellParts
     }
 }
 
-query getUnpairedCells($fetchOptions: CellFetchUnpairedOptions!) {
+query GetUnpairedCells($fetchOptions: CellFetchUnpairedOptions!) {
     unpairedCells(fetchOptions: $fetchOptions) {
         total
         page
@@ -26,7 +26,7 @@ query getUnpairedCells($fetchOptions: CellFetchUnpairedOptions!) {
     }
 }
 
-query getPairedCells($fetchOptions: CellFetchUnpairedOptions!) {
+query GetPairedCells($fetchOptions: CellFetchUnpairedOptions!) {
     pairedCells(fetchOptions: $fetchOptions) {
         total
         page
@@ -37,19 +37,19 @@ query getPairedCells($fetchOptions: CellFetchUnpairedOptions!) {
     }
 }
 
-mutation insertCell($insertOptions: CellInsertOptions!) {
+mutation InsertCell($insertOptions: CellInsertOptions!) {
     insertCell(insertOptions: $insertOptions) {
         ...CellParts
     }
 }
 
-mutation updateCell($updateOptions: CellUpdateOptions!) {
+mutation UpdateCell($updateOptions: CellUpdateOptions!) {
     updateCell(updateOptions: $updateOptions) {
         ...CellParts
     }
 }
 
-mutation deleteCell($deleteOptions: DeleteOptions!) {
+mutation DeleteCell($deleteOptions: DeleteOptions!) {
     deleteCell(deleteOptions: $deleteOptions) {
         ...CellParts
     }

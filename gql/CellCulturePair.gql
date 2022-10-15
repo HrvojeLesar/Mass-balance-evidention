@@ -1,7 +1,7 @@
 #import "./Cell.gql"
 #import "./Culture.gql"
 
-query getCellCulturesPairs($fetchOptions: CellCulturePairFetchOptions!) {
+query GetCellCulturesPairs($fetchOptions: CellCulturePairFetchOptions!) {
     cellCulturePairs(fetchOptions: $fetchOptions) {
         total
         page
@@ -12,7 +12,7 @@ query getCellCulturesPairs($fetchOptions: CellCulturePairFetchOptions!) {
     }
 }
 
-query getAllCellCultureParis($fetchOptions: CellCulturePairFetchOptions!) {
+query GetAllCellCultureParis($fetchOptions: CellCulturePairFetchOptions!) {
     getAllCellCulturePairs(fetchOptions: $fetchOptions) {
         total
         results {
@@ -22,25 +22,25 @@ query getAllCellCultureParis($fetchOptions: CellCulturePairFetchOptions!) {
 }
 
 
-query getCellCulturePair($fetchOptions: CellCulturePairFetchOptions!) {
+query GetCellCulturePair($fetchOptions: CellCulturePairFetchOptions!) {
     cellCulture(fetchOptions: $fetchOptions) {
         ...CellCultureParts
     }
 }
 
-mutation insertCellCulturePair($insertOptions: CellCulturePairInsertOptions!) {
+mutation InsertCellCulturePair($insertOptions: CellCulturePairInsertOptions!) {
     insertCellCulturePair(insertOptions: $insertOptions) {
         ...CellCultureParts
     }
 }
 
-mutation updateCellCulturePair($updateOptions: CellCulturePairUpdateOptions!) {
+mutation UpdateCellCulturePair($updateOptions: CellCulturePairUpdateOptions!) {
     updateCellCulturePair(updateOptions: $updateOptions) {
         ...CellCultureParts
     }
 }
 
-mutation deleteCellCulturePair($deleteOptions: CellCulturePairDeleteOptions!) {
+mutation DeleteCellCulturePair($deleteOptions: CellCulturePairDeleteOptions!) {
   deleteCellCulturePair(deleteOptions: $deleteOptions) {
     ...CellCultureParts
   }
