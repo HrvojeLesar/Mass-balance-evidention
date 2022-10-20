@@ -1,8 +1,10 @@
+use std::sync::Arc;
+
 use anyhow::Result;
 use async_graphql::{Context, Enum, InputObject, Object, OneofObject, SimpleObject};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use sqlx::{FromRow, Postgres, Row, Transaction};
+use sqlx::{query_builder::Separated, FromRow, Postgres, Row, Transaction};
 
 use crate::DatabasePool;
 
@@ -11,11 +13,12 @@ use super::{
     cell::Cell,
     cell_culture_pair::{CellCulturePair, CellCulturePairInsertOptions},
     culture::Culture,
+    data_group::DataGroup,
     db_query::{DatabaseQueries, QueryBuilderHelpers},
     DeleteOptions, FetchMany, FetchOptions, FieldsToSql, OptionalId, Pagination,
 };
 
-type EntryFetchOptions = FetchOptions<EntryFields, EntryFetchIdOptions>;
+type EntryFetchOptions = FetchOptions<EntryFields, EntryFetchIdOptions, EntryOrderingFields>;
 type Entries = FetchMany<Entry>;
 type EntryGroups = FetchMany<EntryGroup>;
 
@@ -28,6 +31,7 @@ pub(super) struct Entry {
     pub(super) created_at: DateTime<Utc>,
     pub(super) buyer: Option<Buyer>,
     pub(super) cell_culture_pair: Option<CellCulturePair>,
+    pub(super) d_group: Option<Arc<DataGroup>>,
 }
 
 #[derive(Enum, Clone, Copy, PartialEq, Eq)]
@@ -48,19 +52,49 @@ impl FieldsToSql for EntryFields {}
 impl ToString for EntryFields {
     fn to_string(&self) -> String {
         match self {
-            EntryFields::Weight => "weight".to_string(),
-            EntryFields::Date => "date".to_string(),
-            EntryFields::BuyerName => "buyer.name".to_string(),
-            EntryFields::BuyerAddress => "buyer.address".to_string(),
-            EntryFields::BuyerContact => "buyer.contact".to_string(),
-            EntryFields::CellName => "cell.name".to_string(),
-            EntryFields::CellDescription => "cell.description".to_string(),
-            EntryFields::CultureName => "culture.name".to_string(),
-            EntryFields::CultureDescription => "culture.description".to_string(),
+            Self::Weight => "weight".to_string(),
+            Self::Date => "date".to_string(),
+            Self::BuyerName => "buyer.name".to_string(),
+            Self::BuyerAddress => "buyer.address".to_string(),
+            Self::BuyerContact => "buyer.contact".to_string(),
+            Self::CellName => "cell.name".to_string(),
+            Self::CellDescription => "cell.description".to_string(),
+            Self::CultureName => "culture.name".to_string(),
+            Self::CultureDescription => "culture.description".to_string(),
         }
     }
 }
 
+#[derive(Enum, Clone, Copy, PartialEq, Eq)]
+pub(super) enum EntryOrderingFields {
+    Weight,
+    Date,
+    BuyerName,
+    BuyerAddress,
+    BuyerContact,
+    CellName,
+    CellDescription,
+    CultureName,
+    CultureDescription,
+}
+
+impl FieldsToSql for EntryOrderingFields {}
+
+impl ToString for EntryOrderingFields {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Weight => "e_weight".to_string(),
+            Self::Date => "e_date".to_string(),
+            Self::BuyerName => "b_name".to_string(),
+            Self::BuyerAddress => "b_address".to_string(),
+            Self::BuyerContact => "b_contact".to_string(),
+            Self::CellName => "c_name".to_string(),
+            Self::CellDescription => "c_desc".to_string(),
+            Self::CultureName => "cu_name".to_string(),
+            Self::CultureDescription => "cu_desc".to_string(),
+        }
+    }
+}
 #[derive(InputObject)]
 pub(super) struct EntryInsertOptions {
     pub(super) date: DateTime<Utc>,
@@ -68,6 +102,7 @@ pub(super) struct EntryInsertOptions {
     pub(super) weight_type: Option<String>,
     pub(super) id_buyer: Option<i32>,
     pub(super) cell_culture_pair: CellCulturePairInsertOptions,
+    pub(super) d_group: Option<i32>,
 }
 
 #[derive(InputObject)]
@@ -78,6 +113,7 @@ pub(super) struct EntryUpdateOptions {
     pub(super) date: Option<DateTime<Utc>>,
     pub(super) id_buyer: Option<i32>,
     pub(super) cell_culture_pair: Option<CellCulturePairInsertOptions>,
+    pub(super) d_group: Option<i32>,
 }
 
 #[derive(Enum, Clone, Copy, PartialEq, Eq)]
@@ -168,8 +204,8 @@ impl DatabaseQueries<Postgres> for Entry {
     ) -> Result<Self> {
         let partial_entry = sqlx::query!(
             "
-            INSERT INTO entry (date, weight, weight_type, id_buyer, id_cell, id_culture)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO entry (date, weight, weight_type, id_buyer, id_cell, id_culture, d_group)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING id
             ",
             options.date,
@@ -178,6 +214,7 @@ impl DatabaseQueries<Postgres> for Entry {
             options.id_buyer,
             options.cell_culture_pair.id_cell,
             options.cell_culture_pair.id_culture,
+            options.d_group,
         )
         .fetch_one(&mut *executor)
         .await?;
@@ -190,6 +227,7 @@ impl DatabaseQueries<Postgres> for Entry {
                         id: Some(partial_entry.id),
                     })),
                 },
+                data_group_id: options.d_group,
                 page: None,
                 limit: None,
                 filters: None,
@@ -203,9 +241,14 @@ impl DatabaseQueries<Postgres> for Entry {
         executor: &mut Transaction<'_, Postgres>,
         options: &EntryFetchOptions,
     ) -> Result<Entries> {
-        let mut builder = sqlx::QueryBuilder::new(
-            "
-            SELECT
+        let mut builder = sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER() as total_count FROM ");
+        Self::filter_and_order_with_score(
+            "entry",
+            options,
+            "entry.id",
+            &mut builder,
+            Some(
+                "
                 entry.id as e_id,
                 entry.weight as e_weight,
                 entry.weight_type as e_weight_type,
@@ -228,43 +271,61 @@ impl DatabaseQueries<Postgres> for Entry {
                 culture.description as cu_desc,
                 culture.created_at as cu_created_at,
                 cell_culture_pair.created_at as ccp_created_at,
-                COUNT(*) OVER() as total_count
-            FROM entry
-            INNER JOIN buyer ON buyer.id = entry.id_buyer
-            INNER JOIN cell ON cell.id = entry.id_cell
-            INNER JOIN culture ON culture.id = entry.id_culture
-            INNER JOIN cell_culture_pair ON
-                cell_culture_pair.id_cell = entry.id_cell AND
-                cell_culture_pair.id_culture = entry.id_culture
-            ",
+                entry.d_group
+                ",
+            ),
+            Some(
+                "
+                INNER JOIN buyer ON buyer.id = entry.id_buyer
+                INNER JOIN cell ON cell.id = entry.id_cell
+                INNER JOIN culture ON culture.id = entry.id_culture
+                INNER JOIN cell_culture_pair ON
+                    cell_culture_pair.id_cell = entry.id_cell AND
+                    cell_culture_pair.id_culture = entry.id_culture
+                ",
+            ),
+            Some(|separator: &mut Separated<_, &str>| {
+                if let Some(id) = options.data_group_id {
+                    separator.push("entry.d_group = ").push_bind_unseparated(id);
+                } else {
+                    separator.push("entry.d_group = 1 ");
+                }
+
+                match &options.id.id_type {
+                    Some(i) => match i {
+                        EntryFetchIdOptionsEnum::CellId(id) => {
+                            separator
+                                .push("WHERE entry.id_cell = ")
+                                .push_bind_unseparated(id.id);
+                        }
+                        EntryFetchIdOptionsEnum::CultureId(id) => {
+                            separator
+                                .push("WHERE entry.id_culture = ")
+                                .push_bind_unseparated(id.id);
+                        }
+                        EntryFetchIdOptionsEnum::Id(id) => {
+                            separator
+                                .push("WHERE entry.id = ")
+                                .push_bind_unseparated(id.id);
+                        }
+                    },
+                    None => {}
+                };
+            }),
         );
-
-        let push_where = match &options.id.id_type {
-            Some(i) => match i {
-                EntryFetchIdOptionsEnum::CellId(id) => {
-                    builder.push("WHERE entry.id_cell = ").push_bind(id.id);
-                    false
-                }
-                EntryFetchIdOptionsEnum::CultureId(id) => {
-                    builder.push("WHERE entry.id_culture = ").push_bind(id.id);
-                    false
-                }
-                EntryFetchIdOptionsEnum::Id(id) => {
-                    builder.push("WHERE entry.id = ").push_bind(id.id);
-                    false
-                }
-            },
-            None => true,
-        };
-
-        Self::filter(&options.filters, &mut builder, push_where);
-        Self::order_by(&options.ordering, "entry.id", &mut builder);
         Self::paginate(options.limit, options.page, &mut builder);
-        let rows = builder.build().fetch_all(executor).await?;
+
+        let rows = builder.build().fetch_all(&mut *executor).await?;
 
         let total = match rows.first() {
             Some(t) => t.try_get("total_count")?,
             None => 0,
+        };
+
+        let d_group = if let Some(id) = options.data_group_id {
+            Some(Arc::new(DataGroup::get(&mut *executor, id).await?))
+        } else {
+            None
         };
 
         let mut entries = Vec::with_capacity(rows.len());
@@ -281,6 +342,7 @@ impl DatabaseQueries<Postgres> for Entry {
                     address: e.try_get("b_address")?,
                     contact: e.try_get("b_contact")?,
                     created_at: e.try_get("c_created_at")?,
+                    d_group: d_group.clone(),
                 }),
                 cell_culture_pair: Some(CellCulturePair {
                     created_at: e.try_get("ccp_created_at")?,
@@ -289,14 +351,18 @@ impl DatabaseQueries<Postgres> for Entry {
                         name: e.try_get("c_name")?,
                         description: e.try_get("c_desc")?,
                         created_at: e.try_get("c_created_at")?,
+                        d_group: d_group.clone(),
                     }),
                     culture: Some(Culture {
                         id: e.try_get("cu_id")?,
                         name: e.try_get("cu_name")?,
                         description: e.try_get("cu_desc")?,
                         created_at: e.try_get("cu_created_at")?,
+                        d_group: d_group.clone(),
                     }),
+                    d_group: d_group.clone(),
                 }),
+                d_group: d_group.clone(),
             })
         }
 
@@ -334,6 +400,7 @@ impl DatabaseQueries<Postgres> for Entry {
                 entry.id_buyer as e_id_buyer,
                 entry.id_cell as e_id_cell,
                 entry.id_culture as e_id_culture,
+                entry.d_group as e_d_group,
                 buyer.id as b_id,
                 buyer.name as b_name,
                 buyer.address as b_address,
@@ -347,7 +414,8 @@ impl DatabaseQueries<Postgres> for Entry {
                 culture.name as cu_name,
                 culture.description as cu_desc,
                 culture.created_at as cu_created_at,
-                cell_culture_pair.created_at as ccp_created_at
+                cell_culture_pair.created_at as ccp_created_at,
+                entry.d_group
             FROM entry
             INNER JOIN buyer ON buyer.id = entry.id_buyer
             INNER JOIN cell ON cell.id = entry.id_cell
@@ -362,6 +430,10 @@ impl DatabaseQueries<Postgres> for Entry {
         .fetch_one(&mut *executor)
         .await?;
 
+        let d_group = Some(Arc::new(
+            DataGroup::get(&mut *executor, r.e_d_group.unwrap_or(1)).await?,
+        ));
+
         Ok(Self {
             id: r.e_id,
             weight: r.e_weight,
@@ -374,6 +446,7 @@ impl DatabaseQueries<Postgres> for Entry {
                 address: r.b_address,
                 contact: r.b_contact,
                 created_at: r.c_created_at,
+                d_group: d_group.clone(),
             }),
             cell_culture_pair: Some(CellCulturePair {
                 created_at: r.ccp_created_at,
@@ -382,14 +455,18 @@ impl DatabaseQueries<Postgres> for Entry {
                     name: r.c_name,
                     description: r.c_desc,
                     created_at: r.c_created_at,
+                    d_group: d_group.clone(),
                 }),
                 culture: Some(Culture {
                     id: r.cu_id,
                     name: r.cu_name,
                     description: r.cu_desc,
                     created_at: r.cu_created_at,
+                    d_group: d_group.clone(),
                 }),
+                d_group: d_group.clone(),
             }),
+            d_group,
         })
     }
 
@@ -434,6 +511,7 @@ impl DatabaseQueries<Postgres> for Entry {
                         id: Some(r.try_get("id")?),
                     })),
                 },
+                data_group_id: options.d_group,
                 page: None,
                 limit: None,
                 filters: None,
@@ -450,7 +528,7 @@ impl DatabaseQueries<Postgres> for Entry {
         let mut builder: sqlx::QueryBuilder<Postgres> =
             sqlx::QueryBuilder::new("DELETE FROM entry ");
         builder.push("WHERE id = ").push_bind(options.id).push(
-            "RETURNING id, id_cell, id_culture, id_buyer, weight, weight_type, created_at, date",
+            "RETURNING id, id_cell, id_culture, id_buyer, weight, weight_type, created_at, date, d_group",
         );
 
         let query = builder.build();
@@ -459,7 +537,9 @@ impl DatabaseQueries<Postgres> for Entry {
         let id_buyer: i32 = row.try_get("id_buyer")?;
         let id_cell: i32 = row.try_get("id_cell")?;
         let id_culture: i32 = row.try_get("id_culture")?;
+        let id_data_group: Option<i32> = row.try_get("d_group")?;
 
+        // WARN: Might fail if entry has no defined data_group
         let r = sqlx::query!(
             "
         SELECT 
@@ -476,20 +556,33 @@ impl DatabaseQueries<Postgres> for Entry {
             culture.name as cu_name,
             culture.description as cu_desc,
             culture.created_at as cu_created_at,
-            cell_culture_pair.created_at as ccp_created_at
-        FROM buyer, cell, culture, cell_culture_pair
+            cell_culture_pair.created_at as ccp_created_at,
+            data_group.id as d_g_id,
+            data_group.name as d_g_name,
+            data_group.description as d_g_description,
+            data_group.created_at as d_g_created_at
+        FROM buyer, cell, culture, cell_culture_pair, data_group
         WHERE 
             buyer.id = $1 AND
             cell.id = $2 AND
             culture.id = $3 AND
-            cell_culture_pair.id_cell = $2 AND cell_culture_pair.id_culture = $3
+            cell_culture_pair.id_cell = $2 AND cell_culture_pair.id_culture = $3 AND
+            data_group.id = $4
         ",
             id_buyer,
             id_cell,
             id_culture,
+            id_data_group,
         )
         .fetch_one(&mut *executor)
         .await?;
+
+        let d_group = Some(Arc::new(DataGroup {
+            id: r.d_g_id,
+            name: r.d_g_name,
+            created_at: r.d_g_created_at,
+            description: r.d_g_description,
+        }));
 
         Ok(Self {
             id: row.try_get("id")?,
@@ -503,6 +596,7 @@ impl DatabaseQueries<Postgres> for Entry {
                 address: r.b_address,
                 contact: r.b_contact,
                 created_at: r.b_created_at,
+                d_group: d_group.clone(),
             }),
             cell_culture_pair: Some(CellCulturePair {
                 created_at: r.ccp_created_at,
@@ -511,14 +605,18 @@ impl DatabaseQueries<Postgres> for Entry {
                     name: r.c_name,
                     description: r.c_desc,
                     created_at: r.c_created_at,
+                    d_group: d_group.clone(),
                 }),
                 culture: Some(Culture {
                     id: r.cu_id,
                     name: r.cu_name,
                     description: r.cu_desc,
                     created_at: r.cu_created_at,
+                    d_group: d_group.clone(),
                 }),
+                d_group: d_group.clone(),
             }),
+            d_group,
         })
     }
 }
@@ -612,9 +710,14 @@ impl EntryQuery {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let mut builder = sqlx::QueryBuilder::new(
-            "
-            SELECT
+        let mut builder = sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER() as total_count FROM ");
+        Entry::filter_and_order_with_score(
+            "entry",
+            &fetch_options,
+            "entry.id",
+            &mut builder,
+            Some(
+                "
                 entry.id as e_id,
                 entry.weight as e_weight,
                 entry.weight_type as e_weight_type,
@@ -637,24 +740,59 @@ impl EntryQuery {
                 culture.description as cu_desc,
                 culture.created_at as cu_created_at,
                 cell_culture_pair.created_at as ccp_created_at,
-                COUNT(*) OVER() as total_count
-            FROM entry
-            INNER JOIN buyer ON buyer.id = entry.id_buyer
-            INNER JOIN cell ON cell.id = entry.id_cell
-            INNER JOIN culture ON culture.id = entry.id_culture
-            INNER JOIN cell_culture_pair ON
-                cell_culture_pair.id_cell = entry.id_cell AND
-                cell_culture_pair.id_culture = entry.id_culture
-            ",
-        );
+                entry.d_group
+                ",
+            ),
+            Some(
+                "
+                INNER JOIN buyer ON buyer.id = entry.id_buyer
+                INNER JOIN cell ON cell.id = entry.id_cell
+                INNER JOIN culture ON culture.id = entry.id_culture
+                INNER JOIN cell_culture_pair ON
+                    cell_culture_pair.id_cell = entry.id_cell AND
+                    cell_culture_pair.id_culture = entry.id_culture
+                ",
+            ),
+            Some(|separator: &mut Separated<_, &str>| {
+                if let Some(id) = fetch_options.data_group_id {
+                    separator.push("entry.d_group = ").push_bind_unseparated(id);
+                } else {
+                    separator.push("entry.d_group = 1 ");
+                }
 
-        Entry::filter(&fetch_options.filters, &mut builder, true);
-        Entry::order_by(&fetch_options.ordering, "entry.id", &mut builder);
+                match &fetch_options.id.id_type {
+                    Some(i) => match i {
+                        EntryFetchIdOptionsEnum::CellId(id) => {
+                            separator
+                                .push("WHERE entry.id_cell = ")
+                                .push_bind_unseparated(id.id);
+                        }
+                        EntryFetchIdOptionsEnum::CultureId(id) => {
+                            separator
+                                .push("WHERE entry.id_culture = ")
+                                .push_bind_unseparated(id.id);
+                        }
+                        EntryFetchIdOptionsEnum::Id(id) => {
+                            separator
+                                .push("WHERE entry.id = ")
+                                .push_bind_unseparated(id.id);
+                        }
+                    },
+                    None => {}
+                };
+            }),
+        );
         let rows = builder.build().fetch_all(&mut transaction).await?;
 
         let total = match rows.first() {
             Some(t) => t.try_get("total_count")?,
             None => 0,
+        };
+
+        let d_group = if let Some(id) = fetch_options.data_group_id {
+            Some(Arc::new(DataGroup::get(&mut transaction, id).await?))
+        } else {
+            None
         };
 
         let mut entries = Vec::with_capacity(rows.len());
@@ -671,6 +809,7 @@ impl EntryQuery {
                     address: e.try_get("b_address")?,
                     contact: e.try_get("b_contact")?,
                     created_at: e.try_get("c_created_at")?,
+                    d_group: d_group.clone(),
                 }),
                 cell_culture_pair: Some(CellCulturePair {
                     created_at: e.try_get("ccp_created_at")?,
@@ -679,14 +818,18 @@ impl EntryQuery {
                         name: e.try_get("c_name")?,
                         description: e.try_get("c_desc")?,
                         created_at: e.try_get("c_created_at")?,
+                        d_group: d_group.clone(),
                     }),
                     culture: Some(Culture {
                         id: e.try_get("cu_id")?,
                         name: e.try_get("cu_name")?,
                         description: e.try_get("cu_desc")?,
                         created_at: e.try_get("cu_created_at")?,
+                        d_group: d_group.clone(),
                     }),
+                    d_group: d_group.clone(),
                 }),
+                d_group: d_group.clone(),
             })
         }
 

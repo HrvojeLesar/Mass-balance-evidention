@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use anyhow::Result;
 use async_graphql::{Context, Enum, InputObject, Object, SimpleObject};
 use async_trait::async_trait;
@@ -7,6 +9,7 @@ use sqlx::{FromRow, Postgres, Row, Transaction};
 use crate::DatabasePool;
 
 use super::{
+    data_group::DataGroup,
     db_query::{DatabaseQueries, QueryBuilderHelpers},
     DeleteOptions, FetchMany, FetchOptions, FieldsToSql, Pagination,
 };
@@ -21,6 +24,7 @@ pub(super) struct Buyer {
     pub(super) address: Option<String>,
     pub(super) contact: Option<String>,
     pub(super) created_at: DateTime<Utc>,
+    pub(super) d_group: Option<Arc<DataGroup>>,
     // note: Option<String>,
 }
 
@@ -48,6 +52,7 @@ pub(super) struct BuyerInsertOptions {
     pub(super) name: String,
     pub(super) address: Option<String>,
     pub(super) contact: Option<String>,
+    pub(super) d_group: Option<i32>,
 }
 
 #[derive(InputObject)]
@@ -76,19 +81,34 @@ impl DatabaseQueries<Postgres> for Buyer {
         executor: &mut Transaction<'_, Postgres>,
         options: &BuyerInsertOptions,
     ) -> Result<Self> {
-        Ok(sqlx::query_as!(
-            Self,
+        let rec = sqlx::query!(
             "
-            INSERT INTO buyer (name, address, contact)
-            VALUES ($1, $2, $3)
+            INSERT INTO buyer (name, address, contact, d_group)
+            VALUES ($1, $2, $3, $4)
             RETURNING *
             ",
             options.name,
             options.address,
             options.contact,
+            options.d_group
         )
-        .fetch_one(executor)
-        .await?)
+        .fetch_one(&mut *executor)
+        .await?;
+
+        let d_group = if let Some(id) = options.d_group {
+            Some(Arc::new(DataGroup::get(&mut *executor, id).await?))
+        } else {
+            None
+        };
+
+        Ok(Self {
+            id: rec.id,
+            name: rec.name,
+            address: rec.address,
+            contact: rec.contact,
+            created_at: rec.created_at,
+            d_group,
+        })
     }
 
     async fn get_many(
@@ -97,11 +117,17 @@ impl DatabaseQueries<Postgres> for Buyer {
     ) -> Result<Buyers> {
         let mut builder = sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER() as total_count FROM ");
         Self::handle_fetch_options_with_score(options, "buyer", "id", &mut builder);
-        let r = builder.build().fetch_all(executor).await?;
+        let r = builder.build().fetch_all(&mut *executor).await?;
 
         let total = match r.first() {
             Some(b) => b.try_get("total_count")?,
             None => 0,
+        };
+
+        let d_group = if let Some(id) = options.data_group_id {
+            Some(Arc::new(DataGroup::get(&mut *executor, id).await?))
+        } else {
+            None
         };
 
         let mut buyers = Vec::with_capacity(r.len());
@@ -112,6 +138,7 @@ impl DatabaseQueries<Postgres> for Buyer {
                 address: b.try_get("address")?,
                 contact: b.try_get("contact")?,
                 created_at: b.try_get("created_at")?,
+                d_group: d_group.clone(),
             });
         }
 
@@ -129,16 +156,30 @@ impl DatabaseQueries<Postgres> for Buyer {
         executor: &mut Transaction<'_, Postgres>,
         options: &BuyerFetchOptions,
     ) -> Result<Self> {
-        Ok(sqlx::query_as!(
-            Self,
+        let rec = sqlx::query!(
             "
             SELECT * FROM buyer
             WHERE id = $1
             ",
             options.id.id
         )
-        .fetch_one(executor)
-        .await?)
+        .fetch_one(&mut *executor)
+        .await?;
+
+        let d_group = if let Some(id) = rec.d_group {
+            Some(Arc::new(DataGroup::get(&mut *executor, id).await?))
+        } else {
+            None
+        };
+
+        Ok(Self {
+            id: rec.id,
+            name: rec.name,
+            address: rec.address,
+            contact: rec.contact,
+            created_at: rec.created_at,
+            d_group,
+        })
     }
 
     async fn update(
@@ -162,8 +203,23 @@ impl DatabaseQueries<Postgres> for Buyer {
             .push_bind(options.id)
             .push("RETURNING *");
 
-        let query = builder.build_query_as();
-        Ok(query.fetch_one(executor).await?)
+        let query = builder.build();
+        let rec = query.fetch_one(&mut *executor).await?;
+
+        let d_group = if let Some(id) = rec.try_get("d_group")? {
+            Some(Arc::new(DataGroup::get(&mut *executor, id).await?))
+        } else {
+            None
+        };
+
+        Ok(Self {
+            id: rec.try_get("id")?,
+            name: rec.try_get("name")?,
+            address: rec.try_get("address")?,
+            contact: rec.try_get("contact")?,
+            created_at: rec.try_get("created_at")?,
+            d_group,
+        })
     }
 
     async fn delete(
@@ -177,8 +233,23 @@ impl DatabaseQueries<Postgres> for Buyer {
             .push_bind(options.id)
             .push("RETURNING *");
 
-        let query = builder.build_query_as();
-        Ok(query.fetch_one(executor).await?)
+        let query = builder.build();
+        let rec = query.fetch_one(&mut *executor).await?;
+
+        let d_group = if let Some(id) = rec.try_get("d_group")? {
+            Some(Arc::new(DataGroup::get(&mut *executor, id).await?))
+        } else {
+            None
+        };
+
+        Ok(Self {
+            id: rec.try_get("id")?,
+            name: rec.try_get("name")?,
+            address: rec.try_get("address")?,
+            contact: rec.try_get("contact")?,
+            created_at: rec.try_get("created_at")?,
+            d_group,
+        })
     }
 }
 

@@ -1,13 +1,16 @@
+use std::sync::Arc;
+
 use anyhow::Result;
 use async_graphql::{Context, Enum, InputObject, Object, SimpleObject};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 
-use sqlx::{FromRow, Postgres, Row, Transaction};
+use sqlx::{query_builder::Separated, FromRow, Postgres, Row, Transaction};
 
 use crate::DatabasePool;
 
 use super::{
+    data_group::DataGroup,
     db_query::{DatabaseQueries, QueryBuilderHelpers},
     DeleteOptions, FetchMany, FetchOptions, FieldsToSql, OptionalId, Pagination,
 };
@@ -28,6 +31,7 @@ pub(super) struct Cell {
     pub(super) name: String,
     pub(super) description: Option<String>,
     pub(super) created_at: DateTime<Utc>,
+    pub(super) d_group: Option<Arc<DataGroup>>,
 }
 
 #[derive(Enum, Clone, Copy, PartialEq, Eq)]
@@ -51,6 +55,7 @@ impl ToString for CellFields {
 pub(super) struct CellInsertOptions {
     pub(super) name: String,
     pub(super) description: Option<String>,
+    pub(super) d_group: Option<i32>,
 }
 
 #[derive(InputObject)]
@@ -78,35 +83,52 @@ impl DatabaseQueries<Postgres> for Cell {
         executor: &mut Transaction<'_, Postgres>,
         options: &CellInsertOptions,
     ) -> Result<Self> {
-        Ok(sqlx::query_as!(
-            Self,
+        let rec = sqlx::query!(
             "
-            INSERT INTO cell (name, description)
-            VALUES ($1, $2)
+            INSERT INTO cell (name, description, d_group)
+            VALUES ($1, $2, $3)
             RETURNING *
             ",
             options.name,
             options.description,
+            options.d_group,
         )
-        .fetch_one(executor)
-        .await?)
+        .fetch_one(&mut *executor)
+        .await?;
+
+        let d_group = if let Some(id) = options.d_group {
+            Some(Arc::new(DataGroup::get(&mut *executor, id).await?))
+        } else {
+            None
+        };
+
+        Ok(Self {
+            id: rec.id,
+            name: rec.name,
+            description: rec.description,
+            created_at: rec.created_at,
+            d_group,
+        })
     }
 
     async fn get_many(
         executor: &mut Transaction<'_, Postgres>,
         options: &CellFetchOptions,
     ) -> Result<Cells> {
-        // SELECT *, COUNT(*) OVER() as total FROM
-        // (SELECT *, name <-> 'tž1' as score, description <-> 'amazing' as score2 FROM cell) as cells
-        // WHERE cells.score < 0.3 AND cells.score2 < 0.3 ORDER BY score ASC;
         let mut builder = sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER() as total_count FROM ");
-        Self::handle_fetch_options_with_score(&options, "cell", "id", &mut builder);
+        Self::handle_fetch_options_with_score(options, "cell", "id", &mut builder);
 
-        let r = builder.build().fetch_all(executor).await?;
+        let r = builder.build().fetch_all(&mut *executor).await?;
 
         let total = match r.first() {
             Some(t) => t.try_get("total_count")?,
             None => 0,
+        };
+
+        let d_group = if let Some(id) = options.data_group_id {
+            Some(Arc::new(DataGroup::get(&mut *executor, id).await?))
+        } else {
+            None
         };
 
         let mut cells = Vec::with_capacity(r.len());
@@ -116,6 +138,7 @@ impl DatabaseQueries<Postgres> for Cell {
                 name: c.try_get("name")?,
                 description: c.try_get("description")?,
                 created_at: c.try_get("created_at")?,
+                d_group: d_group.clone(),
             });
         }
 
@@ -133,16 +156,29 @@ impl DatabaseQueries<Postgres> for Cell {
         executor: &mut Transaction<'_, Postgres>,
         options: &CellFetchOptions,
     ) -> Result<Self> {
-        Ok(sqlx::query_as!(
-            Self,
+        let rec = sqlx::query!(
             "
             SELECT * FROM cell
             WHERE id = $1
             ",
-            options.id.id
+            options.id.id,
         )
-        .fetch_one(executor)
-        .await?)
+        .fetch_one(&mut *executor)
+        .await?;
+
+        let d_group = if let Some(id) = rec.d_group {
+            Some(Arc::new(DataGroup::get(&mut *executor, id).await?))
+        } else {
+            None
+        };
+
+        Ok(Self {
+            id: rec.id,
+            name: rec.name,
+            description: rec.description,
+            created_at: rec.created_at,
+            d_group,
+        })
     }
 
     async fn update(
@@ -163,8 +199,22 @@ impl DatabaseQueries<Postgres> for Cell {
             .push_bind(options.id)
             .push("RETURNING *");
 
-        let query = builder.build_query_as();
-        Ok(query.fetch_one(executor).await?)
+        let query = builder.build();
+        let rec = query.fetch_one(&mut *executor).await?;
+
+        let d_group = if let Some(id) = rec.try_get("d_group")? {
+            Some(Arc::new(DataGroup::get(&mut *executor, id).await?))
+        } else {
+            None
+        };
+
+        Ok(Self {
+            id: rec.try_get("id")?,
+            name: rec.try_get("name")?,
+            description: rec.try_get("description")?,
+            created_at: rec.try_get("created_at")?,
+            d_group,
+        })
     }
 
     async fn delete(
@@ -178,8 +228,22 @@ impl DatabaseQueries<Postgres> for Cell {
             .push_bind(options.id)
             .push("RETURNING *");
 
-        let query = builder.build_query_as();
-        Ok(query.fetch_one(executor).await?)
+        let query = builder.build();
+        let rec = query.fetch_one(&mut *executor).await?;
+
+        let d_group = if let Some(id) = rec.try_get("d_group")? {
+            Some(Arc::new(DataGroup::get(&mut *executor, id).await?))
+        } else {
+            None
+        };
+
+        Ok(Self {
+            id: rec.try_get("id")?,
+            name: rec.try_get("name")?,
+            description: rec.try_get("description")?,
+            created_at: rec.try_get("created_at")?,
+            d_group,
+        })
     }
 }
 
@@ -216,32 +280,40 @@ impl CellQuery {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let mut builder = sqlx::QueryBuilder::new(
-            "
-            SELECT *, COUNT(*) OVER() as total_count FROM cell 
-            WHERE cell.id NOT IN
-            (
-                SELECT id_cell FROM cell_culture_pair
-                WHERE cell_culture_pair.id_culture = ",
+        let mut builder = sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER() as total_count FROM ");
+
+        Cell::filter_and_order_with_score(
+            "cell",
+            &fetch_options,
+            "name",
+            &mut builder,
+            None,
+            None,
+            Some(|separator: &mut Separated<_, &str>| {
+                separator
+                    .push(
+                        "cell.id NOT IN 
+                    (
+                        SELECT id_cell FROM cell_culture_pair
+                        WHERE cell_culture_pair.id_culture = ",
+                    )
+                    .push_bind_unseparated(fetch_options.id.id)
+                    .push_unseparated(" ) ");
+            }),
         );
-        builder.push("").push_bind(fetch_options.id.id).push(" ) ");
-
-        if let Some(filters) = &fetch_options.filters {
-            builder.push("AND ");
-            let mut sep = builder.separated(" AND ");
-            for filter in filters {
-                sep.push(&filter.field.to_sql())
-                    .push_bind_unseparated(&filter.value);
-            }
-        }
-
-        Cell::order_by(&fetch_options.ordering, "name", &mut builder);
         Cell::paginate(fetch_options.limit, fetch_options.page, &mut builder);
+
         let r = builder.build().fetch_all(&mut transaction).await?;
 
         let total = match r.first() {
             Some(t) => t.try_get("total_count")?,
             None => 0,
+        };
+
+        let d_group = if let Some(id) = fetch_options.data_group_id {
+            Some(Arc::new(DataGroup::get(&mut transaction, id).await?))
+        } else {
+            None
         };
 
         let mut cells = Vec::with_capacity(r.len());
@@ -251,6 +323,7 @@ impl CellQuery {
                 name: c.try_get("name")?,
                 description: c.try_get("description")?,
                 created_at: c.try_get("created_at")?,
+                d_group: d_group.clone(),
             });
         }
 
@@ -282,35 +355,45 @@ impl CellQuery {
                 page: fetch_options.page,
                 ordering: fetch_options.ordering,
                 filters: fetch_options.filters,
+                data_group_id: fetch_options.data_group_id,
             };
             resp = Cell::get_many(&mut transaction, &fetch_options).await;
         } else {
-            let mut builder = sqlx::QueryBuilder::new(
-                "
-                SELECT *, COUNT(*) OVER() as total_count FROM cell 
-                WHERE cell.id IN
-                (
-                    SELECT id_cell FROM cell_culture_pair
-                    WHERE cell_culture_pair.id_culture = ",
+            let mut builder =
+                sqlx::QueryBuilder::new("SELECT *, COUNT(*) OVER() as total_count FROM ");
+
+            Cell::filter_and_order_with_score(
+                "cell",
+                &fetch_options,
+                "name",
+                &mut builder,
+                None,
+                None,
+                Some(|separator: &mut Separated<_, &str>| {
+                    separator
+                        .push(
+                            "cell.id IN 
+                                (
+                                    SELECT id_cell FROM cell_culture_pair
+                                    WHERE cell_culture_pair.id_culture = ",
+                        )
+                        .push_bind_unseparated(fetch_options.id.id)
+                        .push_unseparated(" ) ");
+                }),
             );
-            builder.push("").push_bind(fetch_options.id.id).push(" ) ");
-
-            if let Some(filters) = &fetch_options.filters {
-                builder.push("AND ");
-                let mut sep = builder.separated(" AND ");
-                for filter in filters {
-                    sep.push(&filter.field.to_sql())
-                        .push_bind_unseparated(&filter.value);
-                }
-            }
-
-            Cell::order_by(&fetch_options.ordering, "name", &mut builder);
             Cell::paginate(fetch_options.limit, fetch_options.page, &mut builder);
+
             let r = builder.build().fetch_all(&mut transaction).await?;
 
             let total = match r.first() {
                 Some(t) => t.try_get("total_count")?,
                 None => 0,
+            };
+
+            let d_group = if let Some(id) = fetch_options.data_group_id {
+                Some(Arc::new(DataGroup::get(&mut transaction, id).await?))
+            } else {
+                None
             };
 
             let mut cells = Vec::with_capacity(r.len());
@@ -320,6 +403,7 @@ impl CellQuery {
                     name: c.try_get("name")?,
                     description: c.try_get("description")?,
                     created_at: c.try_get("created_at")?,
+                    d_group: d_group.clone(),
                 });
             }
 

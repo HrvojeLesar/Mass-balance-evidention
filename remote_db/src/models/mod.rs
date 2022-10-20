@@ -4,13 +4,13 @@ use self::{
     buyer::{Buyer, BuyerFields, BuyerMutation, BuyerQuery},
     cell::{Cell, CellFields, CellMutation, CellQuery, CellUnpairedId},
     cell_culture_pair::{
-        CellCulturePair, CellCulturePairFields, CellCulturePairIds, CellCulturePairMutation,
-        CellCulturePairQuery, OptionalCellCulturePairIds,
+        CellCultureOrderingFields, CellCulturePair, CellCulturePairFields, CellCulturePairIds,
+        CellCulturePairMutation, CellCulturePairQuery, OptionalCellCulturePairIds,
     },
     culture::{Culture, CultureFields, CultureMutation, CultureQuery, CultureUnpairedId},
     entry::{
         Entry, EntryFetchIdOptions, EntryFields, EntryGroup, EntryGroupFields, EntryMutation,
-        EntryQuery,
+        EntryQuery, EntryOrderingFields,
     },
 };
 
@@ -21,6 +21,7 @@ pub mod culture;
 pub mod db_query;
 pub mod entry;
 pub mod weight_types;
+pub mod data_group;
 
 #[derive(MergedObject, Default)]
 pub struct QueryRoot(
@@ -66,8 +67,11 @@ impl ToString for Ordering {
 #[graphql(concrete(name = "BuyerOrderingOptions", params(BuyerFields)))]
 #[graphql(concrete(name = "CellOrderingOptions", params(CellFields)))]
 #[graphql(concrete(name = "CultureOrderingOptions", params(CultureFields)))]
-#[graphql(concrete(name = "CellCulturePairOrderingOptions", params(CellCulturePairFields)))]
-#[graphql(concrete(name = "EntryOrderingOptions", params(EntryFields)))]
+#[graphql(concrete(
+    name = "CellCulturePairOrderingOptions",
+    params(CellCultureOrderingFields)
+))]
+#[graphql(concrete(name = "EntryOrderingOptions", params(EntryOrderingFields)))]
 #[graphql(concrete(name = "EntryGroupOrderingOptionsBase", params(EntryGroupFields)))]
 pub(super) struct OrderingOptions<T: InputType + ToString> {
     order: Ordering,
@@ -102,22 +106,28 @@ pub struct OptionalId {
 ))]
 #[graphql(concrete(
     name = "CellCulturePairFetchOptions",
-    params(CellCulturePairFields, OptionalCellCulturePairIds)
+    params(
+        CellCulturePairFields,
+        OptionalCellCulturePairIds,
+        CellCultureOrderingFields
+    )
 ))]
-#[graphql(concrete(name = "EntryFetchOptions", params(EntryFields, EntryFetchIdOptions)))]
+#[graphql(concrete(name = "EntryFetchOptions", params(EntryFields, EntryFetchIdOptions, EntryOrderingFields)))]
 #[graphql(concrete(name = "EntryGroupFetchOptionsBase", params(EntryGroupFields)))]
-pub(super) struct FetchOptions<T, I = OptionalId>
+pub(super) struct FetchOptions<T, I = OptionalId, O = T>
 where
     T: InputType + FieldsToSql + ToString,
+    O: InputType + FieldsToSql + ToString,
     I: InputType,
     Filter<T>: InputType,
-    OrderingOptions<T>: InputType,
+    OrderingOptions<O>: InputType,
 {
     pub(super) id: I,
     pub(super) limit: Option<i64>,
     pub(super) page: Option<i64>,
-    pub(super) ordering: Option<OrderingOptions<T>>,
+    pub(super) ordering: Option<OrderingOptions<O>>,
     pub(super) filters: Option<Vec<Filter<T>>>,
+    pub(super) data_group_id: Option<i32>,
 }
 
 #[derive(SimpleObject, Debug)]

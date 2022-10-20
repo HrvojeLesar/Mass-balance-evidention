@@ -1,7 +1,7 @@
 use anyhow::Result;
 use async_graphql::InputType;
 use async_trait::async_trait;
-use sqlx::{Database, QueryBuilder, Transaction};
+use sqlx::{query_builder::Separated, Database, QueryBuilder, Transaction};
 
 use super::{FetchOptions, FieldsToSql, Filter, OrderingOptions};
 
@@ -49,6 +49,8 @@ where
     String: sqlx::Type<DB>,
     i64: sqlx::Encode<'q, DB>,
     i64: sqlx::Type<DB>,
+    i32: sqlx::Encode<'q, DB>,
+    i32: sqlx::Type<DB>,
 {
     fn filter<T: InputType + FieldsToSql>(
         filters: &'q Option<Vec<Filter<T>>>,
@@ -56,7 +58,7 @@ where
         push_where: bool,
     ) {
         if let Some(filters) = filters {
-            if push_where && filters.len() > 0 {
+            if push_where && !filters.is_empty() {
                 builder.push("WHERE ");
             }
             let mut sep = builder.separated(" AND ");
@@ -94,56 +96,109 @@ where
             .push_bind(Self::calc_offset(page, limit));
     }
 
-    fn filter_and_order_with_score<T: InputType + FieldsToSql + Copy>(
+    fn filter_and_order_with_score<T, I, F, O>(
         table_name: &str,
-        filters: &'q Option<Vec<Filter<T>>>,
-        ordering: &Option<OrderingOptions<T>>,
+        options: &'q FetchOptions<T, I, O>,
         order_by_default_column: &str,
         builder: &mut QueryBuilder<'q, DB>,
-    ) {
-        if filters.is_none() {
-            builder.push(&table_name);
-            Self::order_by(&ordering, &order_by_default_column, builder);
-            return;
-        }
+        custom_select_params: Option<&str>,
+        custom_joins: Option<&str>,
+        custom_filter_query: Option<F>,
+    ) where
+        T: InputType + FieldsToSql + ToString,
+        O: InputType + FieldsToSql + ToString,
+        I: InputType,
+        Filter<T>: InputType,
+        OrderingOptions<O>: InputType,
+        F: FnMut(&mut Separated<DB, &str>),
+    {
+        // SELECT *, COUNT(*) OVER() as total FROM
+        // (SELECT *, name <-> 'tž1' as score, description <-> 'amazing' as score2 FROM cell) as cells
+        // WHERE cells.score < 0.3 AND cells.score2 < 0.3 ORDER BY score ASC;
 
-        let order = match ordering {
+        let order = match &options.ordering {
             Some(ord) => ord.order.to_string(),
             None => "ASC".to_string(),
         };
 
-        if let Some(filters) = filters {
-            if filters.len() == 0 {
-                builder.push(&table_name);
-                Self::order_by(&ordering, &order_by_default_column, builder);
-                return;
-            }
-            builder.push("(SELECT *, ");
-            let mut separator = builder.separated(", ");
-            for (idx, filter) in filters.iter().enumerate() {
-                separator
-                    .push(format!("{} <-> ", filter.field.to_string()))
-                    .push_bind_unseparated(&filter.value)
-                    .push_unseparated(format!(" as score_{} ", idx));
-            }
-            builder.push(format!(" FROM {0}) as {0}s WHERE ", table_name));
-            let mut separator = builder.separated(" AND ");
-            for (idx, _) in filters.iter().enumerate() {
-                separator.push(format!("{}s.score_{} < {}", table_name, idx, MAX_SCORE));
-            }
-            builder.push("ORDER BY ");
-            let mut separator = builder.separated(", ");
-            for (idx, _) in filters.iter().enumerate() {
-                separator.push(format!("{}s.score_{} {}", table_name, idx, order));
-            }
+        if let Some(custom_select_params) = custom_select_params {
+            builder.push(format!("(SELECT {} ", custom_select_params));
         }
 
-        match ordering {
+        let num_filters = options
+            .filters
+            .as_ref()
+            .map(|filters| {
+                if filters.is_empty() {
+                    return 0;
+                }
+
+                if custom_select_params.is_none() {
+                    builder.push("(SELECT *, ");
+                } else {
+                    builder.push(",");
+                }
+
+                let mut separator = builder.separated(", ");
+                for (idx, filter) in filters.iter().enumerate() {
+                    separator
+                        .push(format!("{} <-> ", filter.field.to_string()))
+                        .push_bind_unseparated(&filter.value)
+                        .push_unseparated(format!(" as score_{} ", idx));
+                }
+                filters.len()
+            })
+            .unwrap_or(0);
+
+        if num_filters > 0 || custom_filter_query.is_some() || options.data_group_id.is_some() {
+            if num_filters > 0 && custom_joins.is_none() {
+                builder.push(format!(" FROM {0}) as {0} WHERE ", table_name));
+            } else if let Some(custom_joins) = custom_joins {
+                builder.push(format!(
+                    " FROM {0} {1}) as {0} WHERE ",
+                    table_name, custom_joins
+                ));
+            } else {
+                builder.push(format!(" {} WHERE ", table_name));
+            }
+
+            let mut separator = builder.separated(" AND ");
+
+            match options.data_group_id {
+                Some(id) => {
+                    separator
+                        .push(format!("{}.d_group = ", table_name))
+                        .push_bind_unseparated(id);
+                }
+                None => {
+                    separator.push(format!("{}.d_group IS NULL ", table_name));
+                }
+            }
+
+            for idx in 0..num_filters {
+                separator.push(format!("{}.score_{} < {}", table_name, idx, MAX_SCORE));
+            }
+
+            if let Some(mut f) = custom_filter_query {
+                f(&mut separator);
+            }
+        } else {
+            builder.push(format!(" {} ", table_name));
+        }
+
+        builder.push("ORDER BY ");
+        let mut separator = builder.separated(", ");
+
+        for idx in 0..num_filters {
+            separator.push(format!("{}.score_{} {}", table_name, idx, order));
+        }
+
+        match &options.ordering {
             Some(ordering) => {
-                builder.push(format!(", {} {} ", ordering.order_by.to_string(), order));
+                separator.push(format!("{} {} ", ordering.order_by.to_string(), order));
             }
             None => {
-                builder.push(format!(", {} ASC ", order_by_default_column));
+                separator.push(format!("{} ASC ", order_by_default_column));
             }
         }
     }
@@ -175,11 +230,13 @@ where
         OrderingOptions<T>: InputType,
     {
         Self::filter_and_order_with_score(
-            &table_name,
-            &options.filters,
-            &options.ordering,
+            table_name,
+            options,
             order_by_default_column,
             builder,
+            None,
+            None,
+            None::<fn(&mut Separated<_, &str>)>,
         );
         Self::paginate(options.limit, options.page, builder);
     }
