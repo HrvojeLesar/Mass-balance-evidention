@@ -245,7 +245,7 @@ impl DatabaseQueries<Postgres> for Entry {
         Self::filter_and_order_with_score(
             "entry",
             options,
-            "entry.id",
+            "e_id",
             &mut builder,
             Some(
                 "
@@ -714,7 +714,7 @@ impl EntryQuery {
         Entry::filter_and_order_with_score(
             "entry",
             &fetch_options,
-            "entry.id",
+            "e_id",
             &mut builder,
             Some(
                 "
