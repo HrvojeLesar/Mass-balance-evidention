@@ -68,4 +68,7 @@ fragment EntryParts on Entry {
     cellCulturePair {
         ...CellCultureParts
     }
+    dGroup {
+        id
+    }
 }

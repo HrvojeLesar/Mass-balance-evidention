@@ -4,7 +4,7 @@ use anyhow::Result;
 use async_graphql::{Context, Enum, InputObject, Object, SimpleObject};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use sqlx::{FromRow, Postgres, Row, Transaction, query_builder::Separated};
+use sqlx::{query_builder::Separated, FromRow, Postgres, Row, Transaction};
 
 use crate::DatabasePool;
 

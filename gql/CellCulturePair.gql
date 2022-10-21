@@ -54,4 +54,7 @@ fragment CellCultureParts on CellCulturePair {
         ...CultureParts
     }
     createdAt
+    dGroup {
+        id
+    }
 }

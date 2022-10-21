@@ -39,4 +39,7 @@ fragment BuyerParts on Buyer {
     address
     contact
     createdAt
+    dGroup {
+        id
+    }
 }

@@ -43,11 +43,13 @@ export type Buyer = {
   address?: Maybe<Scalars['String']>;
   contact?: Maybe<Scalars['String']>;
   createdAt: Scalars['DateTime'];
+  dGroup?: Maybe<DataGroup>;
   id: Scalars['Int'];
   name?: Maybe<Scalars['String']>;
 };
 
 export type BuyerFetchOptions = {
+  dataGroupId?: InputMaybe<Scalars['Int']>;
   filters?: InputMaybe<Array<BuyerFilterOptions>>;
   id: OptionalId;
   limit?: InputMaybe<Scalars['Int']>;
@@ -69,6 +71,7 @@ export type BuyerFilterOptions = {
 export type BuyerInsertOptions = {
   address?: InputMaybe<Scalars['String']>;
   contact?: InputMaybe<Scalars['String']>;
+  dGroup?: InputMaybe<Scalars['Int']>;
   name: Scalars['String'];
 };
 
@@ -95,16 +98,25 @@ export type Buyers = {
 export type Cell = {
   __typename?: 'Cell';
   createdAt: Scalars['DateTime'];
+  dGroup?: Maybe<DataGroup>;
   description?: Maybe<Scalars['String']>;
   id: Scalars['Int'];
   name: Scalars['String'];
 };
+
+export enum CellCultureOrderingFields {
+  CellDescription = 'CELL_DESCRIPTION',
+  CellName = 'CELL_NAME',
+  CultureDescription = 'CULTURE_DESCRIPTION',
+  CultureName = 'CULTURE_NAME'
+}
 
 export type CellCulturePair = {
   __typename?: 'CellCulturePair';
   cell?: Maybe<Cell>;
   createdAt: Scalars['DateTime'];
   culture?: Maybe<Culture>;
+  dGroup?: Maybe<DataGroup>;
 };
 
 export type CellCulturePairDeleteOptions = {
@@ -112,6 +124,7 @@ export type CellCulturePairDeleteOptions = {
 };
 
 export type CellCulturePairFetchOptions = {
+  dataGroupId?: InputMaybe<Scalars['Int']>;
   filters?: InputMaybe<Array<CellCulturePairFilterOptions>>;
   id: OptionalCellCulturePairIds;
   limit?: InputMaybe<Scalars['Int']>;
@@ -134,16 +147,18 @@ export type CellCulturePairFilterOptions = {
 export type CellCulturePairIds = {
   cellId: Scalars['Int'];
   cultureId: Scalars['Int'];
+  dGroup: Scalars['Int'];
 };
 
 export type CellCulturePairInsertOptions = {
+  dGroup: Scalars['Int'];
   idCell: Scalars['Int'];
   idCulture: Scalars['Int'];
 };
 
 export type CellCulturePairOrderingOptions = {
   order: Ordering;
-  orderBy: CellCulturePairFields;
+  orderBy: CellCultureOrderingFields;
 };
 
 export type CellCulturePairUpdateOptions = {
@@ -151,6 +166,7 @@ export type CellCulturePairUpdateOptions = {
   idCellOld: Scalars['Int'];
   idCultureNew: Scalars['Int'];
   idCultureOld: Scalars['Int'];
+  idDGroup: Scalars['Int'];
 };
 
 export type CellCulturePairs = {
@@ -162,6 +178,7 @@ export type CellCulturePairs = {
 };
 
 export type CellFetchOptions = {
+  dataGroupId?: InputMaybe<Scalars['Int']>;
   filters?: InputMaybe<Array<CellFilterOptions>>;
   id: OptionalId;
   limit?: InputMaybe<Scalars['Int']>;
@@ -170,6 +187,7 @@ export type CellFetchOptions = {
 };
 
 export type CellFetchUnpairedOptions = {
+  dataGroupId?: InputMaybe<Scalars['Int']>;
   filters?: InputMaybe<Array<CellFilterOptions>>;
   id: CellUnpairedId;
   limit?: InputMaybe<Scalars['Int']>;
@@ -188,6 +206,7 @@ export type CellFilterOptions = {
 };
 
 export type CellInsertOptions = {
+  dGroup?: InputMaybe<Scalars['Int']>;
   description?: InputMaybe<Scalars['String']>;
   name: Scalars['String'];
 };
@@ -219,12 +238,14 @@ export type Cells = {
 export type Culture = {
   __typename?: 'Culture';
   createdAt: Scalars['DateTime'];
+  dGroup?: Maybe<DataGroup>;
   description?: Maybe<Scalars['String']>;
   id: Scalars['Int'];
   name: Scalars['String'];
 };
 
 export type CultureFetchOptions = {
+  dataGroupId?: InputMaybe<Scalars['Int']>;
   filters?: InputMaybe<Array<CultureFilterOptions>>;
   id: OptionalId;
   limit?: InputMaybe<Scalars['Int']>;
@@ -233,6 +254,7 @@ export type CultureFetchOptions = {
 };
 
 export type CultureFetchUnpairedOptions = {
+  dataGroupId?: InputMaybe<Scalars['Int']>;
   filters?: InputMaybe<Array<CultureFilterOptions>>;
   id: CultureUnpairedId;
   limit?: InputMaybe<Scalars['Int']>;
@@ -251,6 +273,7 @@ export type CultureFilterOptions = {
 };
 
 export type CultureInsertOptions = {
+  dGroup?: InputMaybe<Scalars['Int']>;
   description?: InputMaybe<Scalars['String']>;
   name: Scalars['String'];
 };
@@ -279,6 +302,19 @@ export type Cultures = {
   total: Scalars['Int'];
 };
 
+export type DataGroup = {
+  __typename?: 'DataGroup';
+  createdAt: Scalars['DateTime'];
+  description?: Maybe<Scalars['String']>;
+  id: Scalars['Int'];
+  name: Scalars['String'];
+};
+
+export type DataGroupInsertOptions = {
+  description?: InputMaybe<Scalars['String']>;
+  name: Scalars['String'];
+};
+
 export type DeleteOptions = {
   id: Scalars['Int'];
 };
@@ -296,6 +332,7 @@ export type Entry = {
   buyer?: Maybe<Buyer>;
   cellCulturePair?: Maybe<CellCulturePair>;
   createdAt: Scalars['DateTime'];
+  dGroup?: Maybe<DataGroup>;
   date: Scalars['DateTime'];
   id: Scalars['Int'];
   weight?: Maybe<Scalars['Float']>;
@@ -313,6 +350,7 @@ export type EntryFetchIdOptionsEnum = {
 };
 
 export type EntryFetchOptions = {
+  dataGroupId?: InputMaybe<Scalars['Int']>;
   filters?: InputMaybe<Array<EntryFilterOptions>>;
   id: EntryFetchIdOptions;
   limit?: InputMaybe<Scalars['Int']>;
@@ -344,6 +382,7 @@ export type EntryGroup = {
 };
 
 export type EntryGroupFetchOptions = {
+  dataGroupId?: InputMaybe<Scalars['Int']>;
   filters?: InputMaybe<Array<EntryGroupFilterOptionsBase>>;
   grouping: EntryGroupOptions;
   id: OptionalId;
@@ -382,19 +421,33 @@ export type EntryGroups = {
 
 export type EntryInsertOptions = {
   cellCulturePair: CellCulturePairInsertOptions;
+  dGroup?: InputMaybe<Scalars['Int']>;
   date: Scalars['DateTime'];
   idBuyer?: InputMaybe<Scalars['Int']>;
   weight?: InputMaybe<Scalars['Float']>;
   weightType?: InputMaybe<Scalars['String']>;
 };
 
+export enum EntryOrderingFields {
+  BuyerAddress = 'BUYER_ADDRESS',
+  BuyerContact = 'BUYER_CONTACT',
+  BuyerName = 'BUYER_NAME',
+  CellDescription = 'CELL_DESCRIPTION',
+  CellName = 'CELL_NAME',
+  CultureDescription = 'CULTURE_DESCRIPTION',
+  CultureName = 'CULTURE_NAME',
+  Date = 'DATE',
+  Weight = 'WEIGHT'
+}
+
 export type EntryOrderingOptions = {
   order: Ordering;
-  orderBy: EntryFields;
+  orderBy: EntryOrderingFields;
 };
 
 export type EntryUpdateOptions = {
   cellCulturePair?: InputMaybe<CellCulturePairInsertOptions>;
+  dGroup?: InputMaybe<Scalars['Int']>;
   date?: InputMaybe<Scalars['DateTime']>;
   id: Scalars['Int'];
   idBuyer?: InputMaybe<Scalars['Int']>;
@@ -408,11 +461,13 @@ export type MutationRoot = {
   deleteCell: Cell;
   deleteCellCulturePair: CellCulturePair;
   deleteCulture: Culture;
+  deleteDataGroup: DataGroup;
   deleteEntry: Entry;
   insertBuyer: Buyer;
   insertCell: Cell;
   insertCellCulturePair: CellCulturePair;
   insertCulture: Culture;
+  insertDataGroup: DataGroup;
   insertEntry: Entry;
   updateBuyer: Buyer;
   updateCell: Cell;
@@ -442,6 +497,11 @@ export type MutationRootDeleteCultureArgs = {
 };
 
 
+export type MutationRootDeleteDataGroupArgs = {
+  deleteOptions: DeleteOptions;
+};
+
+
 export type MutationRootDeleteEntryArgs = {
   deleteOptions: DeleteOptions;
 };
@@ -464,6 +524,11 @@ export type MutationRootInsertCellCulturePairArgs = {
 
 export type MutationRootInsertCultureArgs = {
   insertOptions: CultureInsertOptions;
+};
+
+
+export type MutationRootInsertDataGroupArgs = {
+  insertOptions: DataGroupInsertOptions;
 };
 
 
@@ -499,6 +564,11 @@ export type MutationRootUpdateEntryArgs = {
 export type OptionalCellCulturePairIds = {
   cellId?: InputMaybe<Scalars['Int']>;
   cultureId?: InputMaybe<Scalars['Int']>;
+  /**
+   * Data group should be provided when fetching many
+   * pairs as NULL is not a value that will return any results
+   */
+  dGroup?: InputMaybe<Scalars['Int']>;
 };
 
 export type OptionalId = {
@@ -520,6 +590,7 @@ export type QueryRoot = {
   cells: Cells;
   culture: Culture;
   cultures: Cultures;
+  dataGroups: Array<DataGroup>;
   entries: Entries;
   entry: Entry;
   getAllCellCulturePairs: CellCulturePairs;
@@ -621,204 +692,225 @@ export type GetBuyersQueryVariables = Exact<{
 }>;
 
 
-export type GetBuyersQuery = { __typename?: 'QueryRoot', buyers: { __typename?: 'Buyers', total: number, page: number, limit: number, results: Array<{ __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any }> } };
+export type GetBuyersQuery = { __typename?: 'QueryRoot', buyers: { __typename?: 'Buyers', total: number, page: number, limit: number, results: Array<{ __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null }> } };
 
 export type GetBuyerQueryVariables = Exact<{
   fetchOptions: BuyerFetchOptions;
 }>;
 
 
-export type GetBuyerQuery = { __typename?: 'QueryRoot', buyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } };
+export type GetBuyerQuery = { __typename?: 'QueryRoot', buyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
 export type InsertBuyerMutationVariables = Exact<{
   insertOptions: BuyerInsertOptions;
 }>;
 
 
-export type InsertBuyerMutation = { __typename?: 'MutationRoot', insertBuyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } };
+export type InsertBuyerMutation = { __typename?: 'MutationRoot', insertBuyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
 export type UpdateBuyerMutationVariables = Exact<{
   updateOptions: BuyerUpdateOptions;
 }>;
 
 
-export type UpdateBuyerMutation = { __typename?: 'MutationRoot', updateBuyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } };
+export type UpdateBuyerMutation = { __typename?: 'MutationRoot', updateBuyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
 export type DeleteBuyerMutationVariables = Exact<{
   deleteOptions: DeleteOptions;
 }>;
 
 
-export type DeleteBuyerMutation = { __typename?: 'MutationRoot', deleteBuyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } };
+export type DeleteBuyerMutation = { __typename?: 'MutationRoot', deleteBuyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
-export type BuyerPartsFragment = { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any };
+export type BuyerPartsFragment = { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null };
 
 export type GetCellsQueryVariables = Exact<{
   fetchOptions: CellFetchOptions;
 }>;
 
 
-export type GetCellsQuery = { __typename?: 'QueryRoot', cells: { __typename?: 'Cells', total: number, page: number, limit: number, results: Array<{ __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any }> } };
+export type GetCellsQuery = { __typename?: 'QueryRoot', cells: { __typename?: 'Cells', total: number, page: number, limit: number, results: Array<{ __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null }> } };
 
 export type GetCellQueryVariables = Exact<{
   fetchOptions: CellFetchOptions;
 }>;
 
 
-export type GetCellQuery = { __typename?: 'QueryRoot', cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } };
+export type GetCellQuery = { __typename?: 'QueryRoot', cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
 export type GetUnpairedCellsQueryVariables = Exact<{
   fetchOptions: CellFetchUnpairedOptions;
 }>;
 
 
-export type GetUnpairedCellsQuery = { __typename?: 'QueryRoot', unpairedCells: { __typename?: 'Cells', total: number, page: number, limit: number, results: Array<{ __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any }> } };
+export type GetUnpairedCellsQuery = { __typename?: 'QueryRoot', unpairedCells: { __typename?: 'Cells', total: number, page: number, limit: number, results: Array<{ __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null }> } };
 
 export type GetPairedCellsQueryVariables = Exact<{
   fetchOptions: CellFetchUnpairedOptions;
 }>;
 
 
-export type GetPairedCellsQuery = { __typename?: 'QueryRoot', pairedCells: { __typename?: 'Cells', total: number, page: number, limit: number, results: Array<{ __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any }> } };
+export type GetPairedCellsQuery = { __typename?: 'QueryRoot', pairedCells: { __typename?: 'Cells', total: number, page: number, limit: number, results: Array<{ __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null }> } };
 
 export type InsertCellMutationVariables = Exact<{
   insertOptions: CellInsertOptions;
 }>;
 
 
-export type InsertCellMutation = { __typename?: 'MutationRoot', insertCell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } };
+export type InsertCellMutation = { __typename?: 'MutationRoot', insertCell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
 export type UpdateCellMutationVariables = Exact<{
   updateOptions: CellUpdateOptions;
 }>;
 
 
-export type UpdateCellMutation = { __typename?: 'MutationRoot', updateCell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } };
+export type UpdateCellMutation = { __typename?: 'MutationRoot', updateCell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
 export type DeleteCellMutationVariables = Exact<{
   deleteOptions: DeleteOptions;
 }>;
 
 
-export type DeleteCellMutation = { __typename?: 'MutationRoot', deleteCell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } };
+export type DeleteCellMutation = { __typename?: 'MutationRoot', deleteCell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
-export type CellPartsFragment = { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any };
+export type CellPartsFragment = { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null };
 
 export type GetCellCulturesPairsQueryVariables = Exact<{
   fetchOptions: CellCulturePairFetchOptions;
 }>;
 
 
-export type GetCellCulturesPairsQuery = { __typename?: 'QueryRoot', cellCulturePairs: { __typename?: 'CellCulturePairs', total: number, page: number, limit: number, results: Array<{ __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null }> } };
+export type GetCellCulturesPairsQuery = { __typename?: 'QueryRoot', cellCulturePairs: { __typename?: 'CellCulturePairs', total: number, page: number, limit: number, results: Array<{ __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null }> } };
 
 export type GetAllCellCultureParisQueryVariables = Exact<{
   fetchOptions: CellCulturePairFetchOptions;
 }>;
 
 
-export type GetAllCellCultureParisQuery = { __typename?: 'QueryRoot', getAllCellCulturePairs: { __typename?: 'CellCulturePairs', total: number, results: Array<{ __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null }> } };
+export type GetAllCellCultureParisQuery = { __typename?: 'QueryRoot', getAllCellCulturePairs: { __typename?: 'CellCulturePairs', total: number, results: Array<{ __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null }> } };
 
 export type GetCellCulturePairQueryVariables = Exact<{
   fetchOptions: CellCulturePairFetchOptions;
 }>;
 
 
-export type GetCellCulturePairQuery = { __typename?: 'QueryRoot', cellCulture: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } };
+export type GetCellCulturePairQuery = { __typename?: 'QueryRoot', cellCulture: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
 export type InsertCellCulturePairMutationVariables = Exact<{
   insertOptions: CellCulturePairInsertOptions;
 }>;
 
 
-export type InsertCellCulturePairMutation = { __typename?: 'MutationRoot', insertCellCulturePair: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } };
+export type InsertCellCulturePairMutation = { __typename?: 'MutationRoot', insertCellCulturePair: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
 export type UpdateCellCulturePairMutationVariables = Exact<{
   updateOptions: CellCulturePairUpdateOptions;
 }>;
 
 
-export type UpdateCellCulturePairMutation = { __typename?: 'MutationRoot', updateCellCulturePair: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } };
+export type UpdateCellCulturePairMutation = { __typename?: 'MutationRoot', updateCellCulturePair: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
 export type DeleteCellCulturePairMutationVariables = Exact<{
   deleteOptions: CellCulturePairDeleteOptions;
 }>;
 
 
-export type DeleteCellCulturePairMutation = { __typename?: 'MutationRoot', deleteCellCulturePair: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } };
+export type DeleteCellCulturePairMutation = { __typename?: 'MutationRoot', deleteCellCulturePair: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
-export type CellCulturePartsFragment = { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null };
+export type CellCulturePartsFragment = { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null };
 
 export type GetCulturesQueryVariables = Exact<{
   fetchOptions: CultureFetchOptions;
 }>;
 
 
-export type GetCulturesQuery = { __typename?: 'QueryRoot', cultures: { __typename?: 'Cultures', total: number, page: number, limit: number, results: Array<{ __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any }> } };
+export type GetCulturesQuery = { __typename?: 'QueryRoot', cultures: { __typename?: 'Cultures', total: number, page: number, limit: number, results: Array<{ __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null }> } };
 
 export type GetCultureQueryVariables = Exact<{
   fetchOptions: CultureFetchOptions;
 }>;
 
 
-export type GetCultureQuery = { __typename?: 'QueryRoot', culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } };
+export type GetCultureQuery = { __typename?: 'QueryRoot', culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
 export type GetUnpairedCulturesQueryVariables = Exact<{
   fetchOptions: CultureFetchUnpairedOptions;
 }>;
 
 
-export type GetUnpairedCulturesQuery = { __typename?: 'QueryRoot', unpairedCultures: { __typename?: 'Cultures', total: number, page: number, limit: number, results: Array<{ __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any }> } };
+export type GetUnpairedCulturesQuery = { __typename?: 'QueryRoot', unpairedCultures: { __typename?: 'Cultures', total: number, page: number, limit: number, results: Array<{ __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null }> } };
 
 export type GetPairedCulturesQueryVariables = Exact<{
   fetchOptions: CultureFetchUnpairedOptions;
 }>;
 
 
-export type GetPairedCulturesQuery = { __typename?: 'QueryRoot', pairedCultures: { __typename?: 'Cultures', total: number, page: number, limit: number, results: Array<{ __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any }> } };
+export type GetPairedCulturesQuery = { __typename?: 'QueryRoot', pairedCultures: { __typename?: 'Cultures', total: number, page: number, limit: number, results: Array<{ __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null }> } };
 
 export type InsertCultureMutationVariables = Exact<{
   insertOptions: CultureInsertOptions;
 }>;
 
 
-export type InsertCultureMutation = { __typename?: 'MutationRoot', insertCulture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } };
+export type InsertCultureMutation = { __typename?: 'MutationRoot', insertCulture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
 export type UpdateCultureMutationVariables = Exact<{
   updateOptions: CultureUpdateOptions;
 }>;
 
 
-export type UpdateCultureMutation = { __typename?: 'MutationRoot', updateCulture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } };
+export type UpdateCultureMutation = { __typename?: 'MutationRoot', updateCulture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
 export type DeleteCultureMutationVariables = Exact<{
   deleteOptions: DeleteOptions;
 }>;
 
 
-export type DeleteCultureMutation = { __typename?: 'MutationRoot', deleteCulture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } };
+export type DeleteCultureMutation = { __typename?: 'MutationRoot', deleteCulture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
-export type CulturePartsFragment = { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any };
+export type CulturePartsFragment = { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null };
+
+export type GetDataGroupsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetDataGroupsQuery = { __typename?: 'QueryRoot', dataGroups: Array<{ __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any }> };
+
+export type InsertDataGroupMutationVariables = Exact<{
+  insertOptions: DataGroupInsertOptions;
+}>;
+
+
+export type InsertDataGroupMutation = { __typename?: 'MutationRoot', insertDataGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } };
+
+export type DeleteDataGroupMutationVariables = Exact<{
+  deleteOptions: DeleteOptions;
+}>;
+
+
+export type DeleteDataGroupMutation = { __typename?: 'MutationRoot', deleteDataGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } };
+
+export type DataGroupPartsFragment = { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any };
 
 export type GetEntriesQueryVariables = Exact<{
   fetchOptions: EntryFetchOptions;
 }>;
 
 
-export type GetEntriesQuery = { __typename?: 'QueryRoot', entries: { __typename?: 'Entries', total: number, page: number, limit: number, results: Array<{ __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } | null }> } };
+export type GetEntriesQuery = { __typename?: 'QueryRoot', entries: { __typename?: 'Entries', total: number, page: number, limit: number, results: Array<{ __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null }> } };
 
 export type GetAllEntriesQueryVariables = Exact<{
   fetchOptions: EntryFetchOptions;
 }>;
 
 
-export type GetAllEntriesQuery = { __typename?: 'QueryRoot', getAllEntries: { __typename?: 'Entries', total: number, results: Array<{ __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } | null }> } };
+export type GetAllEntriesQuery = { __typename?: 'QueryRoot', getAllEntries: { __typename?: 'Entries', total: number, results: Array<{ __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null }> } };
 
 export type GetEntryQueryVariables = Exact<{
   fetchOptions: EntryFetchOptions;
 }>;
 
 
-export type GetEntryQuery = { __typename?: 'QueryRoot', entry: { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } | null } };
+export type GetEntryQuery = { __typename?: 'QueryRoot', entry: { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
 export type GetEntryGroupsQueryVariables = Exact<{
   fetchOptions: EntryGroupFetchOptions;
@@ -832,24 +924,32 @@ export type InsertEntryMutationVariables = Exact<{
 }>;
 
 
-export type InsertEntryMutation = { __typename?: 'MutationRoot', insertEntry: { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } | null } };
+export type InsertEntryMutation = { __typename?: 'MutationRoot', insertEntry: { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
 export type UpdateEntryMutationVariables = Exact<{
   updateOptions: EntryUpdateOptions;
 }>;
 
 
-export type UpdateEntryMutation = { __typename?: 'MutationRoot', updateEntry: { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } | null } };
+export type UpdateEntryMutation = { __typename?: 'MutationRoot', updateEntry: { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
 export type DeleteEntryMutationVariables = Exact<{
   deleteOptions: DeleteOptions;
 }>;
 
 
-export type DeleteEntryMutation = { __typename?: 'MutationRoot', deleteEntry: { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } | null } };
+export type DeleteEntryMutation = { __typename?: 'MutationRoot', deleteEntry: { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null } };
 
-export type EntryPartsFragment = { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any } | null } | null };
+export type EntryPartsFragment = { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number } | null };
 
+export const DataGroupPartsFragmentDoc = `
+    fragment DataGroupParts on DataGroup {
+  id
+  name
+  description
+  createdAt
+}
+    `;
 export const BuyerPartsFragmentDoc = `
     fragment BuyerParts on Buyer {
   id
@@ -857,6 +957,9 @@ export const BuyerPartsFragmentDoc = `
   address
   contact
   createdAt
+  dGroup {
+    id
+  }
 }
     `;
 export const CellPartsFragmentDoc = `
@@ -865,6 +968,9 @@ export const CellPartsFragmentDoc = `
   name
   description
   createdAt
+  dGroup {
+    id
+  }
 }
     `;
 export const CulturePartsFragmentDoc = `
@@ -873,6 +979,9 @@ export const CulturePartsFragmentDoc = `
   name
   description
   createdAt
+  dGroup {
+    id
+  }
 }
     `;
 export const CellCulturePartsFragmentDoc = `
@@ -884,6 +993,9 @@ export const CellCulturePartsFragmentDoc = `
     ...CultureParts
   }
   createdAt
+  dGroup {
+    id
+  }
 }
     ${CellPartsFragmentDoc}
 ${CulturePartsFragmentDoc}`;
@@ -900,11 +1012,14 @@ export const EntryPartsFragmentDoc = `
   cellCulturePair {
     ...CellCultureParts
   }
+  dGroup {
+    id
+  }
 }
     ${BuyerPartsFragmentDoc}
 ${CellCulturePartsFragmentDoc}`;
 export const GetBuyersDocument = `
-    query getBuyers($fetchOptions: BuyerFetchOptions!) {
+    query GetBuyers($fetchOptions: BuyerFetchOptions!) {
   buyers(fetchOptions: $fetchOptions) {
     total
     page
@@ -923,12 +1038,12 @@ export const useGetBuyersQuery = <
       options?: UseQueryOptions<GetBuyersQuery, TError, TData>
     ) =>
     useQuery<GetBuyersQuery, TError, TData>(
-      ['getBuyers', variables],
+      ['GetBuyers', variables],
       fetcher<GetBuyersQuery, GetBuyersQueryVariables>(GetBuyersDocument, variables),
       options
     );
 export const GetBuyerDocument = `
-    query getBuyer($fetchOptions: BuyerFetchOptions!) {
+    query GetBuyer($fetchOptions: BuyerFetchOptions!) {
   buyer(fetchOptions: $fetchOptions) {
     ...BuyerParts
   }
@@ -942,12 +1057,12 @@ export const useGetBuyerQuery = <
       options?: UseQueryOptions<GetBuyerQuery, TError, TData>
     ) =>
     useQuery<GetBuyerQuery, TError, TData>(
-      ['getBuyer', variables],
+      ['GetBuyer', variables],
       fetcher<GetBuyerQuery, GetBuyerQueryVariables>(GetBuyerDocument, variables),
       options
     );
 export const InsertBuyerDocument = `
-    mutation insertBuyer($insertOptions: BuyerInsertOptions!) {
+    mutation InsertBuyer($insertOptions: BuyerInsertOptions!) {
   insertBuyer(insertOptions: $insertOptions) {
     ...BuyerParts
   }
@@ -958,12 +1073,12 @@ export const useInsertBuyerMutation = <
       TContext = unknown
     >(options?: UseMutationOptions<InsertBuyerMutation, TError, InsertBuyerMutationVariables, TContext>) =>
     useMutation<InsertBuyerMutation, TError, InsertBuyerMutationVariables, TContext>(
-      ['insertBuyer'],
+      ['InsertBuyer'],
       (variables?: InsertBuyerMutationVariables) => fetcher<InsertBuyerMutation, InsertBuyerMutationVariables>(InsertBuyerDocument, variables)(),
       options
     );
 export const UpdateBuyerDocument = `
-    mutation updateBuyer($updateOptions: BuyerUpdateOptions!) {
+    mutation UpdateBuyer($updateOptions: BuyerUpdateOptions!) {
   updateBuyer(updateOptions: $updateOptions) {
     ...BuyerParts
   }
@@ -974,12 +1089,12 @@ export const useUpdateBuyerMutation = <
       TContext = unknown
     >(options?: UseMutationOptions<UpdateBuyerMutation, TError, UpdateBuyerMutationVariables, TContext>) =>
     useMutation<UpdateBuyerMutation, TError, UpdateBuyerMutationVariables, TContext>(
-      ['updateBuyer'],
+      ['UpdateBuyer'],
       (variables?: UpdateBuyerMutationVariables) => fetcher<UpdateBuyerMutation, UpdateBuyerMutationVariables>(UpdateBuyerDocument, variables)(),
       options
     );
 export const DeleteBuyerDocument = `
-    mutation deleteBuyer($deleteOptions: DeleteOptions!) {
+    mutation DeleteBuyer($deleteOptions: DeleteOptions!) {
   deleteBuyer(deleteOptions: $deleteOptions) {
     ...BuyerParts
   }
@@ -990,12 +1105,12 @@ export const useDeleteBuyerMutation = <
       TContext = unknown
     >(options?: UseMutationOptions<DeleteBuyerMutation, TError, DeleteBuyerMutationVariables, TContext>) =>
     useMutation<DeleteBuyerMutation, TError, DeleteBuyerMutationVariables, TContext>(
-      ['deleteBuyer'],
+      ['DeleteBuyer'],
       (variables?: DeleteBuyerMutationVariables) => fetcher<DeleteBuyerMutation, DeleteBuyerMutationVariables>(DeleteBuyerDocument, variables)(),
       options
     );
 export const GetCellsDocument = `
-    query getCells($fetchOptions: CellFetchOptions!) {
+    query GetCells($fetchOptions: CellFetchOptions!) {
   cells(fetchOptions: $fetchOptions) {
     total
     page
@@ -1014,12 +1129,12 @@ export const useGetCellsQuery = <
       options?: UseQueryOptions<GetCellsQuery, TError, TData>
     ) =>
     useQuery<GetCellsQuery, TError, TData>(
-      ['getCells', variables],
+      ['GetCells', variables],
       fetcher<GetCellsQuery, GetCellsQueryVariables>(GetCellsDocument, variables),
       options
     );
 export const GetCellDocument = `
-    query getCell($fetchOptions: CellFetchOptions!) {
+    query GetCell($fetchOptions: CellFetchOptions!) {
   cell(fetchOptions: $fetchOptions) {
     ...CellParts
   }
@@ -1033,12 +1148,12 @@ export const useGetCellQuery = <
       options?: UseQueryOptions<GetCellQuery, TError, TData>
     ) =>
     useQuery<GetCellQuery, TError, TData>(
-      ['getCell', variables],
+      ['GetCell', variables],
       fetcher<GetCellQuery, GetCellQueryVariables>(GetCellDocument, variables),
       options
     );
 export const GetUnpairedCellsDocument = `
-    query getUnpairedCells($fetchOptions: CellFetchUnpairedOptions!) {
+    query GetUnpairedCells($fetchOptions: CellFetchUnpairedOptions!) {
   unpairedCells(fetchOptions: $fetchOptions) {
     total
     page
@@ -1057,12 +1172,12 @@ export const useGetUnpairedCellsQuery = <
       options?: UseQueryOptions<GetUnpairedCellsQuery, TError, TData>
     ) =>
     useQuery<GetUnpairedCellsQuery, TError, TData>(
-      ['getUnpairedCells', variables],
+      ['GetUnpairedCells', variables],
       fetcher<GetUnpairedCellsQuery, GetUnpairedCellsQueryVariables>(GetUnpairedCellsDocument, variables),
       options
     );
 export const GetPairedCellsDocument = `
-    query getPairedCells($fetchOptions: CellFetchUnpairedOptions!) {
+    query GetPairedCells($fetchOptions: CellFetchUnpairedOptions!) {
   pairedCells(fetchOptions: $fetchOptions) {
     total
     page
@@ -1081,12 +1196,12 @@ export const useGetPairedCellsQuery = <
       options?: UseQueryOptions<GetPairedCellsQuery, TError, TData>
     ) =>
     useQuery<GetPairedCellsQuery, TError, TData>(
-      ['getPairedCells', variables],
+      ['GetPairedCells', variables],
       fetcher<GetPairedCellsQuery, GetPairedCellsQueryVariables>(GetPairedCellsDocument, variables),
       options
     );
 export const InsertCellDocument = `
-    mutation insertCell($insertOptions: CellInsertOptions!) {
+    mutation InsertCell($insertOptions: CellInsertOptions!) {
   insertCell(insertOptions: $insertOptions) {
     ...CellParts
   }
@@ -1097,12 +1212,12 @@ export const useInsertCellMutation = <
       TContext = unknown
     >(options?: UseMutationOptions<InsertCellMutation, TError, InsertCellMutationVariables, TContext>) =>
     useMutation<InsertCellMutation, TError, InsertCellMutationVariables, TContext>(
-      ['insertCell'],
+      ['InsertCell'],
       (variables?: InsertCellMutationVariables) => fetcher<InsertCellMutation, InsertCellMutationVariables>(InsertCellDocument, variables)(),
       options
     );
 export const UpdateCellDocument = `
-    mutation updateCell($updateOptions: CellUpdateOptions!) {
+    mutation UpdateCell($updateOptions: CellUpdateOptions!) {
   updateCell(updateOptions: $updateOptions) {
     ...CellParts
   }
@@ -1113,12 +1228,12 @@ export const useUpdateCellMutation = <
       TContext = unknown
     >(options?: UseMutationOptions<UpdateCellMutation, TError, UpdateCellMutationVariables, TContext>) =>
     useMutation<UpdateCellMutation, TError, UpdateCellMutationVariables, TContext>(
-      ['updateCell'],
+      ['UpdateCell'],
       (variables?: UpdateCellMutationVariables) => fetcher<UpdateCellMutation, UpdateCellMutationVariables>(UpdateCellDocument, variables)(),
       options
     );
 export const DeleteCellDocument = `
-    mutation deleteCell($deleteOptions: DeleteOptions!) {
+    mutation DeleteCell($deleteOptions: DeleteOptions!) {
   deleteCell(deleteOptions: $deleteOptions) {
     ...CellParts
   }
@@ -1129,12 +1244,12 @@ export const useDeleteCellMutation = <
       TContext = unknown
     >(options?: UseMutationOptions<DeleteCellMutation, TError, DeleteCellMutationVariables, TContext>) =>
     useMutation<DeleteCellMutation, TError, DeleteCellMutationVariables, TContext>(
-      ['deleteCell'],
+      ['DeleteCell'],
       (variables?: DeleteCellMutationVariables) => fetcher<DeleteCellMutation, DeleteCellMutationVariables>(DeleteCellDocument, variables)(),
       options
     );
 export const GetCellCulturesPairsDocument = `
-    query getCellCulturesPairs($fetchOptions: CellCulturePairFetchOptions!) {
+    query GetCellCulturesPairs($fetchOptions: CellCulturePairFetchOptions!) {
   cellCulturePairs(fetchOptions: $fetchOptions) {
     total
     page
@@ -1153,12 +1268,12 @@ export const useGetCellCulturesPairsQuery = <
       options?: UseQueryOptions<GetCellCulturesPairsQuery, TError, TData>
     ) =>
     useQuery<GetCellCulturesPairsQuery, TError, TData>(
-      ['getCellCulturesPairs', variables],
+      ['GetCellCulturesPairs', variables],
       fetcher<GetCellCulturesPairsQuery, GetCellCulturesPairsQueryVariables>(GetCellCulturesPairsDocument, variables),
       options
     );
 export const GetAllCellCultureParisDocument = `
-    query getAllCellCultureParis($fetchOptions: CellCulturePairFetchOptions!) {
+    query GetAllCellCultureParis($fetchOptions: CellCulturePairFetchOptions!) {
   getAllCellCulturePairs(fetchOptions: $fetchOptions) {
     total
     results {
@@ -1175,12 +1290,12 @@ export const useGetAllCellCultureParisQuery = <
       options?: UseQueryOptions<GetAllCellCultureParisQuery, TError, TData>
     ) =>
     useQuery<GetAllCellCultureParisQuery, TError, TData>(
-      ['getAllCellCultureParis', variables],
+      ['GetAllCellCultureParis', variables],
       fetcher<GetAllCellCultureParisQuery, GetAllCellCultureParisQueryVariables>(GetAllCellCultureParisDocument, variables),
       options
     );
 export const GetCellCulturePairDocument = `
-    query getCellCulturePair($fetchOptions: CellCulturePairFetchOptions!) {
+    query GetCellCulturePair($fetchOptions: CellCulturePairFetchOptions!) {
   cellCulture(fetchOptions: $fetchOptions) {
     ...CellCultureParts
   }
@@ -1194,12 +1309,12 @@ export const useGetCellCulturePairQuery = <
       options?: UseQueryOptions<GetCellCulturePairQuery, TError, TData>
     ) =>
     useQuery<GetCellCulturePairQuery, TError, TData>(
-      ['getCellCulturePair', variables],
+      ['GetCellCulturePair', variables],
       fetcher<GetCellCulturePairQuery, GetCellCulturePairQueryVariables>(GetCellCulturePairDocument, variables),
       options
     );
 export const InsertCellCulturePairDocument = `
-    mutation insertCellCulturePair($insertOptions: CellCulturePairInsertOptions!) {
+    mutation InsertCellCulturePair($insertOptions: CellCulturePairInsertOptions!) {
   insertCellCulturePair(insertOptions: $insertOptions) {
     ...CellCultureParts
   }
@@ -1210,12 +1325,12 @@ export const useInsertCellCulturePairMutation = <
       TContext = unknown
     >(options?: UseMutationOptions<InsertCellCulturePairMutation, TError, InsertCellCulturePairMutationVariables, TContext>) =>
     useMutation<InsertCellCulturePairMutation, TError, InsertCellCulturePairMutationVariables, TContext>(
-      ['insertCellCulturePair'],
+      ['InsertCellCulturePair'],
       (variables?: InsertCellCulturePairMutationVariables) => fetcher<InsertCellCulturePairMutation, InsertCellCulturePairMutationVariables>(InsertCellCulturePairDocument, variables)(),
       options
     );
 export const UpdateCellCulturePairDocument = `
-    mutation updateCellCulturePair($updateOptions: CellCulturePairUpdateOptions!) {
+    mutation UpdateCellCulturePair($updateOptions: CellCulturePairUpdateOptions!) {
   updateCellCulturePair(updateOptions: $updateOptions) {
     ...CellCultureParts
   }
@@ -1226,12 +1341,12 @@ export const useUpdateCellCulturePairMutation = <
       TContext = unknown
     >(options?: UseMutationOptions<UpdateCellCulturePairMutation, TError, UpdateCellCulturePairMutationVariables, TContext>) =>
     useMutation<UpdateCellCulturePairMutation, TError, UpdateCellCulturePairMutationVariables, TContext>(
-      ['updateCellCulturePair'],
+      ['UpdateCellCulturePair'],
       (variables?: UpdateCellCulturePairMutationVariables) => fetcher<UpdateCellCulturePairMutation, UpdateCellCulturePairMutationVariables>(UpdateCellCulturePairDocument, variables)(),
       options
     );
 export const DeleteCellCulturePairDocument = `
-    mutation deleteCellCulturePair($deleteOptions: CellCulturePairDeleteOptions!) {
+    mutation DeleteCellCulturePair($deleteOptions: CellCulturePairDeleteOptions!) {
   deleteCellCulturePair(deleteOptions: $deleteOptions) {
     ...CellCultureParts
   }
@@ -1242,12 +1357,12 @@ export const useDeleteCellCulturePairMutation = <
       TContext = unknown
     >(options?: UseMutationOptions<DeleteCellCulturePairMutation, TError, DeleteCellCulturePairMutationVariables, TContext>) =>
     useMutation<DeleteCellCulturePairMutation, TError, DeleteCellCulturePairMutationVariables, TContext>(
-      ['deleteCellCulturePair'],
+      ['DeleteCellCulturePair'],
       (variables?: DeleteCellCulturePairMutationVariables) => fetcher<DeleteCellCulturePairMutation, DeleteCellCulturePairMutationVariables>(DeleteCellCulturePairDocument, variables)(),
       options
     );
 export const GetCulturesDocument = `
-    query getCultures($fetchOptions: CultureFetchOptions!) {
+    query GetCultures($fetchOptions: CultureFetchOptions!) {
   cultures(fetchOptions: $fetchOptions) {
     total
     page
@@ -1266,12 +1381,12 @@ export const useGetCulturesQuery = <
       options?: UseQueryOptions<GetCulturesQuery, TError, TData>
     ) =>
     useQuery<GetCulturesQuery, TError, TData>(
-      ['getCultures', variables],
+      ['GetCultures', variables],
       fetcher<GetCulturesQuery, GetCulturesQueryVariables>(GetCulturesDocument, variables),
       options
     );
 export const GetCultureDocument = `
-    query getCulture($fetchOptions: CultureFetchOptions!) {
+    query GetCulture($fetchOptions: CultureFetchOptions!) {
   culture(fetchOptions: $fetchOptions) {
     ...CultureParts
   }
@@ -1285,12 +1400,12 @@ export const useGetCultureQuery = <
       options?: UseQueryOptions<GetCultureQuery, TError, TData>
     ) =>
     useQuery<GetCultureQuery, TError, TData>(
-      ['getCulture', variables],
+      ['GetCulture', variables],
       fetcher<GetCultureQuery, GetCultureQueryVariables>(GetCultureDocument, variables),
       options
     );
 export const GetUnpairedCulturesDocument = `
-    query getUnpairedCultures($fetchOptions: CultureFetchUnpairedOptions!) {
+    query GetUnpairedCultures($fetchOptions: CultureFetchUnpairedOptions!) {
   unpairedCultures(fetchOptions: $fetchOptions) {
     total
     page
@@ -1309,12 +1424,12 @@ export const useGetUnpairedCulturesQuery = <
       options?: UseQueryOptions<GetUnpairedCulturesQuery, TError, TData>
     ) =>
     useQuery<GetUnpairedCulturesQuery, TError, TData>(
-      ['getUnpairedCultures', variables],
+      ['GetUnpairedCultures', variables],
       fetcher<GetUnpairedCulturesQuery, GetUnpairedCulturesQueryVariables>(GetUnpairedCulturesDocument, variables),
       options
     );
 export const GetPairedCulturesDocument = `
-    query getPairedCultures($fetchOptions: CultureFetchUnpairedOptions!) {
+    query GetPairedCultures($fetchOptions: CultureFetchUnpairedOptions!) {
   pairedCultures(fetchOptions: $fetchOptions) {
     total
     page
@@ -1333,12 +1448,12 @@ export const useGetPairedCulturesQuery = <
       options?: UseQueryOptions<GetPairedCulturesQuery, TError, TData>
     ) =>
     useQuery<GetPairedCulturesQuery, TError, TData>(
-      ['getPairedCultures', variables],
+      ['GetPairedCultures', variables],
       fetcher<GetPairedCulturesQuery, GetPairedCulturesQueryVariables>(GetPairedCulturesDocument, variables),
       options
     );
 export const InsertCultureDocument = `
-    mutation insertCulture($insertOptions: CultureInsertOptions!) {
+    mutation InsertCulture($insertOptions: CultureInsertOptions!) {
   insertCulture(insertOptions: $insertOptions) {
     ...CultureParts
   }
@@ -1349,12 +1464,12 @@ export const useInsertCultureMutation = <
       TContext = unknown
     >(options?: UseMutationOptions<InsertCultureMutation, TError, InsertCultureMutationVariables, TContext>) =>
     useMutation<InsertCultureMutation, TError, InsertCultureMutationVariables, TContext>(
-      ['insertCulture'],
+      ['InsertCulture'],
       (variables?: InsertCultureMutationVariables) => fetcher<InsertCultureMutation, InsertCultureMutationVariables>(InsertCultureDocument, variables)(),
       options
     );
 export const UpdateCultureDocument = `
-    mutation updateCulture($updateOptions: CultureUpdateOptions!) {
+    mutation UpdateCulture($updateOptions: CultureUpdateOptions!) {
   updateCulture(updateOptions: $updateOptions) {
     ...CultureParts
   }
@@ -1365,12 +1480,12 @@ export const useUpdateCultureMutation = <
       TContext = unknown
     >(options?: UseMutationOptions<UpdateCultureMutation, TError, UpdateCultureMutationVariables, TContext>) =>
     useMutation<UpdateCultureMutation, TError, UpdateCultureMutationVariables, TContext>(
-      ['updateCulture'],
+      ['UpdateCulture'],
       (variables?: UpdateCultureMutationVariables) => fetcher<UpdateCultureMutation, UpdateCultureMutationVariables>(UpdateCultureDocument, variables)(),
       options
     );
 export const DeleteCultureDocument = `
-    mutation deleteCulture($deleteOptions: DeleteOptions!) {
+    mutation DeleteCulture($deleteOptions: DeleteOptions!) {
   deleteCulture(deleteOptions: $deleteOptions) {
     ...CultureParts
   }
@@ -1381,12 +1496,63 @@ export const useDeleteCultureMutation = <
       TContext = unknown
     >(options?: UseMutationOptions<DeleteCultureMutation, TError, DeleteCultureMutationVariables, TContext>) =>
     useMutation<DeleteCultureMutation, TError, DeleteCultureMutationVariables, TContext>(
-      ['deleteCulture'],
+      ['DeleteCulture'],
       (variables?: DeleteCultureMutationVariables) => fetcher<DeleteCultureMutation, DeleteCultureMutationVariables>(DeleteCultureDocument, variables)(),
       options
     );
+export const GetDataGroupsDocument = `
+    query GetDataGroups {
+  dataGroups {
+    ...DataGroupParts
+  }
+}
+    ${DataGroupPartsFragmentDoc}`;
+export const useGetDataGroupsQuery = <
+      TData = GetDataGroupsQuery,
+      TError = unknown
+    >(
+      variables?: GetDataGroupsQueryVariables,
+      options?: UseQueryOptions<GetDataGroupsQuery, TError, TData>
+    ) =>
+    useQuery<GetDataGroupsQuery, TError, TData>(
+      variables === undefined ? ['GetDataGroups'] : ['GetDataGroups', variables],
+      fetcher<GetDataGroupsQuery, GetDataGroupsQueryVariables>(GetDataGroupsDocument, variables),
+      options
+    );
+export const InsertDataGroupDocument = `
+    mutation InsertDataGroup($insertOptions: DataGroupInsertOptions!) {
+  insertDataGroup(insertOptions: $insertOptions) {
+    ...DataGroupParts
+  }
+}
+    ${DataGroupPartsFragmentDoc}`;
+export const useInsertDataGroupMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<InsertDataGroupMutation, TError, InsertDataGroupMutationVariables, TContext>) =>
+    useMutation<InsertDataGroupMutation, TError, InsertDataGroupMutationVariables, TContext>(
+      ['InsertDataGroup'],
+      (variables?: InsertDataGroupMutationVariables) => fetcher<InsertDataGroupMutation, InsertDataGroupMutationVariables>(InsertDataGroupDocument, variables)(),
+      options
+    );
+export const DeleteDataGroupDocument = `
+    mutation DeleteDataGroup($deleteOptions: DeleteOptions!) {
+  deleteDataGroup(deleteOptions: $deleteOptions) {
+    ...DataGroupParts
+  }
+}
+    ${DataGroupPartsFragmentDoc}`;
+export const useDeleteDataGroupMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<DeleteDataGroupMutation, TError, DeleteDataGroupMutationVariables, TContext>) =>
+    useMutation<DeleteDataGroupMutation, TError, DeleteDataGroupMutationVariables, TContext>(
+      ['DeleteDataGroup'],
+      (variables?: DeleteDataGroupMutationVariables) => fetcher<DeleteDataGroupMutation, DeleteDataGroupMutationVariables>(DeleteDataGroupDocument, variables)(),
+      options
+    );
 export const GetEntriesDocument = `
-    query getEntries($fetchOptions: EntryFetchOptions!) {
+    query GetEntries($fetchOptions: EntryFetchOptions!) {
   entries(fetchOptions: $fetchOptions) {
     total
     page
@@ -1405,12 +1571,12 @@ export const useGetEntriesQuery = <
       options?: UseQueryOptions<GetEntriesQuery, TError, TData>
     ) =>
     useQuery<GetEntriesQuery, TError, TData>(
-      ['getEntries', variables],
+      ['GetEntries', variables],
       fetcher<GetEntriesQuery, GetEntriesQueryVariables>(GetEntriesDocument, variables),
       options
     );
 export const GetAllEntriesDocument = `
-    query getAllEntries($fetchOptions: EntryFetchOptions!) {
+    query GetAllEntries($fetchOptions: EntryFetchOptions!) {
   getAllEntries(fetchOptions: $fetchOptions) {
     total
     results {
@@ -1427,12 +1593,12 @@ export const useGetAllEntriesQuery = <
       options?: UseQueryOptions<GetAllEntriesQuery, TError, TData>
     ) =>
     useQuery<GetAllEntriesQuery, TError, TData>(
-      ['getAllEntries', variables],
+      ['GetAllEntries', variables],
       fetcher<GetAllEntriesQuery, GetAllEntriesQueryVariables>(GetAllEntriesDocument, variables),
       options
     );
 export const GetEntryDocument = `
-    query getEntry($fetchOptions: EntryFetchOptions!) {
+    query GetEntry($fetchOptions: EntryFetchOptions!) {
   entry(fetchOptions: $fetchOptions) {
     ...EntryParts
   }
@@ -1446,12 +1612,12 @@ export const useGetEntryQuery = <
       options?: UseQueryOptions<GetEntryQuery, TError, TData>
     ) =>
     useQuery<GetEntryQuery, TError, TData>(
-      ['getEntry', variables],
+      ['GetEntry', variables],
       fetcher<GetEntryQuery, GetEntryQueryVariables>(GetEntryDocument, variables),
       options
     );
 export const GetEntryGroupsDocument = `
-    query getEntryGroups($fetchOptions: EntryGroupFetchOptions!) {
+    query GetEntryGroups($fetchOptions: EntryGroupFetchOptions!) {
   getEntryGroups(fetchOptions: $fetchOptions) {
     total
     page
@@ -1471,12 +1637,12 @@ export const useGetEntryGroupsQuery = <
       options?: UseQueryOptions<GetEntryGroupsQuery, TError, TData>
     ) =>
     useQuery<GetEntryGroupsQuery, TError, TData>(
-      ['getEntryGroups', variables],
+      ['GetEntryGroups', variables],
       fetcher<GetEntryGroupsQuery, GetEntryGroupsQueryVariables>(GetEntryGroupsDocument, variables),
       options
     );
 export const InsertEntryDocument = `
-    mutation insertEntry($insertOptions: EntryInsertOptions!) {
+    mutation InsertEntry($insertOptions: EntryInsertOptions!) {
   insertEntry(insertOptions: $insertOptions) {
     ...EntryParts
   }
@@ -1487,12 +1653,12 @@ export const useInsertEntryMutation = <
       TContext = unknown
     >(options?: UseMutationOptions<InsertEntryMutation, TError, InsertEntryMutationVariables, TContext>) =>
     useMutation<InsertEntryMutation, TError, InsertEntryMutationVariables, TContext>(
-      ['insertEntry'],
+      ['InsertEntry'],
       (variables?: InsertEntryMutationVariables) => fetcher<InsertEntryMutation, InsertEntryMutationVariables>(InsertEntryDocument, variables)(),
       options
     );
 export const UpdateEntryDocument = `
-    mutation updateEntry($updateOptions: EntryUpdateOptions!) {
+    mutation UpdateEntry($updateOptions: EntryUpdateOptions!) {
   updateEntry(updateOptions: $updateOptions) {
     ...EntryParts
   }
@@ -1503,12 +1669,12 @@ export const useUpdateEntryMutation = <
       TContext = unknown
     >(options?: UseMutationOptions<UpdateEntryMutation, TError, UpdateEntryMutationVariables, TContext>) =>
     useMutation<UpdateEntryMutation, TError, UpdateEntryMutationVariables, TContext>(
-      ['updateEntry'],
+      ['UpdateEntry'],
       (variables?: UpdateEntryMutationVariables) => fetcher<UpdateEntryMutation, UpdateEntryMutationVariables>(UpdateEntryDocument, variables)(),
       options
     );
 export const DeleteEntryDocument = `
-    mutation deleteEntry($deleteOptions: DeleteOptions!) {
+    mutation DeleteEntry($deleteOptions: DeleteOptions!) {
   deleteEntry(deleteOptions: $deleteOptions) {
     ...EntryParts
   }
@@ -1519,7 +1685,7 @@ export const useDeleteEntryMutation = <
       TContext = unknown
     >(options?: UseMutationOptions<DeleteEntryMutation, TError, DeleteEntryMutationVariables, TContext>) =>
     useMutation<DeleteEntryMutation, TError, DeleteEntryMutationVariables, TContext>(
-      ['deleteEntry'],
+      ['DeleteEntry'],
       (variables?: DeleteEntryMutationVariables) => fetcher<DeleteEntryMutation, DeleteEntryMutationVariables>(DeleteEntryDocument, variables)(),
       options
     );

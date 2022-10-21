@@ -1,0 +1,24 @@
+query GetDataGroups {
+    dataGroups {
+        ...DataGroupParts
+    }
+}
+
+mutation InsertDataGroup($insertOptions: DataGroupInsertOptions!) {
+    insertDataGroup(insertOptions: $insertOptions) {
+        ...DataGroupParts
+    }
+}
+
+mutation DeleteDataGroup($deleteOptions: DeleteOptions!) {
+    deleteDataGroup(deleteOptions: $deleteOptions) {
+        ...DataGroupParts
+    }
+}
+
+fragment DataGroupParts on DataGroup {
+    id
+    name
+    description
+    createdAt
+}

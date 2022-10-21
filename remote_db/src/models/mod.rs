@@ -8,9 +8,10 @@ use self::{
         CellCulturePairMutation, CellCulturePairQuery, OptionalCellCulturePairIds,
     },
     culture::{Culture, CultureFields, CultureMutation, CultureQuery, CultureUnpairedId},
+    data_group::{DataGroupMutation, DataGroupQuery},
     entry::{
         Entry, EntryFetchIdOptions, EntryFields, EntryGroup, EntryGroupFields, EntryMutation,
-        EntryQuery, EntryOrderingFields,
+        EntryOrderingFields, EntryQuery,
     },
 };
 
@@ -18,10 +19,10 @@ pub mod buyer;
 pub mod cell;
 pub mod cell_culture_pair;
 pub mod culture;
+pub mod data_group;
 pub mod db_query;
 pub mod entry;
 pub mod weight_types;
-pub mod data_group;
 
 #[derive(MergedObject, Default)]
 pub struct QueryRoot(
@@ -30,6 +31,7 @@ pub struct QueryRoot(
     CellQuery,
     CultureQuery,
     EntryQuery,
+    DataGroupQuery,
 );
 
 #[derive(MergedObject, Default)]
@@ -39,6 +41,7 @@ pub struct MutationRoot(
     CellMutation,
     CultureMutation,
     EntryMutation,
+    DataGroupMutation,
 );
 
 #[derive(SimpleObject, Debug)]
@@ -112,7 +115,10 @@ pub struct OptionalId {
         CellCultureOrderingFields
     )
 ))]
-#[graphql(concrete(name = "EntryFetchOptions", params(EntryFields, EntryFetchIdOptions, EntryOrderingFields)))]
+#[graphql(concrete(
+    name = "EntryFetchOptions",
+    params(EntryFields, EntryFetchIdOptions, EntryOrderingFields)
+))]
 #[graphql(concrete(name = "EntryGroupFetchOptionsBase", params(EntryGroupFields)))]
 pub(super) struct FetchOptions<T, I = OptionalId, O = T>
 where
