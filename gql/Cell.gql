@@ -61,6 +61,6 @@ fragment CellParts on Cell {
     description
     createdAt
     dGroup {
-        id
+        ...DataGroupParts
     }
 }

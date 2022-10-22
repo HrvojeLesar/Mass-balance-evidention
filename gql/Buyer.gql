@@ -40,6 +40,6 @@ fragment BuyerParts on Buyer {
     contact
     createdAt
     dGroup {
-        id
+        ...DataGroupParts
     }
 }

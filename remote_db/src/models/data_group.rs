@@ -21,6 +21,13 @@ pub(super) struct DataGroupInsertOptions {
     pub(super) description: Option<String>,
 }
 
+#[derive(InputObject)]
+pub(super) struct DataGroupUpdateOptions {
+    pub(super) id: i32,
+    pub(super) name: Option<String>,
+    pub(super) description: Option<String>,
+}
+
 impl DataGroup {
     pub async fn get(
         executor: &mut Transaction<'_, Postgres>,
@@ -48,7 +55,7 @@ impl DataGroupQuery {
         let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
         let mut transaction = pool.begin().await?;
 
-        let data_groups = sqlx::query_as!(DataGroup, "SELECT * FROM data_group")
+        let data_groups = sqlx::query_as!(DataGroup, "SELECT * FROM data_group WHERE id != 1")
             .fetch_all(&mut transaction)
             .await?;
 
@@ -87,6 +94,36 @@ impl DataGroupMutation {
         Ok(data_group)
     }
 
+    async fn update_data_group(
+        &self,
+        ctx: &Context<'_>,
+        update_options: DataGroupUpdateOptions,
+    ) -> Result<DataGroup> {
+        let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
+        let mut transaction = pool.begin().await?;
+
+        let mut builder: sqlx::QueryBuilder<Postgres> =
+            sqlx::QueryBuilder::new("UPDATE data_group SET ");
+        let mut sep = builder.separated(", ");
+        if let Some(name) = &update_options.name {
+            sep.push("name = ").push_bind_unseparated(name);
+        }
+        if let Some(description) = &update_options.description {
+            sep.push("description = ")
+                .push_bind_unseparated(description);
+        }
+        builder
+            .push("WHERE id = ")
+            .push_bind(update_options.id)
+            .push("AND id != 1 RETURNING *");
+
+        let query = builder.build_query_as();
+        let data_group = query.fetch_one(&mut transaction).await?;
+
+        transaction.commit().await?;
+        Ok(data_group)
+    }
+
     async fn delete_data_group(
         &self,
         ctx: &Context<'_>,
@@ -99,7 +136,7 @@ impl DataGroupMutation {
             DataGroup,
             "
             DELETE FROM data_group
-            WHERE id = $1
+            WHERE id = $1 AND id != 1
             RETURNING *
             ",
             delete_options.id

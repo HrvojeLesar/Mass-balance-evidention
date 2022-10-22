@@ -1,5 +1,3 @@
-#import "./CellCulturePair.gql"
-
 query GetEntries($fetchOptions: EntryFetchOptions!) {
     entries(fetchOptions: $fetchOptions) {
         total
@@ -69,6 +67,6 @@ fragment EntryParts on Entry {
         ...CellCultureParts
     }
     dGroup {
-        id
+        ...DataGroupParts
     }
 }

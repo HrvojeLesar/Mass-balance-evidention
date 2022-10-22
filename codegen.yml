@@ -9,5 +9,6 @@ generates:
       - "typescript-operations"
       - "typescript-react-query"
     config:
+      dedupeFragments: true
       fetcher:
-        endpoint: "http://localhost:8000/graphiql"
+          endpoint: "http://localhost:8000/graphiql"

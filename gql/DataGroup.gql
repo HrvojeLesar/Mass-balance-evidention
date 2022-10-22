@@ -10,6 +10,12 @@ mutation InsertDataGroup($insertOptions: DataGroupInsertOptions!) {
     }
 }
 
+mutation UpdateDataGroup($updateOptions: DataGroupUpdateOptions!) {
+  updateDataGroup(updateOptions: $updateOptions) {
+    ...DataGroupParts
+  }
+}
+
 mutation DeleteDataGroup($deleteOptions: DeleteOptions!) {
     deleteDataGroup(deleteOptions: $deleteOptions) {
         ...DataGroupParts

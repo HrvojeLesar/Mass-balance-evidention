@@ -1,6 +1,3 @@
-#import "./Cell.gql"
-#import "./Culture.gql"
-
 query GetCellCulturesPairs($fetchOptions: CellCulturePairFetchOptions!) {
     cellCulturePairs(fetchOptions: $fetchOptions) {
         total
@@ -12,7 +9,7 @@ query GetCellCulturesPairs($fetchOptions: CellCulturePairFetchOptions!) {
     }
 }
 
-query GetAllCellCultureParis($fetchOptions: CellCulturePairFetchOptions!) {
+query GetAllCellCulturePairs($fetchOptions: CellCulturePairFetchOptions!) {
     getAllCellCulturePairs(fetchOptions: $fetchOptions) {
         total
         results {
@@ -55,6 +52,6 @@ fragment CellCultureParts on CellCulturePair {
     }
     createdAt
     dGroup {
-        id
+        ...DataGroupParts
     }
 }

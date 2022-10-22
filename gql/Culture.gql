@@ -61,6 +61,6 @@ fragment CultureParts on Culture {
     description
     createdAt
     dGroup {
-        id
+        ...DataGroupParts
     }
 }
