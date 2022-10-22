@@ -66,15 +66,16 @@ export default function DataTable<T>({
         }
     }, [data, paginationState, pageCount]);
 
-    useEffect(() => {
-        if (
-            paginationState.manual !== false &&
-            data.total !== undefined &&
-            data.total === 0
-        ) {
-            paginationState.setPagination((old) => ({ ...old, pageIndex: 0 }));
-        }
-    }, [paginationState.setPagination, pageCountMemo, data]);
+    // // BUG: Infinite loop, rerenders when array is empty
+    // useEffect(() => {
+    //     if (
+    //         (paginationState.manual ?? true) &&
+    //         data.total !== undefined &&
+    //         data.total === 0
+    //     ) {
+    //         paginationState.setPagination((old) => ({ ...old, pageIndex: 0 }));
+    //     }
+    // }, [paginationState, paginationState.setPagination, pageCountMemo, data]);
 
     const table = useReactTable({
         data: data.data,

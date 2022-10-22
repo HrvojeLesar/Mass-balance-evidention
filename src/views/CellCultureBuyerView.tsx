@@ -9,10 +9,10 @@ export default function CellCultureBuyerView() {
         <>
             <CellCulturePairTable isInsertable={true} isEditable={true} />
             <Row className="my-4">
-                <Col>
+                <Col sm className="mb-4">
                     <CellTable isInsertable={true} isEditable={true} />
                 </Col>
-                <Col>
+                <Col sm className="mb-4">
                     <CultureTable isInsertable={true} isEditable={true} />
                 </Col>
             </Row>

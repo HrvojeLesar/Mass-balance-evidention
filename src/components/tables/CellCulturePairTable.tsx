@@ -4,13 +4,14 @@ import {
     GroupingState,
     SortingState,
 } from "@tanstack/react-table";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Card, Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
+import { DataGroupContext } from "../../DataGroupProvider";
 import {
     CellCulturePair,
     useDeleteCellCulturePairMutation,
-    useGetAllCellCultureParisQuery,
+    useGetAllCellCulturePairsQuery,
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import ActionButtons from "../ActionButtons";
@@ -47,14 +48,20 @@ export default function CellCulturePairTable({
         T | undefined
     >();
 
-    const { data, refetch } = useGetAllCellCultureParisQuery(
+    const dataGroupContextValue = useContext(DataGroupContext);
+
+    const { data, refetch } = useGetAllCellCulturePairsQuery(
         {
             fetchOptions: {
                 id: {},
+                dataGroupId: dataGroupContextValue.selectedGroup,
             },
         },
         {
-            queryKey: ["getAllCellCulturePairs"],
+            queryKey: [
+                "getAllCellCulturePairs",
+                dataGroupContextValue.selectedGroup,
+            ],
             keepPreviousData: true,
         }
     );
@@ -146,6 +153,9 @@ export default function CellCulturePairTable({
                                     cellId: selectedCellCulturePair.cell.id,
                                     cultureId:
                                         selectedCellCulturePair.culture.id,
+                                    dGroup:
+                                        dataGroupContextValue.selectedGroup ??
+                                        1,
                                 },
                             },
                         });

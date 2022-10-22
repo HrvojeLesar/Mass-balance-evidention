@@ -21,7 +21,7 @@ import {
     useUpdateEntryMutation,
 } from "../../generated/graphql";
 import BaseForm from "./BaseForm";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import Select from "react-select";
 import {
     DEBOUNCE_TIME,
@@ -33,6 +33,7 @@ import {
     selectStyle,
 } from "./FormUtils";
 import moment from "moment";
+import { DataGroupContext } from "../../DataGroupProvider";
 
 type FormInput = {
     cell: SelectOption<Cell> | undefined;
@@ -57,6 +58,7 @@ export default function EntryForm({
     EntryUpdateOptions
 >) {
     const { t } = useTranslation();
+    const dataGroupContextValue = useContext(DataGroupContext);
 
     const {
         control,
@@ -114,10 +116,12 @@ export default function EntryForm({
                         cellCulturePair: {
                             idCell: data.cell.value.id,
                             idCulture: data.culture.value.id,
+                            dGroup: dataGroupContextValue.selectedGroup ?? 1,
                         },
                         date: new Date(data.date),
                         weight: Number(data.weight),
                         idBuyer: data.buyer.value.id,
+                        dGroup: dataGroupContextValue.selectedGroup ?? 1,
                         // weightType: "kg",
                     },
                 });
@@ -128,7 +132,7 @@ export default function EntryForm({
                 );
             }
         },
-        [insert]
+        [insert, dataGroupContextValue.selectedGroup]
     );
 
     const onUpdateSubmit = useCallback(
@@ -140,6 +144,7 @@ export default function EntryForm({
                         cellCulturePair: {
                             idCell: data.cell.value.id,
                             idCulture: data.culture.value.id,
+                            dGroup: edit.dGroup?.id ?? 1,
                         },
                         date: new Date(data.date),
                         weight: Number(data.weight),
@@ -261,6 +266,7 @@ export default function EntryForm({
                                   },
                               ]
                             : undefined,
+                    dataGroupId: dataGroupContextValue.selectedGroup,
                 },
             },
             {
@@ -269,6 +275,7 @@ export default function EntryForm({
                     cellSelectState.limit,
                     cellSelectState.page,
                     cultureSelectState.selected,
+                    dataGroupContextValue.selectedGroup,
                 ],
                 keepPreviousData: true,
             }
@@ -294,6 +301,7 @@ export default function EntryForm({
                                   },
                               ]
                             : undefined,
+                    dataGroupId: dataGroupContextValue.selectedGroup,
                 },
             },
             {
@@ -302,6 +310,7 @@ export default function EntryForm({
                     cultureSelectState.limit,
                     cultureSelectState.page,
                     cellSelectState.selected,
+                    dataGroupContextValue.selectedGroup,
                 ],
                 keepPreviousData: true,
             }

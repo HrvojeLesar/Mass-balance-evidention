@@ -18,7 +18,7 @@ import {
     useUpdateCellCulturePairMutation,
 } from "../../generated/graphql";
 import BaseForm from "./BaseForm";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import Select from "react-select";
 import {
     DEBOUNCE_TIME,
@@ -29,6 +29,7 @@ import {
     SelectState,
     selectStyle,
 } from "./FormUtils";
+import { DataGroupContext } from "../../DataGroupProvider";
 
 type FormInput = {
     cell: SelectOption<Cell> | undefined;
@@ -50,6 +51,7 @@ export default function CellCulturePairForm({
     CellCulturePairUpdateOptions
 >) {
     const { t } = useTranslation();
+    const dataGroupContextValue = useContext(DataGroupContext);
 
     const {
         control,
@@ -94,6 +96,7 @@ export default function CellCulturePairForm({
                     insertOptions: {
                         idCell: data.cell?.value.id,
                         idCulture: data.culture?.value.id,
+                        dGroup: dataGroupContextValue.selectedGroup ?? 1,
                     },
                 });
             } else {
@@ -103,7 +106,7 @@ export default function CellCulturePairForm({
                 );
             }
         },
-        [insert]
+        [insert, dataGroupContextValue]
     );
 
     const onUpdateSubmit = useCallback(
@@ -115,6 +118,7 @@ export default function CellCulturePairForm({
                         idCultureOld: edit.culture.id,
                         idCellNew: data.cell?.value.id,
                         idCultureNew: data.culture?.value.id,
+                        idDGroup: edit.dGroup?.id ?? 1,
                     },
                 });
             } else {
@@ -124,7 +128,7 @@ export default function CellCulturePairForm({
                 );
             }
         },
-        [update, edit?.cell, edit?.culture]
+        [update, edit?.cell, edit?.culture, edit?.dGroup]
     );
 
     const [cellSelectState, setCellSelectState] = useState<SelectState<Cell>>({
@@ -206,6 +210,7 @@ export default function CellCulturePairForm({
                                   },
                               ]
                             : undefined,
+                    dataGroupId: dataGroupContextValue.selectedGroup,
                 },
             },
             {
@@ -214,6 +219,7 @@ export default function CellCulturePairForm({
                     cellSelectState.limit,
                     cellSelectState.page,
                     cultureSelectState.selected,
+                    dataGroupContextValue.selectedGroup,
                 ],
                 keepPreviousData: true,
             }
@@ -239,6 +245,7 @@ export default function CellCulturePairForm({
                                   },
                               ]
                             : undefined,
+                    dataGroupId: dataGroupContextValue.selectedGroup,
                 },
             },
             {
@@ -247,6 +254,7 @@ export default function CellCulturePairForm({
                     cultureSelectState.limit,
                     cultureSelectState.page,
                     cellSelectState.selected,
+                    dataGroupContextValue.selectedGroup,
                 ],
                 keepPreviousData: true,
             }

@@ -69,11 +69,21 @@
         "buyerInsertable": "Unos kupaca",
         "edit": "Uređivanje",
         "delete": "Brisanje",
-        "deleteConfirmation": "Potrvrda"
+        "deleteConfirmation": "Potrvrda",
+        "dataGroupSelect": "Odabir globalne grupacije podataka",
+        "newDataGroup": "Dodavanje nove grupacije podataka",
+        "editDataGroup": "Uređivanje trenutne grupacije podataka"
     },
     "deleteModal": {
         "deleteConfirmText": "Jeste li sigurni da želite obrisati odabrani red?",
         "cancelButton": "Odustani",
         "confirmButton": "Obriši red"
+    },
+    "dataGroup": {
+        "name": "Naziv grupe",
+        "description": "Opis",
+        "errors": {
+            "name": "Ovo polje je obavezno!"
+        }
     }
 }

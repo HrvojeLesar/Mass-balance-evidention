@@ -1,6 +1,8 @@
+import { useContext } from "react";
 import { Col, Form, Row } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { DataGroupContext } from "../../DataGroupProvider";
 import {
     Buyer,
     BuyerInsertOptions,
@@ -25,6 +27,7 @@ export default function BuyerForm({
     BuyerUpdateOptions
 >) {
     const { t } = useTranslation();
+    const dataGroupContextValue = useContext(DataGroupContext);
     const {
         register,
         handleSubmit,
@@ -67,7 +70,12 @@ export default function BuyerForm({
                           });
                       })
                     : handleSubmit((data) => {
-                          insert.mutate({ insertOptions: data });
+                          insert.mutate({
+                              insertOptions: {
+                                  ...data,
+                                  dGroup: dataGroupContextValue.selectedGroup ?? 1,
+                              },
+                          });
                       })
             }
         >

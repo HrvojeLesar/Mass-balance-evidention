@@ -24,7 +24,7 @@ function DebouncedInput({
 }: DebouncedInputPorps &
     Omit<InputHTMLAttributes<HTMLImageElement>, "onChange">) {
     const [value, setValue] = useState(initialValue);
-    const [isValueTooShort, setIsValueTooShort] = useState(false);
+    // const [isValueTooShort, setIsValueTooShort] = useState(false);
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -33,24 +33,13 @@ function DebouncedInput({
 
     useEffect(() => {
         const timeout = setTimeout(() => {
-            if (
-                typeof value === "string" &&
-                value.trim().length < 2 &&
-                value.trim().length !== 0
-            ) {
-                setIsValueTooShort(true);
-            } else {
-                if (isValueTooShort) {
-                    setIsValueTooShort(false);
-                }
-                onChange(value);
-            }
+            onChange(value);
         }, debounce);
 
         return () => {
             clearTimeout(timeout);
         };
-    }, [value, debounce, isValueTooShort, onChange]);
+    }, [value, debounce, onChange]);
 
     return (
         <Form.Group
@@ -64,7 +53,6 @@ function DebouncedInput({
                 }}
                 type="input"
                 placeholder={props.placeholder}
-                isInvalid={isValueTooShort}
                 autoComplete="off"
                 size="sm"
             />
@@ -134,12 +122,27 @@ export default function BaseTable<T>({ table }: BaseTableProps<T>) {
                                                 )}
                                             </div>
                                             {header.column.getCanSort() ===
-                                            false ? null : header.column.getIsSorted() ===
-                                              "asc" ? (
-                                                <IoMdArrowDropup size={28} />
-                                            ) : (
-                                                <IoMdArrowDropdown size={28} />
-                                            )}
+                                            false
+                                                ? null
+                                                : {
+                                                      asc: (
+                                                          <IoMdArrowDropup
+                                                              size={28}
+                                                          />
+                                                      ),
+                                                      desc: (
+                                                          <IoMdArrowDropdown
+                                                              size={28}
+                                                          />
+                                                      ),
+                                                  }[
+                                                      header.column.getIsSorted() as string
+                                                  ] ?? (
+                                                      <IoMdArrowDropup
+                                                          size={28}
+                                                          color="gray"
+                                                      />
+                                                  )}
                                         </div>
                                         {header.column.getCanFilter() && (
                                             <Filter

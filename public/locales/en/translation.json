@@ -69,11 +69,21 @@
         "buyerInsertable": "Buyer insertion",
         "edit": "Editing",
         "delete": "Delete",
-        "deleteConfirmation": "Confirmation"
+        "deleteConfirmation": "Confirmation",
+        "dataGroupSelect": "Select global data group",
+        "newDataGroup": "New data group",
+        "editDataGroup": "Edit current data group"
     },
     "deleteModal": {
         "deleteConfirmText": "Are you sure you want to delete the selected row?",
         "cancelButton": "Cancel",
         "confirmButton": "Delete row"
+    },
+    "dataGroup": {
+        "name": "Data group name",
+        "description": "Description",
+        "errors": {
+            "name": "This field is required!"
+        }
     }
 }

@@ -63,6 +63,10 @@ export default function AppNavbar({ children }: AppNavbarProps) {
                                 ).toString()}
                                 to="/insert-cell-culture-buyer"
                             />
+                            <BaseNavLink
+                                linkDesc={"Options"}
+                                to="/options"
+                            />
                         </Nav>
                     </Navbar.Collapse>
                 </Container>

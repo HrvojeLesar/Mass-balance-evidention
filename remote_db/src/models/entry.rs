@@ -202,10 +202,11 @@ impl DatabaseQueries<Postgres> for Entry {
         executor: &mut Transaction<'_, Postgres>,
         options: &EntryInsertOptions,
     ) -> Result<Self> {
+        let ccp_d_group = options.d_group.unwrap_or(1);
         let partial_entry = sqlx::query!(
             "
-            INSERT INTO entry (date, weight, weight_type, id_buyer, id_cell, id_culture, d_group)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            INSERT INTO entry (date, weight, weight_type, id_buyer, id_cell, id_culture, d_group, ccp_d_group)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             RETURNING id
             ",
             options.date,
@@ -215,6 +216,7 @@ impl DatabaseQueries<Postgres> for Entry {
             options.cell_culture_pair.id_cell,
             options.cell_culture_pair.id_culture,
             options.d_group,
+            ccp_d_group,
         )
         .fetch_one(&mut *executor)
         .await?;

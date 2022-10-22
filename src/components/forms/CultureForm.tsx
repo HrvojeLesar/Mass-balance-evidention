@@ -1,6 +1,8 @@
+import { useContext } from "react";
 import { Col, Form, Row } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { DataGroupContext } from "../../DataGroupProvider";
 import {
     Culture,
     CultureInsertOptions,
@@ -25,6 +27,7 @@ export default function CultureForm({
     CultureUpdateOptions
 >) {
     const { t } = useTranslation();
+    const dataGroupContextValue = useContext(DataGroupContext);
     const {
         register,
         handleSubmit,
@@ -55,7 +58,6 @@ export default function CultureForm({
         },
     });
 
-
     return (
         <BaseForm
             submitDisabled={insert.isLoading || update.isLoading}
@@ -67,7 +69,13 @@ export default function CultureForm({
                           });
                       })
                     : handleSubmit((data) => {
-                          insert.mutate({ insertOptions: data });
+                          insert.mutate({
+                              insertOptions: {
+                                  ...data,
+                                  dGroup:
+                                      dataGroupContextValue.selectedGroup ?? 1,
+                              },
+                          });
                       })
             }
         >

@@ -3,9 +3,10 @@ import {
     ColumnFiltersState,
     SortingState,
 } from "@tanstack/react-table";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Card } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
+import { DataGroupContext } from "../../DataGroupProvider";
 import {
     Ordering,
     useGetCellsQuery,
@@ -38,6 +39,8 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
     const [isDeleteModalShown, setIsDeleteModalShown] = useState(false);
     const [selectedCell, setSelectedCell] = useState<T | undefined>();
 
+    const dataGroupContextValue = useContext(DataGroupContext);
+
     const { data, refetch } = useGetCellsQuery(
         {
             fetchOptions: {
@@ -61,10 +64,17 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
                               } as TFilterOptions;
                           })
                         : undefined,
+                dataGroupId: dataGroupContextValue.selectedGroup,
             },
         },
         {
-            queryKey: ["getCells", pagination, sorting, columnFilters],
+            queryKey: [
+                "getCells",
+                pagination,
+                sorting,
+                columnFilters,
+                dataGroupContextValue.selectedGroup,
+            ],
             keepPreviousData: true,
         }
     );

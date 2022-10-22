@@ -5,10 +5,15 @@ import {
     SortingState,
 } from "@tanstack/react-table";
 import moment from "moment";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Card, Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { Entry, useDeleteEntryMutation, useGetAllEntriesQuery } from "../../generated/graphql";
+import { DataGroupContext } from "../../DataGroupProvider";
+import {
+    Entry,
+    useDeleteEntryMutation,
+    useGetAllEntriesQuery,
+} from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import ActionButtons from "../ActionButtons";
 import DataTable from "../DataTable";
@@ -38,14 +43,17 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
     const [isDeleteModalShown, setIsDeleteModalShown] = useState(false);
     const [selectedEntry, setSelectedEntry] = useState<Entry | undefined>();
 
+    const dataGroupContextValue = useContext(DataGroupContext);
+
     const { data, refetch } = useGetAllEntriesQuery(
         {
             fetchOptions: {
                 id: {},
+                dataGroupId: dataGroupContextValue.selectedGroup,
             },
         },
         {
-            queryKey: ["getAllEntries"],
+            queryKey: ["getAllEntries", dataGroupContextValue.selectedGroup],
             keepPreviousData: true,
         }
     );

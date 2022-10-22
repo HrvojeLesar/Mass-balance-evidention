@@ -3,7 +3,7 @@ import {
     ColumnFiltersState,
     SortingState,
 } from "@tanstack/react-table";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Card } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import {
@@ -21,6 +21,7 @@ import { TableProps } from "./TableUtils";
 import ActionButtons from "../ActionButtons";
 import EditModal from "../EditModal";
 import DeleteModal from "../DeleteModal";
+import { DataGroupContext } from "../../DataGroupProvider";
 
 type T = Buyer;
 type TFields = BuyerFields;
@@ -37,6 +38,8 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
     const [isModalShown, setIsModalShown] = useState(false);
     const [isDeleteModalShown, setIsDeleteModalShown] = useState(false);
     const [selectedBuyer, setSelectedBuyer] = useState<T | undefined>();
+
+    const dataGroupContextValue = useContext(DataGroupContext);
 
     const { data, refetch } = useGetBuyersQuery(
         {
@@ -61,10 +64,17 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
                               } as TFilterOptions;
                           })
                         : undefined,
+                dataGroupId: dataGroupContextValue.selectedGroup,
             },
         },
         {
-            queryKey: ["getBuyers", pagination, sorting, columnFilters],
+            queryKey: [
+                "getBuyers",
+                pagination,
+                sorting,
+                columnFilters,
+                dataGroupContextValue,
+            ],
             keepPreviousData: true,
         }
     );
