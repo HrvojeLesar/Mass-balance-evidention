@@ -1,10 +1,11 @@
 import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import { Container, Nav, Navbar } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
+import { FaCog } from "react-icons/fa";
 import { Link, useMatch } from "react-router-dom";
 
 type BaseNavLinkProps = {
-    linkDesc: string;
+    linkDesc: ReactNode;
     to: string;
 };
 
@@ -63,8 +64,10 @@ export default function AppNavbar({ children }: AppNavbarProps) {
                                 ).toString()}
                                 to="/insert-cell-culture-buyer"
                             />
+                        </Nav>
+                        <Nav>
                             <BaseNavLink
-                                linkDesc={"Options"}
+                                linkDesc={<FaCog size={24} />}
                                 to="/options"
                             />
                         </Nav>

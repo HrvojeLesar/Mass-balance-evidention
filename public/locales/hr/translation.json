@@ -84,6 +84,7 @@
         "description": "Opis",
         "errors": {
             "name": "Ovo polje je obavezno!"
-        }
+        },
+        "dataGroupSelect": "Globalna grupacija podataka"
     }
 }

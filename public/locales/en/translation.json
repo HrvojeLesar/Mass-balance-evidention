@@ -84,6 +84,7 @@
         "description": "Description",
         "errors": {
             "name": "This field is required!"
-        }
+        },
+        "dataGroupSelect": "Global data group"
     }
 }

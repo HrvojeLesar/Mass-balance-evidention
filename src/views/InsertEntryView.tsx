@@ -1,5 +1,11 @@
+import { DataGroupSelectFlex } from "../components/DataGroupSelect";
 import EntryTable from "../components/tables/EntryTable";
 
 export default function InsertEntryView() {
-    return <EntryTable isInsertable={true} isEditable={true} />;
+    return (
+        <>
+            <DataGroupSelectFlex />
+            <EntryTable isInsertable={true} isEditable={true} />
+        </>
+    );
 }
