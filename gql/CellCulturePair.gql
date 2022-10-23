@@ -43,6 +43,33 @@ mutation DeleteCellCulturePair($deleteOptions: CellCulturePairDeleteOptions!) {
   }
 }
 
+fragment DataGroupParts on DataGroup {
+    id
+    name
+    description
+    createdAt
+}
+
+fragment CellParts on Cell {
+    id
+    name
+    description
+    createdAt
+    dGroup {
+        ...DataGroupParts
+    }
+}
+
+fragment CultureParts on Culture {
+    id
+    name
+    description
+    createdAt
+    dGroup {
+        ...DataGroupParts
+    }
+}
+
 fragment CellCultureParts on CellCulturePair {
     cell {
         ...CellParts

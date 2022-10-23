@@ -54,6 +54,57 @@ mutation DeleteEntry($deleteOptions: DeleteOptions!) {
   }
 }
 
+fragment DataGroupParts on DataGroup {
+    id
+    name
+    description
+    createdAt
+}
+
+fragment CellParts on Cell {
+    id
+    name
+    description
+    createdAt
+    dGroup {
+        ...DataGroupParts
+    }
+}
+
+fragment CultureParts on Culture {
+    id
+    name
+    description
+    createdAt
+    dGroup {
+        ...DataGroupParts
+    }
+}
+
+fragment CellCultureParts on CellCulturePair {
+    cell {
+        ...CellParts
+    }
+    culture {
+        ...CultureParts
+    }
+    createdAt
+    dGroup {
+        ...DataGroupParts
+    }
+}
+
+fragment BuyerParts on Buyer {
+    id
+    name
+    address
+    contact
+    createdAt
+    dGroup {
+        ...DataGroupParts
+    }
+}
+
 fragment EntryParts on Entry {
     id
     weight
