@@ -17,7 +17,7 @@ pub struct GetCells;
 pub struct InsertCell;
 
 pub async fn get_existing_cells(
-    client: Client,
+    client: &Client,
     data_group_id: i64,
     page: Option<i64>,
 ) -> Result<graphql_client::Response<get_cells::ResponseData>> {

@@ -17,7 +17,7 @@ pub struct GetBuyers;
 pub struct InsertBuyer;
 
 pub async fn get_existing_buyers(
-    client: Client,
+    client: &Client,
     data_group_id: i64,
     page: Option<i64>,
 ) -> Result<graphql_client::Response<get_buyers::ResponseData>> {

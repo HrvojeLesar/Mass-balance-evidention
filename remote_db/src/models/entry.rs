@@ -172,16 +172,22 @@ impl ToString for EntryGroupFields {
     }
 }
 
-#[derive(OneofObject)]
+#[derive(Enum, Clone, Copy, PartialEq, Eq)]
 pub(super) enum EntryFetchIdOptionsEnum {
-    CellId(OptionalId),
-    CultureId(OptionalId),
-    Id(OptionalId),
+    EntryId,
+    CellId,
+    CultureId,
+}
+
+#[derive(InputObject)]
+pub(super) struct EntryFetchId {
+    id: i32,
+    id_type: EntryFetchIdOptionsEnum,
 }
 
 #[derive(InputObject)]
 pub(super) struct EntryFetchIdOptions {
-    id_type: Option<EntryFetchIdOptionsEnum>,
+    id: Option<EntryFetchId>,
 }
 
 impl QueryBuilderHelpers<'_, Postgres> for Entry {}
@@ -225,9 +231,10 @@ impl DatabaseQueries<Postgres> for Entry {
             &mut *executor,
             &EntryFetchOptions {
                 id: EntryFetchIdOptions {
-                    id_type: Some(EntryFetchIdOptionsEnum::Id(super::OptionalId {
-                        id: Some(partial_entry.id),
-                    })),
+                    id: Some(EntryFetchId {
+                        id: partial_entry.id,
+                        id_type: EntryFetchIdOptionsEnum::EntryId,
+                    }),
                 },
                 data_group_id: options.d_group,
                 page: None,
@@ -287,28 +294,26 @@ impl DatabaseQueries<Postgres> for Entry {
                 ",
             ),
             Some(|separator: &mut Separated<_, &str>| {
-                if let Some(id) = options.data_group_id {
-                    separator.push("entry.d_group = ").push_bind_unseparated(id);
-                } else {
-                    separator.push("entry.d_group = 1 ");
-                }
+                // if let Some(id) = options.data_group_id {
+                //     separator.push("entry.d_group = ").push_bind_unseparated(id);
+                // } else {
+                //     separator.push("entry.d_group = 1 ");
+                // }
 
-                match &options.id.id_type {
-                    Some(i) => match i {
-                        EntryFetchIdOptionsEnum::CellId(id) => {
+                match &options.id.id {
+                    Some(i) => match i.id_type {
+                        EntryFetchIdOptionsEnum::CellId => {
                             separator
-                                .push("WHERE entry.id_cell = ")
-                                .push_bind_unseparated(id.id);
+                                .push("entry.e_id_cell = ")
+                                .push_bind_unseparated(i.id);
                         }
-                        EntryFetchIdOptionsEnum::CultureId(id) => {
+                        EntryFetchIdOptionsEnum::CultureId => {
                             separator
-                                .push("WHERE entry.id_culture = ")
-                                .push_bind_unseparated(id.id);
+                                .push("entry.e_id_culture = ")
+                                .push_bind_unseparated(i.id);
                         }
-                        EntryFetchIdOptionsEnum::Id(id) => {
-                            separator
-                                .push("WHERE entry.id = ")
-                                .push_bind_unseparated(id.id);
+                        EntryFetchIdOptionsEnum::EntryId => {
+                            separator.push("entry.e_id = ").push_bind_unseparated(i.id);
                         }
                     },
                     None => {}
@@ -382,13 +387,13 @@ impl DatabaseQueries<Postgres> for Entry {
         executor: &mut Transaction<'_, Postgres>,
         options: &EntryFetchOptions,
     ) -> Result<Self> {
-        let id_options = match &options.id.id_type {
-            Some(i) => match i {
-                EntryFetchIdOptionsEnum::CellId(id)
-                | EntryFetchIdOptionsEnum::CultureId(id)
-                | EntryFetchIdOptionsEnum::Id(id) => id,
+        let id_options = match &options.id.id {
+            Some(i) => match i.id_type {
+                EntryFetchIdOptionsEnum::CellId
+                | EntryFetchIdOptionsEnum::CultureId
+                | EntryFetchIdOptionsEnum::EntryId => OptionalId { id: Some(i.id) },
             },
-            None => &OptionalId { id: None },
+            None => OptionalId { id: None },
         };
 
         let r = sqlx::query!(
@@ -509,9 +514,10 @@ impl DatabaseQueries<Postgres> for Entry {
             &mut *executor,
             &EntryFetchOptions {
                 id: EntryFetchIdOptions {
-                    id_type: Some(EntryFetchIdOptionsEnum::Id(super::OptionalId {
-                        id: Some(r.try_get("id")?),
-                    })),
+                    id: Some(EntryFetchId {
+                        id: Some(r.try_get("id")?).unwrap_or(0),
+                        id_type: EntryFetchIdOptionsEnum::EntryId,
+                    }),
                 },
                 data_group_id: options.d_group,
                 page: None,
@@ -756,28 +762,26 @@ impl EntryQuery {
                 ",
             ),
             Some(|separator: &mut Separated<_, &str>| {
-                if let Some(id) = fetch_options.data_group_id {
-                    separator.push("entry.d_group = ").push_bind_unseparated(id);
-                } else {
-                    separator.push("entry.d_group = 1 ");
-                }
+                // if let Some(id) = fetch_options.data_group_id {
+                //     separator.push("entry.d_group = ").push_bind_unseparated(id);
+                // } else {
+                //     separator.push("entry.d_group = 1 ");
+                // }
 
-                match &fetch_options.id.id_type {
-                    Some(i) => match i {
-                        EntryFetchIdOptionsEnum::CellId(id) => {
+                match &fetch_options.id.id {
+                    Some(i) => match i.id_type {
+                        EntryFetchIdOptionsEnum::CellId => {
                             separator
-                                .push("WHERE entry.id_cell = ")
-                                .push_bind_unseparated(id.id);
+                                .push("entry.e_id_cell = ")
+                                .push_bind_unseparated(i.id);
                         }
-                        EntryFetchIdOptionsEnum::CultureId(id) => {
+                        EntryFetchIdOptionsEnum::CultureId => {
                             separator
-                                .push("WHERE entry.id_culture = ")
-                                .push_bind_unseparated(id.id);
+                                .push("entry.e_id_culture = ")
+                                .push_bind_unseparated(i.id);
                         }
-                        EntryFetchIdOptionsEnum::Id(id) => {
-                            separator
-                                .push("WHERE entry.id = ")
-                                .push_bind_unseparated(id.id);
+                        EntryFetchIdOptionsEnum::EntryId => {
+                            separator.push("entry.e_id = ").push_bind_unseparated(i.id);
                         }
                     },
                     None => {}

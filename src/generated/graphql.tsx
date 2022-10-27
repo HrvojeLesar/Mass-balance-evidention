@@ -345,15 +345,20 @@ export type Entry = {
   weightType?: Maybe<Scalars['String']>;
 };
 
-export type EntryFetchIdOptions = {
-  idType?: InputMaybe<EntryFetchIdOptionsEnum>;
+export type EntryFetchId = {
+  id: Scalars['Int'];
+  idType: EntryFetchIdOptionsEnum;
 };
 
-export type EntryFetchIdOptionsEnum = {
-  cellId?: InputMaybe<OptionalId>;
-  cultureId?: InputMaybe<OptionalId>;
-  id?: InputMaybe<OptionalId>;
+export type EntryFetchIdOptions = {
+  id?: InputMaybe<EntryFetchId>;
 };
+
+export enum EntryFetchIdOptionsEnum {
+  CellId = 'CELL_ID',
+  CultureId = 'CULTURE_ID',
+  EntryId = 'ENTRY_ID'
+}
 
 export type EntryFetchOptions = {
   dataGroupId?: InputMaybe<Scalars['Int']>;
@@ -734,6 +739,8 @@ export type DeleteBuyerMutationVariables = Exact<{
 
 export type DeleteBuyerMutation = { __typename?: 'MutationRoot', deleteBuyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null } };
 
+export type DataGroupPartsFragment = { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any };
+
 export type BuyerPartsFragment = { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null };
 
 export type GetCellsQueryVariables = Exact<{
@@ -829,6 +836,8 @@ export type DeleteCellCulturePairMutationVariables = Exact<{
 
 export type DeleteCellCulturePairMutation = { __typename?: 'MutationRoot', deleteCellCulturePair: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null } };
 
+export type CulturePartsFragment = { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null };
+
 export type CellCulturePartsFragment = { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null };
 
 export type GetCulturesQueryVariables = Exact<{
@@ -880,8 +889,6 @@ export type DeleteCultureMutationVariables = Exact<{
 
 export type DeleteCultureMutation = { __typename?: 'MutationRoot', deleteCulture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null } };
 
-export type CulturePartsFragment = { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null };
-
 export type GetDataGroupsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -908,8 +915,6 @@ export type DeleteDataGroupMutationVariables = Exact<{
 
 export type DeleteDataGroupMutation = { __typename?: 'MutationRoot', deleteDataGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } };
 
-export type DataGroupPartsFragment = { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any };
-
 export type GetEntriesQueryVariables = Exact<{
   fetchOptions: EntryFetchOptions;
 }>;
@@ -932,7 +937,7 @@ export type GetEntryQueryVariables = Exact<{
 export type GetEntryQuery = { __typename?: 'QueryRoot', entry: { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null } | null, cellCulturePair?: { __typename?: 'CellCulturePair', createdAt: any, cell?: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null } | null, culture?: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null } | null, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null } };
 
 export type GetEntryGroupsQueryVariables = Exact<{
-  fetchOptions: EntryGroupFetchOptions;
+  fetchGroupOptions: EntryGroupFetchOptions;
 }>;
 
 
@@ -1702,8 +1707,8 @@ export const useGetEntryQuery = <
       options
     );
 export const GetEntryGroupsDocument = `
-    query GetEntryGroups($fetchOptions: EntryGroupFetchOptions!) {
-  getEntryGroups(fetchOptions: $fetchOptions) {
+    query GetEntryGroups($fetchGroupOptions: EntryGroupFetchOptions!) {
+  getEntryGroups(fetchOptions: $fetchGroupOptions) {
     total
     page
     limit

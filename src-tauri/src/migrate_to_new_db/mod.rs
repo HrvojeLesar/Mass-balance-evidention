@@ -5,7 +5,6 @@ use std::{
 
 use chrono::{NaiveDate, Utc};
 use directories::UserDirs;
-use graphql_client::GraphQLQuery;
 use serde::Deserialize;
 use sqlx::{sqlite::SqlitePoolOptions, SqlitePool};
 
@@ -13,9 +12,11 @@ use anyhow::{anyhow, Result};
 
 pub mod buyer;
 pub mod cell;
+pub mod cell_culture_pair;
 pub mod culture;
 pub mod data_group;
 pub mod migrate;
+pub mod entry;
 
 pub(super) type DateTime = chrono::DateTime<Utc>;
 

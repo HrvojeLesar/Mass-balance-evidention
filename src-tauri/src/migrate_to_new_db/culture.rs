@@ -17,7 +17,7 @@ pub struct GetCultures;
 pub struct InsertCulture;
 
 pub async fn get_existing_cultures(
-    client: Client,
+    client: &Client,
     data_group_id: i64,
     page: Option<i64>,
 ) -> Result<graphql_client::Response<get_cultures::ResponseData>> {

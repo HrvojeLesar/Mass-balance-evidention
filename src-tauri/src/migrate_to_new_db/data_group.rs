@@ -20,7 +20,7 @@ pub struct GetDataGroups;
 pub struct InsertDataGroup;
 
 pub async fn get_data_groups(
-    client: Client,
+    client: &Client,
 ) -> Result<graphql_client::Response<get_data_groups::ResponseData>> {
     let request_body = GetDataGroups::build_query(get_data_groups::Variables {});
 
@@ -37,7 +37,7 @@ pub async fn get_data_groups(
 
 pub async fn insert_data_group(
     data_group_name: &str,
-    client: Client,
+    client: &Client,
 ) -> Result<graphql_client::Response<insert_data_group::ResponseData>> {
     let request_body = InsertDataGroup::build_query(insert_data_group::Variables {
         insert_options: insert_data_group::DataGroupInsertOptions {

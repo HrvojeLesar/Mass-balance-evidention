@@ -24,8 +24,8 @@ query GetEntry($fetchOptions: EntryFetchOptions!) {
     }
 }
 
-query GetEntryGroups($fetchOptions: EntryGroupFetchOptions!) {
-    getEntryGroups(fetchOptions: $fetchOptions) {
+query GetEntryGroups($fetchGroupOptions: EntryGroupFetchOptions!) {
+    getEntryGroups(fetchOptions: $fetchGroupOptions) {
         total
         page
         limit
