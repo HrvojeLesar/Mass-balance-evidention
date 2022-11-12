@@ -1,8 +1,10 @@
 use graphql_client::GraphQLQuery;
 use reqwest::Client;
 
-use super::{DateTime, GRAPHQL_ENDPOINT};
+use super::{DateTime, FetchExisting, GRAPHQL_ENDPOINT};
 use anyhow::Result;
+
+use async_trait::async_trait;
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -19,7 +21,7 @@ pub struct GetAllCellCulturePairs;
 )]
 pub struct InsertCellCulturePair;
 
-pub async fn get_all_existing_cell_culture_pairs(
+async fn get_all_existing_cell_culture_pairs(
     client: &Client,
     data_group_id: i64,
 ) -> Result<graphql_client::Response<get_all_cell_culture_pairs::ResponseData>> {
@@ -47,4 +49,22 @@ pub async fn get_all_existing_cell_culture_pairs(
     Ok(res
         .json::<graphql_client::Response<get_all_cell_culture_pairs::ResponseData>>()
         .await?)
+}
+
+#[async_trait]
+impl FetchExisting<get_all_cell_culture_pairs::CellCultureParts> for GetAllCellCulturePairs {
+    async fn get_existing(
+        data_group_id: i64,
+    ) -> Result<Vec<get_all_cell_culture_pairs::CellCultureParts>> {
+        let client = Client::new();
+        Ok(
+            match get_all_existing_cell_culture_pairs(&client, data_group_id)
+                .await?
+                .data
+            {
+                Some(d) => d.get_all_cell_culture_pairs.results,
+                None => Vec::new(),
+            },
+        )
+    }
 }

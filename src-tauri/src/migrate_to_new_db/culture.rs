@@ -1,8 +1,10 @@
 use graphql_client::GraphQLQuery;
 use reqwest::Client;
 
-use super::{DateTime, GRAPHQL_ENDPOINT};
+use super::{DateTime, GRAPHQL_ENDPOINT, FetchExisting};
 use anyhow::Result;
+
+use async_trait::async_trait;
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -16,7 +18,7 @@ pub struct GetCultures;
 #[graphql(schema_path = "../schema.gql", query_path = "../gql/Culture.gql")]
 pub struct InsertCulture;
 
-pub async fn get_existing_cultures(
+async fn get_existing_cultures(
     client: &Client,
     data_group_id: i64,
     page: Option<i64>,
@@ -41,4 +43,33 @@ pub async fn get_existing_cultures(
     Ok(res
         .json::<graphql_client::Response<get_cultures::ResponseData>>()
         .await?)
+}
+
+#[async_trait]
+impl FetchExisting<get_cultures::CultureParts> for GetCultures {
+    async fn get_existing(data_group_id: i64) -> Result<Vec<get_cultures::CultureParts>> {
+        let mut page = 1;
+        let mut existing_cultures = Vec::new();
+
+        let client = Client::new();
+        loop {
+            let data = match get_existing_cultures(&client, data_group_id, Some(page))
+                .await?
+                .data
+            {
+                Some(b) => b,
+                None => break,
+            };
+            let culture_countn = data.cultures.results.len();
+            let mut cultures = data.cultures.results;
+            existing_cultures.append(&mut cultures);
+
+            if data.cultures.total > culture_countn as i64 * page {
+                page += 1;
+            } else {
+                break;
+            }
+        }
+        Ok(existing_cultures)
+    }
 }

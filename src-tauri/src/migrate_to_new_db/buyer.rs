@@ -1,8 +1,10 @@
 use graphql_client::GraphQLQuery;
 use reqwest::Client;
 
-use super::{DateTime, GRAPHQL_ENDPOINT};
+use super::{DateTime, GRAPHQL_ENDPOINT, FetchExisting};
 use anyhow::Result;
+
+use async_trait::async_trait;
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -16,7 +18,7 @@ pub struct GetBuyers;
 #[graphql(schema_path = "../schema.gql", query_path = "../gql/Buyer.gql")]
 pub struct InsertBuyer;
 
-pub async fn get_existing_buyers(
+async fn get_existing_buyers(
     client: &Client,
     data_group_id: i64,
     page: Option<i64>,
@@ -41,4 +43,33 @@ pub async fn get_existing_buyers(
     Ok(res
         .json::<graphql_client::Response<get_buyers::ResponseData>>()
         .await?)
+}
+
+#[async_trait]
+impl FetchExisting<get_buyers::BuyerParts> for GetBuyers {
+    async fn get_existing(data_group_id: i64) -> Result<Vec<get_buyers::BuyerParts>> {
+        let mut page = 1;
+        let mut existing_buyers = Vec::new();
+
+        let client = Client::new();
+        loop {
+            let data = match get_existing_buyers(&client, data_group_id, Some(page))
+                .await?
+                .data
+            {
+                Some(b) => b,
+                None => break,
+            };
+            let buyer_count = data.buyers.results.len();
+            let mut buyers = data.buyers.results;
+            existing_buyers.append(&mut buyers);
+
+            if data.buyers.total > buyer_count as i64 * page {
+                page += 1;
+            } else {
+                break;
+            }
+        }
+        Ok(existing_buyers)
+    }
 }

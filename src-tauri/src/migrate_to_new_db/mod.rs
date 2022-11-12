@@ -10,13 +10,15 @@ use sqlx::{sqlite::SqlitePoolOptions, SqlitePool};
 
 use anyhow::{anyhow, Result};
 
+use async_trait::async_trait;
+
 pub mod buyer;
 pub mod cell;
 pub mod cell_culture_pair;
 pub mod culture;
 pub mod data_group;
-pub mod migrate;
 pub mod entry;
+pub mod migrate;
 
 pub(super) type DateTime = chrono::DateTime<Utc>;
 
@@ -301,6 +303,11 @@ async fn get_entries(pool: &SqlitePool) -> Result<Vec<Entry>> {
     transaction.commit().await.unwrap();
 
     Ok(rows)
+}
+
+#[async_trait]
+trait FetchExisting<T> {
+    async fn get_existing(data_group_id: i64) -> Result<Vec<T>>;
 }
 
 #[cfg(test)]
