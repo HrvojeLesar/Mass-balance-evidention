@@ -20,9 +20,9 @@ export default function DataGroupSelect() {
                 }}
             >
                 {value.isLoading ? (
-                    <option>Loading</option>
+                    <option>{t("loading").toString()}</option>
                 ) : isGroupsEmpty ? (
-                    <option>No Groups</option>
+                    <option>{t("dataGroup.noGroups")}</option>
                 ) : (
                     value.groups.map((group) => {
                         return (

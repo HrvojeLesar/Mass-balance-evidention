@@ -24,6 +24,12 @@ i18n.use(Backend)
         },
     });
 
+declare global {
+    interface Window {
+        __TAURI__?: any;
+    }
+}
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
         <QueryClientProvider client={queryClient}>

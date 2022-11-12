@@ -1,7 +1,7 @@
 use graphql_client::GraphQLQuery;
 use reqwest::Client;
 
-use super::{DateTime, GRAPHQL_ENDPOINT, FetchExisting};
+use super::{DateTime, FetchExisting, GRAPHQL_ENDPOINT};
 use anyhow::Result;
 
 use async_trait::async_trait;
@@ -52,14 +52,10 @@ impl FetchExisting<get_buyers::BuyerParts> for GetBuyers {
         let mut existing_buyers = Vec::new();
 
         let client = Client::new();
-        loop {
-            let data = match get_existing_buyers(&client, data_group_id, Some(page))
-                .await?
-                .data
-            {
-                Some(b) => b,
-                None => break,
-            };
+        while let Some(data) = get_existing_buyers(&client, data_group_id, Some(page))
+            .await?
+            .data
+        {
             let buyer_count = data.buyers.results.len();
             let mut buyers = data.buyers.results;
             existing_buyers.append(&mut buyers);

@@ -85,6 +85,7 @@
         "errors": {
             "name": "This field is required!"
         },
-        "dataGroupSelect": "Global data group"
+        "dataGroupSelect": "Global data group",
+        "noGroups": "There are no defined groups"
     }
 }

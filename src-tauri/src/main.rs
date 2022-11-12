@@ -5,7 +5,7 @@
 
 use migrate_to_new_db::migrate::Migrate;
 use serde::Serialize;
-use tauri::{AppHandle, Manager};
+use tauri::AppHandle;
 
 mod migrate_to_new_db;
 

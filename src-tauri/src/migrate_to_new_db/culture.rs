@@ -1,7 +1,7 @@
 use graphql_client::GraphQLQuery;
 use reqwest::Client;
 
-use super::{DateTime, GRAPHQL_ENDPOINT, FetchExisting};
+use super::{DateTime, FetchExisting, GRAPHQL_ENDPOINT};
 use anyhow::Result;
 
 use async_trait::async_trait;
@@ -52,19 +52,15 @@ impl FetchExisting<get_cultures::CultureParts> for GetCultures {
         let mut existing_cultures = Vec::new();
 
         let client = Client::new();
-        loop {
-            let data = match get_existing_cultures(&client, data_group_id, Some(page))
-                .await?
-                .data
-            {
-                Some(b) => b,
-                None => break,
-            };
-            let culture_countn = data.cultures.results.len();
+        while let Some(data) = get_existing_cultures(&client, data_group_id, Some(page))
+            .await?
+            .data
+        {
+            let culture_count = data.cultures.results.len();
             let mut cultures = data.cultures.results;
             existing_cultures.append(&mut cultures);
 
-            if data.cultures.total > culture_countn as i64 * page {
+            if data.cultures.total > culture_count as i64 * page {
                 page += 1;
             } else {
                 break;

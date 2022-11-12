@@ -22,9 +22,7 @@ pub async fn get_all_entries(
 ) -> Result<graphql_client::Response<get_all_entries::ResponseData>> {
     let request_body = GetAllEntries::build_query(get_all_entries::Variables {
         fetch_options: get_all_entries::EntryFetchOptions {
-            id: get_all_entries::EntryFetchIdOptions {
-                id: None,
-            },
+            id: get_all_entries::EntryFetchIdOptions { id: None },
             limit: None,
             page: None,
             ordering: None,

@@ -52,14 +52,10 @@ impl FetchExisting<get_cells::CellParts> for GetCells {
         let mut existing_cells = Vec::new();
 
         let client = Client::new();
-        loop {
-            let data = match get_existing_cells(&client, data_group_id, Some(page))
-                .await?
-                .data
-            {
-                Some(b) => b,
-                None => break,
-            };
+        while let Some(data) = get_existing_cells(&client, data_group_id, Some(page))
+            .await?
+            .data
+        {
             let cell_count = data.cells.results.len();
             let mut cells = data.cells.results;
             existing_cells.append(&mut cells);
