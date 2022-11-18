@@ -1,7 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, Button, Col, Modal, ProgressBar, Row } from "react-bootstrap";
+import {
+    Accordion,
+    Alert,
+    Button,
+    Col,
+    Modal,
+    ProgressBar,
+    Row,
+    Table,
+} from "react-bootstrap";
 import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from "@tauri-apps/api/event";
+import { Trans, useTranslation } from "react-i18next";
 
 enum Task {
     FetchRemoteBuyer,
@@ -104,6 +114,7 @@ const newMigrationProgress = (): MigrationProgress => ({
 });
 
 export default function EditModal({ show, onHide }: MigrateModal) {
+    const { t } = useTranslation();
     const [status, setStatus] = useState<Status>({
         overall: newProgress(),
         progress: [],
@@ -117,6 +128,8 @@ export default function EditModal({ show, onHide }: MigrateModal) {
         return window.__TAURI__ !== undefined;
     }, []);
 
+    // TODO: Handle errors during migration
+    // TODO: DB title in stats
     const startImport = useCallback(() => {
         if (displayImport) {
             invoke("try_start_import").then((response) =>
@@ -129,12 +142,15 @@ export default function EditModal({ show, onHide }: MigrateModal) {
     useEffect(() => {
         if (show) {
             setIsFinished(false);
+            setStatus({
+                overall: newProgress(),
+                progress: [],
+            });
             var timeout = setTimeout(() => {
                 setIsStartDisabled(false);
             }, 2000);
         }
         return () => {
-            console.log("cleartimeout");
             clearTimeout(timeout);
         };
     }, [show]);
@@ -220,69 +236,203 @@ export default function EditModal({ show, onHide }: MigrateModal) {
             keyboard={!isImporting}
         >
             <Modal.Header closeButton={!isImporting}>
-                <Modal.Title>
-                    Import local database {isFinished.toString()}
-                </Modal.Title>
+                <Modal.Title>{t("titles.migrationModalTitle")}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                {isImporting === false ? (
-                    <Row>
-                        <Alert variant="danger">
-                            <p>
-                                Počinje s unošenjem podataka iz lokalnih baza.
-                                Proces može potrajati i nije moguće prekinuti
-                                ili nastaviti. Moguće je da preneseni podatci
-                                neće biti sasvim točni (npr. datum).
-                            </p>
-                            <hr />
-                            <p className="mb-0">
-                                Pritisnite tipku "Početak" za pokretanje
-                                procesa.
-                            </p>
-                        </Alert>
-                        <Button
-                            disabled={isStartDisabled || isImporting}
-                            onClick={() => {
-                                startImport();
-                            }}
-                        >
-                            Start
-                        </Button>
-                    </Row>
-                ) : (
-                    <Row>
-                        <div>
-                            Migrirano: <b>{status.overall.migrated}</b> /{" "}
-                            <b>{status.overall.totalToMigrate}</b> baza.
-                        </div>
-                        <div>
-                            Trenutno prebacuje: <b>{status.mainTask}</b>.
-                        </div>
-                        <div>
-                            Podzadatak: <b>{status.subtask}</b>.
-                        </div>
-                        {status.mainTask !== undefined &&
-                            status.progress.length > 0 && (
+                {isFinished === false ? (
+                    isImporting === false ? (
+                        <Row>
+                            <Alert variant="danger">
+                                <p>{t("migration.warning")}</p>
+                                <hr />
+                                <p className="mb-0">
+                                    {t("migration.startWarning")}
+                                </p>
+                            </Alert>
+                            <Button
+                                disabled={isStartDisabled || isImporting}
+                                onClick={() => {
+                                    startImport();
+                                }}
+                            >
+                                {t("migration.start")}
+                            </Button>
+                        </Row>
+                    ) : (
+                        <Row>
+                            <div>
+                                <Trans
+                                    t={t}
+                                    i18nKey="migration.migratedDatabases"
+                                    values={{
+                                        migrated: status.overall.migrated,
+                                        totalToMigrate:
+                                            status.overall.totalToMigrate,
+                                    }}
+                                />
+                            </div>
+                            {status.mainTask && (
                                 <div>
-                                    Status:{" "}
-                                    <b>
-                                        {
-                                            status.progress[
-                                                status.progress.length - 1
-                                            ][status.mainTask].migrated
-                                        }
-                                    </b>
-                                    {" / "}
-                                    <b>
-                                        {
-                                            status.progress[
-                                                status.progress.length - 1
-                                            ][status.mainTask].totalToMigrate
-                                        }
-                                    </b>
+                                    <Trans
+                                        t={t}
+                                        i18nKey="migration.mainTask"
+                                        values={{
+                                            mainTask: t(
+                                                `mainTask.${status.mainTask}`
+                                            ),
+                                        }}
+                                    />
                                 </div>
                             )}
-                    </Row>
+                            {status.subtask && (
+                                <div>
+                                    <Trans
+                                        t={t}
+                                        i18nKey="migration.subtask"
+                                        values={{
+                                            subtask: t(
+                                                `subtask.${status.subtask}`
+                                            ),
+                                        }}
+                                    />
+                                </div>
+                            )}
+                            {status.mainTask !== undefined &&
+                                status.progress.length > 0 &&
+                                status.progress[status.progress.length - 1][
+                                    status.mainTask
+                                ].totalToMigrate > 0 && (
+                                    <div>
+                                        <Trans
+                                            t={t}
+                                            i18nKey="migration.status"
+                                            values={{
+                                                migrated:
+                                                    status.progress[
+                                                        status.progress.length -
+                                                            1
+                                                    ][status.mainTask].migrated,
+                                                totalToMigrate:
+                                                    status.progress[
+                                                        status.progress.length -
+                                                            1
+                                                    ][status.mainTask]
+                                                        .totalToMigrate,
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                        </Row>
+                    )
+                ) : (
+                    <div>
+                        <div>{t("migration.migrationFinished")}</div>
+                        <hr />
+                        <Accordion alwaysOpen>
+                            {status.progress.map((prog, idx) => {
+                                return (
+                                    <Accordion.Item
+                                        eventKey={idx.toString()}
+                                        key={idx}
+                                    >
+                                        <Accordion.Header>
+                                            DB title
+                                        </Accordion.Header>
+                                        <Accordion.Body>
+                                            <Table
+                                                responsive
+                                                striped
+                                                bordered
+                                                hover
+                                                size="sm"
+                                            >
+                                                <thead>
+                                                    <tr>
+                                                        <td>
+                                                            {t(
+                                                                "migration.identifier"
+                                                            )}
+                                                        </td>
+                                                        <td>
+                                                            {t(
+                                                                "migration.migrated"
+                                                            )}
+                                                        </td>
+                                                        <td>
+                                                            {t(
+                                                                "migration.totalToMigrate"
+                                                            )}
+                                                        </td>
+                                                        <td>
+                                                            {t(
+                                                                "migration.skipped"
+                                                            )}
+                                                        </td>
+                                                        <td>
+                                                            {t(
+                                                                "migration.failed"
+                                                            )}
+                                                        </td>
+                                                        <td>
+                                                            {t(
+                                                                "migration.total"
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {Object.entries(prog).map(
+                                                        ([key, value], i) => {
+                                                            if (
+                                                                key ===
+                                                                "dataGroup"
+                                                            ) {
+                                                                return <></>;
+                                                            }
+                                                            return (
+                                                                <tr key={i}>
+                                                                    <td>
+                                                                        {t(
+                                                                            `${key}.name`
+                                                                        )}
+                                                                    </td>
+                                                                    <td>
+                                                                        {
+                                                                            value.migrated
+                                                                        }
+                                                                    </td>
+                                                                    <td>
+                                                                        {
+                                                                            value.totalToMigrate
+                                                                        }
+                                                                    </td>
+                                                                    <td>
+                                                                        {
+                                                                            value.skipped
+                                                                        }
+                                                                    </td>
+                                                                    <td>
+                                                                        {
+                                                                            value.failed
+                                                                        }
+                                                                    </td>
+                                                                    <td>
+                                                                        {
+                                                                            value.total
+                                                                        }
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        }
+                                                    )}
+                                                </tbody>
+                                            </Table>
+                                        </Accordion.Body>
+                                    </Accordion.Item>
+                                );
+                            })}
+                        </Accordion>
+                    </div>
                 )}
             </Modal.Body>
         </Modal>

@@ -31,8 +31,12 @@
         }
     },
     "entry": {
+        "name": "Zapis",
         "weight": "Težina",
         "date": "Datum"
+    },
+    "cellCulturePair": {
+        "name": "Par čestica i kultura"
     },
     "weight": {
         "errors": {
@@ -72,7 +76,8 @@
         "deleteConfirmation": "Potrvrda",
         "dataGroupSelect": "Odabir globalne grupacije podataka",
         "newDataGroup": "Dodavanje nove grupacije podataka",
-        "editDataGroup": "Uređivanje trenutne grupacije podataka"
+        "editDataGroup": "Uređivanje trenutne grupacije podataka",
+        "migrationModalTitle": "Migracija s lokalnih baza podataka"
     },
     "deleteModal": {
         "deleteConfirmText": "Jeste li sigurni da želite obrisati odabrani red?",
@@ -87,5 +92,51 @@
         },
         "dataGroupSelect": "Globalna grupacija podataka",
         "noGroups": "Nema definiranih grupa"
+    },
+    "migration": {
+        "warning": "Počinje s unošenjem podataka iz lokalnih baza podataka. Proces može duže potrajati i nije ga moguće prekinuti ili nastaviti. Moguće je da preneseni podatci neće biti sasvim točni (npr. datum zbog vremenskih zona).",
+        "startWarning": "Pritisnite tipoku \"Početak\" za pokretanje procesa.",
+        "start": "Početak",
+        "migratedDatabases": "Migrirano: <strong>{{migrated}}</strong> / <strong>{{totalToMigrate}}</strong> baza podataka.",
+        "mainTask": "Trenutno prebacuje: <strong>{{mainTask}}</strong>.",
+        "subtask": "Trenutni podzadatak: <strong>{{subtask}}</strong>.",
+        "status": "Status: <strong>{{migrated}}</strong> / <strong>{{totalToMigrate}}</strong>",
+        "identifier": "Identifikator",
+        "migrated": "Migrirano",
+        "totalToMigrate": "Ukupno za migrirati",
+        "skipped": "Preskočeno",
+        "failed": "Neuspjelo",
+        "total": "Ukupno",
+        "migrationFinished": "Migracija je uspješno završena. Ispod su prikazani podaci o broju migriranih, preskočenih, neuspjelih stavki iz pojedine lokalne baze podataka."
+    },
+    "mainTask": {
+        "buyer": "kupce",
+        "cell": "čestice",
+        "culture": "kulture",
+        "cellCulturePair": "parove čestica i kultura",
+        "entry": "zapise",
+        "dataGroup": "grupu podataka"
+    },
+    "subtask": {
+        "fetchRemoteBuyer": "dohvaćanje kupaca",
+        "fetchRemoteCell": "dohvaćanje čestica",
+        "fetchRemoteCulture": "dohvaćanje kultura",
+        "fetchRemoteCellCulturePair": "dohvaćanje para čestica i kultura",
+        "fetchRemoteEntry": "dohvaćanje zapisa",
+        "fetchLocalBuyer": "dohvaćanje lokalnih kupaca",
+        "fetchLocalCell": "dohvaćanje lokalnih čelija",
+        "fetchLocalCulture": "dohvaćanje lokalnih kultura",
+        "fetchLocalCellCulturePair": "dohvćanje lokalnih para čestica i kultura",
+        "fetchLocalEntry": "dohvaćanje lokalnih zapisa",
+        "loadToMigrateBuyer": "učitavanje kupaca za migraciju",
+        "loadToMigrateCell": "učitavanje čestica za migraciju",
+        "loadToMigrateCulture": "učitavanje kultura za migraciju",
+        "loadToMigrateCellCulturePair": "učitavanje para čestica i kultura za migraciju",
+        "loadToMigrateEntry": "učitavanje zapisa za migraciju",
+        "insertBuyer": "umetanje kupaca",
+        "insertCell": "umetanje čestica",
+        "insertCulture": "umetanje kultura",
+        "insertCellCulturePair": "umetanje para čestica i kultura",
+        "insertEntry": "umetanje zapisa"
     }
 }

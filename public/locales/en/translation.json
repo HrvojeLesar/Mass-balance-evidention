@@ -31,8 +31,12 @@
         }
     },
     "entry": {
+        "name": "Entry",
         "weight": "Weight",
         "date": "Date"
+    },
+    "cellCulturePair": {
+        "name": "Cell and culture pair"
     },
     "weight": {
         "errors": {
@@ -72,7 +76,8 @@
         "deleteConfirmation": "Confirmation",
         "dataGroupSelect": "Select global data group",
         "newDataGroup": "New data group",
-        "editDataGroup": "Edit current data group"
+        "editDataGroup": "Edit current data group",
+        "migrationModalTitle": "Migrate from local databases"
     },
     "deleteModal": {
         "deleteConfirmText": "Are you sure you want to delete the selected row?",
@@ -87,5 +92,51 @@
         },
         "dataGroupSelect": "Global data group",
         "noGroups": "There are no defined groups"
+    },
+    "migration": {
+        "warning": "Starts with the migration process. The process can take some time to finish and cannot be stopped or continued. It is possible for some transfered values to be incorret (E.g. dates becaus of timezones).",
+        "startWarning": "Press \"Start\" to start the migration process.",
+        "start": "Start",
+        "migratedDatabases": "Migrated: <strong>{{migrated}}</strong> / <strong>{{totalToMigrate}}</strong> databases.",
+        "mainTask": "Currently migrating: <strong>{{mainTask}}</strong>.",
+        "subtask": "Current subtask: <strong>{{subtask}}</strong>.",
+        "status": "Status: <strong>{{migrated}}</strong> / <strong>{{totalToMigrate}}</strong>",
+        "identifier": "Identifier",
+        "migrated": "Migrated",
+        "totalToMigrate": "Total to migrate",
+        "skipped": "Skipped",
+        "failed": "Failed",
+        "total": "Total",
+        "migrationFinished": "Migration process successfully finished. Shown below are short statistics about number of items migrated, skipped, failed and total number of items from each local database."
+    },
+    "mainTask": {
+        "buyer": "buyers",
+        "cell": "cells",
+        "culture": "cultures",
+        "cellCulturePair": "cell culture pairs",
+        "entry": "entries",
+        "dataGroup": "data groups"
+    },
+    "subtask": {
+        "fetchRemoteBuyer": "fetching buyers",
+        "fetchRemoteCell": "fetching cells",
+        "fetchRemoteCulture": "fetching cultures",
+        "fetchRemoteCellCulturePair": "fetching cell culture pairs",
+        "fetchRemoteEntry": "fetching entries",
+        "fetchLocalBuyer": "fetching local buyers",
+        "fetchLocalCell": "fetching local cells",
+        "fetchLocalCulture": "fetching local cultures",
+        "fetchLocalCellCulturePair": "fetching local cell culture pairs",
+        "fetchLocalEntry": "fetching local entries",
+        "loadToMigrateBuyer": "loading buyers to migrate",
+        "loadToMigrateCell": "loading cells to migrate",
+        "loadToMigrateCulture": "loading cultures to migrate",
+        "loadToMigrateCellCulturePair": "loading cell culture pairs to migrate",
+        "loadToMigrateEntry": "loading entries to migrate",
+        "insertBuyer": "inserting buyers",
+        "insertCell": "inserting cells",
+        "insertCulture": "inserting cultures",
+        "insertCellCulturePair": "inserting cell culture pairs",
+        "insertEntry": "inserting entries"
     }
 }
