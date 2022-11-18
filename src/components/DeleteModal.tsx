@@ -28,7 +28,7 @@ export default function EditModal({
             backdrop={isLoading ? "static" : true}
             keyboard={isLoading ? false : true}
         >
-            <Modal.Header closeButton>
+            <Modal.Header closeButton={!isLoading}>
                 <Modal.Title>{title}</Modal.Title>
             </Modal.Header>
             <Modal.Body>

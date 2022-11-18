@@ -26,8 +26,11 @@ use tauri::{AppHandle, Manager};
 
 const PROGRESS_EVENT: &str = "progress-event";
 const TASK_CHANGE_EVENT: &str = "task-change-event";
+const MIGRATION_FINISHED_EVENT: &str = "migration-finished-event";
+const START_NEW_PROGRESS_EVENT: &str = "start-new-progress-event";
 
 #[derive(Clone, Debug, Serialize)]
+#[serde(rename_all="camelCase")]
 enum Task {
     FetchRemoteBuyer,
     FetchRemoteCell,
@@ -52,6 +55,7 @@ enum Task {
 }
 
 #[derive(Clone, Debug, Serialize)]
+#[serde(rename_all="camelCase")]
 enum MainTask {
     Buyer,
     Cell,
@@ -62,6 +66,7 @@ enum MainTask {
 }
 
 #[derive(Clone, Debug, Serialize)]
+#[serde(rename_all="camelCase")]
 enum UpdateOn {
     // Buyer,
     // Cell,
@@ -73,12 +78,14 @@ enum UpdateOn {
 }
 
 #[derive(Clone, Debug, Serialize)]
+#[serde(rename_all="camelCase")]
 struct ProgressMessage<'a> {
     update_on: UpdateOn,
     progress: &'a Progress,
 }
 
 #[derive(Clone, Debug, Serialize)]
+#[serde(rename_all="camelCase")]
 struct TaskMessage {
     #[serde(skip_serializing)]
     app_handle: Arc<AppHandle>,
@@ -114,6 +121,7 @@ impl TaskMessage {
 }
 
 #[derive(Clone, Debug, Default, Serialize)]
+#[serde(rename_all="camelCase")]
 struct Progress {
     migrated: usize,
     skipped: usize,
@@ -140,14 +148,15 @@ impl Progress {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize)]
+#[serde(rename_all="camelCase")]
 struct MigrationProgress {
     buyer: Progress,
     cell: Progress,
     culture: Progress,
     cell_culture_pair: Progress,
     entry: Progress,
-    data_groups: Progress,
+    data_group: Progress,
     overall: Progress,
 }
 
@@ -158,7 +167,7 @@ impl MigrationProgress {
         self.culture = Progress::default();
         self.cell_culture_pair = Progress::default();
         self.entry = Progress::default();
-        self.data_groups = Progress::default();
+        self.data_group = Progress::default();
     }
 }
 
@@ -191,7 +200,7 @@ impl Migrate {
         {
             let mut progress = self.progress.lock().await;
             let total = database_config_pairs.len();
-            progress.data_groups.total_to_migrate = total;
+            progress.data_group.total_to_migrate = total;
             progress.overall.total_to_migrate = total;
             progress.overall.emit(&self.app_handle, UpdateOn::Overall)?;
         }
@@ -205,6 +214,7 @@ impl Migrate {
                 }
             };
 
+            self.app_handle.emit_all(START_NEW_PROGRESS_EVENT, "")?;
             {
                 let mut progress = self.progress.lock().await;
                 progress.reset();
@@ -241,7 +251,7 @@ impl Migrate {
             println!("Done.");
         }
         println!("Done overall.");
-
+        self.app_handle.emit_all(MIGRATION_FINISHED_EVENT, "")?;
         Ok(())
     }
 
@@ -254,7 +264,7 @@ impl Migrate {
         let mut progress = self.progress.lock().await;
         match group {
             Some(g) => {
-                progress.data_groups.skipped += 1;
+                progress.data_group.skipped += 1;
                 Ok(g.id)
             }
             None => {
@@ -268,7 +278,7 @@ impl Migrate {
                     ))?
                     .insert_data_group
                     .id;
-                progress.data_groups.migrated += 1;
+                progress.data_group.migrated += 1;
                 Ok(id)
             }
         }
