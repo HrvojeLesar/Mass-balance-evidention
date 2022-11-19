@@ -107,7 +107,7 @@
         "skipped": "Preskočeno",
         "failed": "Neuspjelo",
         "total": "Ukupno",
-        "migrationFinished": "Migracija je uspješno završena. Ispod su prikazani podaci o broju migriranih, preskočenih, neuspjelih stavki iz pojedine lokalne baze podataka."
+        "migrationFinished": "Migracija je uspješno završena. Ispod su prikazani podaci o broju migriranih, preskočenih i neuspjelih stavki iz pojedine lokalne baze podataka."
     },
     "mainTask": {
         "buyer": "kupce",

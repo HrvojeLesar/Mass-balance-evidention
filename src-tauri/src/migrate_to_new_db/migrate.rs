@@ -214,7 +214,7 @@ impl Migrate {
                 }
             };
 
-            self.app_handle.emit_all(START_NEW_PROGRESS_EVENT, "")?;
+            self.app_handle.emit_all(START_NEW_PROGRESS_EVENT, &dcp.database.alias)?;
             {
                 let mut progress = self.progress.lock().await;
                 progress.reset();

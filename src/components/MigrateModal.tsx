@@ -12,6 +12,7 @@ import {
 import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from "@tauri-apps/api/event";
 import { Trans, useTranslation } from "react-i18next";
+import React from "react";
 
 enum Task {
     FetchRemoteBuyer,
@@ -80,6 +81,7 @@ type Status = {
     subtask?: Task;
     overall: Progress;
     progress: MigrationProgress[];
+    dbNames: string[];
 };
 
 type MigrationProgress = {
@@ -118,6 +120,7 @@ export default function EditModal({ show, onHide }: MigrateModal) {
     const [status, setStatus] = useState<Status>({
         overall: newProgress(),
         progress: [],
+        dbNames: [],
     });
 
     const [isStartDisabled, setIsStartDisabled] = useState(true);
@@ -129,7 +132,6 @@ export default function EditModal({ show, onHide }: MigrateModal) {
     }, []);
 
     // TODO: Handle errors during migration
-    // TODO: DB title in stats
     const startImport = useCallback(() => {
         if (displayImport) {
             invoke("try_start_import").then((response) =>
@@ -145,6 +147,7 @@ export default function EditModal({ show, onHide }: MigrateModal) {
             setStatus({
                 overall: newProgress(),
                 progress: [],
+                dbNames: [],
             });
             var timeout = setTimeout(() => {
                 setIsStartDisabled(false);
@@ -202,10 +205,12 @@ export default function EditModal({ show, onHide }: MigrateModal) {
             var unlistenStartNewProgressEvent = async () => {
                 let unlistenHandle = await listen(
                     "start-new-progress-event",
-                    () => {
+                    (e) => {
+                        let event = e as TauriEvent<string>;
                         setStatus((s) => ({
                             ...s,
                             progress: [...s.progress, newMigrationProgress()],
+                            dbNames: [...s.dbNames, event.payload],
                         }));
                     }
                 );
@@ -336,7 +341,8 @@ export default function EditModal({ show, onHide }: MigrateModal) {
                                         key={idx}
                                     >
                                         <Accordion.Header>
-                                            DB title
+                                            {status.dbNames[idx] ??
+                                                "__NO_NAME_FOUND__"}
                                         </Accordion.Header>
                                         <Accordion.Body>
                                             <Table
@@ -387,7 +393,11 @@ export default function EditModal({ show, onHide }: MigrateModal) {
                                                                 key ===
                                                                 "dataGroup"
                                                             ) {
-                                                                return <></>;
+                                                                return (
+                                                                    <React.Fragment
+                                                                        key={i}
+                                                                    ></React.Fragment>
+                                                                );
                                                             }
                                                             return (
                                                                 <tr key={i}>
