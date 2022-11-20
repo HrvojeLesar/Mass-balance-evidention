@@ -41,7 +41,7 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
 
     const dataGroupContextValue = useContext(DataGroupContext);
 
-    const { data, refetch } = useGetCellsQuery(
+    const { data, refetch, isInitialLoading } = useGetCellsQuery(
         {
             fetchOptions: {
                 id: {},
@@ -184,6 +184,7 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
                 paginationState={{ pagination, setPagination }}
                 sortingState={{ sorting, setSorting }}
                 filterState={{ columnFilters, setColumnFilters }}
+                dataLoadingState={{ isInitialLoading }}
             />
         </Card>
     );

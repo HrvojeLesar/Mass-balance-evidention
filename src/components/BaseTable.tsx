@@ -85,10 +85,19 @@ function Filter<T>({ column, table }: FilterProps<T>) {
 }
 
 type BaseTableProps<T> = {
+    dataLoadingState: {
+        isInitialLoading: boolean;
+        // isLoading?: boolean;
+        // isFetching?: boolean;
+    };
     table: Table<T>;
 };
 
-export default function BaseTable<T>({ table }: BaseTableProps<T>) {
+export default function BaseTable<T>({
+    table,
+    dataLoadingState,
+}: BaseTableProps<T>) {
+    const { t } = useTranslation();
     return (
         <BSTable hover responsive striped bordered>
             <thead>
@@ -158,53 +167,82 @@ export default function BaseTable<T>({ table }: BaseTableProps<T>) {
                 ))}
             </thead>
             <tbody>
-                {table.getRowModel().rows.map((row) => (
-                    <tr key={row.id}>
-                        {row.getVisibleCells().map((cell) => (
-                            <td
-                                key={cell.id}
-                                className={
-                                    cell.getIsGrouped()
-                                        ? "bg-info bg-opacity-75 align-middle"
-                                        : cell.getIsAggregated()
-                                        ? "bg-warning bg-opacity-50 align-middle"
-                                        : cell.getIsPlaceholder()
-                                        ? "bg-danger bg-opacity-50 align-middle"
-                                        : "align-middle"
-                                }
-                            >
-                                {cell.getIsGrouped() ? (
-                                    <div
-                                        onClick={row.getToggleExpandedHandler()}
-                                        className="expand-cell"
-                                    >
-                                        {row.getIsExpanded() ? (
-                                            <IoMdArrowDropdown size={28} />
-                                        ) : (
-                                            <IoMdArrowDropright size={28} />
-                                        )}
-                                        {flexRender(
+                {   dataLoadingState.isInitialLoading === false ? 
+                    table.getRowModel().rows.length > 0 ? (
+                    table.getRowModel().rows.map((row) => (
+                        <tr key={row.id}>
+                            {row.getVisibleCells().map((cell) => (
+                                <td
+                                    key={cell.id}
+                                    className={
+                                        cell.getIsGrouped()
+                                            ? "bg-info bg-opacity-75 align-middle"
+                                            : cell.getIsAggregated()
+                                            ? "bg-warning bg-opacity-50 align-middle"
+                                            : cell.getIsPlaceholder()
+                                            ? "bg-danger bg-opacity-50 align-middle"
+                                            : "align-middle"
+                                    }
+                                >
+                                    {cell.getIsGrouped() ? (
+                                        <div
+                                            onClick={row.getToggleExpandedHandler()}
+                                            className="expand-cell"
+                                        >
+                                            {row.getIsExpanded() ? (
+                                                <IoMdArrowDropdown size={28} />
+                                            ) : (
+                                                <IoMdArrowDropright size={28} />
+                                            )}
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                            {` (${row.subRows.length})`}
+                                        </div>
+                                    ) : cell.getIsAggregated() ? (
+                                        flexRender(
+                                            cell.column.columnDef
+                                                .aggregatedCell ??
+                                                cell.column.columnDef.cell,
+                                            cell.getContext()
+                                        )
+                                    ) : cell.getIsPlaceholder() ? null : (
+                                        flexRender(
                                             cell.column.columnDef.cell,
                                             cell.getContext()
-                                        )}
-                                        {` (${row.subRows.length})`}
-                                    </div>
-                                ) : cell.getIsAggregated() ? (
-                                    flexRender(
-                                        cell.column.columnDef.aggregatedCell ??
-                                            cell.column.columnDef.cell,
-                                        cell.getContext()
-                                    )
-                                ) : cell.getIsPlaceholder() ? null : (
-                                    flexRender(
-                                        cell.column.columnDef.cell,
-                                        cell.getContext()
-                                    )
-                                )}
-                            </td>
-                        ))}
+                                        )
+                                    )}
+                                </td>
+                            ))}
+                        </tr>
+                    ))
+                ) : (
+                    <tr>
+                        <td
+                            colSpan={
+                                table.getHeaderGroups().at(0)?.headers.length ??
+                                10
+                            }
+                            className="text-center h5"
+                        >
+                            {t("table.noData")}
+                        </td>
                     </tr>
-                ))}
+                ): (
+
+                    <tr>
+                        <td
+                            colSpan={
+                                table.getHeaderGroups().at(0)?.headers.length ??
+                                10
+                            }
+                            className="text-center h5"
+                        >
+                            {t("loading")}
+                        </td>
+                    </tr>
+                )}
             </tbody>
         </BSTable>
     );

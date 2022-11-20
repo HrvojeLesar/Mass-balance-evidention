@@ -41,7 +41,7 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
 
     const dataGroupContextValue = useContext(DataGroupContext);
 
-    const { data, refetch } = useGetCulturesQuery(
+    const { data, refetch, isInitialLoading } = useGetCulturesQuery(
         {
             fetchOptions: {
                 id: {},
@@ -188,6 +188,7 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
                 paginationState={{ pagination, setPagination }}
                 sortingState={{ sorting, setSorting }}
                 filterState={{ columnFilters, setColumnFilters }}
+                dataLoadingState={{ isInitialLoading }}
             />
         </Card>
     );

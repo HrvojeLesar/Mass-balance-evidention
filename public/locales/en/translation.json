@@ -139,5 +139,8 @@
         "insertCulture": "inserting cultures",
         "insertCellCulturePair": "inserting cell culture pairs",
         "insertEntry": "inserting entries"
+    },
+    "table": {
+        "noData": "No data."
     }
 }

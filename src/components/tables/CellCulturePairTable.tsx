@@ -50,7 +50,7 @@ export default function CellCulturePairTable({
 
     const dataGroupContextValue = useContext(DataGroupContext);
 
-    const { data, refetch } = useGetAllCellCulturePairsQuery(
+    const { data, refetch, isInitialLoading } = useGetAllCellCulturePairsQuery(
         {
             fetchOptions: {
                 id: {},
@@ -214,6 +214,7 @@ export default function CellCulturePairTable({
                 sortingState={{ sorting, setSorting, manual: false }}
                 filterState={{ columnFilters, setColumnFilters, manual: false }}
                 groupingState={{ groupingState, setGroupingState }}
+                dataLoadingState={{ isInitialLoading }}
             />
         </Card>
     );

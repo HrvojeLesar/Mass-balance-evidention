@@ -41,7 +41,7 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
 
     const dataGroupContextValue = useContext(DataGroupContext);
 
-    const { data, refetch } = useGetBuyersQuery(
+    const { data, refetch, isInitialLoading } = useGetBuyersQuery(
         {
             fetchOptions: {
                 id: {},
@@ -190,6 +190,7 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
                 paginationState={{ pagination, setPagination }}
                 sortingState={{ sorting, setSorting }}
                 filterState={{ columnFilters, setColumnFilters }}
+                dataLoadingState={{ isInitialLoading }}
             />
         </Card>
     );

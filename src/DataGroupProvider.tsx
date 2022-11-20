@@ -39,7 +39,7 @@ export default function DataGroupProvider({
         {},
         { queryKey: ["getDataGroups"], keepPreviousData: true }
     );
-    // TODO: read selected group from disk/cookie
+
     const [selectedGroup, setSelectedGroup] = useState<number | undefined>(
         undefined
     );

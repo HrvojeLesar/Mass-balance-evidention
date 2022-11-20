@@ -39,6 +39,11 @@ type SomeTableProps<T> = {
         setGroupingState: Dispatch<SetStateAction<GroupingState>>;
     };
     pageCount?: number;
+    dataLoadingState?: {
+        isInitialLoading?: boolean;
+        // isLoading?: boolean;
+        // isFetching?: boolean;
+    };
 };
 
 export default function DataTable<T>({
@@ -49,6 +54,7 @@ export default function DataTable<T>({
     filterState,
     groupingState,
     pageCount,
+    dataLoadingState,
 }: SomeTableProps<T>) {
     const pageCountMemo = useMemo(() => {
         if (pageCount) {
@@ -125,7 +131,13 @@ export default function DataTable<T>({
 
     return (
         <>
-            <BaseTable table={table} />
+            <BaseTable
+                table={table}
+                dataLoadingState={{
+                    isInitialLoading:
+                        dataLoadingState?.isInitialLoading ?? false,
+                }}
+            />
             <TablePagination table={table} />
         </>
     );
