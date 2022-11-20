@@ -30,6 +30,8 @@ type DataGroupProviderProps = {
     children?: ReactNode;
 };
 
+const SELECTED_DATA_GROUP_ID = "selectedDataGroupId";
+
 export default function DataGroupProvider({
     children,
 }: DataGroupProviderProps) {
@@ -42,22 +44,35 @@ export default function DataGroupProvider({
         undefined
     );
 
+    const groups = useMemo(() => {
+        return data !== undefined
+            ? [...data.dataGroups].sort((a, b) => a.id - b.id)
+            : [];
+    }, [data]);
+
     const selectGroup = useCallback((id: number) => {
+        localStorage.setItem(SELECTED_DATA_GROUP_ID, id.toString());
         setSelectedGroup(id);
+    }, []);
+
+    const initialGroupId = useMemo(() => {
+        const dgId = localStorage.getItem(SELECTED_DATA_GROUP_ID);
+        if (dgId !== null) {
+            const id = Number(dgId);
+            return isNaN(id) ? undefined : id;
+        }
+        return undefined;
     }, []);
 
     const value: DataGroupContextType = useMemo(
         () => ({
             isLoading,
-            groups:
-                data !== undefined
-                    ? [...data.dataGroups].sort((a, b) => a.id - b.id)
-                    : [],
-            selectedGroup: selectedGroup ?? data?.dataGroups.at(0)?.id,
+            groups,
+            selectedGroup: selectedGroup ?? initialGroupId,
             selectGroup,
             refetch,
         }),
-        [isLoading, data, selectedGroup, selectGroup, refetch]
+        [isLoading, selectedGroup, selectGroup, refetch, groups, initialGroupId]
     );
     return (
         <DataGroupContext.Provider value={value}>
