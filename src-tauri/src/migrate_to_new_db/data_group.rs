@@ -1,7 +1,7 @@
 use graphql_client::GraphQLQuery;
 use reqwest::Client;
 
-use anyhow::Result;
+use crate::errors::Result;
 
 use super::GRAPHQL_ENDPOINT;
 

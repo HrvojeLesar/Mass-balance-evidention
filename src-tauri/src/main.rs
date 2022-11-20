@@ -3,10 +3,12 @@
     windows_subsystem = "windows"
 )]
 
+use errors::MBEError;
 use migrate_to_new_db::migrate::Migrate;
 use serde::Serialize;
 use tauri::AppHandle;
 
+mod errors;
 mod migrate_to_new_db;
 
 #[derive(Clone, Serialize)]
@@ -15,9 +17,9 @@ struct TestEventPayload {
 }
 
 #[tauri::command]
-async fn try_start_import(app: AppHandle) -> tauri::Result<()> {
+async fn try_start_import(app: AppHandle) -> Result<(), MBEError> {
     let mut mig = Migrate::new(app);
-    mig.start_migrating().await.unwrap();
+    mig.start_migrating().await?;
     Ok(())
 }
 

@@ -2,7 +2,7 @@ use graphql_client::GraphQLQuery;
 use reqwest::Client;
 
 use super::{DateTime, FetchExisting, GRAPHQL_ENDPOINT};
-use anyhow::Result;
+use crate::errors::Result;
 
 use async_trait::async_trait;
 

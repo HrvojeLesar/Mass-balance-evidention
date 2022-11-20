@@ -131,12 +131,13 @@ export default function EditModal({ show, onHide }: MigrateModal) {
         return window.__TAURI__ !== undefined;
     }, []);
 
-    // TODO: Handle errors during migration
     const startImport = useCallback(() => {
         if (displayImport) {
-            invoke("try_start_import").then((response) =>
-                console.log(response)
-            );
+            invoke("try_start_import")
+                .then((response) => console.log(response))
+                .catch((err) => {
+                    console.log(err);
+                });
             setIsImporting(true);
         }
     }, [displayImport]);

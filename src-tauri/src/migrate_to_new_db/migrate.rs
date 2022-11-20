@@ -1,8 +1,11 @@
 use std::sync::Arc;
 
-use crate::migrate_to_new_db::{
-    cell_culture_pair::GetAllCellCulturePairs,
-    entry::{insert_entry, InsertEntry},
+use crate::{
+    errors::MBEError,
+    migrate_to_new_db::{
+        cell_culture_pair::GetAllCellCulturePairs,
+        entry::{insert_entry, InsertEntry},
+    },
 };
 
 use super::{
@@ -15,7 +18,7 @@ use super::{
     get_buyers, get_cell_culture_pairs, get_cells, get_cultures, get_entries, get_paired_db_config,
     get_sqlite_database_pool, DatabaseConfigPair, DateTime, FetchExisting, GRAPHQL_ENDPOINT,
 };
-use anyhow::{anyhow, Result};
+
 use chrono::Utc;
 use futures::{lock::Mutex, stream, StreamExt};
 use graphql_client::{GraphQLQuery, Response};
@@ -24,13 +27,15 @@ use serde::Serialize;
 use sqlx::SqlitePool;
 use tauri::{AppHandle, Manager};
 
+use crate::errors::Result;
+
 const PROGRESS_EVENT: &str = "progress-event";
 const TASK_CHANGE_EVENT: &str = "task-change-event";
 const MIGRATION_FINISHED_EVENT: &str = "migration-finished-event";
 const START_NEW_PROGRESS_EVENT: &str = "start-new-progress-event";
 
 #[derive(Clone, Debug, Serialize)]
-#[serde(rename_all="camelCase")]
+#[serde(rename_all = "camelCase")]
 enum Task {
     FetchRemoteBuyer,
     FetchRemoteCell,
@@ -55,7 +60,7 @@ enum Task {
 }
 
 #[derive(Clone, Debug, Serialize)]
-#[serde(rename_all="camelCase")]
+#[serde(rename_all = "camelCase")]
 enum MainTask {
     Buyer,
     Cell,
@@ -66,7 +71,7 @@ enum MainTask {
 }
 
 #[derive(Clone, Debug, Serialize)]
-#[serde(rename_all="camelCase")]
+#[serde(rename_all = "camelCase")]
 enum UpdateOn {
     // Buyer,
     // Cell,
@@ -78,14 +83,14 @@ enum UpdateOn {
 }
 
 #[derive(Clone, Debug, Serialize)]
-#[serde(rename_all="camelCase")]
+#[serde(rename_all = "camelCase")]
 struct ProgressMessage<'a> {
     update_on: UpdateOn,
     progress: &'a Progress,
 }
 
 #[derive(Clone, Debug, Serialize)]
-#[serde(rename_all="camelCase")]
+#[serde(rename_all = "camelCase")]
 struct TaskMessage {
     #[serde(skip_serializing)]
     app_handle: Arc<AppHandle>,
@@ -121,7 +126,7 @@ impl TaskMessage {
 }
 
 #[derive(Clone, Debug, Default, Serialize)]
-#[serde(rename_all="camelCase")]
+#[serde(rename_all = "camelCase")]
 struct Progress {
     migrated: usize,
     skipped: usize,
@@ -149,7 +154,7 @@ impl Progress {
 }
 
 #[derive(Debug, Default, Serialize)]
-#[serde(rename_all="camelCase")]
+#[serde(rename_all = "camelCase")]
 struct MigrationProgress {
     buyer: Progress,
     cell: Progress,
@@ -193,7 +198,7 @@ impl Migrate {
         let database_config_pairs = get_paired_db_config()?;
         let data_groups = match get_data_groups(&self.client).await?.data {
             Some(d) => d,
-            None => return Err(anyhow!("Fetched group data is incomplete.")),
+            None => return Err(MBEError::other("Fetched group data is incomplete.")),
         }
         .data_groups;
 
@@ -214,7 +219,8 @@ impl Migrate {
                 }
             };
 
-            self.app_handle.emit_all(START_NEW_PROGRESS_EVENT, &dcp.database.alias)?;
+            self.app_handle
+                .emit_all(START_NEW_PROGRESS_EVENT, &dcp.database.alias)?;
             {
                 let mut progress = self.progress.lock().await;
                 progress.reset();
@@ -224,12 +230,10 @@ impl Migrate {
                 .set_main_task(Some(MainTask::DataGroup))?;
             let group_id = self.migrate_data_group(&data_groups, &dcp).await?;
 
-            self.progress_message
-                .set_main_task(Some(MainTask::Buyer))?;
+            self.progress_message.set_main_task(Some(MainTask::Buyer))?;
             self.migrate_buyer(group_id, &db_pool).await?;
 
-            self.progress_message
-                .set_main_task(Some(MainTask::Cell))?;
+            self.progress_message.set_main_task(Some(MainTask::Cell))?;
             self.migrate_cell(group_id, &db_pool).await?;
 
             self.progress_message
@@ -240,8 +244,7 @@ impl Migrate {
                 .set_main_task(Some(MainTask::CellCulturePair))?;
             self.migrate_cell_culture_pair(group_id, &db_pool).await?;
 
-            self.progress_message
-                .set_main_task(Some(MainTask::Entry))?;
+            self.progress_message.set_main_task(Some(MainTask::Entry))?;
             self.migrate_entry(group_id, &db_pool).await?;
             {
                 let mut progress = self.progress.lock().await;
@@ -273,9 +276,9 @@ impl Migrate {
                 println!("ERRORS: {:#?}", new_data_group.errors);
                 let id = new_data_group
                     .data
-                    .ok_or_else(|| anyhow!(
-                        "Failed to retrieve data about inserted data group!"
-                    ))?
+                    .ok_or_else(|| {
+                        MBEError::other("Failed to retrieve data about inserted data group!")
+                    })?
                     .insert_data_group
                     .id;
                 progress.data_group.migrated += 1;
@@ -599,7 +602,8 @@ impl Migrate {
             match existing_cell_culture_pairs.iter().find(|c| {
                 if let (Some(cell), Some(culture)) = (c.cell.as_ref(), c.culture.as_ref()) {
                     cell.name == ccp.cell.naziv.clone().unwrap_or_else(|| "".to_owned())
-                        && culture.name == ccp.culture.naziv.clone().unwrap_or_else(|| "".to_owned())
+                        && culture.name
+                            == ccp.culture.naziv.clone().unwrap_or_else(|| "".to_owned())
                 } else {
                     false
                 }
@@ -769,8 +773,7 @@ impl Migrate {
                                     .unwrap_or_else(|| "".to_owned())
                             && buyer.name.clone().unwrap_or_else(|| "".to_owned())
                                 == entry.buyer.naziv.clone().unwrap_or_else(|| "".to_owned())
-                            && e.weight.unwrap_or(0.0)
-                                == entry.weight.unwrap_or(0.0)
+                            && e.weight.unwrap_or(0.0) == entry.weight.unwrap_or(0.0)
                             && if let Some(e_date) = entry.date {
                                 e.date.date_naive() == e_date
                             } else {

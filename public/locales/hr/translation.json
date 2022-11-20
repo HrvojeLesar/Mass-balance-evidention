@@ -94,7 +94,7 @@
         "noGroups": "Nema definiranih grupa"
     },
     "migration": {
-        "warning": "Počinje s unošenjem podataka iz lokalnih baza podataka. Proces može duže potrajati i nije ga moguće prekinuti ili nastaviti. Moguće je da preneseni podatci neće biti sasvim točni (npr. datum zbog vremenskih zona).",
+        "warning": "Započinje s procesom prenošenja podataka iz lokalnih baza podataka. Proces može duže potrajati i nije ga moguće prekinuti ili nastaviti. Moguće je da preneseni podatci neće biti sasvim točni (npr. datum zbog vremenskih zona).",
         "startWarning": "Pritisnite tipoku \"Početak\" za pokretanje procesa.",
         "start": "Početak",
         "migratedDatabases": "Migrirano: <strong>{{migrated}}</strong> / <strong>{{totalToMigrate}}</strong> baza podataka.",

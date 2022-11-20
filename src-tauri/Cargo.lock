@@ -3,25 +3,6 @@
 version = 3
 
 [[package]]
-name = "Mass-Balance-Evidention"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "chrono",
- "directories",
- "futures",
- "graphql_client",
- "reqwest",
- "serde",
- "serde_json",
- "sqlx",
- "tauri",
- "tauri-build",
- "tokio",
-]
-
-[[package]]
 name = "adler"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1891,6 +1872,26 @@ dependencies = [
  "string_cache",
  "string_cache_codegen",
  "tendril",
+]
+
+[[package]]
+name = "mass_balance_evidention"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "chrono",
+ "directories",
+ "futures",
+ "graphql_client",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tauri",
+ "tauri-build",
+ "thiserror",
+ "tokio",
 ]
 
 [[package]]

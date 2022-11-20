@@ -2,7 +2,7 @@ use graphql_client::GraphQLQuery;
 use reqwest::Client;
 
 use super::{DateTime, GRAPHQL_ENDPOINT};
-use anyhow::Result;
+use crate::errors::Result;
 
 #[derive(GraphQLQuery)]
 #[graphql(

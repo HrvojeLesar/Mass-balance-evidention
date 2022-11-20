@@ -8,7 +8,9 @@ use directories::UserDirs;
 use serde::Deserialize;
 use sqlx::{sqlite::SqlitePoolOptions, SqlitePool};
 
-use anyhow::{anyhow, Result};
+
+
+use crate::errors::{MBEError, Result};
 
 use async_trait::async_trait;
 
@@ -89,15 +91,17 @@ fn get_old_mbe_config_dir() -> Result<PathBuf> {
     let user_dirs = match UserDirs::new() {
         Some(d) => d,
         None => {
-            return Err(anyhow!(
-                "No valid home directory can be retrieved from the operating system."
+            return Err(MBEError::other(
+                "No valid home directory can be retrieved from the operating system.",
             ))
         }
     };
     let mut home_dir = user_dirs.home_dir().to_path_buf();
     home_dir.push(".mass-balance-evidention");
     if !home_dir.is_dir() {
-        return Err(anyhow!("No previous configuration or databases exist."));
+        return Err(MBEError::other(
+            "No previous configuration or databases exist.",
+        ));
     }
 
     Ok(home_dir)
@@ -131,7 +135,7 @@ pub(super) fn get_mbe_config() -> Result<MbeConfigJson> {
         .find(|entry| entry.file_name() == "config.json")
     {
         Some(cfg) => cfg.path(),
-        None => return Err(anyhow!("Config file not found!")),
+        None => return Err(MBEError::other("Config file not found!")),
     };
 
     let file_contents = read_to_string(config_file)?;
@@ -167,8 +171,8 @@ pub(super) async fn get_sqlite_database_pool(path: &Path) -> Result<SqlitePool> 
     let path_as_string = match path.to_str() {
         Some(path) => path,
         None => {
-            return Err(anyhow!(
-                "Failed to create a string from given database path!"
+            return Err(MBEError::other(
+                "Failed to create a string from given database path!",
             ))
         }
     };
