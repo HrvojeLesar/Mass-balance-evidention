@@ -107,7 +107,8 @@
         "skipped": "Skipped",
         "failed": "Failed",
         "total": "Total",
-        "migrationFinished": "Migration process successfully finished. Shown below are short statistics about number of items migrated, skipped, failed and total number of items from each local database."
+        "migrationFinished": "Migration process successfully finished. Shown below are short statistics about number of items migrated, skipped, failed and total number of items from each local database.",
+        "optionText": "Data transfer from local databases to a remote database."
     },
     "mainTask": {
         "buyer": "buyers",

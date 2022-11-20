@@ -49,7 +49,10 @@ export default function DataGroupProvider({
     const value: DataGroupContextType = useMemo(
         () => ({
             isLoading,
-            groups: data?.dataGroups ?? [],
+            groups:
+                data !== undefined
+                    ? [...data.dataGroups].sort((a, b) => a.id - b.id)
+                    : [],
             selectedGroup: selectedGroup ?? data?.dataGroups.at(0)?.id,
             selectGroup,
             refetch,

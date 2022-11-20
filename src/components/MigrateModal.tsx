@@ -255,6 +255,7 @@ export default function EditModal({ show, onHide }: MigrateModal) {
                                 </p>
                             </Alert>
                             <Button
+                                variant="danger"
                                 disabled={isStartDisabled || isImporting}
                                 onClick={() => {
                                     startImport();

@@ -22,23 +22,6 @@ export default function OptionsView() {
 
     return (
         <Row className="my-4">
-            {displayImport && (
-                <Col md>
-                    <MigrateModal
-                        show={isMigrateModalShown}
-                        onHide={() => {
-                            setIsMigrateModalShown(false);
-                        }}
-                    />
-                    <Button
-                        onClick={() => {
-                            setIsMigrateModalShown(true);
-                        }}
-                    >
-                        Start Migrations
-                    </Button>
-                </Col>
-            )}
             <Col md>
                 <Card className="p-2 shadow mb-4">
                     <div className="h5 mb-1">
@@ -63,22 +46,51 @@ export default function OptionsView() {
                     />
                 </Card>
             </Col>
-            <Col md>
-                <Card className="p-2 shadow mb-4">
-                    <div className="h5 mb-1">
-                        {t("titles.editDataGroup").toString()}
-                    </div>
-                    <div className="divider"></div>
-                    <DataGroupForm
-                        edit={editValue}
-                        onUpdateSuccess={() => {
-                            if (value.refetch) {
-                                value.refetch();
-                            }
-                        }}
-                    />
-                </Card>
-            </Col>
+            {editValue && (
+                <Col md>
+                    <Card className="p-2 shadow mb-4">
+                        <div className="h5 mb-1">
+                            {t("titles.editDataGroup").toString()}
+                        </div>
+                        <div className="divider"></div>
+                        <DataGroupForm
+                            edit={editValue}
+                            onUpdateSuccess={() => {
+                                if (value.refetch) {
+                                    value.refetch();
+                                }
+                            }}
+                        />
+                    </Card>
+                </Col>
+            )}
+            {displayImport && (
+                <Col md>
+                    <Card className="p-2 shadow mb-4">
+                        <div className="h5 mb-1">
+                            {t("titles.migrationModalTitle").toString()}
+                        </div>
+                        <div className="divider"></div>
+                        <MigrateModal
+                            show={isMigrateModalShown}
+                            onHide={() => {
+                                setIsMigrateModalShown(false);
+                            }}
+                        />
+                        <div className="mb-2">
+                            {t("migration.optionText")}
+                        </div>
+                        <Button
+                            variant="danger"
+                            onClick={() => {
+                                setIsMigrateModalShown(true);
+                            }}
+                        >
+                            {t("migration.start")}
+                        </Button>
+                    </Card>
+                </Col>
+            )}
         </Row>
     );
 }

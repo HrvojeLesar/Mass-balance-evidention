@@ -50,7 +50,8 @@ export default function DataGroupForm({
 
     const update = useUpdateDataGroupMutation({
         onSuccess: (_data, _variables, _context) => {
-            reset();
+            // WARN: causes flickering input text on save
+            // reset();
             if (onUpdateSuccess) {
                 onUpdateSuccess();
             }
