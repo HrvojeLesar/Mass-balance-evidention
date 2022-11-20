@@ -77,9 +77,7 @@ export default function OptionsView() {
                                 setIsMigrateModalShown(false);
                             }}
                         />
-                        <div className="mb-2">
-                            {t("migration.optionText")}
-                        </div>
+                        <div className="mb-2">{t("migration.optionText")}</div>
                         <Button
                             variant="danger"
                             onClick={() => {

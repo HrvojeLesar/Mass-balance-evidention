@@ -161,19 +161,19 @@ export default function EditModal({ show, onHide }: MigrateModal) {
 
     useEffect(() => {
         if (displayImport) {
-            var unlistenTaskChangeEvent = async () => {
-                let unlistenHandle = await listen("task-change-event", (e) => {
-                    let event = e as TauriEvent<TaskPayload>;
-                    setStatus((s) => ({
-                        ...s,
-                        mainTask: event.payload.mainTask,
-                        subtask: event.payload.subtask,
-                    }));
-                });
-                return unlistenHandle;
-            };
-            var unlistenMigrationProgressEvent = async () => {
-                let unlistenHandle = await listen("progress-event", (e) => {
+            var unlistenTaskChangeEvent = listen("task-change-event", (e) => {
+                console.log("task change event");
+                let event = e as TauriEvent<TaskPayload>;
+                setStatus((s) => ({
+                    ...s,
+                    mainTask: event.payload.mainTask,
+                    subtask: event.payload.subtask,
+                }));
+            });
+            var unlistenMigrationProgressEvent = listen(
+                "progress-event",
+                (e) => {
+                    console.log("progress event");
                     let event = e as TauriEvent<ProgressMessagePayload>;
                     let payload = event.payload;
                     if (payload.updateOn === UpdateOn.Overall) {
@@ -190,41 +190,36 @@ export default function EditModal({ show, onHide }: MigrateModal) {
                             return { ...s };
                         });
                     }
-                });
-                return unlistenHandle;
-            };
-            var unlistenMigrationFinishedEvent = async () => {
-                let unlistenHandle = await listen(
-                    "migration-finished-event",
-                    () => {
-                        setIsImporting(false);
-                        setIsFinished(true);
-                    }
-                );
-                return unlistenHandle;
-            };
-            var unlistenStartNewProgressEvent = async () => {
-                let unlistenHandle = await listen(
-                    "start-new-progress-event",
-                    (e) => {
-                        let event = e as TauriEvent<string>;
-                        setStatus((s) => ({
-                            ...s,
-                            progress: [...s.progress, newMigrationProgress()],
-                            dbNames: [...s.dbNames, event.payload],
-                        }));
-                    }
-                );
-                return unlistenHandle;
-            };
+                }
+            );
+            var unlistenMigrationFinishedEvent = listen(
+                "migration-finished-event",
+                () => {
+                    console.log("migration finished event");
+                    setIsImporting(false);
+                    setIsFinished(true);
+                }
+            );
+            var unlistenStartNewProgressEvent = listen(
+                "start-new-progress-event",
+                (e) => {
+                    console.log("start new progress event");
+                    let event = e as TauriEvent<string>;
+                    setStatus((s) => ({
+                        ...s,
+                        progress: [...s.progress, newMigrationProgress()],
+                        dbNames: [...s.dbNames, event.payload],
+                    }));
+                }
+            );
         }
 
         return () => {
             if (displayImport) {
-                unlistenTaskChangeEvent();
-                unlistenMigrationProgressEvent();
-                unlistenMigrationFinishedEvent();
-                unlistenStartNewProgressEvent();
+                unlistenTaskChangeEvent.then((f) => f());
+                unlistenMigrationProgressEvent.then((f) => f());
+                unlistenMigrationFinishedEvent.then((f) => f());
+                unlistenStartNewProgressEvent.then((f) => f());
             }
         };
     }, [displayImport]);
