@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
     Accordion,
     Alert,
@@ -13,6 +13,7 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from "@tauri-apps/api/event";
 import { Trans, useTranslation } from "react-i18next";
 import React from "react";
+import { DataGroupContext } from "../DataGroupProvider";
 
 enum Task {
     FetchRemoteBuyer,
@@ -117,6 +118,7 @@ const newMigrationProgress = (): MigrationProgress => ({
 
 export default function EditModal({ show, onHide }: MigrateModal) {
     const { t } = useTranslation();
+    const value = useContext(DataGroupContext);
     const [status, setStatus] = useState<Status>({
         overall: newProgress(),
         progress: [],
@@ -134,7 +136,12 @@ export default function EditModal({ show, onHide }: MigrateModal) {
     const startImport = useCallback(() => {
         if (displayImport) {
             invoke("try_start_import")
-                .then((response) => console.log(response))
+                .then((response) => {
+                    if (value.refetch) {
+                        value.refetch();
+                    }
+                    console.log(response);
+                })
                 .catch((err) => {
                     console.log(err);
                 });

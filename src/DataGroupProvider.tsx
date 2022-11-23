@@ -2,6 +2,7 @@ import {
     createContext,
     ReactNode,
     useCallback,
+    useEffect,
     useMemo,
     useState,
 } from "react";
@@ -60,8 +61,10 @@ export default function DataGroupProvider({
         if (dgId !== null) {
             const id = Number(dgId);
             return isNaN(id) ? undefined : id;
+        } else {
+            localStorage.removeItem(SELECTED_DATA_GROUP_ID);
+            return undefined;
         }
-        return undefined;
     }, []);
 
     const value: DataGroupContextType = useMemo(
@@ -74,6 +77,26 @@ export default function DataGroupProvider({
         }),
         [isLoading, selectedGroup, selectGroup, refetch, groups, initialGroupId]
     );
+
+    useEffect(() => {
+        const storedId = localStorage.getItem(SELECTED_DATA_GROUP_ID);
+        if (
+            initialGroupId === undefined &&
+            value.selectedGroup === undefined &&
+            value.groups.length > 0
+        ) {
+            const id = value.groups[0].id;
+            setSelectedGroup(id);
+            localStorage.setItem(SELECTED_DATA_GROUP_ID, id.toString());
+        } else if (
+            storedId !== null &&
+            value.selectedGroup !== undefined &&
+            value.selectedGroup.toString() !== storedId
+        ) {
+            setSelectedGroup(value.selectedGroup);
+        }
+    }, [initialGroupId, value.selectedGroup, value.groups]);
+
     return (
         <DataGroupContext.Provider value={value}>
             {children}
