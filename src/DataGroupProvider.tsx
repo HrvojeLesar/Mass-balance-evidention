@@ -94,6 +94,17 @@ export default function DataGroupProvider({
             value.selectedGroup.toString() !== storedId
         ) {
             setSelectedGroup(value.selectedGroup);
+        } else if (
+            value.groups.length > 0 &&
+            value.groups.find((dg) => dg.id.toString() === storedId) ===
+                undefined
+        ) {
+            const id = value.groups[0].id;
+            setSelectedGroup(id);
+            localStorage.setItem(SELECTED_DATA_GROUP_ID, id.toString());
+        } else if (storedId !== null && value.groups.length === 0) {
+            setSelectedGroup(undefined);
+            localStorage.removeItem(SELECTED_DATA_GROUP_ID);
         }
     }, [initialGroupId, value.selectedGroup, value.groups]);
 
