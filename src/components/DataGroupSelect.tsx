@@ -6,7 +6,7 @@ import { DataGroupContext } from "../DataGroupProvider";
 export default function DataGroupSelect() {
     const { t } = useTranslation();
     const value = useContext(DataGroupContext);
-    const isGroupsEmpty = useMemo(() => value.groups.length === 0, [value]);
+    const isGroupsEmpty = useMemo(() => value.groups?.length === 0, [value]);
     return (
         <Form>
             <Form.Label>{t("dataGroup.dataGroupSelect").toString()}</Form.Label>
@@ -24,7 +24,7 @@ export default function DataGroupSelect() {
                 ) : isGroupsEmpty ? (
                     <option>{t("dataGroup.noGroups")}</option>
                 ) : (
-                    value.groups.map((group) => {
+                    value.groups?.map((group) => {
                         return (
                             <option key={group.id} value={group.id}>
                                 {group.name}

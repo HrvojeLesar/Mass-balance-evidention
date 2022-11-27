@@ -13,7 +13,7 @@ export default function OptionsView() {
     const [isMigrateModalShown, setIsMigrateModalShown] = useState(false);
 
     const editValue = useMemo(() => {
-        return value.groups.find((group) => group.id === value.selectedGroup);
+        return value.groups?.find((group) => group.id === value.selectedGroup);
     }, [value]);
 
     const displayImport = useMemo(() => {

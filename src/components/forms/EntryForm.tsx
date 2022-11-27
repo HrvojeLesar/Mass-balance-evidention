@@ -212,21 +212,6 @@ export default function EntryForm({
         maxPage: 1,
     });
 
-    const resetSelects = useCallback(() => {
-        setCellSelectState((old) => ({
-            ...old,
-            selected: null,
-        }));
-        setCultureSelectState((old) => ({
-            ...old,
-            selected: null,
-        }));
-        setBuyerSelectState((old) => ({
-            ...old,
-            selected: null,
-        }));
-    }, [setCellSelectState, setCultureSelectState, setBuyerSelectState]);
-
     const [debouncedCellInputValue, setDebouncedCellInputValue] = useState("");
     const [debouncedCultureInputValue, setDebouncedCultureInputValue] =
         useState("");
