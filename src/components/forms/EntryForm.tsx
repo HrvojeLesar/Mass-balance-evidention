@@ -38,9 +38,9 @@ import { DataGroupContext } from "../../DataGroupProvider";
 type FormInput = {
     cell: SelectOption<Cell> | undefined;
     culture: SelectOption<Culture> | undefined;
-    weight: number;
+    weight: number | null;
     buyer: SelectOption<Buyer> | undefined;
-    date: Date | string;
+    date: Date | string | null;
 };
 
 const LIMIT = 10;
@@ -66,6 +66,7 @@ export default function EntryForm({
         setValue,
         register,
         reset,
+        getValues,
         formState: { errors },
     } = useForm<FormInput>({
         mode: "onSubmit",
@@ -92,8 +93,8 @@ export default function EntryForm({
 
     const insert = useInsertEntryMutation({
         onSuccess: (data, variables, context) => {
-            resetSelects();
-            reset();
+            // resetSelects();
+            reset({ ...getValues(), date: null, weight: null });
             if (onInsertSuccess) {
                 onInsertSuccess(data, variables, context);
             }
@@ -110,7 +111,7 @@ export default function EntryForm({
 
     const onInsertSubmit = useCallback(
         (data: FormInput) => {
-            if (data.cell && data.culture && data.buyer) {
+            if (data.cell && data.culture && data.buyer && data.date) {
                 insert.mutate({
                     insertOptions: {
                         cellCulturePair: {
@@ -137,7 +138,7 @@ export default function EntryForm({
 
     const onUpdateSubmit = useCallback(
         (data: FormInput) => {
-            if (data.cell && data.culture && data.buyer && edit) {
+            if (data.cell && data.culture && data.buyer && data.date && edit) {
                 update.mutate({
                     updateOptions: {
                         id: edit?.id,
