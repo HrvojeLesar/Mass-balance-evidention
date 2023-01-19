@@ -1,0 +1,177 @@
+{
+  "db": "SQLite",
+  "1aa4ac6d4f266b4da21d969c3c3f07b4e0d781bc13b571b4e8c280b003a833d4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        },
+        {
+          "name": "naziv",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        true
+      ],
+      "parameters": {
+        "Right": 0
+      }
+    },
+    "query": "SELECT * FROM kultura"
+  },
+  "59202c2df1222bf1696de0b65d5bcd215b41e3a7b0962ebce6ab07d4a9205c0c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        },
+        {
+          "name": "naziv",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        true
+      ],
+      "parameters": {
+        "Right": 0
+      }
+    },
+    "query": "SELECT * FROM cestica"
+  },
+  "7329125750e90552007c815af18bff72562dd13ba2c33664eeda592a796dfdd9": {
+    "describe": {
+      "columns": [
+        {
+          "name": "e_id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        },
+        {
+          "name": "e_weight",
+          "ordinal": 1,
+          "type_info": "Float"
+        },
+        {
+          "name": "e_date: NaiveDate",
+          "ordinal": 2,
+          "type_info": "Date"
+        },
+        {
+          "name": "c_id",
+          "ordinal": 3,
+          "type_info": "Int64"
+        },
+        {
+          "name": "c_name",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "cc_id",
+          "ordinal": 5,
+          "type_info": "Int64"
+        },
+        {
+          "name": "cc_name",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "b_id",
+          "ordinal": 7,
+          "type_info": "Int64"
+        },
+        {
+          "name": "b_name",
+          "ordinal": 8,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        true,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true
+      ],
+      "parameters": {
+        "Right": 0
+      }
+    },
+    "query": "\n        SELECT \n            zapisi.id as e_id,\n            zapisi.tezina as e_weight,\n            zapisi.datum as \"e_date: NaiveDate\",\n            cestica.id as c_id,\n            cestica.naziv as c_name,\n            kultura.id as cc_id,\n            kultura.naziv as cc_name,\n            kupci.id as b_id,\n            kupci.naziv as b_name\n        FROM zapisi\n        INNER JOIN cestica ON cestica.id = zapisi.id_cestica\n        INNER JOIN kultura ON kultura.id = zapisi.id_kultura\n        INNER JOIN kupci ON kupci.id = zapisi.id_kupac\n        "
+  },
+  "b3e44033d899a81ffd666dc8d222ef0138fb70d8124cfe8fcccf45ffbb696d50": {
+    "describe": {
+      "columns": [
+        {
+          "name": "c_id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        },
+        {
+          "name": "c_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "cc_id",
+          "ordinal": 2,
+          "type_info": "Int64"
+        },
+        {
+          "name": "cc_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        true,
+        false,
+        true
+      ],
+      "parameters": {
+        "Right": 0
+      }
+    },
+    "query": "\n        SELECT \n            cestica.id as c_id,\n            cestica.naziv as c_name,\n            kultura.id as cc_id,\n            kultura.naziv as cc_name\n        FROM cestica_kultura\n        INNER JOIN cestica ON cestica.id = cestica_kultura.id_cestica\n        INNER JOIN kultura ON kultura.id = cestica_kultura.id_kultura\n        "
+  },
+  "f8c8655aa80132441b68633151c5f643450ae57a3d3d77e0c8f562154e0bbf7b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int64"
+        },
+        {
+          "name": "naziv",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        true
+      ],
+      "parameters": {
+        "Right": 0
+      }
+    },
+    "query": "SELECT * FROM kupci"
+  }
+}
