@@ -230,6 +230,7 @@ impl DatabaseQueries<Postgres> for Entry {
         Ok(Self::get(
             &mut *executor,
             &EntryFetchOptions {
+                filtersnew: None,
                 id: EntryFetchIdOptions {
                     id: Some(EntryFetchId {
                         id: partial_entry.id,
@@ -238,7 +239,7 @@ impl DatabaseQueries<Postgres> for Entry {
                 },
                 data_group_id: options.d_group,
                 page: None,
-                limit: None,
+                page_size: None,
                 filters: None,
                 ordering: None,
             },
@@ -320,7 +321,7 @@ impl DatabaseQueries<Postgres> for Entry {
                 };
             }),
         );
-        Self::paginate(options.limit, options.page, &mut builder);
+        Self::paginate(options.page_size, options.page, &mut builder);
 
         let rows = builder.build().fetch_all(&mut *executor).await?;
 
@@ -375,7 +376,7 @@ impl DatabaseQueries<Postgres> for Entry {
 
         Ok(Entries {
             pagination: Pagination {
-                limit: options.limit.unwrap_or_default(),
+                page_size: options.page_size.unwrap_or_default(),
                 page: options.page.unwrap_or_default(),
                 total,
             },
@@ -521,9 +522,10 @@ impl DatabaseQueries<Postgres> for Entry {
                 },
                 data_group_id: options.d_group,
                 page: None,
-                limit: None,
+                page_size: None,
                 filters: None,
                 ordering: None,
+                filtersnew: None,
             },
         )
         .await?)
@@ -677,7 +679,7 @@ impl EntryQuery {
         builder.push("GROUP BY ").push(grouping);
         Entry::order_by(&fetch_options.options.ordering, "name", &mut builder);
         Entry::paginate(
-            fetch_options.options.limit,
+            fetch_options.options.page_size,
             fetch_options.options.page,
             &mut builder,
         );
@@ -700,7 +702,7 @@ impl EntryQuery {
         let res = EntryGroups {
             results: groups,
             pagination: Pagination {
-                limit: fetch_options.options.limit.unwrap_or_default(),
+                page_size: fetch_options.options.page_size.unwrap_or_default(),
                 page: fetch_options.options.page.unwrap_or_default(),
                 total,
             },
@@ -841,7 +843,7 @@ impl EntryQuery {
 
         let res = Ok(Entries {
             pagination: Pagination {
-                limit: fetch_options.limit.unwrap_or_default(),
+                page_size: fetch_options.page_size.unwrap_or_default(),
                 page: fetch_options.page.unwrap_or_default(),
                 total,
             },

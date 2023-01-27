@@ -12,12 +12,15 @@ use async_graphql::{http::GraphiQLSource, EmptySubscription, Schema};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use dotenvy::dotenv;
 use models::{MutationRoot, QueryRoot};
+use sea_orm::{ConnectOptions, DatabaseConnection};
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 
 mod models;
+mod seaorm_models;
 
 pub type DatabasePool = Data<Pool<Postgres>>;
 pub type GQLSchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
+pub type SeaOrmPool = Data<DatabaseConnection>;
 
 #[get("/graphiql")]
 async fn graphql_playground() -> actix_web::Result<HttpResponse> {
@@ -37,13 +40,14 @@ async fn get_schema(schema: web::Data<GQLSchema>) -> String {
 }
 
 #[cfg(debug_assertions)]
-fn build_schema(pool: Data<Pool<Postgres>>) -> GQLSchema {
+fn build_schema(pool: Data<Pool<Postgres>>, sea_orm_pool: SeaOrmPool) -> GQLSchema {
     Schema::build(
         QueryRoot::default(),
         MutationRoot::default(),
         EmptySubscription,
     )
     .data(pool)
+    .data(sea_orm_pool)
     .extension(async_graphql::extensions::Logger)
     .finish()
 }
@@ -75,7 +79,17 @@ async fn main() -> std::io::Result<()> {
             .unwrap(),
     );
 
-    let schema = build_schema(pool.clone());
+    let mut seaorm_connection_options =
+        ConnectOptions::new(env::var("DATABASE_URL").expect("DATABASE_URL must be set"));
+    seaorm_connection_options.max_connections(5);
+
+    let sea_orm_pool = Data::new(
+        sea_orm::Database::connect(seaorm_connection_options)
+            .await
+            .unwrap(),
+    );
+
+    let schema = build_schema(pool.clone(), sea_orm_pool);
 
     HttpServer::new(move || {
         App::new()

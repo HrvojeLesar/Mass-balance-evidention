@@ -3,10 +3,10 @@ use async_graphql::InputType;
 use async_trait::async_trait;
 use sqlx::{query_builder::Separated, Database, QueryBuilder, Transaction};
 
-use super::{FetchOptions, FieldsToSql, Filter, OrderingOptions};
+use super::{FetchOptions, FieldsToSql, Filter, OrderingOptions, FilterNew};
 
-pub const MAX_LIMIT: i64 = 100;
-pub const DEFAULT_LIMIT: i64 = 10;
+pub const MAX_PAGE_SIZE: i64 = 100;
+pub const DEFAULT_PAGE_SIZE: i64 = 10;
 
 /// 0 == exact match, x > 0 partial match
 /// bigger values entails less strict matching
@@ -109,6 +109,7 @@ where
         O: InputType + FieldsToSql + ToString,
         I: InputType,
         Filter<T>: InputType,
+        FilterNew<T>: InputType,
         OrderingOptions<O>: InputType,
         F: FnMut(&mut Separated<DB, &str>),
     {
@@ -211,11 +212,12 @@ where
         T: InputType + FieldsToSql + ToString,
         I: InputType,
         Filter<T>: InputType,
+        FilterNew<T>: InputType,
         OrderingOptions<T>: InputType,
     {
         Self::filter(&options.filters, builder, true);
         Self::order_by(&options.ordering, order_by_default_column, builder);
-        Self::paginate(options.limit, options.page, builder);
+        Self::paginate(options.page_size, options.page, builder);
     }
 
     fn handle_fetch_options_with_score<T: Copy, I>(
@@ -227,6 +229,7 @@ where
         T: InputType + FieldsToSql + ToString,
         I: InputType,
         Filter<T>: InputType,
+        FilterNew<T>: InputType,
         OrderingOptions<T>: InputType,
     {
         Self::filter_and_order_with_score(
@@ -238,19 +241,19 @@ where
             None,
             None::<fn(&mut Separated<_, &str>)>,
         );
-        Self::paginate(options.limit, options.page, builder);
+        Self::paginate(options.page_size, options.page, builder);
     }
 
     fn calc_limit(limit: Option<i64>) -> i64 {
         match limit {
             Some(l) => {
-                if l <= MAX_LIMIT {
+                if l <= MAX_PAGE_SIZE {
                     l
                 } else {
-                    DEFAULT_LIMIT
+                    DEFAULT_PAGE_SIZE
                 }
             }
-            None => DEFAULT_LIMIT,
+            None => DEFAULT_PAGE_SIZE,
         }
     }
 
@@ -267,5 +270,18 @@ where
         };
 
         page * Self::calc_limit(limit)
+    }
+}
+
+pub fn calc_limit(limit: Option<i64>) -> i64 {
+    match limit {
+        Some(l) => {
+            if l <= MAX_PAGE_SIZE {
+                l
+            } else {
+                DEFAULT_PAGE_SIZE
+            }
+        }
+        None => DEFAULT_PAGE_SIZE,
     }
 }

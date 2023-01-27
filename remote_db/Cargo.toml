@@ -31,3 +31,4 @@ anyhow = "1.0"
 chrono = "0.4.22"
 async-trait = "0.1.57"
 actix-cors = "0.6.2"
+sea-orm = { version = "^0", features = [ "sqlx-postgres", "runtime-actix-rustls", "macros" ] }

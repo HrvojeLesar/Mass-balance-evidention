@@ -229,7 +229,7 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
                 }
             }),
         );
-        Self::paginate(options.limit, options.page, &mut builder);
+        Self::paginate(options.page_size, options.page, &mut builder);
 
         let rows = builder.build().fetch_all(&mut *executor).await?;
 
@@ -268,7 +268,7 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
 
         Ok(CellCulturePairs {
             pagination: Pagination {
-                limit: options.limit.unwrap_or_default(),
+                page_size: options.page_size.unwrap_or_default(),
                 page: options.page.unwrap_or_default(),
                 total,
             },
@@ -361,6 +361,7 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
         Self::get(
             executor,
             &CellCulturePairFetchOptions {
+                filtersnew: None,
                 id: OptionalCellCulturePairIds {
                     cell_id: Some(cell_culture_new_ids.id_cell),
                     culture_id: Some(cell_culture_new_ids.id_culture),
@@ -368,7 +369,7 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
                 },
                 data_group_id: Some(cell_culture_new_ids.d_group),
                 page: None,
-                limit: None,
+                page_size: None,
                 filters: None,
                 ordering: None,
             },
@@ -403,12 +404,13 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
         let cell = Cell::get(
             &mut *executor,
             &FetchOptions::<CellFields> {
+                filtersnew: None,
                 id: OptionalId {
                     id: Some(deleted_data.id_cell),
                 },
                 data_group_id: Some(deleted_data.d_group),
                 page: None,
-                limit: None,
+                page_size: None,
                 filters: None,
                 ordering: None,
             },
@@ -418,12 +420,13 @@ impl DatabaseQueries<Postgres> for CellCulturePair {
         let culture = Culture::get(
             &mut *executor,
             &FetchOptions::<CultureFields> {
+                filtersnew: None,
                 id: OptionalId {
                     id: Some(deleted_data.id_culture),
                 },
                 data_group_id: Some(deleted_data.d_group),
                 page: None,
-                limit: None,
+                page_size: None,
                 filters: None,
                 ordering: None,
             },
@@ -554,7 +557,7 @@ impl CellCulturePairQuery {
 
         let res = Ok(CellCulturePairs {
             pagination: Pagination {
-                limit: fetch_options.limit.unwrap_or_default(),
+                page_size: fetch_options.page_size.unwrap_or_default(),
                 page: fetch_options.page.unwrap_or_default(),
                 total,
             },

@@ -1,9 +1,9 @@
 [package]
 name = "mass_balance_evidention"
-version = "0.0.0"
-description = "A Tauri App"
-authors = ["you"]
-license = ""
+version = "0.0.1"
+description = "Mass Balance Evidention"
+authors = ["Hrvoje Lesar"]
+license = "MIT"
 repository = ""
 edition = "2021"
 rust-version = "1.57"

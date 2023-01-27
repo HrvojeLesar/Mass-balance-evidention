@@ -144,7 +144,7 @@ impl DatabaseQueries<Postgres> for Cell {
 
         Ok(Cells {
             pagination: Pagination {
-                limit: options.limit.unwrap_or_default(),
+                page_size: options.page_size.unwrap_or_default(),
                 page: options.page.unwrap_or_default(),
                 total,
             },
@@ -301,7 +301,7 @@ impl CellQuery {
                     .push_unseparated(" ) ");
             }),
         );
-        Cell::paginate(fetch_options.limit, fetch_options.page, &mut builder);
+        Cell::paginate(fetch_options.page_size, fetch_options.page, &mut builder);
 
         let r = builder.build().fetch_all(&mut transaction).await?;
 
@@ -331,7 +331,7 @@ impl CellQuery {
 
         Ok(Cells {
             pagination: Pagination {
-                limit: fetch_options.limit.unwrap_or_default(),
+                page_size: fetch_options.page_size.unwrap_or_default(),
                 page: fetch_options.page.unwrap_or_default(),
                 total,
             },
@@ -350,8 +350,9 @@ impl CellQuery {
         let resp;
         if fetch_options.id.id.is_none() {
             let fetch_options = CellFetchOptions {
+                filtersnew: None,
                 id: OptionalId { id: None },
-                limit: fetch_options.limit,
+                page_size: fetch_options.page_size,
                 page: fetch_options.page,
                 ordering: fetch_options.ordering,
                 filters: fetch_options.filters,
@@ -381,7 +382,7 @@ impl CellQuery {
                         .push_unseparated(" ) ");
                 }),
             );
-            Cell::paginate(fetch_options.limit, fetch_options.page, &mut builder);
+            Cell::paginate(fetch_options.page_size, fetch_options.page, &mut builder);
 
             let r = builder.build().fetch_all(&mut transaction).await?;
 
@@ -409,7 +410,7 @@ impl CellQuery {
 
             resp = Ok(Cells {
                 pagination: Pagination {
-                    limit: fetch_options.limit.unwrap_or_default(),
+                    page_size: fetch_options.page_size.unwrap_or_default(),
                     page: fetch_options.page.unwrap_or_default(),
                     total,
                 },

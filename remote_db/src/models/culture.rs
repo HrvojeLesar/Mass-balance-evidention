@@ -143,7 +143,7 @@ impl DatabaseQueries<Postgres> for Culture {
 
         Ok(Cultures {
             pagination: Pagination {
-                limit: options.limit.unwrap_or_default(),
+                page_size: options.page_size.unwrap_or_default(),
                 page: options.page.unwrap_or_default(),
                 total,
             },
@@ -309,7 +309,7 @@ impl CultureQuery {
             }),
         );
 
-        Culture::paginate(fetch_options.limit, fetch_options.page, &mut builder);
+        Culture::paginate(fetch_options.page_size, fetch_options.page, &mut builder);
         let r = builder.build().fetch_all(&mut transaction).await?;
 
         let total = match r.first() {
@@ -338,7 +338,7 @@ impl CultureQuery {
 
         Ok(Cultures {
             pagination: Pagination {
-                limit: fetch_options.limit.unwrap_or_default(),
+                page_size: fetch_options.page_size.unwrap_or_default(),
                 page: fetch_options.page.unwrap_or_default(),
                 total,
             },
@@ -357,8 +357,9 @@ impl CultureQuery {
         let resp;
         if fetch_options.id.id.is_none() {
             let fetch_options = CultureFetchOptions {
+                filtersnew: None,
                 id: OptionalId { id: None },
-                limit: fetch_options.limit,
+                page_size: fetch_options.page_size,
                 page: fetch_options.page,
                 ordering: fetch_options.ordering,
                 filters: fetch_options.filters,
@@ -389,7 +390,7 @@ impl CultureQuery {
                 }),
             );
 
-            Culture::paginate(fetch_options.limit, fetch_options.page, &mut builder);
+            Culture::paginate(fetch_options.page_size, fetch_options.page, &mut builder);
             let r = builder.build().fetch_all(&mut transaction).await?;
 
             let total = match r.first() {
@@ -415,7 +416,7 @@ impl CultureQuery {
             }
             resp = Ok(Cultures {
                 pagination: Pagination {
-                    limit: fetch_options.limit.unwrap_or_default(),
+                    page_size: fetch_options.page_size.unwrap_or_default(),
                     page: fetch_options.page.unwrap_or_default(),
                     total,
                 },

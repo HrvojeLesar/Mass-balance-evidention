@@ -1,21 +1,27 @@
 use std::sync::Arc;
 
+use actix_web::web::Data;
 use anyhow::Result;
 use async_graphql::{Context, Enum, InputObject, Object, SimpleObject};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
+use sea_orm::{EntityTrait, PaginatorTrait, TransactionTrait};
+use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, Postgres, Row, Transaction};
 
-use crate::DatabasePool;
+use crate::{seaorm_models::buyer, DatabasePool, SeaOrmPool};
 
 use super::{
     data_group::DataGroup,
-    db_query::{DatabaseQueries, QueryBuilderHelpers},
+    db_query::{calc_limit, DatabaseQueries, QueryBuilderHelpers},
     DeleteOptions, FetchMany, FetchOptions, FieldsToSql, Pagination,
 };
 
 type BuyerFetchOptions = FetchOptions<BuyerFields>;
 type Buyers = FetchMany<Buyer>;
+
+pub type BuyerNew = buyer::Model;
+pub type BuyersNew = FetchMany<buyer::Model>;
 
 #[derive(SimpleObject, FromRow, Debug)]
 pub(super) struct Buyer {
@@ -29,7 +35,7 @@ pub(super) struct Buyer {
 }
 
 #[derive(Enum, Clone, Copy, PartialEq, Eq)]
-pub(super) enum BuyerFields {
+pub enum BuyerFields {
     Name,
     Address,
     Contact,
@@ -47,20 +53,20 @@ impl ToString for BuyerFields {
     }
 }
 
-#[derive(InputObject)]
-pub(super) struct BuyerInsertOptions {
-    pub(super) name: String,
-    pub(super) address: Option<String>,
-    pub(super) contact: Option<String>,
-    pub(super) d_group: Option<i32>,
+#[derive(InputObject, Serialize, Deserialize)]
+pub struct BuyerInsertOptions {
+    pub name: String,
+    pub address: Option<String>,
+    pub contact: Option<String>,
+    pub d_group: Option<i32>,
 }
 
 #[derive(InputObject)]
-pub(super) struct BuyerUpdateOptions {
-    pub(super) id: i32,
-    pub(super) name: Option<String>,
-    pub(super) address: Option<String>,
-    pub(super) contact: Option<String>,
+pub struct BuyerUpdateOptions {
+    pub id: i32,
+    pub name: Option<String>,
+    pub address: Option<String>,
+    pub contact: Option<String>,
 }
 
 impl QueryBuilderHelpers<'_, Postgres> for Buyer {}
@@ -144,7 +150,7 @@ impl DatabaseQueries<Postgres> for Buyer {
 
         Ok(Buyers {
             pagination: Pagination {
-                limit: options.limit.unwrap_or_default(),
+                page_size: options.page_size.unwrap_or_default(),
                 page: options.page.unwrap_or_default(),
                 total,
             },
@@ -321,6 +327,31 @@ impl BuyerMutation {
         let mut transaction = pool.begin().await?;
 
         let res = Buyer::delete(&mut transaction, &delete_options).await?;
+
+        transaction.commit().await?;
+        Ok(res)
+    }
+}
+
+#[derive(Default)]
+pub struct NewBuyerQuery;
+
+#[Object]
+impl NewBuyerQuery {
+    async fn buyers_new(
+        &self,
+        ctx: &Context<'_>,
+        fetch_options: BuyerFetchOptions,
+    ) -> Result<BuyersNew> {
+        let pool = ctx.data::<SeaOrmPool>().expect("Pool must exist");
+        buyer::Model::get(pool, fetch_options).await
+    }
+
+    async fn buyer(&self, ctx: &Context<'_>, fetch_options: BuyerFetchOptions) -> Result<Buyer> {
+        let pool = ctx.data::<DatabasePool>().expect("Pool must exist");
+        let mut transaction = pool.begin().await?;
+
+        let res = Buyer::get(&mut transaction, &fetch_options).await?;
 
         transaction.commit().await?;
         Ok(res)

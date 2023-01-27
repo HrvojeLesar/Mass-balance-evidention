@@ -1,7 +1,8 @@
 use async_graphql::{Enum, InputObject, InputType, MergedObject, OutputType, SimpleObject};
+use sea_orm::Order;
 
 use self::{
-    buyer::{Buyer, BuyerFields, BuyerMutation, BuyerQuery},
+    buyer::{Buyer, BuyerFields, BuyerMutation, BuyerNew, BuyerQuery, NewBuyerQuery},
     cell::{Cell, CellFields, CellMutation, CellQuery, CellUnpairedId},
     cell_culture_pair::{
         CellCultureOrderingFields, CellCulturePair, CellCulturePairFields, CellCulturePairIds,
@@ -32,6 +33,7 @@ pub struct QueryRoot(
     CultureQuery,
     EntryQuery,
     DataGroupQuery,
+    NewBuyerQuery,
 );
 
 #[derive(MergedObject, Default)]
@@ -46,13 +48,13 @@ pub struct MutationRoot(
 
 #[derive(SimpleObject, Debug)]
 pub struct Pagination {
-    limit: i64,
-    page: i64,
-    total: i64,
+    pub page: i64,
+    pub page_size: i64,
+    pub total: i64,
 }
 
 #[derive(Enum, Clone, Copy, PartialEq, Eq)]
-pub(super) enum Ordering {
+pub enum Ordering {
     Asc,
     Desc,
 }
@@ -62,6 +64,15 @@ impl ToString for Ordering {
         match self {
             Ordering::Asc => "ASC".to_string(),
             Ordering::Desc => "DESC".to_string(),
+        }
+    }
+}
+
+impl From<Ordering> for Order {
+    fn from(ordering: Ordering) -> Self {
+        match ordering {
+            Ordering::Asc => Order::Asc,
+            Ordering::Desc => Order::Desc,
         }
     }
 }
@@ -76,9 +87,9 @@ impl ToString for Ordering {
 ))]
 #[graphql(concrete(name = "EntryOrderingOptions", params(EntryOrderingFields)))]
 #[graphql(concrete(name = "EntryGroupOrderingOptionsBase", params(EntryGroupFields)))]
-pub(super) struct OrderingOptions<T: InputType + ToString> {
-    order: Ordering,
-    order_by: T,
+pub struct OrderingOptions<T: InputType + ToString> {
+    pub order: Ordering,
+    pub order_by: T,
 }
 
 #[derive(InputObject)]
@@ -88,14 +99,37 @@ pub(super) struct OrderingOptions<T: InputType + ToString> {
 #[graphql(concrete(name = "CellCulturePairFilterOptions", params(CellCulturePairFields)))]
 #[graphql(concrete(name = "EntryFilterOptions", params(EntryFields)))]
 #[graphql(concrete(name = "EntryGroupFilterOptionsBase", params(EntryGroupFields)))]
-pub(super) struct Filter<T: InputType + FieldsToSql> {
-    pub(super) field: T,
-    pub(super) value: String,
+pub struct Filter<T: InputType + FieldsToSql> {
+    pub field: T,
+    pub value: String,
 }
 
 #[derive(InputObject)]
 pub struct OptionalId {
     pub id: Option<i32>,
+}
+
+#[derive(Enum, Clone, Copy, PartialEq, Eq)]
+pub enum FieldTypes {
+    String,
+    Number,
+    Date,
+}
+
+#[derive(InputObject)]
+#[graphql(concrete(name = "BuyerFilterOptionsNew", params(BuyerFields)))]
+#[graphql(concrete(name = "CellFilterOptionsNew", params(CellFields)))]
+#[graphql(concrete(name = "CultureFilterOptionsNew", params(CultureFields)))]
+#[graphql(concrete(
+    name = "CellCulturePairFilterOptionsNew",
+    params(CellCulturePairFields)
+))]
+#[graphql(concrete(name = "EntryFilterOptionsNew", params(EntryFields)))]
+#[graphql(concrete(name = "EntryGroupFilterOptionsBaseNew", params(EntryGroupFields)))]
+pub struct FilterNew<T: InputType> {
+    pub field: T,
+    pub field_type: FieldTypes,
+    pub value: String,
 }
 
 #[derive(InputObject)]
@@ -120,20 +154,22 @@ pub struct OptionalId {
     params(EntryFields, EntryFetchIdOptions, EntryOrderingFields)
 ))]
 #[graphql(concrete(name = "EntryGroupFetchOptionsBase", params(EntryGroupFields)))]
-pub(super) struct FetchOptions<T, I = OptionalId, O = T>
+pub struct FetchOptions<T, I = OptionalId, O = T>
 where
     T: InputType + FieldsToSql + ToString,
     O: InputType + FieldsToSql + ToString,
     I: InputType,
     Filter<T>: InputType,
+    FilterNew<T>: InputType,
     OrderingOptions<O>: InputType,
 {
-    pub(super) id: I,
-    pub(super) limit: Option<i64>,
-    pub(super) page: Option<i64>,
-    pub(super) ordering: Option<OrderingOptions<O>>,
-    pub(super) filters: Option<Vec<Filter<T>>>,
-    pub(super) data_group_id: Option<i32>,
+    pub id: I,
+    pub page_size: Option<i64>,
+    pub page: Option<i64>,
+    pub ordering: Option<OrderingOptions<O>>,
+    pub filters: Option<Vec<Filter<T>>>,
+    pub filtersnew: Option<Vec<FilterNew<T>>>,
+    pub data_group_id: Option<i32>,
 }
 
 #[derive(SimpleObject, Debug)]
@@ -143,10 +179,11 @@ where
 #[graphql(concrete(name = "CellCulturePairs", params(CellCulturePair)))]
 #[graphql(concrete(name = "Entries", params(Entry)))]
 #[graphql(concrete(name = "EntryGroups", params(EntryGroup)))]
-pub(super) struct FetchMany<T: OutputType> {
+#[graphql(concrete(name = "BuyersNew", params(BuyerNew)))]
+pub struct FetchMany<T: OutputType> {
     #[graphql(flatten)]
-    pub(super) pagination: Pagination,
-    pub(super) results: Vec<T>,
+    pub pagination: Pagination,
+    pub results: Vec<T>,
 }
 
 pub trait FieldsToSql: ToString {
@@ -158,6 +195,6 @@ pub trait FieldsToSql: ToString {
 #[derive(InputObject)]
 #[graphql(concrete(name = "DeleteOptions", params()))]
 #[graphql(concrete(name = "CellCulturePairDeleteOptions", params(CellCulturePairIds)))]
-pub(super) struct DeleteOptions<T: InputType = i32> {
-    id: T,
+pub struct DeleteOptions<T: InputType = i32> {
+    pub id: T,
 }
