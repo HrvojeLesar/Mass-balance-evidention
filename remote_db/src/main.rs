@@ -13,6 +13,7 @@ use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use dotenvy::dotenv;
 use models::{MutationRoot, QueryRoot};
 use sea_orm::{ConnectOptions, DatabaseConnection};
+use seaorm_models::entry::t;
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 
 mod models;
@@ -88,6 +89,9 @@ async fn main() -> std::io::Result<()> {
             .await
             .unwrap(),
     );
+
+    let tt = sea_orm_pool.clone();
+    t(&tt).await;
 
     let schema = build_schema(pool.clone(), sea_orm_pool);
 

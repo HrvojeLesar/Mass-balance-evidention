@@ -9,7 +9,7 @@ use sea_orm::{EntityTrait, PaginatorTrait, TransactionTrait};
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, Postgres, Row, Transaction};
 
-use crate::{seaorm_models::buyer, DatabasePool, SeaOrmPool};
+use crate::{seaorm_models::{buyer, QueryDatabase}, DatabasePool, SeaOrmPool};
 
 use super::{
     data_group::DataGroup,
@@ -344,7 +344,9 @@ impl NewBuyerQuery {
         fetch_options: BuyerFetchOptions,
     ) -> Result<BuyersNew> {
         let pool = ctx.data::<SeaOrmPool>().expect("Pool must exist");
-        buyer::Model::get(pool, fetch_options).await
+        todo!()
+        // crate::seaorm_models::entry::Entity::fetch(&pool, fetch_options);
+        // buyer::Model::get(pool, fetch_options).await
     }
 
     async fn buyer(&self, ctx: &Context<'_>, fetch_options: BuyerFetchOptions) -> Result<Buyer> {

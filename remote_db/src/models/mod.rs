@@ -1,6 +1,8 @@
 use async_graphql::{Enum, InputObject, InputType, MergedObject, OutputType, SimpleObject};
 use sea_orm::Order;
 
+use crate::seaorm_models::entry::EntryFieldsNew;
+
 use self::{
     buyer::{Buyer, BuyerFields, BuyerMutation, BuyerNew, BuyerQuery, NewBuyerQuery},
     cell::{Cell, CellFields, CellMutation, CellQuery, CellUnpairedId},
@@ -53,6 +55,14 @@ pub struct Pagination {
     pub total: i64,
 }
 
+#[derive(SimpleObject, Debug)]
+pub struct PaginationNew {
+    pub page: u64,
+    pub page_size: u64,
+    pub total_items: u64,
+    pub total_pages: u64,
+}
+
 #[derive(Enum, Clone, Copy, PartialEq, Eq)]
 pub enum Ordering {
     Asc,
@@ -93,6 +103,22 @@ pub struct OrderingOptions<T: InputType + ToString> {
 }
 
 #[derive(InputObject)]
+#[graphql(concrete(name = "BuyerOrderingOptions", params(BuyerFields)))]
+#[graphql(concrete(name = "CellOrderingOptions", params(CellFields)))]
+#[graphql(concrete(name = "CultureOrderingOptions", params(CultureFields)))]
+#[graphql(concrete(
+    name = "CellCulturePairOrderingOptions",
+    params(CellCultureOrderingFields)
+))]
+#[graphql(concrete(name = "EntryOrderingOptions", params(EntryOrderingFields)))]
+#[graphql(concrete(name = "EntryGroupOrderingOptionsBase", params(EntryGroupFields)))]
+#[graphql(concrete(name = "djijdlBuyerFilterOptionsNewkldjsakl", params(EntryFieldsNew)))]
+pub struct OrderingOptionsNew<T: InputType> {
+    pub order: Ordering,
+    pub order_by: T,
+}
+
+#[derive(InputObject)]
 #[graphql(concrete(name = "BuyerFilterOptions", params(BuyerFields)))]
 #[graphql(concrete(name = "CellFilterOptions", params(CellFields)))]
 #[graphql(concrete(name = "CultureFilterOptions", params(CultureFields)))]
@@ -117,6 +143,7 @@ pub enum FieldTypes {
 }
 
 #[derive(InputObject)]
+#[graphql(concrete(name = "BuyerFilterOptionsNewkldjsakl", params(EntryFieldsNew)))]
 #[graphql(concrete(name = "BuyerFilterOptionsNew", params(BuyerFields)))]
 #[graphql(concrete(name = "CellFilterOptionsNew", params(CellFields)))]
 #[graphql(concrete(name = "CultureFilterOptionsNew", params(CultureFields)))]
@@ -168,6 +195,42 @@ where
     pub page: Option<i64>,
     pub ordering: Option<OrderingOptions<O>>,
     pub filters: Option<Vec<Filter<T>>>,
+    pub filtersnew: Option<Vec<FilterNew<T>>>,
+    pub data_group_id: Option<i32>,
+}
+
+#[derive(InputObject)]
+// #[graphql(concrete(name = "BuyerFetchOptions", params(BuyerFields)))]
+// #[graphql(concrete(name = "CellFetchOptions", params(CellFields)))]
+// #[graphql(concrete(name = "CellFetchUnpairedOptions", params(CellFields, CellUnpairedId)))]
+// #[graphql(concrete(name = "CultureFetchOptions", params(CultureFields)))]
+// #[graphql(concrete(
+//     name = "CultureFetchUnpairedOptions",
+//     params(CultureFields, CultureUnpairedId)
+// ))]
+// #[graphql(concrete(
+//     name = "CellCulturePairFetchOptions",
+//     params(
+//         CellCulturePairFields,
+//         OptionalCellCulturePairIds,
+//         CellCultureOrderingFields
+//     )
+// ))]
+// #[graphql(concrete(
+//     name = "EntryFetchOptions",
+//     params(EntryFields, EntryFetchIdOptions, EntryOrderingFields)
+// ))]
+#[graphql(concrete(name = "EntryGroupFetchOptionsBaseNew", params(EntryFieldsNew)))]
+pub struct FetchOptionsNew<T>
+where
+    T: InputType,
+    FilterNew<T>: InputType,
+    OrderingOptionsNew<T>: InputType,
+{
+    pub id: Option<i32>,
+    pub page_size: Option<i64>,
+    pub page: Option<i64>,
+    pub ordering: Option<OrderingOptionsNew<T>>,
     pub filtersnew: Option<Vec<FilterNew<T>>>,
     pub data_group_id: Option<i32>,
 }
