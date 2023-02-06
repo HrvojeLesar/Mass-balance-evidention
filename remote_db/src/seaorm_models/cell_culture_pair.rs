@@ -3,9 +3,9 @@ use async_trait::async_trait;
 use log::warn;
 use sea_orm::{
     entity::prelude::*,
-    sea_query::{Expr, Func},
-    ActiveValue, DatabaseTransaction, DeleteResult, FromQueryResult, Order, QueryOrder,
-    QuerySelect, TransactionTrait,
+    sea_query::{Expr, Func, PostgresQueryBuilder, Query},
+    ActiveValue, ConnectionTrait, DatabaseTransaction, DbBackend, DeleteResult, FromQueryResult,
+    Order, QueryOrder, QuerySelect, Statement, TransactionTrait,
 };
 use serde::{Deserialize, Serialize};
 
@@ -145,7 +145,7 @@ pub struct CellCulturePairFlattened {
     pub d_group_culture: Option<i32>,
 
     pub id_d_group: i32,
-    pub name_g_group: String,
+    pub name_d_group: String,
     pub description_d_group: Option<String>,
     pub created_at_d_group: DateTimeWithTimeZone,
 }
@@ -182,7 +182,7 @@ impl From<QueryResultsHelperType<CellCulturePairFlattened>> for QueryResults<Cel
                     },
                     d_group: super::data_group::Model {
                         id: flat.id_d_group,
-                        name: flat.name_g_group,
+                        name: flat.name_d_group,
                         description: flat.description_d_group,
                         created_at: flat.created_at_d_group,
                     },
@@ -331,20 +331,31 @@ impl QueryDatabase for Entity {
         db: &DatabaseConnection,
         options: Self::UpdateOptions,
     ) -> Result<Self::InnerQueryResultType> {
-        let model = ActiveModel {
-            id_cell: ActiveValue::Set(options.id_cell_new),
-            id_culture: ActiveValue::Set(options.id_culture_new),
-            d_group: ActiveValue::Set(options.id_d_group),
-            ..Default::default()
-        };
+        let (update_query, values) = Query::update()
+            .table(Self.table_ref())
+            .values([
+                (Self::Column::IdCell, options.id_cell_new.into()),
+                (Self::Column::IdCulture, options.id_culture_new.into()),
+            ])
+            .and_where(Self::Column::IdCell.eq(options.id_cell_old))
+            .and_where(Self::Column::IdCulture.eq(options.id_culture_old))
+            .and_where(Self::Column::DGroup.eq(options.id_d_group))
+            .returning_all()
+            .to_owned()
+            .build(PostgresQueryBuilder);
+
         let transaction = db.begin().await?;
-        Entity::update(model)
-            .filter(Self::Column::IdCell.eq(options.id_cell_old))
-            .filter(Self::Column::IdCulture.eq(options.id_culture_old))
-            .filter(Self::Column::DGroup.eq(options.id_d_group))
-            .exec(&transaction)
+        // WARN: uses manually built query
+        // SeaOrm doesn't support changing primary key in update
+        transaction
+            .query_one(Statement::from_sql_and_values(
+                DbBackend::Postgres,
+                &update_query,
+                values,
+            ))
             .await?;
         transaction.commit().await?;
+
         Ok(Self::fetch(
             db,
             FetchOptions::<CellCulturePairFields, Option<CellCulturePairIds>> {

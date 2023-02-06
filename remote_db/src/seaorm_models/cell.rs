@@ -216,7 +216,6 @@ impl CellQuery {
         let page = Page(options.page.unwrap_or(0));
 
         let mut query = Entity::find();
-        query = query.filter(Entity::get_id_column().eq(options.id.id_culture));
         if let Some(data_group) = options.data_group_id {
             query = query.filter(Entity::get_data_group_column().eq(data_group));
         }
@@ -257,7 +256,6 @@ impl CellQuery {
         let page = Page(options.page.unwrap_or(0));
 
         let mut query = Entity::find();
-        query = query.filter(Entity::get_id_column().eq(options.id.id_culture));
         if let Some(data_group) = options.data_group_id {
             query = query.filter(Entity::get_data_group_column().eq(data_group));
         }

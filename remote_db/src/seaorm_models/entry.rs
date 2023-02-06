@@ -171,7 +171,7 @@ pub struct EntryFlattened {
     pub d_group_culture: Option<i32>,
 
     pub id_d_group: i32,
-    pub name_g_group: String,
+    pub name_d_group: String,
     pub description_d_group: Option<String>,
     pub created_at_d_group: DateTimeWithTimeZone,
 }
@@ -226,7 +226,7 @@ impl From<QueryResultsHelperType<EntryFlattened>> for QueryResults<Entry> {
                     },
                     d_group: Some(super::data_group::Model {
                         id: flat.id_d_group,
-                        name: flat.name_g_group,
+                        name: flat.name_d_group,
                         description: flat.description_d_group,
                         created_at: flat.created_at_d_group,
                     }),
