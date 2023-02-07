@@ -29,7 +29,27 @@ const MAX_PAGE_SIZE: u64 = 100;
 const DEFAULT_PAGE_SIZE: u64 = 10;
 
 #[derive(Clone, Copy, Debug)]
-pub struct Page(pub u64);
+pub struct Page {
+    pub page: u64,
+    pub index: u64,
+}
+
+impl From<Option<u64>> for Page {
+    fn from(page: Option<u64>) -> Self {
+        let (page, index) = if let Some(page) = page {
+            if page == 0 {
+                (page + 1, page)
+            } else {
+                (page, page - 1)
+            }
+        } else {
+            (1, 0)
+        };
+
+        Self { page, index }
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct PageSize(pub u64);
 
@@ -57,7 +77,7 @@ where
         Self {
             results,
             pagination: Pagination {
-                page: page.0,
+                page: page.page,
                 page_size: page_size.0,
                 total_items: items_and_page_number.number_of_items,
                 total_pages: items_and_page_number.number_of_pages,
@@ -169,7 +189,7 @@ where
         Self::QueryResultType: From<QueryResultsHelperType<Self::FetchModel>>,
     {
         let page_size = PageSize(calculate_page_size(fetch_options.page_size));
-        let page = Page(fetch_options.page.unwrap_or(0));
+        let page: Page = fetch_options.page.into();
 
         let mut query = Self::get_query();
 
@@ -180,7 +200,7 @@ where
         let transaction = db.begin().await?;
 
         let paginator = Self::paginate_query(query, &transaction, page_size);
-        let res = paginator.fetch_page(page.0).await?;
+        let res = paginator.fetch_page(page.index).await?;
         let num_items_and_pages = paginator.num_items_and_pages().await?;
 
         transaction.commit().await?;

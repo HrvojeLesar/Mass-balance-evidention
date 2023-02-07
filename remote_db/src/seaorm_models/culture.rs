@@ -65,10 +65,10 @@ pub enum CultureFields {
     Description,
 }
 
-#[derive(InputObject)]
+#[derive(Debug, InputObject)]
 pub struct CultureParity {
     /// Id refers to a Cell Id
-    pub id_cell: i32,
+    pub id_cell: Option<i32>,
 }
 
 impl From<CultureFields> for Column {
@@ -213,7 +213,7 @@ impl CultureQuery {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
 
         let page_size = PageSize(calculate_page_size(options.page_size));
-        let page = Page(options.page.unwrap_or(0));
+        let page: Page = options.page.into();
 
         let mut query = Entity::find();
         if let Some(data_group) = options.data_group_id {
@@ -221,22 +221,24 @@ impl CultureQuery {
         }
         query = Entity::add_ordering(query, options.ordering);
         query = Entity::add_filters(query, options.filters);
-        query = query.filter(
-            Condition::any().add(
-                Column::Id.in_subquery(
-                    Query::select()
-                        .column(super::cell_culture_pair::Column::IdCulture)
-                        .from(super::cell_culture_pair::Entity)
-                        .and_where(super::cell_culture_pair::Column::IdCell.eq(options.id.id_cell))
-                        .to_owned(),
+        if let Some(id_cell) = options.id.id_cell {
+            query = query.filter(
+                Condition::any().add(
+                    Column::Id.in_subquery(
+                        Query::select()
+                            .column(super::cell_culture_pair::Column::IdCulture)
+                            .from(super::cell_culture_pair::Entity)
+                            .and_where(super::cell_culture_pair::Column::IdCell.eq(id_cell))
+                            .to_owned(),
+                    ),
                 ),
-            ),
-        );
+            );
+        }
 
         let transaction = db.begin().await?;
 
         let paginator = Entity::paginate_query(query, &transaction, page_size);
-        let res = paginator.fetch_page(page.0).await?;
+        let res = paginator.fetch_page(page.index).await?;
         let num_items_and_pages = paginator.num_items_and_pages().await?;
 
         transaction.commit().await?;
@@ -251,7 +253,7 @@ impl CultureQuery {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
 
         let page_size = PageSize(calculate_page_size(options.page_size));
-        let page = Page(options.page.unwrap_or(0));
+        let page: Page = options.page.into();
 
         let mut query = Entity::find();
         if let Some(data_group) = options.data_group_id {
@@ -274,7 +276,7 @@ impl CultureQuery {
         let transaction = db.begin().await?;
 
         let paginator = Entity::paginate_query(query, &transaction, page_size);
-        let res = paginator.fetch_page(page.0).await?;
+        let res = paginator.fetch_page(page.index).await?;
         let num_items_and_pages = paginator.num_items_and_pages().await?;
 
         transaction.commit().await?;

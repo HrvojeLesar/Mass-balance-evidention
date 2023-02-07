@@ -490,10 +490,14 @@ impl QueryDatabase for Entity {
             id_cell: ActiveValue::Set(options.cell_culture_pair.id_cell),
             id_culture: ActiveValue::Set(options.cell_culture_pair.id_culture),
             d_group: ActiveValue::Set(options.d_group),
+            // WARN: Remove ccp_d_group
+            ccp_d_group: ActiveValue::Set(options.d_group.unwrap_or(0)),
             ..Default::default()
         };
         let transaction = db.begin().await?;
-        let res = Entity::update(model).exec(&transaction).await?;
+        let res = Entity::insert(model)
+            .exec_with_returning(&transaction)
+            .await?;
         transaction.commit().await?;
 
         Ok(Self::fetch(
