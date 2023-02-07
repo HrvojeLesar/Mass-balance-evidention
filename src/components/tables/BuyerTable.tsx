@@ -43,9 +43,9 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
 
     const { data, refetch, isInitialLoading } = useGetBuyersQuery(
         {
-            fetchOptions: {
-                id: {},
-                limit: pagination.pageSize,
+            options: {
+                id: undefined,
+                pageSize: pagination.pageSize,
                 page: pagination.pageIndex + 1,
                 ordering: sorting[0]
                     ? {
@@ -122,7 +122,7 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
     }, [t, isEditable]);
 
     const total = useMemo<number>(() => {
-        return data?.buyers.total ?? -1;
+        return data?.buyers.totalItems ?? -1;
     }, [data]);
 
     const onSuccess = useCallback(() => {
@@ -165,7 +165,7 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
                 deleteFn={() => {
                     if (selectedBuyer) {
                         deleteBuyer.mutate({
-                            deleteOptions: { id: selectedBuyer.id },
+                            options: { id: selectedBuyer.id },
                         });
                     }
                 }}

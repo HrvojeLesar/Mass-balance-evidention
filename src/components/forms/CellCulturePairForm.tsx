@@ -4,11 +4,12 @@ import { useTranslation } from "react-i18next";
 import {
     Cell,
     CellCulturePair,
-    CellCulturePairInsertOptions,
+    CellCulturePairIds,
     CellCulturePairUpdateOptions,
     CellFields,
     Culture,
     CultureFields,
+    FieldTypes,
     InsertCellCulturePairMutation,
     Ordering,
     UpdateCellCulturePairMutation,
@@ -46,7 +47,7 @@ export default function CellCulturePairForm({
 }: FormProps<
     CellCulturePair,
     InsertCellCulturePairMutation,
-    CellCulturePairInsertOptions,
+    CellCulturePairIds,
     UpdateCellCulturePairMutation,
     CellCulturePairUpdateOptions
 >) {
@@ -93,7 +94,7 @@ export default function CellCulturePairForm({
         (data: FormInput) => {
             if (data.cell && data.culture) {
                 insert.mutate({
-                    insertOptions: {
+                    options: {
                         idCell: data.cell?.value.id,
                         idCulture: data.culture?.value.id,
                         dGroup: dataGroupContextValue.selectedGroup ?? 1,
@@ -113,7 +114,7 @@ export default function CellCulturePairForm({
         (data: FormInput) => {
             if (data.cell && data.culture && edit?.cell && edit?.culture) {
                 update.mutate({
-                    updateOptions: {
+                    options: {
                         idCellOld: edit.cell.id,
                         idCultureOld: edit.culture.id,
                         idCellNew: data.cell?.value.id,
@@ -136,9 +137,9 @@ export default function CellCulturePairForm({
             edit === undefined
                 ? undefined
                 : ({
-                      value: edit.cell,
-                      label: edit?.cell?.name ?? "",
-                  } as SelectOption<Cell>),
+                    value: edit.cell,
+                    label: edit?.cell?.name ?? "",
+                } as SelectOption<Cell>),
         page: 1,
         pages: {},
         limit: LIMIT,
@@ -153,9 +154,9 @@ export default function CellCulturePairForm({
             edit === undefined
                 ? undefined
                 : ({
-                      value: edit.culture,
-                      label: edit?.culture?.name ?? "",
-                  } as SelectOption<Culture>),
+                    value: edit.culture,
+                    label: edit?.culture?.name ?? "",
+                } as SelectOption<Culture>),
         page: 1,
         pages: {},
         limit: LIMIT,
@@ -191,11 +192,11 @@ export default function CellCulturePairForm({
     const { data: cellData, isFetching: isFetchingCells } =
         useGetUnpairedCellsQuery(
             {
-                fetchOptions: {
+                options: {
                     id: {
-                        id: cultureSelectState.selected?.value.id ?? undefined,
+                        idCulture: cultureSelectState.selected?.value.id ?? undefined,
                     },
-                    limit: cellSelectState.limit,
+                    pageSize: cellSelectState.limit,
                     page: cellSelectState.page,
                     ordering: {
                         order: Ordering.Asc,
@@ -204,11 +205,12 @@ export default function CellCulturePairForm({
                     filters:
                         cellSelectState.filter !== ""
                             ? [
-                                  {
-                                      value: cellSelectState.filter,
-                                      field: CellFields.Name,
-                                  },
-                              ]
+                                {
+                                    value: cellSelectState.filter,
+                                    fieldType: FieldTypes.String,
+                                    field: CellFields.Name,
+                                },
+                            ]
                             : undefined,
                     dataGroupId: dataGroupContextValue.selectedGroup,
                 },
@@ -228,9 +230,9 @@ export default function CellCulturePairForm({
     const { data: cultureData, isFetching: isFetchingCultures } =
         useGetUnpairedCulturesQuery(
             {
-                fetchOptions: {
-                    id: { id: cellSelectState.selected?.value.id ?? undefined },
-                    limit: cultureSelectState.limit,
+                options: {
+                    id: { idCell: cellSelectState.selected?.value.id ?? undefined },
+                    pageSize: cultureSelectState.limit,
                     page: cultureSelectState.page,
                     ordering: {
                         order: Ordering.Asc,
@@ -239,11 +241,12 @@ export default function CellCulturePairForm({
                     filters:
                         cultureSelectState.filter !== ""
                             ? [
-                                  {
-                                      value: cultureSelectState.filter,
-                                      field: CultureFields.Name,
-                                  },
-                              ]
+                                {
+                                    value: cultureSelectState.filter,
+                                    fieldType: FieldTypes.String,
+                                    field: CultureFields.Name,
+                                },
+                            ]
                             : undefined,
                     dataGroupId: dataGroupContextValue.selectedGroup,
                 },
@@ -264,7 +267,7 @@ export default function CellCulturePairForm({
         if (cellData) {
             setCellSelectState((old) => ({
                 ...old,
-                maxPage: Math.ceil(cellData.unpairedCells.total / old.limit),
+                maxPage: cellData.unpairedCells.totalPages,
                 pages: {
                     ...old.pages,
                     [cellData.unpairedCells.page]:
@@ -278,9 +281,8 @@ export default function CellCulturePairForm({
         if (cultureData) {
             setCultureSelectState((old) => ({
                 ...old,
-                maxPage: Math.ceil(
-                    cultureData.unpairedCultures.total / old.limit
-                ),
+                maxPage:
+                    cultureData.unpairedCultures.totalPages,
                 pages: {
                     ...old.pages,
                     [cultureData.unpairedCultures.page]:
@@ -353,13 +355,13 @@ export default function CellCulturePairForm({
                                     }}
                                     onMenuScrollToBottom={
                                         cellSelectState.page <
-                                        cellSelectState.maxPage
+                                            cellSelectState.maxPage
                                             ? () => {
-                                                  setCellSelectState((old) => ({
-                                                      ...old,
-                                                      page: old.page + 1,
-                                                  }));
-                                              }
+                                                setCellSelectState((old) => ({
+                                                    ...old,
+                                                    page: old.page + 1,
+                                                }));
+                                            }
                                             : undefined
                                     }
                                     onInputChange={(value, actionMeta) => {
@@ -418,15 +420,15 @@ export default function CellCulturePairForm({
                                     }}
                                     onMenuScrollToBottom={
                                         cultureSelectState.page <
-                                        cultureSelectState.maxPage
+                                            cultureSelectState.maxPage
                                             ? () => {
-                                                  setCultureSelectState(
-                                                      (old) => ({
-                                                          ...old,
-                                                          page: old.page + 1,
-                                                      })
-                                                  );
-                                              }
+                                                setCultureSelectState(
+                                                    (old) => ({
+                                                        ...old,
+                                                        page: old.page + 1,
+                                                    })
+                                                );
+                                            }
                                             : undefined
                                     }
                                     onInputChange={(value, actionMeta) => {

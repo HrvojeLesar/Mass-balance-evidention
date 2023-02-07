@@ -52,8 +52,8 @@ export default function CellCulturePairTable({
 
     const { data, refetch, isInitialLoading } = useGetAllCellCulturePairsQuery(
         {
-            fetchOptions: {
-                id: {},
+            options: {
+                id: undefined,
                 dataGroupId: dataGroupContextValue.selectedGroup,
             },
         },
@@ -68,7 +68,7 @@ export default function CellCulturePairTable({
 
     useEffect(() => {
         if (data) {
-            setTableData([...data.getAllCellCulturePairs.results]);
+            setTableData([...data.allCellCulturePairs.results]);
         }
     }, [data]);
 
@@ -148,10 +148,10 @@ export default function CellCulturePairTable({
                         selectedCellCulturePair.culture
                     ) {
                         deleteCellCulturePair.mutate({
-                            deleteOptions: {
+                            options: {
                                 id: {
-                                    cellId: selectedCellCulturePair.cell.id,
-                                    cultureId:
+                                    idCell: selectedCellCulturePair.cell.id,
+                                    idCulture:
                                         selectedCellCulturePair.culture.id,
                                     dGroup:
                                         dataGroupContextValue.selectedGroup ??

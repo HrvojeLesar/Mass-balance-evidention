@@ -21,12 +21,12 @@ export type FormProps<
     edit?: T | undefined;
     onInsertSuccess?: (
         data: InsertMutation,
-        variables: Exact<{ insertOptions: InsertOptions }>,
+        variables: Exact<{ options: InsertOptions }>,
         context: unknown
     ) => unknown;
     onUpdateSuccess?: (
         data: UpdateMutation,
-        variables: Exact<{ updateOptions: UpdateOptions }>,
+        variables: Exact<{ options: UpdateOptions }>,
         context: unknown
     ) => unknown;
 };

@@ -37,7 +37,7 @@ export default function DataGroupProvider({
     children,
 }: DataGroupProviderProps) {
     const { data, isLoading, refetch } = useGetDataGroupsQuery(
-        {},
+        { options: {} },
         { queryKey: ["getDataGroups"], keepPreviousData: true }
     );
 
@@ -47,7 +47,7 @@ export default function DataGroupProvider({
 
     const groups = useMemo(() => {
         return data !== undefined
-            ? [...data.dataGroups].sort((a, b) => a.id - b.id)
+            ? [...data.dataGroups.results].sort((a, b) => a.id - b.id)
             : undefined;
     }, [data]);
 
@@ -110,7 +110,7 @@ export default function DataGroupProvider({
             localStorage.setItem(SELECTED_DATA_GROUP_ID, id.toString());
         } else if (
             storedId !== null &&
-                value.groups !== undefined &&
+            value.groups !== undefined &&
             value.groups.length === 0
         ) {
             setSelectedGroup(undefined);

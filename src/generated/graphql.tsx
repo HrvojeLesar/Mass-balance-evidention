@@ -215,7 +215,7 @@ export type CellOrderingOptions = {
 
 export type CellParity = {
   /** Id refers to a Culture Id */
-  idCulture: Scalars['Int'];
+  idCulture?: InputMaybe<Scalars['Int']>;
 };
 
 export type CellParityFetchOptions = {
@@ -285,7 +285,7 @@ export type CultureOrderingOptions = {
 
 export type CultureParity = {
   /** Id refers to a Cell Id */
-  idCell: Scalars['Int'];
+  idCell?: InputMaybe<Scalars['Int']>;
 };
 
 export type CultureParityFetchOptions = {

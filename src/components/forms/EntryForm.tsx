@@ -11,6 +11,7 @@ import {
     Entry,
     EntryInsertOptions,
     EntryUpdateOptions,
+    FieldTypes,
     InsertEntryMutation,
     Ordering,
     UpdateEntryMutation,
@@ -72,12 +73,12 @@ export default function EntryForm({
         mode: "onSubmit",
         defaultValues: {
             cell: {
-                value: edit?.cellCulturePair?.cell ?? undefined,
-                label: edit?.cellCulturePair?.cell?.name ?? undefined,
+                value: edit?.cell,
+                label: edit?.cell?.name ?? undefined,
             },
             culture: {
-                value: edit?.cellCulturePair?.culture ?? undefined,
-                label: edit?.cellCulturePair?.culture?.name ?? undefined,
+                value: edit?.culture ?? undefined,
+                label: edit?.culture?.name ?? undefined,
             },
             buyer: {
                 value: edit?.buyer ?? undefined,
@@ -113,7 +114,7 @@ export default function EntryForm({
         (data: FormInput) => {
             if (data.cell && data.culture && data.buyer && data.date) {
                 insert.mutate({
-                    insertOptions: {
+                    options: {
                         cellCulturePair: {
                             idCell: data.cell.value.id,
                             idCulture: data.culture.value.id,
@@ -140,7 +141,7 @@ export default function EntryForm({
         (data: FormInput) => {
             if (data.cell && data.culture && data.buyer && data.date && edit) {
                 update.mutate({
-                    updateOptions: {
+                    options: {
                         id: edit?.id,
                         cellCulturePair: {
                             idCell: data.cell.value.id,
@@ -168,9 +169,9 @@ export default function EntryForm({
             edit === undefined
                 ? undefined
                 : ({
-                      value: edit?.cellCulturePair?.cell,
-                      label: edit?.cellCulturePair?.cell?.name ?? "",
-                  } as SelectOption<Cell>),
+                    value: edit?.cell,
+                    label: edit?.cell?.name ?? "",
+                } as SelectOption<Cell>),
         page: 1,
         pages: {},
         limit: LIMIT,
@@ -185,9 +186,9 @@ export default function EntryForm({
             edit === undefined
                 ? undefined
                 : ({
-                      value: edit?.cellCulturePair?.culture,
-                      label: edit?.cellCulturePair?.culture?.name ?? "",
-                  } as SelectOption<Culture>),
+                    value: edit?.culture,
+                    label: edit?.culture?.name ?? "",
+                } as SelectOption<Culture>),
         page: 1,
         pages: {},
         limit: LIMIT,
@@ -202,9 +203,9 @@ export default function EntryForm({
             edit === undefined
                 ? undefined
                 : ({
-                      value: edit?.buyer,
-                      label: edit?.buyer?.name ?? "",
-                  } as SelectOption<Buyer>),
+                    value: edit?.buyer,
+                    label: edit?.buyer?.name ?? "",
+                } as SelectOption<Buyer>),
         page: 1,
         pages: {},
         limit: LIMIT,
@@ -233,11 +234,11 @@ export default function EntryForm({
     const { data: cellData, isFetching: isFetchingCells } =
         useGetPairedCellsQuery(
             {
-                fetchOptions: {
+                options: {
                     id: {
-                        id: cultureSelectState.selected?.value.id ?? undefined,
+                        idCulture: cultureSelectState.selected?.value.id ?? undefined,
                     },
-                    limit: cellSelectState.limit,
+                    pageSize: cellSelectState.limit,
                     page: cellSelectState.page,
                     ordering: {
                         order: Ordering.Asc,
@@ -246,11 +247,12 @@ export default function EntryForm({
                     filters:
                         cellSelectState.filter !== ""
                             ? [
-                                  {
-                                      value: cellSelectState.filter,
-                                      field: CellFields.Name,
-                                  },
-                              ]
+                                {
+                                    value: cellSelectState.filter,
+                                    fieldType: FieldTypes.String,
+                                    field: CellFields.Name,
+                                },
+                            ]
                             : undefined,
                     dataGroupId: dataGroupContextValue.selectedGroup,
                 },
@@ -270,9 +272,9 @@ export default function EntryForm({
     const { data: cultureData, isFetching: isFetchingCultures } =
         useGetPairedCulturesQuery(
             {
-                fetchOptions: {
-                    id: { id: cellSelectState.selected?.value.id ?? undefined },
-                    limit: cultureSelectState.limit,
+                options: {
+                    id: { idCell: cellSelectState.selected?.value.id ?? undefined },
+                    pageSize: cultureSelectState.limit,
                     page: cultureSelectState.page,
                     ordering: {
                         order: Ordering.Asc,
@@ -281,11 +283,12 @@ export default function EntryForm({
                     filters:
                         cultureSelectState.filter !== ""
                             ? [
-                                  {
-                                      value: cultureSelectState.filter,
-                                      field: CultureFields.Name,
-                                  },
-                              ]
+                                {
+                                    value: cultureSelectState.filter,
+                                    fieldType: FieldTypes.String,
+                                    field: CultureFields.Name,
+                                },
+                            ]
                             : undefined,
                     dataGroupId: dataGroupContextValue.selectedGroup,
                 },
@@ -304,9 +307,9 @@ export default function EntryForm({
 
     const { data: buyerData, isFetching: isFetchingBuyers } = useGetBuyersQuery(
         {
-            fetchOptions: {
-                id: {},
-                limit: buyerSelectState.limit,
+            options: {
+                id: undefined,
+                pageSize: buyerSelectState.limit,
                 page: buyerSelectState.page,
                 ordering: {
                     order: Ordering.Asc,
@@ -315,12 +318,14 @@ export default function EntryForm({
                 filters:
                     buyerSelectState.filter !== ""
                         ? [
-                              {
-                                  value: buyerSelectState.filter,
-                                  field: BuyerFields.Name,
-                              },
-                          ]
+                            {
+                                value: buyerSelectState.filter,
+                                fieldType: FieldTypes.String,
+                                field: BuyerFields.Name,
+                            },
+                        ]
                         : undefined,
+                dataGroupId: dataGroupContextValue.selectedGroup,
             },
         },
         {
@@ -337,7 +342,7 @@ export default function EntryForm({
         if (cellData) {
             setCellSelectState((old) => ({
                 ...old,
-                maxPage: Math.ceil(cellData.pairedCells.total / old.limit),
+                maxPage: cellData.pairedCells.totalPages,
                 pages: {
                     ...old.pages,
                     [cellData.pairedCells.page]: cellData.pairedCells.results,
@@ -350,9 +355,7 @@ export default function EntryForm({
         if (cultureData) {
             setCultureSelectState((old) => ({
                 ...old,
-                maxPage: Math.ceil(
-                    cultureData.pairedCultures.total / old.limit
-                ),
+                maxPage: cultureData.pairedCultures.totalPages,
                 pages: {
                     ...old.pages,
                     [cultureData.pairedCultures.page]:
@@ -366,7 +369,7 @@ export default function EntryForm({
         if (buyerData) {
             setBuyerSelectState((old) => ({
                 ...old,
-                maxPage: Math.ceil(buyerData.buyers.total / old.limit),
+                maxPage: buyerData.buyers.totalPages,
                 pages: {
                     ...old.pages,
                     [buyerData.buyers.page]: buyerData.buyers.results,
@@ -453,15 +456,15 @@ export default function EntryForm({
                                     }}
                                     onMenuScrollToBottom={
                                         cultureSelectState.page <
-                                        cultureSelectState.maxPage
+                                            cultureSelectState.maxPage
                                             ? () => {
-                                                  setCultureSelectState(
-                                                      (old) => ({
-                                                          ...old,
-                                                          page: old.page + 1,
-                                                      })
-                                                  );
-                                              }
+                                                setCultureSelectState(
+                                                    (old) => ({
+                                                        ...old,
+                                                        page: old.page + 1,
+                                                    })
+                                                );
+                                            }
                                             : undefined
                                     }
                                     onInputChange={(value, actionMeta) => {
@@ -529,13 +532,13 @@ export default function EntryForm({
                                     }}
                                     onMenuScrollToBottom={
                                         cellSelectState.page <
-                                        cellSelectState.maxPage
+                                            cellSelectState.maxPage
                                             ? () => {
-                                                  setCellSelectState((old) => ({
-                                                      ...old,
-                                                      page: old.page + 1,
-                                                  }));
-                                              }
+                                                setCellSelectState((old) => ({
+                                                    ...old,
+                                                    page: old.page + 1,
+                                                }));
+                                            }
                                             : undefined
                                     }
                                     onInputChange={(value, actionMeta) => {
@@ -612,15 +615,15 @@ export default function EntryForm({
                                     }}
                                     onMenuScrollToBottom={
                                         buyerSelectState.page <
-                                        buyerSelectState.maxPage
+                                            buyerSelectState.maxPage
                                             ? () => {
-                                                  setBuyerSelectState(
-                                                      (old) => ({
-                                                          ...old,
-                                                          page: old.page + 1,
-                                                      })
-                                                  );
-                                              }
+                                                setBuyerSelectState(
+                                                    (old) => ({
+                                                        ...old,
+                                                        page: old.page + 1,
+                                                    })
+                                                );
+                                            }
                                             : undefined
                                     }
                                     onInputChange={(value, actionMeta) => {

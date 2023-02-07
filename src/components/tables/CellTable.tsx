@@ -43,9 +43,9 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
 
     const { data, refetch, isInitialLoading } = useGetCellsQuery(
         {
-            fetchOptions: {
-                id: {},
-                limit: pagination.pageSize,
+            options: {
+                id: undefined,
+                pageSize: pagination.pageSize,
                 page: pagination.pageIndex + 1,
                 ordering: sorting[0]
                     ? {
@@ -118,7 +118,7 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
     }, [t, isEditable]);
 
     const total = useMemo<number>(() => {
-        return data?.cells.total ?? -1;
+        return data?.cells.totalItems ?? -1;
     }, [data]);
 
     const onSuccess = useCallback(() => {
@@ -159,7 +159,7 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
                 deleteFn={() => {
                     if (selectedCell) {
                         deleteCell.mutate({
-                            deleteOptions: { id: selectedCell.id },
+                            options: { id: selectedCell.id },
                         });
                     }
                 }}

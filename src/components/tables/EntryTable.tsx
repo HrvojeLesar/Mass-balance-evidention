@@ -47,8 +47,8 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
 
     const { data, refetch, isInitialLoading } = useGetAllEntriesQuery(
         {
-            fetchOptions: {
-                id: {},
+            options: {
+                id: undefined,
                 dataGroupId: dataGroupContextValue.selectedGroup,
             },
         },
@@ -60,20 +60,20 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
 
     useEffect(() => {
         if (data) {
-            setTableData([...data.getAllEntries.results]);
+            setTableData([...data.allEntries.results]);
         }
     }, [data]);
 
     const columns = useMemo<ColumnDef<Entry>[]>(() => {
         let columns: ColumnDef<Entry>[] = [
             {
-                accessorKey: "cellCulturePair.cell.name",
+                accessorKey: "cell.name",
                 cell: (info) => info.getValue(),
                 header: t("cell.name").toString(),
                 id: "cell_name",
             },
             {
-                accessorKey: "cellCulturePair.culture.name",
+                accessorKey: "culture.name",
                 cell: (info) => info.getValue(),
                 header: t("culture.name").toString(),
                 id: "culture_name",
@@ -161,7 +161,7 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
                 deleteFn={() => {
                     if (selectedEntry) {
                         deleteEntry.mutate({
-                            deleteOptions: { id: selectedEntry.id },
+                            options: { id: selectedEntry.id },
                         });
                     }
                 }}
