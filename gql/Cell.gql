@@ -1,65 +1,55 @@
-query GetCells($fetchOptions: CellFetchOptions!) {
-    cells(fetchOptions: $fetchOptions) {
-        total
+query GetCells($options: CellFetchOptions!) {
+    cells(options: $options) {
         page
-        limit
+        pageSize
+        totalItems
+        totalPages
         results {
             ...CellParts
         }
     }
 }
 
-query GetCell($fetchOptions: CellFetchOptions!) {
-    cell(fetchOptions: $fetchOptions) {
-        ...CellParts
-    }
-}
-
-query GetUnpairedCells($fetchOptions: CellFetchUnpairedOptions!) {
-    unpairedCells(fetchOptions: $fetchOptions) {
-        total
+query GetUnpairedCells($options: CellParityFetchOptions!) {
+    unpairedCells(options: $options) {
         page
-        limit
+        pageSize
+        totalItems
+        totalPages
         results {
             ...CellParts
         }
     }
 }
 
-query GetPairedCells($fetchOptions: CellFetchUnpairedOptions!) {
-    pairedCells(fetchOptions: $fetchOptions) {
-        total
+query GetPairedCells($options: CellParityFetchOptions!) {
+    pairedCells(options: $options) {
         page
-        limit
+        pageSize
+        totalItems
+        totalPages
         results {
             ...CellParts
         }
     }
 }
 
-mutation InsertCell($insertOptions: CellInsertOptions!) {
-    insertCell(insertOptions: $insertOptions) {
+mutation InsertCell($options: CellInsertOptions!) {
+    insertCell(options: $options) {
         ...CellParts
     }
 }
 
-mutation UpdateCell($updateOptions: CellUpdateOptions!) {
-    updateCell(updateOptions: $updateOptions) {
+mutation UpdateCell($options: CellUpdateOptions!) {
+    updateCell(options: $options) {
         ...CellParts
     }
 }
 
-mutation DeleteCell($deleteOptions: DeleteOptions!) {
-    deleteCell(deleteOptions: $deleteOptions) {
-        ...CellParts
+mutation DeleteCell($options: DeleteOptions!) {
+    deleteCell(options: $options) {
+        numRows
     }
-}
-
-fragment DataGroupParts on DataGroup {
-    id
-    name
-    description
-    createdAt
 }
 
 fragment CellParts on Cell {
@@ -67,7 +57,5 @@ fragment CellParts on Cell {
     name
     description
     createdAt
-    dGroup {
-        ...DataGroupParts
-    }
+    dGroup
 }

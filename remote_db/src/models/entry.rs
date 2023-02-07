@@ -95,6 +95,7 @@ impl ToString for EntryOrderingFields {
         }
     }
 }
+
 #[derive(InputObject)]
 pub(super) struct EntryInsertOptions {
     pub(super) date: DateTime<Utc>,

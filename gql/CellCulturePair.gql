@@ -1,16 +1,17 @@
-query GetCellCulturesPairs($fetchOptions: CellCulturePairFetchOptions!) {
-    cellCulturePairs(fetchOptions: $fetchOptions) {
-        total
+query GetCellCulturesPairs($options: CellCultureFetchOptions!) {
+    cellCulturePairs(options: $options) {
         page
-        limit
+        pageSize
+        totalItems
+        totalPages
         results {
             ...CellCultureParts
         }
     }
 }
 
-query GetAllCellCulturePairs($fetchOptions: CellCulturePairFetchOptions!) {
-    getAllCellCulturePairs(fetchOptions: $fetchOptions) {
+query GetAllCellCulturePairs($options: CellCultureFetchOptions!) {
+    allCellCulturePairs(options: $options) {
         total
         results {
             ...CellCultureParts
@@ -18,29 +19,22 @@ query GetAllCellCulturePairs($fetchOptions: CellCulturePairFetchOptions!) {
     }
 }
 
-
-query GetCellCulturePair($fetchOptions: CellCulturePairFetchOptions!) {
-    cellCulture(fetchOptions: $fetchOptions) {
+mutation InsertCellCulturePair($options: CellCulturePairIds!) {
+    insertCellCulturePair(options: $options) {
         ...CellCultureParts
     }
 }
 
-mutation InsertCellCulturePair($insertOptions: CellCulturePairInsertOptions!) {
-    insertCellCulturePair(insertOptions: $insertOptions) {
+mutation UpdateCellCulturePair($options: CellCulturePairUpdateOptions!) {
+    updateCellCulturePair(options: $options) {
         ...CellCultureParts
     }
 }
 
-mutation UpdateCellCulturePair($updateOptions: CellCulturePairUpdateOptions!) {
-    updateCellCulturePair(updateOptions: $updateOptions) {
-        ...CellCultureParts
+mutation DeleteCellCulturePair($options: CellCulturePairDeleteOptions!) {
+    deleteCellCulturePair(options: $options) {
+        numRows
     }
-}
-
-mutation DeleteCellCulturePair($deleteOptions: CellCulturePairDeleteOptions!) {
-  deleteCellCulturePair(deleteOptions: $deleteOptions) {
-    ...CellCultureParts
-  }
 }
 
 fragment DataGroupParts on DataGroup {
@@ -55,9 +49,7 @@ fragment CellParts on Cell {
     name
     description
     createdAt
-    dGroup {
-        ...DataGroupParts
-    }
+    dGroup
 }
 
 fragment CultureParts on Culture {
@@ -65,9 +57,7 @@ fragment CultureParts on Culture {
     name
     description
     createdAt
-    dGroup {
-        ...DataGroupParts
-    }
+    dGroup
 }
 
 fragment CellCultureParts on CellCulturePair {

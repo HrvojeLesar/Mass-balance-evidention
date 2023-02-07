@@ -158,6 +158,12 @@ pub struct CellCulturePair {
     pub d_group: super::data_group::Model,
 }
 
+#[derive(Debug, SimpleObject)]
+pub struct AllCellCulturePairs {
+    results: Vec<CellCulturePair>,
+    total: u64,
+}
+
 impl From<QueryResultsHelperType<CellCulturePairFlattened>> for QueryResults<CellCulturePair> {
     fn from(inp: QueryResultsHelperType<CellCulturePairFlattened>) -> Self {
         Self {
@@ -432,6 +438,59 @@ impl CellCulturePairQuery {
     ) -> Result<QueryResults<CellCulturePair>> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::fetch(db, options).await
+    }
+
+    async fn all_cell_culture_pairs(
+        &self,
+        ctx: &Context<'_>,
+        options: FetchOptions<CellCulturePairFields, Option<CellCulturePairIds>>,
+    ) -> Result<AllCellCulturePairs> {
+        let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
+
+        let mut query = Entity::get_query();
+
+        query = Entity::add_id_and_data_group_filters(query, &options);
+        query = Entity::add_ordering(query, options.ordering);
+        query = Entity::add_filters(query, options.filters);
+
+        let transaction = db.begin().await?;
+
+        let res = query
+            .into_model::<<Entity as QueryDatabase>::FetchModel>()
+            .all(&transaction)
+            .await?;
+
+        transaction.commit().await?;
+
+        Ok(AllCellCulturePairs {
+            total: res.len() as u64,
+            results: res
+                .into_iter()
+                .map(|flat| CellCulturePair {
+                    created_at: flat.created_at,
+                    cell: super::cell::Model {
+                        id: flat.id_cell,
+                        name: flat.name_cell,
+                        description: flat.description_cell,
+                        created_at: flat.created_at_cell,
+                        d_group: flat.d_group_cell,
+                    },
+                    culture: super::culture::Model {
+                        id: flat.id_culture,
+                        name: flat.name_culture,
+                        description: flat.description_culture,
+                        created_at: flat.created_at_culture,
+                        d_group: flat.d_group_culture,
+                    },
+                    d_group: super::data_group::Model {
+                        id: flat.id_d_group,
+                        name: flat.name_d_group,
+                        description: flat.description_d_group,
+                        created_at: flat.created_at_d_group,
+                    },
+                })
+                .collect(),
+        })
     }
 }
 

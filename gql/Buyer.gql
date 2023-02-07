@@ -1,43 +1,31 @@
-query GetBuyers($fetchOptions: BuyerFetchOptions!) {
-    buyers(fetchOptions: $fetchOptions) {
-        total
+query GetBuyers($options: BuyerFetchOptions!) {
+    buyers(options: $options) {
         page
-        limit
+        pageSize
+        totalItems
+        totalPages
         results {
             ...BuyerParts
         }
     }
 }
 
-query GetBuyer($fetchOptions: BuyerFetchOptions!) {
-    buyer(fetchOptions: $fetchOptions) {
+mutation InsertBuyer($options: BuyerInsertOptions!) {
+    insertBuyer(options: $options) {
         ...BuyerParts
     }
 }
 
-mutation InsertBuyer($insertOptions: BuyerInsertOptions!) {
-    insertBuyer(insertOptions: $insertOptions) {
+mutation UpdateBuyer($options: BuyerUpdateOptions!) {
+    updateBuyer(options: $options) {
         ...BuyerParts
     }
 }
 
-mutation UpdateBuyer($updateOptions: BuyerUpdateOptions!) {
-    updateBuyer(updateOptions: $updateOptions) {
-        ...BuyerParts
+mutation DeleteBuyer($options: DeleteOptions!) {
+    deleteBuyer(options: $options) {
+        numRows
     }
-}
-
-mutation DeleteBuyer($deleteOptions: DeleteOptions!) {
-    deleteBuyer(deleteOptions: $deleteOptions) {
-        ...BuyerParts
-    }
-}
-
-fragment DataGroupParts on DataGroup {
-    id
-    name
-    description
-    createdAt
 }
 
 fragment BuyerParts on Buyer {
@@ -46,7 +34,5 @@ fragment BuyerParts on Buyer {
     address
     contact
     createdAt
-    dGroup {
-        ...DataGroupParts
-    }
+    dGroup
 }

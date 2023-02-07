@@ -1,24 +1,31 @@
-query GetDataGroups {
-    dataGroups {
+query GetDataGroups($options: DataGroupFetchOptions!) {
+    dataGroups(options: $options) {
+        page
+        pageSize
+        totalItems
+        totalPages
+        results {
+            ...DataGroupParts
+        }
+    }
+}
+
+
+mutation InsertDataGroup($options: DataGroupInsertOptions!) {
+    insertDataGroup(options: $options) {
         ...DataGroupParts
     }
 }
 
-mutation InsertDataGroup($insertOptions: DataGroupInsertOptions!) {
-    insertDataGroup(insertOptions: $insertOptions) {
+mutation UpdateDataGroup($options: DataGroupUpdateOptions!) {
+    updateDataGroup(options: $options) {
         ...DataGroupParts
     }
 }
 
-mutation UpdateDataGroup($updateOptions: DataGroupUpdateOptions!) {
-  updateDataGroup(updateOptions: $updateOptions) {
-    ...DataGroupParts
-  }
-}
-
-mutation DeleteDataGroup($deleteOptions: DeleteOptions!) {
-    deleteDataGroup(deleteOptions: $deleteOptions) {
-        ...DataGroupParts
+mutation DeleteDataGroup($options: DeleteOptions!) {
+    deleteDataGroup(options: $options) {
+        numRows
     }
 }
 

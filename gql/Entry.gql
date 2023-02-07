@@ -1,16 +1,17 @@
-query GetEntries($fetchOptions: EntryFetchOptions!) {
-    entries(fetchOptions: $fetchOptions) {
-        total
+query GetEntries($options: EntryFetchOptions!) {
+    entries(options: $options) {
         page
-        limit
+        pageSize
+        totalItems
+        totalPages
         results {
             ...EntryParts
         }
     }
 }
 
-query GetAllEntries($fetchOptions: EntryFetchOptions!) {
-     getAllEntries(fetchOptions: $fetchOptions) {
+query GetAllEntries($options: EntryFetchOptions!) {
+     allEntries(options: $options) {
         total
         results {
             ...EntryParts
@@ -18,40 +19,22 @@ query GetAllEntries($fetchOptions: EntryFetchOptions!) {
     }
 }
 
-query GetEntry($fetchOptions: EntryFetchOptions!) {
-    entry(fetchOptions: $fetchOptions) {
+mutation InsertEntry($options: EntryInsertOptions!) {
+    insertEntry(options: $options) {
         ...EntryParts
     }
 }
 
-query GetEntryGroups($fetchGroupOptions: EntryGroupFetchOptions!) {
-    getEntryGroups(fetchOptions: $fetchGroupOptions) {
-        total
-        page
-        limit
-        results {
-            id
-            name
-        }
-    }
-}
-
-mutation InsertEntry($insertOptions: EntryInsertOptions!) {
-    insertEntry(insertOptions: $insertOptions) {
+mutation UpdateEntry($options: EntryUpdateOptions!) {
+    updateEntry(options: $options) {
         ...EntryParts
     }
 }
 
-mutation UpdateEntry($updateOptions: EntryUpdateOptions!) {
-    updateEntry(updateOptions: $updateOptions) {
-        ...EntryParts
+mutation DeleteEntry($options: DeleteOptions!) {
+    deleteEntry(options: $options) {
+        numRows
     }
-}
-
-mutation DeleteEntry($deleteOptions: DeleteOptions!) {
-  deleteEntry(deleteOptions: $deleteOptions) {
-    ...EntryParts
-  }
 }
 
 fragment DataGroupParts on DataGroup {
@@ -66,9 +49,7 @@ fragment CellParts on Cell {
     name
     description
     createdAt
-    dGroup {
-        ...DataGroupParts
-    }
+    dGroup
 }
 
 fragment CultureParts on Culture {
@@ -76,9 +57,7 @@ fragment CultureParts on Culture {
     name
     description
     createdAt
-    dGroup {
-        ...DataGroupParts
-    }
+    dGroup
 }
 
 fragment CellCultureParts on CellCulturePair {
@@ -100,9 +79,7 @@ fragment BuyerParts on Buyer {
     address
     contact
     createdAt
-    dGroup {
-        ...DataGroupParts
-    }
+    dGroup
 }
 
 fragment EntryParts on Entry {
@@ -114,8 +91,11 @@ fragment EntryParts on Entry {
     buyer {
         ...BuyerParts
     }
-    cellCulturePair {
-        ...CellCultureParts
+    cell {
+        ...CellParts
+    }
+    culture {
+        ...CultureParts
     }
     dGroup {
         ...DataGroupParts

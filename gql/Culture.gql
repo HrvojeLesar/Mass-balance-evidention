@@ -1,65 +1,55 @@
-query GetCultures($fetchOptions: CultureFetchOptions!) {
-    cultures(fetchOptions: $fetchOptions) {
-        total
+query GetCultures($options: CultureFetchOptions!) {
+    cultures(options: $options) {
         page
-        limit
+        pageSize
+        totalItems
+        totalPages
         results {
             ...CultureParts
         }
     }
 }
 
-query GetCulture($fetchOptions: CultureFetchOptions!) {
-    culture(fetchOptions: $fetchOptions) {
-        ...CultureParts
-    }
-}
-
-query GetUnpairedCultures($fetchOptions: CultureFetchUnpairedOptions!) {
-    unpairedCultures(fetchOptions: $fetchOptions) {
-        total
+query GetUnpairedCultures($options: CultureParityFetchOptions!) {
+    unpairedCultures(options: $options) {
         page
-        limit
+        pageSize
+        totalItems
+        totalPages
         results {
             ...CultureParts
         }
     }
 }
 
-query GetPairedCultures($fetchOptions: CultureFetchUnpairedOptions!) {
-    pairedCultures(fetchOptions: $fetchOptions) {
-        total
+query GetPairedCultures($options: CultureParityFetchOptions!) {
+    pairedCultures(options: $options) {
         page
-        limit
+        pageSize
+        totalItems
+        totalPages
         results {
             ...CultureParts
         }
     }
 }
 
-mutation InsertCulture($insertOptions: CultureInsertOptions!) {
-    insertCulture(insertOptions: $insertOptions) {
+mutation InsertCulture($options: CultureInsertOptions!) {
+    insertCulture(options: $options) {
         ...CultureParts
     }
 }
 
-mutation UpdateCulture($updateOptions: CultureUpdateOptions!) {
-    updateCulture(updateOptions: $updateOptions) {
+mutation UpdateCulture($options: CultureUpdateOptions!) {
+    updateCulture(options: $options) {
         ...CultureParts
     }
 }
 
-mutation DeleteCulture($deleteOptions: DeleteOptions!) {
-    deleteCulture(deleteOptions: $deleteOptions) {
-        ...CultureParts
+mutation DeleteCulture($options: DeleteOptions!) {
+    deleteCulture(options: $options) {
+        numRows
     }
-}
-
-fragment DataGroupParts on DataGroup {
-    id
-    name
-    description
-    createdAt
 }
 
 fragment CultureParts on Culture {
@@ -67,7 +57,5 @@ fragment CultureParts on Culture {
     name
     description
     createdAt
-    dGroup {
-        ...DataGroupParts
-    }
+    dGroup
 }

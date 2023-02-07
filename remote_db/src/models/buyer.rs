@@ -9,7 +9,10 @@ use sea_orm::{EntityTrait, PaginatorTrait, TransactionTrait};
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, Postgres, Row, Transaction};
 
-use crate::{seaorm_models::{buyer, QueryDatabase}, DatabasePool, SeaOrmPool};
+use crate::{
+    seaorm_models::{buyer, QueryDatabase},
+    DatabasePool, SeaOrmPool,
+};
 
 use super::{
     data_group::DataGroup,

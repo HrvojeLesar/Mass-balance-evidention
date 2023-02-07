@@ -190,6 +190,12 @@ pub struct Entry {
     pub d_group: Option<super::data_group::Model>,
 }
 
+#[derive(Debug, SimpleObject)]
+pub struct AllEntires {
+    results: Vec<Entry>,
+    total: u64,
+}
+
 impl From<QueryResultsHelperType<EntryFlattened>> for QueryResults<Entry> {
     fn from(inp: QueryResultsHelperType<EntryFlattened>) -> Self {
         Self {
@@ -523,6 +529,71 @@ impl EntryQuery {
     ) -> Result<QueryResults<Entry>> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::fetch(db, options).await
+    }
+
+    async fn all_entries(
+        &self,
+        ctx: &Context<'_>,
+        options: FetchOptions<EntryFields>,
+    ) -> Result<AllEntires> {
+        let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
+
+        let mut query = Entity::get_query();
+
+        query = Entity::add_id_and_data_group_filters(query, &options);
+        query = Entity::add_ordering(query, options.ordering);
+        query = Entity::add_filters(query, options.filters);
+
+        let transaction = db.begin().await?;
+
+        let res = query
+            .into_model::<<Entity as QueryDatabase>::FetchModel>()
+            .all(&transaction)
+            .await?;
+
+        transaction.commit().await?;
+
+        Ok(AllEntires {
+            total: res.len() as u64,
+            results: res
+                .into_iter()
+                .map(|flat| Entry {
+                    id: flat.id,
+                    weight: flat.weight,
+                    weight_type: flat.weight_type,
+                    date: flat.date,
+                    created_at: flat.created_at,
+                    buyer: Some(super::buyer::Model {
+                        id: flat.id_buyer,
+                        name: flat.name_buyer,
+                        address: flat.address_buyer,
+                        contact: flat.contact_buyer,
+                        created_at: flat.created_at_buyer,
+                        d_group: flat.d_group_buyer,
+                    }),
+                    cell: super::cell::Model {
+                        id: flat.id_cell,
+                        name: flat.name_cell,
+                        description: flat.description_cell,
+                        created_at: flat.created_at_cell,
+                        d_group: flat.d_group_cell,
+                    },
+                    culture: super::culture::Model {
+                        id: flat.id_culture,
+                        name: flat.name_culture,
+                        description: flat.description_culture,
+                        created_at: flat.created_at_culture,
+                        d_group: flat.d_group_culture,
+                    },
+                    d_group: Some(super::data_group::Model {
+                        id: flat.id_d_group,
+                        name: flat.name_d_group,
+                        description: flat.description_d_group,
+                        created_at: flat.created_at_d_group,
+                    }),
+                })
+                .collect(),
+        })
     }
 }
 
