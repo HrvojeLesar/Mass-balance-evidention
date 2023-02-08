@@ -14,6 +14,7 @@ import {
     CellFilterOptions,
     Cell,
     useDeleteCellMutation,
+    FieldTypes,
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import ActionButtons from "../ActionButtons";
@@ -59,9 +60,10 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
                     columnFilters.length > 0
                         ? columnFilters.map((filter) => {
                               return {
-                                  value: filter.value,
+                                  value: filter.value as string,
+                                  fieldType: FieldTypes.String,
                                   field: filter.id.toUpperCase() as TFields,
-                              } as TFilterOptions;
+                              };
                           })
                         : undefined,
                 dataGroupId: dataGroupContextValue.selectedGroup,

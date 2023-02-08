@@ -3,6 +3,8 @@ use reqwest::Client;
 
 use crate::errors::Result;
 
+use self::get_data_groups::DataGroupFetchOptions;
+
 use super::GRAPHQL_ENDPOINT;
 
 use super::DateTime;
@@ -22,7 +24,16 @@ pub struct InsertDataGroup;
 pub async fn get_data_groups(
     client: &Client,
 ) -> Result<graphql_client::Response<get_data_groups::ResponseData>> {
-    let request_body = GetDataGroups::build_query(get_data_groups::Variables {});
+    let request_body = GetDataGroups::build_query(get_data_groups::Variables {
+        options: DataGroupFetchOptions {
+            id: None,
+            page_size: None,
+            page: None,
+            filters: None,
+            ordering: None,
+            data_group_id: None,
+        },
+    });
 
     let res = client
         .post(GRAPHQL_ENDPOINT)
@@ -40,7 +51,7 @@ pub async fn insert_data_group(
     client: &Client,
 ) -> Result<graphql_client::Response<insert_data_group::ResponseData>> {
     let request_body = InsertDataGroup::build_query(insert_data_group::Variables {
-        insert_options: insert_data_group::DataGroupInsertOptions {
+        options: insert_data_group::DataGroupInsertOptions {
             name: data_group_name.to_string(),
             description: None,
         },

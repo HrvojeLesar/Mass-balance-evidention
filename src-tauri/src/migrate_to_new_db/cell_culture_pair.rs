@@ -26,13 +26,9 @@ async fn get_all_existing_cell_culture_pairs(
     data_group_id: i64,
 ) -> Result<graphql_client::Response<get_all_cell_culture_pairs::ResponseData>> {
     let request_body = GetAllCellCulturePairs::build_query(get_all_cell_culture_pairs::Variables {
-        fetch_options: get_all_cell_culture_pairs::CellCulturePairFetchOptions {
-            id: get_all_cell_culture_pairs::OptionalCellCulturePairIds {
-                cell_id: None,
-                culture_id: None,
-                d_group: None,
-            },
-            limit: None,
+        options: get_all_cell_culture_pairs::CellCultureFetchOptions {
+            id: None,
+            page_size: None,
             page: None,
             ordering: None,
             filters: None,
@@ -62,7 +58,7 @@ impl FetchExisting<get_all_cell_culture_pairs::CellCultureParts> for GetAllCellC
                 .await?
                 .data
             {
-                Some(d) => d.get_all_cell_culture_pairs.results,
+                Some(d) => d.all_cell_culture_pairs.results,
                 None => Vec::new(),
             },
         )

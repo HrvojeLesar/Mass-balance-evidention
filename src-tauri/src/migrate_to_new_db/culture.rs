@@ -24,9 +24,9 @@ async fn get_existing_cultures(
     page: Option<i64>,
 ) -> Result<graphql_client::Response<get_cultures::ResponseData>> {
     let request_body = GetCultures::build_query(get_cultures::Variables {
-        fetch_options: get_cultures::CultureFetchOptions {
-            id: get_cultures::OptionalId { id: None },
-            limit: Some(100),
+        options: get_cultures::CultureFetchOptions {
+            id: None,
+            page_size: Some(100),
             page: Some(page.unwrap_or(1)),
             ordering: None,
             filters: None,
@@ -60,7 +60,7 @@ impl FetchExisting<get_cultures::CultureParts> for GetCultures {
             let mut cultures = data.cultures.results;
             existing_cultures.append(&mut cultures);
 
-            if data.cultures.total > culture_count as i64 * page {
+            if data.cultures.total_items > culture_count as i64 * page {
                 page += 1;
             } else {
                 break;

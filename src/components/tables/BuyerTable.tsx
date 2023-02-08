@@ -13,6 +13,7 @@ import {
     BuyerFields,
     BuyerFilterOptions,
     useDeleteBuyerMutation,
+    FieldTypes,
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import BuyerForm from "../forms/BuyerForm";
@@ -49,20 +50,21 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
                 page: pagination.pageIndex + 1,
                 ordering: sorting[0]
                     ? {
-                          order: !sorting[0].desc
-                              ? Ordering.Asc
-                              : Ordering.Desc,
-                          orderBy: sorting[0].id.toUpperCase() as TFields,
-                      }
+                        order: !sorting[0].desc
+                            ? Ordering.Asc
+                            : Ordering.Desc,
+                        orderBy: sorting[0].id.toUpperCase() as TFields,
+                    }
                     : undefined,
                 filters:
                     columnFilters.length > 0
                         ? columnFilters.map((filter) => {
-                              return {
-                                  value: filter.value,
-                                  field: filter.id.toUpperCase() as TFields,
-                              } as TFilterOptions;
-                          })
+                            return {
+                                value: filter.value as string,
+                                fieldType: FieldTypes.String,
+                                field: filter.id.toUpperCase() as TFields,
+                            };
+                        })
                         : undefined,
                 dataGroupId: dataGroupContextValue.selectedGroup,
             },

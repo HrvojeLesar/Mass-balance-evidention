@@ -24,9 +24,9 @@ async fn get_existing_cells(
     page: Option<i64>,
 ) -> Result<graphql_client::Response<get_cells::ResponseData>> {
     let request_body = GetCells::build_query(get_cells::Variables {
-        fetch_options: get_cells::CellFetchOptions {
-            id: get_cells::OptionalId { id: None },
-            limit: Some(100),
+        options: get_cells::CellFetchOptions {
+            id: None,
+            page_size: Some(100),
             page: Some(page.unwrap_or(1)),
             ordering: None,
             filters: None,
@@ -60,7 +60,7 @@ impl FetchExisting<get_cells::CellParts> for GetCells {
             let mut cells = data.cells.results;
             existing_cells.append(&mut cells);
 
-            if data.cells.total > cell_count as i64 * page {
+            if data.cells.total_items > cell_count as i64 * page {
                 page += 1;
             } else {
                 break;

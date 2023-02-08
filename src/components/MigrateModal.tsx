@@ -147,7 +147,7 @@ export default function EditModal({ show, onHide }: MigrateModal) {
                 });
             setIsImporting(true);
         }
-    }, [displayImport]);
+    }, [displayImport, value]);
 
     useEffect(() => {
         if (show) {

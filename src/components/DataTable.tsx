@@ -88,7 +88,12 @@ export default function DataTable<T>({
                 pageIndex: old.pageIndex - 1,
             }));
         }
-    }, [paginationState.manual, data, paginationState.pagination]);
+    }, [
+        paginationState,
+        paginationState.manual,
+        data,
+        paginationState.pagination,
+    ]);
 
     const table = useReactTable({
         data: data.data,

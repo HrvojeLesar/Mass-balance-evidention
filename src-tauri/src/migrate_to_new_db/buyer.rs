@@ -24,9 +24,9 @@ async fn get_existing_buyers(
     page: Option<i64>,
 ) -> Result<graphql_client::Response<get_buyers::ResponseData>> {
     let request_body = GetBuyers::build_query(get_buyers::Variables {
-        fetch_options: get_buyers::BuyerFetchOptions {
-            id: get_buyers::OptionalId { id: None },
-            limit: Some(100),
+        options: get_buyers::BuyerFetchOptions {
+            id: None,
+            page_size: Some(100),
             page: Some(page.unwrap_or(1)),
             ordering: None,
             filters: None,
@@ -60,7 +60,7 @@ impl FetchExisting<get_buyers::BuyerParts> for GetBuyers {
             let mut buyers = data.buyers.results;
             existing_buyers.append(&mut buyers);
 
-            if data.buyers.total > buyer_count as i64 * page {
+            if data.buyers.total_items > buyer_count as i64 * page {
                 page += 1;
             } else {
                 break;

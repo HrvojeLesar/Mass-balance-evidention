@@ -228,7 +228,7 @@ impl Migrate {
 
             self.progress_message
                 .set_main_task(Some(MainTask::DataGroup))?;
-            let group_id = self.migrate_data_group(&data_groups, &dcp).await?;
+            let group_id = self.migrate_data_group(&data_groups.results, &dcp).await?;
 
             self.progress_message.set_main_task(Some(MainTask::Buyer))?;
             self.migrate_buyer(group_id, &db_pool).await?;
@@ -321,7 +321,7 @@ impl Migrate {
                 let client = self.client.clone();
                 async move {
                     let request_body = InsertBuyer::build_query(insert_buyer::Variables {
-                        insert_options: insert_buyer::BuyerInsertOptions {
+                        options: insert_buyer::BuyerInsertOptions {
                             name: buyer.naziv.unwrap_or_else(|| "".to_owned()),
                             address: None,
                             contact: None,
@@ -417,7 +417,7 @@ impl Migrate {
                 let client = self.client.clone();
                 async move {
                     let request_body = InsertCell::build_query(insert_cell::Variables {
-                        insert_options: insert_cell::CellInsertOptions {
+                        options: insert_cell::CellInsertOptions {
                             name: cell.naziv.unwrap_or_else(|| "".to_owned()),
                             description: None,
                             d_group: Some(data_group_id),
@@ -512,7 +512,7 @@ impl Migrate {
                 let client = self.client.clone();
                 async move {
                     let request_body = InsertCulture::build_query(insert_culture::Variables {
-                        insert_options: insert_culture::CultureInsertOptions {
+                        options: insert_culture::CultureInsertOptions {
                             name: culture.naziv.unwrap_or_else(|| "".to_owned()),
                             description: None,
                             d_group: Some(data_group_id),
@@ -600,13 +600,8 @@ impl Migrate {
             .set_subtask(Some(Task::LoadToMigrateCellCulturePair))?;
         for ccp in cell_culture_pairs {
             match existing_cell_culture_pairs.iter().find(|c| {
-                if let (Some(cell), Some(culture)) = (c.cell.as_ref(), c.culture.as_ref()) {
-                    cell.name == ccp.cell.naziv.clone().unwrap_or_else(|| "".to_owned())
-                        && culture.name
-                            == ccp.culture.naziv.clone().unwrap_or_else(|| "".to_owned())
-                } else {
-                    false
-                }
+                c.cell.name == ccp.cell.naziv.clone().unwrap_or_default()
+                    && c.culture.name == ccp.culture.naziv.clone().unwrap_or_default()
             }) {
                 Some(_exists_do_nothing) => (),
                 None => new_pairs.push(ccp),
@@ -626,13 +621,13 @@ impl Migrate {
         for np in new_pairs {
             let cell = existing_cells
                 .iter()
-                .find(|c| c.name == np.cell.naziv.clone().unwrap_or_else(|| "".to_string()));
+                .find(|c| c.name == np.cell.naziv.clone().unwrap_or_default());
             if cell.is_none() {
                 continue;
             }
             let culture = existing_cultures
                 .iter()
-                .find(|c| c.name == np.culture.naziv.clone().unwrap_or_else(|| "".to_string()));
+                .find(|c| c.name == np.culture.naziv.clone().unwrap_or_default());
             if culture.is_none() {
                 continue;
             }
@@ -662,12 +657,11 @@ impl Migrate {
                 async move {
                     let request_body =
                         InsertCellCulturePair::build_query(insert_cell_culture_pair::Variables {
-                            insert_options:
-                                insert_cell_culture_pair::CellCulturePairInsertOptions {
-                                    id_cell: ccp.cell_id,
-                                    id_culture: ccp.culture_id,
-                                    d_group: data_group_id,
-                                },
+                            options: insert_cell_culture_pair::CellCulturePairIds {
+                                id_cell: ccp.cell_id,
+                                id_culture: ccp.culture_id,
+                                d_group: data_group_id,
+                            },
                         });
 
                     let res = client
@@ -734,7 +728,7 @@ impl Migrate {
         self.progress_message
             .set_subtask(Some(Task::FetchRemoteEntry))?;
         let existing_entries = match get_all_entries(&self.client, data_group_id).await?.data {
-            Some(d) => d.get_all_entries.results,
+            Some(d) => d.all_entries.results,
             None => Vec::new(),
         };
 
@@ -751,37 +745,29 @@ impl Migrate {
             .set_subtask(Some(Task::LoadToMigrateEntry))?;
         for entry in entries {
             match existing_entries.iter().find(|e| {
-                if let Some(cell_culture_pair) = e.cell_culture_pair.as_ref() {
-                    if let (Some(cell), Some(culture), Some(buyer)) = (
-                        cell_culture_pair.cell.as_ref(),
-                        cell_culture_pair.culture.as_ref(),
-                        e.buyer.as_ref(),
-                    ) {
-                        cell.name
+                if let Some(buyer) = e.buyer.as_ref() {
+                    e.cell.name
+                        == entry
+                            .cell_culture_pair
+                            .cell
+                            .naziv
+                            .clone()
+                            .unwrap_or_else(|| "".to_owned())
+                        && e.culture.name
                             == entry
                                 .cell_culture_pair
-                                .cell
+                                .culture
                                 .naziv
                                 .clone()
                                 .unwrap_or_else(|| "".to_owned())
-                            && culture.name
-                                == entry
-                                    .cell_culture_pair
-                                    .culture
-                                    .naziv
-                                    .clone()
-                                    .unwrap_or_else(|| "".to_owned())
-                            && buyer.name.clone().unwrap_or_else(|| "".to_owned())
-                                == entry.buyer.naziv.clone().unwrap_or_else(|| "".to_owned())
-                            && e.weight.unwrap_or(0.0) == entry.weight.unwrap_or(0.0)
-                            && if let Some(e_date) = entry.date {
-                                e.date.date_naive() == e_date
-                            } else {
-                                false
-                            }
-                    } else {
-                        false
-                    }
+                        && buyer.name.clone().unwrap_or_else(|| "".to_owned())
+                            == entry.buyer.naziv.clone().unwrap_or_else(|| "".to_owned())
+                        && e.weight.unwrap_or(0.0) == entry.weight.unwrap_or(0.0)
+                        && if let Some(e_date) = entry.date {
+                            e.date.date_naive() == e_date
+                        } else {
+                            false
+                        }
                 } else {
                     false
                 }
@@ -804,15 +790,9 @@ impl Migrate {
         self.progress_message
             .set_subtask(Some(Task::LoadToMigrateEntry))?;
         for ne in new_entries {
-            let cell = existing_cells.iter().find(|c| {
-                c.name
-                    == ne
-                        .cell_culture_pair
-                        .cell
-                        .naziv
-                        .clone()
-                        .unwrap_or_else(|| "".to_string())
-            });
+            let cell = existing_cells
+                .iter()
+                .find(|c| c.name == ne.cell_culture_pair.cell.naziv.clone().unwrap_or_default());
             if cell.is_none() {
                 continue;
             }
@@ -823,7 +803,7 @@ impl Migrate {
                         .culture
                         .naziv
                         .clone()
-                        .unwrap_or_else(|| "".to_string())
+                        .unwrap_or_default()
             });
             if culture.is_none() {
                 continue;
@@ -836,7 +816,10 @@ impl Migrate {
             if let (Some(cell), Some(culture), Some(buyer)) = (cell, culture, buyer) {
                 entries_to_migrate.push(TempEntry {
                     date: ne.date.map_or(Some(Utc::now()), |d| {
-                        Some(DateTime::from_utc(d.and_hms(0, 0, 0), Utc))
+                        Some(DateTime::from_utc(
+                            d.and_hms_opt(0, 0, 0).unwrap_or_default(),
+                            Utc,
+                        ))
                     }),
                     cell_id: cell.id,
                     culture_id: culture.id,
@@ -862,12 +845,12 @@ impl Migrate {
                 let client = self.client.clone();
                 async move {
                     let request_body = InsertEntry::build_query(insert_entry::Variables {
-                        insert_options: insert_entry::EntryInsertOptions {
+                        options: insert_entry::EntryInsertOptions {
                             date: entry.date.unwrap_or_else(Utc::now),
                             weight: entry.weight,
                             weight_type: None,
                             id_buyer: Some(entry.buyer_id),
-                            cell_culture_pair: insert_entry::CellCulturePairInsertOptions {
+                            cell_culture_pair: insert_entry::CellCulturePairIds {
                                 id_cell: entry.cell_id,
                                 id_culture: entry.culture_id,
                                 d_group: data_group_id,
