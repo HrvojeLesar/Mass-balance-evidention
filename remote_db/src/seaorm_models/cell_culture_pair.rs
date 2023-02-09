@@ -128,16 +128,17 @@ pub struct CellCulturePairUpdateOptions {
 
 #[derive(Debug, Clone, FromQueryResult)]
 pub struct CellCulturePairFlattened {
-    pub id_cell: i32,
-    pub id_culture: i32,
+    pub id: i32,
     pub created_at: DateTimeWithTimeZone,
     pub d_group: i32,
 
+    pub id_cell: i32,
     pub name_cell: String,
     pub description_cell: Option<String>,
     pub created_at_cell: DateTimeWithTimeZone,
     pub d_group_cell: i32,
 
+    pub id_culture: i32,
     pub name_culture: String,
     pub description_culture: Option<String>,
     pub created_at_culture: DateTimeWithTimeZone,
@@ -151,6 +152,7 @@ pub struct CellCulturePairFlattened {
 
 #[derive(Debug, SimpleObject)]
 pub struct CellCulturePair {
+    pub id: i32,
     pub cell: super::cell::Model,
     pub culture: super::culture::Model,
     pub created_at: DateTimeWithTimeZone,
@@ -170,6 +172,7 @@ impl From<QueryResultsHelperType<CellCulturePairFlattened>> for QueryResults<Cel
                 .0
                 .into_iter()
                 .map(|flat| CellCulturePair {
+                    id: flat.id,
                     created_at: flat.created_at,
                     cell: super::cell::Model {
                         id: flat.id_cell,
@@ -460,6 +463,7 @@ impl CellCulturePairQuery {
             results: res
                 .into_iter()
                 .map(|flat| CellCulturePair {
+                    id: flat.id,
                     created_at: flat.created_at,
                     cell: super::cell::Model {
                         id: flat.id_cell,

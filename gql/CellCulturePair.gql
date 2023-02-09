@@ -1,3 +1,6 @@
+# WARN: For some reason graphql-codegen fails if id field is set in CellCultureParts fragment
+# so its manually added to everywhere needed
+
 query GetCellCulturesPairs($options: CellCultureFetchOptions!) {
     cellCulturePairs(options: $options) {
         page
@@ -5,6 +8,7 @@ query GetCellCulturesPairs($options: CellCultureFetchOptions!) {
         totalItems
         totalPages
         results {
+            id
             ...CellCultureParts
         }
     }
@@ -14,6 +18,7 @@ query GetAllCellCulturePairs($options: CellCultureFetchOptions!) {
     allCellCulturePairs(options: $options) {
         total
         results {
+            id
             ...CellCultureParts
         }
     }
@@ -21,12 +26,14 @@ query GetAllCellCulturePairs($options: CellCultureFetchOptions!) {
 
 mutation InsertCellCulturePair($insertOptions: CellCulturePairIds!) {
     insertCellCulturePair(options: $insertOptions) {
+        id
         ...CellCultureParts
     }
 }
 
 mutation UpdateCellCulturePair($updateOptions: CellCulturePairUpdateOptions!) {
     updateCellCulturePair(options: $updateOptions) {
+        id
         ...CellCultureParts
     }
 }

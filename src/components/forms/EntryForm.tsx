@@ -115,11 +115,8 @@ export default function EntryForm({
             if (data.cell && data.culture && data.buyer && data.date) {
                 insert.mutate({
                     insertOptions: {
-                        cellCulturePair: {
-                            idCell: data.cell.value.id,
-                            idCulture: data.culture.value.id,
-                            dGroup: dataGroupContextValue.selectedGroup ?? 1,
-                        },
+                        idCell: data.cell.value.id,
+                        idCulture: data.culture.value.id,
                         date: new Date(data.date),
                         weight: Number(data.weight),
                         idBuyer: data.buyer.value.id,
@@ -143,10 +140,9 @@ export default function EntryForm({
                 update.mutate({
                     updateOptions: {
                         id: edit?.id,
-                        cellCulturePair: {
+                        pairIds: {
                             idCell: data.cell.value.id,
                             idCulture: data.culture.value.id,
-                            dGroup: edit.dGroup?.id ?? 1,
                         },
                         date: new Date(data.date),
                         weight: Number(data.weight),
@@ -236,7 +232,8 @@ export default function EntryForm({
             {
                 options: {
                     id: {
-                        idCulture: cultureSelectState.selected?.value.id ?? undefined,
+                        idCulture:
+                            cultureSelectState.selected?.value.id ?? undefined,
                     },
                     pageSize: cellSelectState.limit,
                     page: cellSelectState.page,
@@ -273,7 +270,9 @@ export default function EntryForm({
         useGetPairedCulturesQuery(
             {
                 options: {
-                    id: { idCell: cellSelectState.selected?.value.id ?? undefined },
+                    id: {
+                        idCell: cellSelectState.selected?.value.id ?? undefined,
+                    },
                     pageSize: cultureSelectState.limit,
                     page: cultureSelectState.page,
                     ordering: {

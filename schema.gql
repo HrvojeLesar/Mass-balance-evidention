@@ -96,6 +96,7 @@ input CellCultureOrderingOptions {
 }
 
 type CellCulturePair {
+	id: Int!
 	cell: Cell!
 	culture: Culture!
 	createdAt: DateTime!
@@ -363,7 +364,8 @@ input EntryInsertOptions {
 	weight: Float
 	weightType: String
 	idBuyer: Int!
-	idCellCulturePair: Int!
+	idCell: Int!
+	idCulture: Int!
 	dGroup: Int!
 }
 
@@ -386,7 +388,7 @@ input EntryUpdateOptions {
 	weightType: String
 	date: DateTime
 	idBuyer: Int
-	idCellCulturePair: Int
+	pairIds: PairIds
 	dGroup: Int
 }
 
@@ -423,6 +425,11 @@ type MutationRoot {
 enum Ordering {
 	ASC
 	DESC
+}
+
+input PairIds {
+	idCell: Int!
+	idCulture: Int!
 }
 
 type QueryRoot {

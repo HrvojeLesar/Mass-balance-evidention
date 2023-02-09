@@ -109,8 +109,16 @@ pub struct EntryInsertOptions {
     pub weight: Option<f64>,
     pub weight_type: Option<String>,
     pub id_buyer: i32,
-    pub id_cell_culture_pair: i32,
+    pub id_cell: i32,
+    pub id_culture: i32,
+    // pub id_cell_culture_pair: i32,
     pub d_group: i32,
+}
+
+#[derive(InputObject)]
+pub struct PairIds {
+    id_cell: i32,
+    id_culture: i32,
 }
 
 #[derive(InputObject)]
@@ -120,7 +128,7 @@ pub struct EntryUpdateOptions {
     pub weight_type: Option<String>,
     pub date: Option<DateTimeWithTimeZone>,
     pub id_buyer: Option<i32>,
-    pub id_cell_culture_pair: Option<i32>,
+    pub pair_ids: Option<PairIds>,
     pub d_group: Option<i32>,
 }
 
@@ -429,6 +437,19 @@ impl QueryDatabase for Entity {
         db: &DatabaseConnection,
         options: Self::UpdateOptions,
     ) -> Result<Self::InnerQueryResultType> {
+        let transaction = db.begin().await?;
+
+        let pair = match options.pair_ids {
+            Some(pair) => {
+                super::cell_culture_pair::Entity::find()
+                    .filter(super::cell_culture_pair::Column::IdCell.eq(pair.id_cell))
+                    .filter(super::cell_culture_pair::Column::IdCulture.eq(pair.id_culture))
+                    .one(&transaction)
+                    .await?
+            }
+            None => None,
+        };
+
         let model = ActiveModel {
             id: ActiveValue::Set(options.id),
             weight: options
@@ -441,13 +462,11 @@ impl QueryDatabase for Entity {
             id_buyer: options
                 .id_buyer
                 .map_or(ActiveValue::NotSet, ActiveValue::Set),
-            id_cell_culture_pair: options
-                .id_cell_culture_pair
-                .map_or(ActiveValue::NotSet, ActiveValue::Set),
+            id_cell_culture_pair: pair.map_or(ActiveValue::NotSet, |val| ActiveValue::Set(val.id)),
             ..Default::default()
         };
-        let transaction = db.begin().await?;
         let res = Entity::update(model).exec(&transaction).await?;
+
         transaction.commit().await?;
 
         Ok(Self::fetch(
@@ -474,19 +493,28 @@ impl QueryDatabase for Entity {
         db: &DatabaseConnection,
         options: Self::InsertOptions,
     ) -> Result<Self::InnerQueryResultType> {
+        let transaction = db.begin().await?;
+
+        let cell_culture_pair = super::cell_culture_pair::Entity::find()
+            .filter(super::cell_culture_pair::Column::IdCell.eq(options.id_cell))
+            .filter(super::cell_culture_pair::Column::IdCulture.eq(options.id_culture))
+            .one(&transaction)
+            .await?
+            .ok_or_else(|| anyhow!("CellCulturePair with provided ids must exist!"))?;
+
         let model = ActiveModel {
             date: ActiveValue::Set(options.date),
             weight: ActiveValue::Set(options.weight),
             weight_type: ActiveValue::Set(options.weight_type),
             id_buyer: ActiveValue::Set(options.id_buyer),
-            id_cell_culture_pair: ActiveValue::Set(options.id_cell_culture_pair),
+            id_cell_culture_pair: ActiveValue::Set(cell_culture_pair.id),
             d_group: ActiveValue::Set(options.d_group),
             ..Default::default()
         };
-        let transaction = db.begin().await?;
         let res = Entity::insert(model)
             .exec_with_returning(&transaction)
             .await?;
+
         transaction.commit().await?;
 
         Ok(Self::fetch(

@@ -149,14 +149,7 @@ export default function CellCulturePairTable({
                     ) {
                         deleteCellCulturePair.mutate({
                             deleteOptions: {
-                                id: {
-                                    idCell: selectedCellCulturePair.cell.id,
-                                    idCulture:
-                                        selectedCellCulturePair.culture.id,
-                                    dGroup:
-                                        dataGroupContextValue.selectedGroup ??
-                                        1,
-                                },
+                                id: selectedCellCulturePair.id,
                             },
                         });
                     }
