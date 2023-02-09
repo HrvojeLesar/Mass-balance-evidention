@@ -309,19 +309,19 @@ impl QueryDatabase for Entity {
                 query = match filter.field {
                     Self::InputFields::CellName => query.filter(
                         Expr::expr(Func::lower(Expr::col(super::cell::Column::Name)))
-                            .like(format!("%{}%", filter.value)),
+                            .like(format!("%{}%", filter.value.trim().to_lowercase())),
                     ),
                     Self::InputFields::CellDescription => query.filter(
                         Expr::expr(Func::lower(Expr::col(super::cell::Column::Description)))
-                            .like(format!("%{}%", filter.value)),
+                            .like(format!("%{}%", filter.value.trim().to_lowercase())),
                     ),
                     Self::InputFields::CultureName => query.filter(
                         Expr::expr(Func::lower(Expr::col(super::culture::Column::Name)))
-                            .like(format!("%{}%", filter.value)),
+                            .like(format!("%{}%", filter.value.trim().to_lowercase())),
                     ),
                     Self::InputFields::CultureDescription => query.filter(
                         Expr::expr(Func::lower(Expr::col(super::culture::Column::Description)))
-                            .like(format!("%{}%", filter.value)),
+                            .like(format!("%{}%", filter.value.trim().to_lowercase())),
                     ),
                 };
             }
