@@ -28,7 +28,7 @@ pub struct Model {
     #[sea_orm(column_type = "Text", nullable)]
     pub contact: Option<String>,
     pub created_at: DateTimeWithTimeZone,
-    pub d_group: Option<i32>,
+    pub d_group: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -106,7 +106,7 @@ pub struct BuyerInsertOptions {
     pub name: String,
     pub address: Option<String>,
     pub contact: Option<String>,
-    pub d_group: Option<i32>,
+    pub d_group: i32,
 }
 
 #[async_trait]

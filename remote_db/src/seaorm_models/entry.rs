@@ -15,7 +15,6 @@ use anyhow::Result;
 use crate::SeaOrmPool;
 
 use super::{
-    cell_culture_pair::CellCulturePairIds,
     graphql_schema::{
         DeleteOptions, FetchOptions, FieldTypes, Filter, OrderingOptions, Pagination,
     },
@@ -31,11 +30,9 @@ pub struct Model {
     pub weight_type: Option<String>,
     pub date: DateTimeWithTimeZone,
     pub created_at: DateTimeWithTimeZone,
-    pub id_buyer: Option<i32>,
-    pub id_cell: i32,
-    pub id_culture: i32,
-    pub d_group: Option<i32>,
-    pub ccp_d_group: i32,
+    pub id_buyer: i32,
+    pub id_cell_culture_pair: i32,
+    pub d_group: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -50,9 +47,9 @@ pub enum Relation {
     Buyer,
     #[sea_orm(
         belongs_to = "super::cell_culture_pair::Entity",
-        from = "(Column::IdCell, Column::IdCulture)",
-        to = "(super::cell_culture_pair::Column::IdCell, super::cell_culture_pair::Column::IdCulture)",
-        on_update = "Cascade",
+        from = "Column::IdCellCulturePair",
+        to = "super::cell_culture_pair::Column::Id",
+        on_update = "NoAction",
         on_delete = "NoAction"
     )]
     CellCulturePair,
@@ -98,22 +95,22 @@ impl Related<super::weight_types::Entity> for Entity {
     }
 }
 
+impl ActiveModelBehavior for ActiveModel {}
+
 impl Default for Column {
     fn default() -> Self {
         Self::Id
     }
 }
 
-impl ActiveModelBehavior for ActiveModel {}
-
 #[derive(InputObject)]
 pub struct EntryInsertOptions {
     pub date: DateTimeWithTimeZone,
     pub weight: Option<f64>,
     pub weight_type: Option<String>,
-    pub id_buyer: Option<i32>,
-    pub cell_culture_pair: CellCulturePairIds,
-    pub d_group: Option<i32>,
+    pub id_buyer: i32,
+    pub id_cell_culture_pair: i32,
+    pub d_group: i32,
 }
 
 #[derive(InputObject)]
@@ -123,7 +120,7 @@ pub struct EntryUpdateOptions {
     pub weight_type: Option<String>,
     pub date: Option<DateTimeWithTimeZone>,
     pub id_buyer: Option<i32>,
-    pub cell_culture_pair: Option<CellCulturePairIds>,
+    pub id_cell_culture_pair: Option<i32>,
     pub d_group: Option<i32>,
 }
 
@@ -148,27 +145,26 @@ pub struct EntryFlattened {
     pub weight_type: Option<String>,
     pub date: DateTimeWithTimeZone,
     pub created_at: DateTimeWithTimeZone,
-    pub d_group: Option<i32>,
-    pub ccp_d_group: i32,
+    pub d_group: i32,
 
     pub id_buyer: i32,
     pub name_buyer: Option<String>,
     pub address_buyer: Option<String>,
     pub contact_buyer: Option<String>,
     pub created_at_buyer: DateTimeWithTimeZone,
-    pub d_group_buyer: Option<i32>,
+    pub d_group_buyer: i32,
 
     pub id_cell: i32,
     pub name_cell: String,
     pub description_cell: Option<String>,
     pub created_at_cell: DateTimeWithTimeZone,
-    pub d_group_cell: Option<i32>,
+    pub d_group_cell: i32,
 
     pub id_culture: i32,
     pub name_culture: String,
     pub description_culture: Option<String>,
     pub created_at_culture: DateTimeWithTimeZone,
-    pub d_group_culture: Option<i32>,
+    pub d_group_culture: i32,
 
     pub id_d_group: i32,
     pub name_d_group: String,
@@ -444,14 +440,10 @@ impl QueryDatabase for Entity {
             date: options.date.map_or(ActiveValue::NotSet, ActiveValue::Set),
             id_buyer: options
                 .id_buyer
-                .map_or(ActiveValue::NotSet, |val| ActiveValue::Set(Some(val))),
-            id_cell: options
-                .cell_culture_pair
-                .as_ref()
-                .map_or(ActiveValue::NotSet, |val| ActiveValue::Set(val.id_cell)),
-            id_culture: options
-                .cell_culture_pair
-                .map_or(ActiveValue::NotSet, |val| ActiveValue::Set(val.id_culture)),
+                .map_or(ActiveValue::NotSet, ActiveValue::Set),
+            id_cell_culture_pair: options
+                .id_cell_culture_pair
+                .map_or(ActiveValue::NotSet, ActiveValue::Set),
             ..Default::default()
         };
         let transaction = db.begin().await?;
@@ -466,7 +458,7 @@ impl QueryDatabase for Entity {
                 page: None,
                 ordering: None,
                 filters: None,
-                data_group_id: res.d_group,
+                data_group_id: Some(res.d_group),
             },
         )
         .await?
@@ -487,11 +479,8 @@ impl QueryDatabase for Entity {
             weight: ActiveValue::Set(options.weight),
             weight_type: ActiveValue::Set(options.weight_type),
             id_buyer: ActiveValue::Set(options.id_buyer),
-            id_cell: ActiveValue::Set(options.cell_culture_pair.id_cell),
-            id_culture: ActiveValue::Set(options.cell_culture_pair.id_culture),
+            id_cell_culture_pair: ActiveValue::Set(options.id_cell_culture_pair),
             d_group: ActiveValue::Set(options.d_group),
-            // WARN: Remove ccp_d_group
-            ccp_d_group: ActiveValue::Set(options.d_group.unwrap_or(0)),
             ..Default::default()
         };
         let transaction = db.begin().await?;
@@ -508,7 +497,7 @@ impl QueryDatabase for Entity {
                 page: None,
                 ordering: None,
                 filters: None,
-                data_group_id: res.d_group,
+                data_group_id: Some(res.d_group),
             },
         )
         .await?

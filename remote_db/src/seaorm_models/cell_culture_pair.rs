@@ -23,12 +23,11 @@ use anyhow::{anyhow, Result};
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "cell_culture_pair")]
 pub struct Model {
-    #[sea_orm(primary_key, auto_increment = false)]
+    #[sea_orm(primary_key)]
+    pub id: i32,
     pub id_cell: i32,
-    #[sea_orm(primary_key, auto_increment = false)]
     pub id_culture: i32,
     pub created_at: DateTimeWithTimeZone,
-    #[sea_orm(primary_key, auto_increment = false)]
     pub d_group: i32,
 }
 
@@ -137,12 +136,12 @@ pub struct CellCulturePairFlattened {
     pub name_cell: String,
     pub description_cell: Option<String>,
     pub created_at_cell: DateTimeWithTimeZone,
-    pub d_group_cell: Option<i32>,
+    pub d_group_cell: i32,
 
     pub name_culture: String,
     pub description_culture: Option<String>,
     pub created_at_culture: DateTimeWithTimeZone,
-    pub d_group_culture: Option<i32>,
+    pub d_group_culture: i32,
 
     pub id_d_group: i32,
     pub name_d_group: String,
@@ -218,7 +217,7 @@ impl QueryDatabase for Entity {
 
     type InputFields = CellCulturePairFields;
 
-    type DeleteOptionsType = CellCulturePairIds;
+    type DeleteOptionsType = i32;
 
     type FetchIdType = Option<CellCulturePairIds>;
 
@@ -250,13 +249,7 @@ impl QueryDatabase for Entity {
         transaction: &DatabaseTransaction,
         options: DeleteOptions<Self::DeleteOptionsType>,
     ) -> Result<DeleteResult> {
-        Ok(Self::delete_by_id((
-            options.id.id_cell,
-            options.id.id_culture,
-            options.id.d_group,
-        ))
-        .exec(transaction)
-        .await?)
+        Ok(Self::delete_by_id(options.id).exec(transaction).await?)
     }
 
     fn add_ordering(
@@ -520,7 +513,7 @@ impl CellCulturePairMutation {
     async fn delete_cell_culture_pair(
         &self,
         ctx: &Context<'_>,
-        options: DeleteOptions<CellCulturePairIds>,
+        options: DeleteOptions,
     ) -> Result<RowsDeleted> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::delete_entity(db, options).await

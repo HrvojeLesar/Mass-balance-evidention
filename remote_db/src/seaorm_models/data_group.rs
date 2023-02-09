@@ -135,12 +135,6 @@ impl QueryDatabase for Entity {
 
     type FetchIdType = Option<i32>;
 
-    fn get_query() -> Select<Self> {
-        // WARN: Hardcoded ID, breaks if id changes in database
-        // Find a better db solution
-        Entity::find().filter(Column::Id.ne(1))
-    }
-
     async fn delete_query(
         transaction: &DatabaseTransaction,
         options: DeleteOptions<Self::DeleteOptionsType>,

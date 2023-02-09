@@ -15,10 +15,10 @@ type Buyer {
 	address: String
 	contact: String
 	createdAt: DateTime!
-	dGroup: Int
+	dGroup: Int!
 }
 
-input BuyerFetchOptions{
+input BuyerFetchOptions {
 	id: Int
 	pageSize: Int
 	page: Int
@@ -27,27 +27,27 @@ input BuyerFetchOptions{
 	dataGroupId: Int
 }
 
-enum BuyerFields{
+enum BuyerFields {
 	ID
 	NAME
 	ADDRESS
 	CONTACT
 }
 
-input BuyerFilterOptions{
+input BuyerFilterOptions {
 	field: BuyerFields!
 	fieldType: FieldTypes!
 	value: String!
 }
 
-input BuyerInsertOptions{
+input BuyerInsertOptions {
 	name: String!
 	address: String
 	contact: String
-	dGroup: Int
+	dGroup: Int!
 }
 
-input BuyerOrderingOptions{
+input BuyerOrderingOptions {
 	order: Ordering!
 	orderBy: BuyerFields!
 }
@@ -60,7 +60,7 @@ type BuyerResult {
 	totalPages: Int!
 }
 
-input BuyerUpdateOptions{
+input BuyerUpdateOptions {
 	id: Int!
 	name: String
 	address: String
@@ -72,10 +72,10 @@ type Cell {
 	name: String!
 	description: String
 	createdAt: DateTime!
-	dGroup: Int
+	dGroup: Int!
 }
 
-input CellCultureFetchOptions{
+input CellCultureFetchOptions {
 	id: CellCulturePairIds
 	pageSize: Int
 	page: Int
@@ -84,13 +84,13 @@ input CellCultureFetchOptions{
 	dataGroupId: Int
 }
 
-input CellCultureFilterOptions{
+input CellCultureFilterOptions {
 	field: CellCulturePairFields!
 	fieldType: FieldTypes!
 	value: String!
 }
 
-input CellCultureOrderingOptions{
+input CellCultureOrderingOptions {
 	order: Ordering!
 	orderBy: CellCulturePairFields!
 }
@@ -102,18 +102,14 @@ type CellCulturePair {
 	dGroup: DataGroup!
 }
 
-input CellCulturePairDeleteOptions{
-	id: CellCulturePairIds!
-}
-
-enum CellCulturePairFields{
+enum CellCulturePairFields {
 	CELL_NAME
 	CELL_DESCRIPTION
 	CULTURE_NAME
 	CULTURE_DESCRIPTION
 }
 
-input CellCulturePairIds{
+input CellCulturePairIds {
 	idCell: Int!
 	idCulture: Int!
 	dGroup: Int!
@@ -127,7 +123,7 @@ type CellCulturePairResult {
 	totalPages: Int!
 }
 
-input CellCulturePairUpdateOptions{
+input CellCulturePairUpdateOptions {
 	idCellNew: Int!
 	idCultureNew: Int!
 	idCellOld: Int!
@@ -135,7 +131,7 @@ input CellCulturePairUpdateOptions{
 	idDGroup: Int!
 }
 
-input CellFetchOptions{
+input CellFetchOptions {
 	id: Int
 	pageSize: Int
 	page: Int
@@ -144,37 +140,37 @@ input CellFetchOptions{
 	dataGroupId: Int
 }
 
-enum CellFields{
+enum CellFields {
 	ID
 	NAME
 	DESCRIPTION
 }
 
-input CellFilterOptions{
+input CellFilterOptions {
 	field: CellFields!
 	fieldType: FieldTypes!
 	value: String!
 }
 
-input CellInsertOptions{
+input CellInsertOptions {
 	name: String!
 	description: String
-	dGroup: Int
+	dGroup: Int!
 }
 
-input CellOrderingOptions{
+input CellOrderingOptions {
 	order: Ordering!
 	orderBy: CellFields!
 }
 
-input CellParity{
+input CellParity {
 	"""
 	Id refers to a Culture Id
 	"""
 	idCulture: Int
 }
 
-input CellParityFetchOptions{
+input CellParityFetchOptions {
 	id: CellParity!
 	pageSize: Int
 	page: Int
@@ -191,7 +187,7 @@ type CellResult {
 	totalPages: Int!
 }
 
-input CellUpdateOptions{
+input CellUpdateOptions {
 	id: Int!
 	name: String
 	description: String
@@ -202,10 +198,10 @@ type Culture {
 	name: String!
 	description: String
 	createdAt: DateTime!
-	dGroup: Int
+	dGroup: Int!
 }
 
-input CultureFetchOptions{
+input CultureFetchOptions {
 	id: Int
 	pageSize: Int
 	page: Int
@@ -214,37 +210,37 @@ input CultureFetchOptions{
 	dataGroupId: Int
 }
 
-enum CultureFields{
+enum CultureFields {
 	ID
 	NAME
 	DESCRIPTION
 }
 
-input CultureFilterOptions{
+input CultureFilterOptions {
 	field: CultureFields!
 	fieldType: FieldTypes!
 	value: String!
 }
 
-input CultureInsertOptions{
+input CultureInsertOptions {
 	name: String!
 	description: String
-	dGroup: Int
+	dGroup: Int!
 }
 
-input CultureOrderingOptions{
+input CultureOrderingOptions {
 	order: Ordering!
 	orderBy: CultureFields!
 }
 
-input CultureParity{
+input CultureParity {
 	"""
 	Id refers to a Cell Id
 	"""
 	idCell: Int
 }
 
-input CultureParityFetchOptions{
+input CultureParityFetchOptions {
 	id: CultureParity!
 	pageSize: Int
 	page: Int
@@ -261,7 +257,7 @@ type CultureResult {
 	totalPages: Int!
 }
 
-input CultureUpdateOptions{
+input CultureUpdateOptions {
 	id: Int!
 	name: String
 	description: String
@@ -274,7 +270,7 @@ type DataGroup {
 	createdAt: DateTime!
 }
 
-input DataGroupFetchOptions{
+input DataGroupFetchOptions {
 	id: Int
 	pageSize: Int
 	page: Int
@@ -283,29 +279,29 @@ input DataGroupFetchOptions{
 	dataGroupId: Int
 }
 
-enum DataGroupFields{
+enum DataGroupFields {
 	ID
 	NAME
 	DESCRIPTION
 }
 
-input DataGroupFilterOptions{
+input DataGroupFilterOptions {
 	field: DataGroupFields!
 	fieldType: FieldTypes!
 	value: String!
 }
 
-input DataGroupInsertOptions{
+input DataGroupInsertOptions {
 	name: String!
 	description: String
 }
 
-input DataGroupOrderingOptions{
+input DataGroupOrderingOptions {
 	order: Ordering!
 	orderBy: DataGroupFields!
 }
 
-input DataGroupUpdateOptions{
+input DataGroupUpdateOptions {
 	id: Int!
 	name: String
 	description: String
@@ -316,9 +312,9 @@ Implement the DateTime<FixedOffset> scalar
 
 The input/output is a string in RFC3339 format.
 """
-scalar DateTime @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc3339")
+scalar DateTime
 
-input DeleteOptions{
+input DeleteOptions {
 	id: Int!
 }
 
@@ -334,7 +330,7 @@ type Entry {
 	dGroup: DataGroup
 }
 
-input EntryFetchOptions{
+input EntryFetchOptions {
 	id: Int
 	pageSize: Int
 	page: Int
@@ -343,7 +339,7 @@ input EntryFetchOptions{
 	dataGroupId: Int
 }
 
-enum EntryFields{
+enum EntryFields {
 	ID
 	WEIGHT
 	DATE
@@ -356,22 +352,22 @@ enum EntryFields{
 	CULTURE_DESCRIPTION
 }
 
-input EntryFilterOptions{
+input EntryFilterOptions {
 	field: EntryFields!
 	fieldType: FieldTypes!
 	value: String!
 }
 
-input EntryInsertOptions{
+input EntryInsertOptions {
 	date: DateTime!
 	weight: Float
 	weightType: String
-	idBuyer: Int
-	cellCulturePair: CellCulturePairIds!
-	dGroup: Int
+	idBuyer: Int!
+	idCellCulturePair: Int!
+	dGroup: Int!
 }
 
-input EntryOrderingOptions{
+input EntryOrderingOptions {
 	order: Ordering!
 	orderBy: EntryFields!
 }
@@ -384,17 +380,17 @@ type EntryResult {
 	totalPages: Int!
 }
 
-input EntryUpdateOptions{
+input EntryUpdateOptions {
 	id: Int!
 	weight: Float
 	weightType: String
 	date: DateTime
 	idBuyer: Int
-	cellCulturePair: CellCulturePairIds
+	idCellCulturePair: Int
 	dGroup: Int
 }
 
-enum FieldTypes{
+enum FieldTypes {
 	STRING
 	NUMBER
 	DATE
@@ -418,13 +414,13 @@ type MutationRoot {
 	deleteDataGroup(options: DeleteOptions!): RowsDeleted!
 	insertCellCulturePair(options: CellCulturePairIds!): CellCulturePair!
 	updateCellCulturePair(options: CellCulturePairUpdateOptions!): CellCulturePair!
-	deleteCellCulturePair(options: CellCulturePairDeleteOptions!): RowsDeleted!
+	deleteCellCulturePair(options: DeleteOptions!): RowsDeleted!
 	insertEntry(options: EntryInsertOptions!): Entry!
 	updateEntry(options: EntryUpdateOptions!): Entry!
 	deleteEntry(options: DeleteOptions!): RowsDeleted!
 }
 
-enum Ordering{
+enum Ordering {
 	ASC
 	DESC
 }

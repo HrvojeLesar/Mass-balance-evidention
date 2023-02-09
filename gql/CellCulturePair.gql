@@ -31,7 +31,7 @@ mutation UpdateCellCulturePair($updateOptions: CellCulturePairUpdateOptions!) {
     }
 }
 
-mutation DeleteCellCulturePair($deleteOptions: CellCulturePairDeleteOptions!) {
+mutation DeleteCellCulturePair($deleteOptions: DeleteOptions!) {
     deleteCellCulturePair(options: $deleteOptions) {
         numRows
     }
