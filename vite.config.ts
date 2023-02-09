@@ -14,7 +14,7 @@ export default defineConfig({
         port: 1420,
         strictPort: true,
         watch: {
-            ignored: ["**/remote_db/**"],
+            ignored: ["**/remote_db/**", "**/target/**"],
         },
     },
     // to make use of `TAURI_DEBUG` and other env variables

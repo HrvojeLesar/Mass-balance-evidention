@@ -1,12 +1,6 @@
 query GetDataGroups($options: DataGroupFetchOptions!) {
     dataGroups(options: $options) {
-        page
-        pageSize
-        totalItems
-        totalPages
-        results {
-            ...DataGroupParts
-        }
+        ...DataGroupParts
     }
 }
 

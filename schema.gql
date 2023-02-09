@@ -305,14 +305,6 @@ input DataGroupOrderingOptions{
 	orderBy: DataGroupFields!
 }
 
-type DataGroupResult {
-	results: [DataGroup!]!
-	page: Int!
-	pageSize: Int!
-	totalItems: Int!
-	totalPages: Int!
-}
-
 input DataGroupUpdateOptions{
 	id: Int!
 	name: String
@@ -445,7 +437,7 @@ type QueryRoot {
 	cultures(options: CultureFetchOptions!): CultureResult!
 	pairedCultures(options: CultureParityFetchOptions!): CultureResult!
 	unpairedCultures(options: CultureParityFetchOptions!): CultureResult!
-	dataGroups(options: DataGroupFetchOptions!): DataGroupResult!
+	dataGroups(options: DataGroupFetchOptions!): [DataGroup!]!
 	cellCulturePairs(options: CellCultureFetchOptions!): CellCulturePairResult!
 	allCellCulturePairs(options: CellCultureFetchOptions!): AllCellCulturePairs!
 	entries(options: EntryFetchOptions!): EntryResult!

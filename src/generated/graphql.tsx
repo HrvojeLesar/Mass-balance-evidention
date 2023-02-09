@@ -351,15 +351,6 @@ export type DataGroupOrderingOptions = {
   orderBy: DataGroupFields;
 };
 
-export type DataGroupResult = {
-  __typename?: 'DataGroupResult';
-  page: Scalars['Int'];
-  pageSize: Scalars['Int'];
-  results: Array<DataGroup>;
-  totalItems: Scalars['Int'];
-  totalPages: Scalars['Int'];
-};
-
 export type DataGroupUpdateOptions = {
   description?: InputMaybe<Scalars['String']>;
   id: Scalars['Int'];
@@ -575,7 +566,7 @@ export type QueryRoot = {
   cellCulturePairs: CellCulturePairResult;
   cells: CellResult;
   cultures: CultureResult;
-  dataGroups: DataGroupResult;
+  dataGroups: Array<DataGroup>;
   entries: EntryResult;
   pairedCells: CellResult;
   pairedCultures: CultureResult;
@@ -810,7 +801,7 @@ export type GetDataGroupsQueryVariables = Exact<{
 }>;
 
 
-export type GetDataGroupsQuery = { __typename?: 'QueryRoot', dataGroups: { __typename?: 'DataGroupResult', page: number, pageSize: number, totalItems: number, totalPages: number, results: Array<{ __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any }> } };
+export type GetDataGroupsQuery = { __typename?: 'QueryRoot', dataGroups: Array<{ __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any }> };
 
 export type InsertDataGroupMutationVariables = Exact<{
   insertOptions: DataGroupInsertOptions;
@@ -1370,13 +1361,7 @@ export const useDeleteCultureMutation = <
 export const GetDataGroupsDocument = `
     query GetDataGroups($options: DataGroupFetchOptions!) {
   dataGroups(options: $options) {
-    page
-    pageSize
-    totalItems
-    totalPages
-    results {
-      ...DataGroupParts
-    }
+    ...DataGroupParts
   }
 }
     ${DataGroupPartsFragmentDoc}`;

@@ -268,7 +268,8 @@ where
     match filter.field_type {
         FieldTypes::String => {
             query = query.filter(
-                Expr::expr(Func::lower(Expr::col(column))).like(format!("%{}%", filter.value.trim().to_lowercase())),
+                Expr::expr(Func::lower(Expr::col(column)))
+                    .like(format!("%{}%", filter.value.trim().to_lowercase())),
             );
         }
         FieldTypes::Number => {

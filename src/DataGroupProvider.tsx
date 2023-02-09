@@ -47,7 +47,7 @@ export default function DataGroupProvider({
 
     const groups = useMemo(() => {
         return data !== undefined
-            ? [...data.dataGroups.results].sort((a, b) => a.id - b.id)
+            ? [...data.dataGroups].sort((a, b) => a.id - b.id)
             : undefined;
     }, [data]);
 

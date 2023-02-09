@@ -135,6 +135,12 @@ impl QueryDatabase for Entity {
 
     type FetchIdType = Option<i32>;
 
+    fn get_query() -> Select<Self> {
+        // WARN: Hardcoded ID, breaks if id changes in database
+        // Find a better db solution
+        Entity::find().filter(Column::Id.ne(1))
+    }
+
     async fn delete_query(
         transaction: &DatabaseTransaction,
         options: DeleteOptions<Self::DeleteOptionsType>,
@@ -206,9 +212,24 @@ impl DataGroupQuery {
         &self,
         ctx: &Context<'_>,
         options: FetchOptions<DataGroupFields>,
-    ) -> Result<QueryResults<Model>> {
+    ) -> Result<Vec<Model>> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
-        Entity::fetch(db, options).await
+        let mut query = Entity::get_query();
+
+        query = Entity::add_id_and_data_group_filters(query, &options);
+        query = Entity::add_ordering(query, options.ordering);
+        query = Entity::add_filters(query, options.filters);
+
+        let transaction = db.begin().await?;
+
+        let res = query
+            .into_model::<<Entity as QueryDatabase>::FetchModel>()
+            .all(&transaction)
+            .await?;
+
+        transaction.commit().await?;
+
+        Ok(res)
     }
 }
 
