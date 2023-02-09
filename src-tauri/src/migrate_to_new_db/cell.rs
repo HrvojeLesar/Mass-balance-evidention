@@ -56,11 +56,10 @@ impl FetchExisting<get_cells::CellParts> for GetCells {
             .await?
             .data
         {
-            let cell_count = data.cells.results.len();
             let mut cells = data.cells.results;
             existing_cells.append(&mut cells);
 
-            if data.cells.total_items > cell_count as i64 * page {
+            if data.cells.total_items > existing_cells.len() as i64 {
                 page += 1;
             } else {
                 break;

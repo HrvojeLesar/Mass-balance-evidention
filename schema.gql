@@ -1,0 +1,463 @@
+type AllCellCulturePairs {
+	results: [CellCulturePair!]!
+	total: Int!
+}
+
+type AllEntires {
+	results: [Entry!]!
+	total: Int!
+}
+
+
+type Buyer {
+	id: Int!
+	name: String
+	address: String
+	contact: String
+	createdAt: DateTime!
+	dGroup: Int
+}
+
+input BuyerFetchOptions{
+	id: Int
+	pageSize: Int
+	page: Int
+	ordering: BuyerOrderingOptions
+	filters: [BuyerFilterOptions!]
+	dataGroupId: Int
+}
+
+enum BuyerFields{
+	ID
+	NAME
+	ADDRESS
+	CONTACT
+}
+
+input BuyerFilterOptions{
+	field: BuyerFields!
+	fieldType: FieldTypes!
+	value: String!
+}
+
+input BuyerInsertOptions{
+	name: String!
+	address: String
+	contact: String
+	dGroup: Int
+}
+
+input BuyerOrderingOptions{
+	order: Ordering!
+	orderBy: BuyerFields!
+}
+
+type BuyerResult {
+	results: [Buyer!]!
+	page: Int!
+	pageSize: Int!
+	totalItems: Int!
+	totalPages: Int!
+}
+
+input BuyerUpdateOptions{
+	id: Int!
+	name: String
+	address: String
+	contact: String
+}
+
+type Cell {
+	id: Int!
+	name: String!
+	description: String
+	createdAt: DateTime!
+	dGroup: Int
+}
+
+input CellCultureFetchOptions{
+	id: CellCulturePairIds
+	pageSize: Int
+	page: Int
+	ordering: CellCultureOrderingOptions
+	filters: [CellCultureFilterOptions!]
+	dataGroupId: Int
+}
+
+input CellCultureFilterOptions{
+	field: CellCulturePairFields!
+	fieldType: FieldTypes!
+	value: String!
+}
+
+input CellCultureOrderingOptions{
+	order: Ordering!
+	orderBy: CellCulturePairFields!
+}
+
+type CellCulturePair {
+	cell: Cell!
+	culture: Culture!
+	createdAt: DateTime!
+	dGroup: DataGroup!
+}
+
+input CellCulturePairDeleteOptions{
+	id: CellCulturePairIds!
+}
+
+enum CellCulturePairFields{
+	CELL_NAME
+	CELL_DESCRIPTION
+	CULTURE_NAME
+	CULTURE_DESCRIPTION
+}
+
+input CellCulturePairIds{
+	idCell: Int!
+	idCulture: Int!
+	dGroup: Int!
+}
+
+type CellCulturePairResult {
+	results: [CellCulturePair!]!
+	page: Int!
+	pageSize: Int!
+	totalItems: Int!
+	totalPages: Int!
+}
+
+input CellCulturePairUpdateOptions{
+	idCellNew: Int!
+	idCultureNew: Int!
+	idCellOld: Int!
+	idCultureOld: Int!
+	idDGroup: Int!
+}
+
+input CellFetchOptions{
+	id: Int
+	pageSize: Int
+	page: Int
+	ordering: CellOrderingOptions
+	filters: [CellFilterOptions!]
+	dataGroupId: Int
+}
+
+enum CellFields{
+	ID
+	NAME
+	DESCRIPTION
+}
+
+input CellFilterOptions{
+	field: CellFields!
+	fieldType: FieldTypes!
+	value: String!
+}
+
+input CellInsertOptions{
+	name: String!
+	description: String
+	dGroup: Int
+}
+
+input CellOrderingOptions{
+	order: Ordering!
+	orderBy: CellFields!
+}
+
+input CellParity{
+	"""
+	Id refers to a Culture Id
+	"""
+	idCulture: Int
+}
+
+input CellParityFetchOptions{
+	id: CellParity!
+	pageSize: Int
+	page: Int
+	ordering: CellOrderingOptions
+	filters: [CellFilterOptions!]
+	dataGroupId: Int
+}
+
+type CellResult {
+	results: [Cell!]!
+	page: Int!
+	pageSize: Int!
+	totalItems: Int!
+	totalPages: Int!
+}
+
+input CellUpdateOptions{
+	id: Int!
+	name: String
+	description: String
+}
+
+type Culture {
+	id: Int!
+	name: String!
+	description: String
+	createdAt: DateTime!
+	dGroup: Int
+}
+
+input CultureFetchOptions{
+	id: Int
+	pageSize: Int
+	page: Int
+	ordering: CultureOrderingOptions
+	filters: [CultureFilterOptions!]
+	dataGroupId: Int
+}
+
+enum CultureFields{
+	ID
+	NAME
+	DESCRIPTION
+}
+
+input CultureFilterOptions{
+	field: CultureFields!
+	fieldType: FieldTypes!
+	value: String!
+}
+
+input CultureInsertOptions{
+	name: String!
+	description: String
+	dGroup: Int
+}
+
+input CultureOrderingOptions{
+	order: Ordering!
+	orderBy: CultureFields!
+}
+
+input CultureParity{
+	"""
+	Id refers to a Cell Id
+	"""
+	idCell: Int
+}
+
+input CultureParityFetchOptions{
+	id: CultureParity!
+	pageSize: Int
+	page: Int
+	ordering: CultureOrderingOptions
+	filters: [CultureFilterOptions!]
+	dataGroupId: Int
+}
+
+type CultureResult {
+	results: [Culture!]!
+	page: Int!
+	pageSize: Int!
+	totalItems: Int!
+	totalPages: Int!
+}
+
+input CultureUpdateOptions{
+	id: Int!
+	name: String
+	description: String
+}
+
+type DataGroup {
+	id: Int!
+	name: String!
+	description: String
+	createdAt: DateTime!
+}
+
+input DataGroupFetchOptions{
+	id: Int
+	pageSize: Int
+	page: Int
+	ordering: DataGroupOrderingOptions
+	filters: [DataGroupFilterOptions!]
+	dataGroupId: Int
+}
+
+enum DataGroupFields{
+	ID
+	NAME
+	DESCRIPTION
+}
+
+input DataGroupFilterOptions{
+	field: DataGroupFields!
+	fieldType: FieldTypes!
+	value: String!
+}
+
+input DataGroupInsertOptions{
+	name: String!
+	description: String
+}
+
+input DataGroupOrderingOptions{
+	order: Ordering!
+	orderBy: DataGroupFields!
+}
+
+type DataGroupResult {
+	results: [DataGroup!]!
+	page: Int!
+	pageSize: Int!
+	totalItems: Int!
+	totalPages: Int!
+}
+
+input DataGroupUpdateOptions{
+	id: Int!
+	name: String
+	description: String
+}
+
+"""
+Implement the DateTime<FixedOffset> scalar
+
+The input/output is a string in RFC3339 format.
+"""
+scalar DateTime @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc3339")
+
+input DeleteOptions{
+	id: Int!
+}
+
+type Entry {
+	id: Int!
+	weight: Float
+	weightType: String
+	date: DateTime!
+	createdAt: DateTime!
+	buyer: Buyer
+	cell: Cell!
+	culture: Culture!
+	dGroup: DataGroup
+}
+
+input EntryFetchOptions{
+	id: Int
+	pageSize: Int
+	page: Int
+	ordering: EntryOrderingOptions
+	filters: [EntryFilterOptions!]
+	dataGroupId: Int
+}
+
+enum EntryFields{
+	ID
+	WEIGHT
+	DATE
+	BUYER_NAME
+	BUYER_ADDRESS
+	BUYER_CONTACT
+	CELL_NAME
+	CELL_DESCRIPTION
+	CULTURE_NAME
+	CULTURE_DESCRIPTION
+}
+
+input EntryFilterOptions{
+	field: EntryFields!
+	fieldType: FieldTypes!
+	value: String!
+}
+
+input EntryInsertOptions{
+	date: DateTime!
+	weight: Float
+	weightType: String
+	idBuyer: Int
+	cellCulturePair: CellCulturePairIds!
+	dGroup: Int
+}
+
+input EntryOrderingOptions{
+	order: Ordering!
+	orderBy: EntryFields!
+}
+
+type EntryResult {
+	results: [Entry!]!
+	page: Int!
+	pageSize: Int!
+	totalItems: Int!
+	totalPages: Int!
+}
+
+input EntryUpdateOptions{
+	id: Int!
+	weight: Float
+	weightType: String
+	date: DateTime
+	idBuyer: Int
+	cellCulturePair: CellCulturePairIds
+	dGroup: Int
+}
+
+enum FieldTypes{
+	STRING
+	NUMBER
+	DATE
+}
+
+
+
+
+type MutationRoot {
+	insertBuyer(options: BuyerInsertOptions!): Buyer!
+	updateBuyer(options: BuyerUpdateOptions!): Buyer!
+	deleteBuyer(options: DeleteOptions!): RowsDeleted!
+	insertCell(options: CellInsertOptions!): Cell!
+	updateCell(options: CellUpdateOptions!): Cell!
+	deleteCell(options: DeleteOptions!): RowsDeleted!
+	insertCulture(options: CultureInsertOptions!): Culture!
+	updateCulture(options: CultureUpdateOptions!): Culture!
+	deleteCulture(options: DeleteOptions!): RowsDeleted!
+	insertDataGroup(options: DataGroupInsertOptions!): DataGroup!
+	updateDataGroup(options: DataGroupUpdateOptions!): DataGroup!
+	deleteDataGroup(options: DeleteOptions!): RowsDeleted!
+	insertCellCulturePair(options: CellCulturePairIds!): CellCulturePair!
+	updateCellCulturePair(options: CellCulturePairUpdateOptions!): CellCulturePair!
+	deleteCellCulturePair(options: CellCulturePairDeleteOptions!): RowsDeleted!
+	insertEntry(options: EntryInsertOptions!): Entry!
+	updateEntry(options: EntryUpdateOptions!): Entry!
+	deleteEntry(options: DeleteOptions!): RowsDeleted!
+}
+
+enum Ordering{
+	ASC
+	DESC
+}
+
+type QueryRoot {
+	buyers(options: BuyerFetchOptions!): BuyerResult!
+	cells(options: CellFetchOptions!): CellResult!
+	pairedCells(options: CellParityFetchOptions!): CellResult!
+	unpairedCells(options: CellParityFetchOptions!): CellResult!
+	cultures(options: CultureFetchOptions!): CultureResult!
+	pairedCultures(options: CultureParityFetchOptions!): CultureResult!
+	unpairedCultures(options: CultureParityFetchOptions!): CultureResult!
+	dataGroups(options: DataGroupFetchOptions!): DataGroupResult!
+	cellCulturePairs(options: CellCultureFetchOptions!): CellCulturePairResult!
+	allCellCulturePairs(options: CellCultureFetchOptions!): AllCellCulturePairs!
+	entries(options: EntryFetchOptions!): EntryResult!
+	allEntries(options: EntryFetchOptions!): AllEntires!
+}
+
+type RowsDeleted {
+	numRows: Int!
+}
+
+
+schema {
+	query: QueryRoot
+	mutation: MutationRoot
+}

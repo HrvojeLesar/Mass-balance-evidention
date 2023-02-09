@@ -34,20 +34,20 @@ query GetPairedCells($options: CellParityFetchOptions!) {
     }
 }
 
-mutation InsertCell($options: CellInsertOptions!) {
-    insertCell(options: $options) {
+mutation InsertCell($insertOptions: CellInsertOptions!) {
+    insertCell(options: $insertOptions) {
         ...CellParts
     }
 }
 
-mutation UpdateCell($options: CellUpdateOptions!) {
-    updateCell(options: $options) {
+mutation UpdateCell($updateOptions: CellUpdateOptions!) {
+    updateCell(options: $updateOptions) {
         ...CellParts
     }
 }
 
-mutation DeleteCell($options: DeleteOptions!) {
-    deleteCell(options: $options) {
+mutation DeleteCell($deleteOptions: DeleteOptions!) {
+    deleteCell(options: $deleteOptions) {
         numRows
     }
 }

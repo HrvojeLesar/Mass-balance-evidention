@@ -94,7 +94,7 @@ export default function CellCulturePairForm({
         (data: FormInput) => {
             if (data.cell && data.culture) {
                 insert.mutate({
-                    options: {
+                    insertOptions: {
                         idCell: data.cell?.value.id,
                         idCulture: data.culture?.value.id,
                         dGroup: dataGroupContextValue.selectedGroup ?? 1,
@@ -114,7 +114,7 @@ export default function CellCulturePairForm({
         (data: FormInput) => {
             if (data.cell && data.culture && edit?.cell && edit?.culture) {
                 update.mutate({
-                    options: {
+                    updateOptions: {
                         idCellOld: edit.cell.id,
                         idCultureOld: edit.culture.id,
                         idCellNew: data.cell?.value.id,

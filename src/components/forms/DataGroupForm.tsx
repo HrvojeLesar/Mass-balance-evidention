@@ -65,12 +65,12 @@ export default function DataGroupForm({
                 edit
                     ? handleSubmit((data) => {
                         update.mutate({
-                            options: { ...data, id: edit.id },
+                            updateOptions: { ...data, id: edit.id },
                         });
                     })
                     : handleSubmit((data) => {
                         insert.mutate({
-                            options: {
+                            insertOptions: {
                                 ...data,
                             },
                         });

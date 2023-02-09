@@ -11,20 +11,20 @@ query GetDataGroups($options: DataGroupFetchOptions!) {
 }
 
 
-mutation InsertDataGroup($options: DataGroupInsertOptions!) {
-    insertDataGroup(options: $options) {
+mutation InsertDataGroup($insertOptions: DataGroupInsertOptions!) {
+    insertDataGroup(options: $insertOptions) {
         ...DataGroupParts
     }
 }
 
-mutation UpdateDataGroup($options: DataGroupUpdateOptions!) {
-    updateDataGroup(options: $options) {
+mutation UpdateDataGroup($updateOptions: DataGroupUpdateOptions!) {
+    updateDataGroup(options: $updateOptions) {
         ...DataGroupParts
     }
 }
 
-mutation DeleteDataGroup($options: DeleteOptions!) {
-    deleteDataGroup(options: $options) {
+mutation DeleteDataGroup($deleteOptions: DeleteOptions!) {
+    deleteDataGroup(options: $deleteOptions) {
         numRows
     }
 }

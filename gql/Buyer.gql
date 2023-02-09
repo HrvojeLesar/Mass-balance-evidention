@@ -10,20 +10,20 @@ query GetBuyers($options: BuyerFetchOptions!) {
     }
 }
 
-mutation InsertBuyer($options: BuyerInsertOptions!) {
-    insertBuyer(options: $options) {
+mutation InsertBuyer($insertOptions: BuyerInsertOptions!) {
+    insertBuyer(options: $insertOptions) {
         ...BuyerParts
     }
 }
 
-mutation UpdateBuyer($options: BuyerUpdateOptions!) {
-    updateBuyer(options: $options) {
+mutation UpdateBuyer($updateOptions: BuyerUpdateOptions!) {
+    updateBuyer(options: $updateOptions) {
         ...BuyerParts
     }
 }
 
-mutation DeleteBuyer($options: DeleteOptions!) {
-    deleteBuyer(options: $options) {
+mutation DeleteBuyer($deleteOptions: DeleteOptions!) {
+    deleteBuyer(options: $deleteOptions) {
         numRows
     }
 }

@@ -148,7 +148,7 @@ export default function CellCulturePairTable({
                         selectedCellCulturePair.culture
                     ) {
                         deleteCellCulturePair.mutate({
-                            options: {
+                            deleteOptions: {
                                 id: {
                                     idCell: selectedCellCulturePair.cell.id,
                                     idCulture:

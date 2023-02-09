@@ -165,7 +165,7 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
                 deleteFn={() => {
                     if (selectedCulture) {
                         deleteCulture.mutate({
-                            options: { id: selectedCulture.id },
+                            deleteOptions: { id: selectedCulture.id },
                         });
                     }
                 }}

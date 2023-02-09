@@ -66,12 +66,12 @@ export default function BuyerForm({
                 edit
                     ? handleSubmit((data) => {
                           update.mutate({
-                              options: { ...data, id: edit.id },
+                              updateOptions: { ...data, id: edit.id },
                           });
                       })
                     : handleSubmit((data) => {
                           insert.mutate({
-                              options: {
+                              insertOptions: {
                                   ...data,
                                   dGroup: dataGroupContextValue.selectedGroup ?? 1,
                               },

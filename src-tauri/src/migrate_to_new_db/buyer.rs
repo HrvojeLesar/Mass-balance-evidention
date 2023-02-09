@@ -56,11 +56,10 @@ impl FetchExisting<get_buyers::BuyerParts> for GetBuyers {
             .await?
             .data
         {
-            let buyer_count = data.buyers.results.len();
             let mut buyers = data.buyers.results;
             existing_buyers.append(&mut buyers);
 
-            if data.buyers.total_items > buyer_count as i64 * page {
+            if data.buyers.total_items > existing_buyers.len() as i64 {
                 page += 1;
             } else {
                 break;

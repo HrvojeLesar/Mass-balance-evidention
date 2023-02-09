@@ -114,7 +114,7 @@ export default function EntryForm({
         (data: FormInput) => {
             if (data.cell && data.culture && data.buyer && data.date) {
                 insert.mutate({
-                    options: {
+                    insertOptions: {
                         cellCulturePair: {
                             idCell: data.cell.value.id,
                             idCulture: data.culture.value.id,
@@ -141,7 +141,7 @@ export default function EntryForm({
         (data: FormInput) => {
             if (data.cell && data.culture && data.buyer && data.date && edit) {
                 update.mutate({
-                    options: {
+                    updateOptions: {
                         id: edit?.id,
                         cellCulturePair: {
                             idCell: data.cell.value.id,

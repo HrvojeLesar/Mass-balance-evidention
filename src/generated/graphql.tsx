@@ -656,21 +656,21 @@ export type GetBuyersQueryVariables = Exact<{
 export type GetBuyersQuery = { __typename?: 'QueryRoot', buyers: { __typename?: 'BuyerResult', page: number, pageSize: number, totalItems: number, totalPages: number, results: Array<{ __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: number | null }> } };
 
 export type InsertBuyerMutationVariables = Exact<{
-  options: BuyerInsertOptions;
+  insertOptions: BuyerInsertOptions;
 }>;
 
 
 export type InsertBuyerMutation = { __typename?: 'MutationRoot', insertBuyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: number | null } };
 
 export type UpdateBuyerMutationVariables = Exact<{
-  options: BuyerUpdateOptions;
+  updateOptions: BuyerUpdateOptions;
 }>;
 
 
 export type UpdateBuyerMutation = { __typename?: 'MutationRoot', updateBuyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: number | null } };
 
 export type DeleteBuyerMutationVariables = Exact<{
-  options: DeleteOptions;
+  deleteOptions: DeleteOptions;
 }>;
 
 
@@ -700,21 +700,21 @@ export type GetPairedCellsQueryVariables = Exact<{
 export type GetPairedCellsQuery = { __typename?: 'QueryRoot', pairedCells: { __typename?: 'CellResult', page: number, pageSize: number, totalItems: number, totalPages: number, results: Array<{ __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: number | null }> } };
 
 export type InsertCellMutationVariables = Exact<{
-  options: CellInsertOptions;
+  insertOptions: CellInsertOptions;
 }>;
 
 
 export type InsertCellMutation = { __typename?: 'MutationRoot', insertCell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: number | null } };
 
 export type UpdateCellMutationVariables = Exact<{
-  options: CellUpdateOptions;
+  updateOptions: CellUpdateOptions;
 }>;
 
 
 export type UpdateCellMutation = { __typename?: 'MutationRoot', updateCell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: number | null } };
 
 export type DeleteCellMutationVariables = Exact<{
-  options: DeleteOptions;
+  deleteOptions: DeleteOptions;
 }>;
 
 
@@ -737,21 +737,21 @@ export type GetAllCellCulturePairsQueryVariables = Exact<{
 export type GetAllCellCulturePairsQuery = { __typename?: 'QueryRoot', allCellCulturePairs: { __typename?: 'AllCellCulturePairs', total: number, results: Array<{ __typename?: 'CellCulturePair', createdAt: any, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: number | null }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: number | null }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } }> } };
 
 export type InsertCellCulturePairMutationVariables = Exact<{
-  options: CellCulturePairIds;
+  insertOptions: CellCulturePairIds;
 }>;
 
 
 export type InsertCellCulturePairMutation = { __typename?: 'MutationRoot', insertCellCulturePair: { __typename?: 'CellCulturePair', createdAt: any, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: number | null }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: number | null }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } } };
 
 export type UpdateCellCulturePairMutationVariables = Exact<{
-  options: CellCulturePairUpdateOptions;
+  updateOptions: CellCulturePairUpdateOptions;
 }>;
 
 
 export type UpdateCellCulturePairMutation = { __typename?: 'MutationRoot', updateCellCulturePair: { __typename?: 'CellCulturePair', createdAt: any, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: number | null }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: number | null }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } } };
 
 export type DeleteCellCulturePairMutationVariables = Exact<{
-  options: CellCulturePairDeleteOptions;
+  deleteOptions: CellCulturePairDeleteOptions;
 }>;
 
 
@@ -785,21 +785,21 @@ export type GetPairedCulturesQueryVariables = Exact<{
 export type GetPairedCulturesQuery = { __typename?: 'QueryRoot', pairedCultures: { __typename?: 'CultureResult', page: number, pageSize: number, totalItems: number, totalPages: number, results: Array<{ __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: number | null }> } };
 
 export type InsertCultureMutationVariables = Exact<{
-  options: CultureInsertOptions;
+  insertOptions: CultureInsertOptions;
 }>;
 
 
 export type InsertCultureMutation = { __typename?: 'MutationRoot', insertCulture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: number | null } };
 
 export type UpdateCultureMutationVariables = Exact<{
-  options: CultureUpdateOptions;
+  updateOptions: CultureUpdateOptions;
 }>;
 
 
 export type UpdateCultureMutation = { __typename?: 'MutationRoot', updateCulture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: number | null } };
 
 export type DeleteCultureMutationVariables = Exact<{
-  options: DeleteOptions;
+  deleteOptions: DeleteOptions;
 }>;
 
 
@@ -813,21 +813,21 @@ export type GetDataGroupsQueryVariables = Exact<{
 export type GetDataGroupsQuery = { __typename?: 'QueryRoot', dataGroups: { __typename?: 'DataGroupResult', page: number, pageSize: number, totalItems: number, totalPages: number, results: Array<{ __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any }> } };
 
 export type InsertDataGroupMutationVariables = Exact<{
-  options: DataGroupInsertOptions;
+  insertOptions: DataGroupInsertOptions;
 }>;
 
 
 export type InsertDataGroupMutation = { __typename?: 'MutationRoot', insertDataGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } };
 
 export type UpdateDataGroupMutationVariables = Exact<{
-  options: DataGroupUpdateOptions;
+  updateOptions: DataGroupUpdateOptions;
 }>;
 
 
 export type UpdateDataGroupMutation = { __typename?: 'MutationRoot', updateDataGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } };
 
 export type DeleteDataGroupMutationVariables = Exact<{
-  options: DeleteOptions;
+  deleteOptions: DeleteOptions;
 }>;
 
 
@@ -848,21 +848,21 @@ export type GetAllEntriesQueryVariables = Exact<{
 export type GetAllEntriesQuery = { __typename?: 'QueryRoot', allEntries: { __typename?: 'AllEntires', total: number, results: Array<{ __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: number | null } | null, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: number | null }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: number | null }, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null }> } };
 
 export type InsertEntryMutationVariables = Exact<{
-  options: EntryInsertOptions;
+  insertOptions: EntryInsertOptions;
 }>;
 
 
 export type InsertEntryMutation = { __typename?: 'MutationRoot', insertEntry: { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: number | null } | null, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: number | null }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: number | null }, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null } };
 
 export type UpdateEntryMutationVariables = Exact<{
-  options: EntryUpdateOptions;
+  updateOptions: EntryUpdateOptions;
 }>;
 
 
 export type UpdateEntryMutation = { __typename?: 'MutationRoot', updateEntry: { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup?: number | null } | null, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup?: number | null }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup?: number | null }, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null } };
 
 export type DeleteEntryMutationVariables = Exact<{
-  options: DeleteOptions;
+  deleteOptions: DeleteOptions;
 }>;
 
 
@@ -967,8 +967,8 @@ export const useGetBuyersQuery = <
       options
     );
 export const InsertBuyerDocument = `
-    mutation InsertBuyer($options: BuyerInsertOptions!) {
-  insertBuyer(options: $options) {
+    mutation InsertBuyer($insertOptions: BuyerInsertOptions!) {
+  insertBuyer(options: $insertOptions) {
     ...BuyerParts
   }
 }
@@ -983,8 +983,8 @@ export const useInsertBuyerMutation = <
       options
     );
 export const UpdateBuyerDocument = `
-    mutation UpdateBuyer($options: BuyerUpdateOptions!) {
-  updateBuyer(options: $options) {
+    mutation UpdateBuyer($updateOptions: BuyerUpdateOptions!) {
+  updateBuyer(options: $updateOptions) {
     ...BuyerParts
   }
 }
@@ -999,8 +999,8 @@ export const useUpdateBuyerMutation = <
       options
     );
 export const DeleteBuyerDocument = `
-    mutation DeleteBuyer($options: DeleteOptions!) {
-  deleteBuyer(options: $options) {
+    mutation DeleteBuyer($deleteOptions: DeleteOptions!) {
+  deleteBuyer(options: $deleteOptions) {
     numRows
   }
 }
@@ -1090,8 +1090,8 @@ export const useGetPairedCellsQuery = <
       options
     );
 export const InsertCellDocument = `
-    mutation InsertCell($options: CellInsertOptions!) {
-  insertCell(options: $options) {
+    mutation InsertCell($insertOptions: CellInsertOptions!) {
+  insertCell(options: $insertOptions) {
     ...CellParts
   }
 }
@@ -1106,8 +1106,8 @@ export const useInsertCellMutation = <
       options
     );
 export const UpdateCellDocument = `
-    mutation UpdateCell($options: CellUpdateOptions!) {
-  updateCell(options: $options) {
+    mutation UpdateCell($updateOptions: CellUpdateOptions!) {
+  updateCell(options: $updateOptions) {
     ...CellParts
   }
 }
@@ -1122,8 +1122,8 @@ export const useUpdateCellMutation = <
       options
     );
 export const DeleteCellDocument = `
-    mutation DeleteCell($options: DeleteOptions!) {
-  deleteCell(options: $options) {
+    mutation DeleteCell($deleteOptions: DeleteOptions!) {
+  deleteCell(options: $deleteOptions) {
     numRows
   }
 }
@@ -1191,8 +1191,8 @@ export const useGetAllCellCulturePairsQuery = <
       options
     );
 export const InsertCellCulturePairDocument = `
-    mutation InsertCellCulturePair($options: CellCulturePairIds!) {
-  insertCellCulturePair(options: $options) {
+    mutation InsertCellCulturePair($insertOptions: CellCulturePairIds!) {
+  insertCellCulturePair(options: $insertOptions) {
     ...CellCultureParts
   }
 }
@@ -1210,8 +1210,8 @@ export const useInsertCellCulturePairMutation = <
       options
     );
 export const UpdateCellCulturePairDocument = `
-    mutation UpdateCellCulturePair($options: CellCulturePairUpdateOptions!) {
-  updateCellCulturePair(options: $options) {
+    mutation UpdateCellCulturePair($updateOptions: CellCulturePairUpdateOptions!) {
+  updateCellCulturePair(options: $updateOptions) {
     ...CellCultureParts
   }
 }
@@ -1229,8 +1229,8 @@ export const useUpdateCellCulturePairMutation = <
       options
     );
 export const DeleteCellCulturePairDocument = `
-    mutation DeleteCellCulturePair($options: CellCulturePairDeleteOptions!) {
-  deleteCellCulturePair(options: $options) {
+    mutation DeleteCellCulturePair($deleteOptions: CellCulturePairDeleteOptions!) {
+  deleteCellCulturePair(options: $deleteOptions) {
     numRows
   }
 }
@@ -1320,8 +1320,8 @@ export const useGetPairedCulturesQuery = <
       options
     );
 export const InsertCultureDocument = `
-    mutation InsertCulture($options: CultureInsertOptions!) {
-  insertCulture(options: $options) {
+    mutation InsertCulture($insertOptions: CultureInsertOptions!) {
+  insertCulture(options: $insertOptions) {
     ...CultureParts
   }
 }
@@ -1336,8 +1336,8 @@ export const useInsertCultureMutation = <
       options
     );
 export const UpdateCultureDocument = `
-    mutation UpdateCulture($options: CultureUpdateOptions!) {
-  updateCulture(options: $options) {
+    mutation UpdateCulture($updateOptions: CultureUpdateOptions!) {
+  updateCulture(options: $updateOptions) {
     ...CultureParts
   }
 }
@@ -1352,8 +1352,8 @@ export const useUpdateCultureMutation = <
       options
     );
 export const DeleteCultureDocument = `
-    mutation DeleteCulture($options: DeleteOptions!) {
-  deleteCulture(options: $options) {
+    mutation DeleteCulture($deleteOptions: DeleteOptions!) {
+  deleteCulture(options: $deleteOptions) {
     numRows
   }
 }
@@ -1393,8 +1393,8 @@ export const useGetDataGroupsQuery = <
       options
     );
 export const InsertDataGroupDocument = `
-    mutation InsertDataGroup($options: DataGroupInsertOptions!) {
-  insertDataGroup(options: $options) {
+    mutation InsertDataGroup($insertOptions: DataGroupInsertOptions!) {
+  insertDataGroup(options: $insertOptions) {
     ...DataGroupParts
   }
 }
@@ -1409,8 +1409,8 @@ export const useInsertDataGroupMutation = <
       options
     );
 export const UpdateDataGroupDocument = `
-    mutation UpdateDataGroup($options: DataGroupUpdateOptions!) {
-  updateDataGroup(options: $options) {
+    mutation UpdateDataGroup($updateOptions: DataGroupUpdateOptions!) {
+  updateDataGroup(options: $updateOptions) {
     ...DataGroupParts
   }
 }
@@ -1425,8 +1425,8 @@ export const useUpdateDataGroupMutation = <
       options
     );
 export const DeleteDataGroupDocument = `
-    mutation DeleteDataGroup($options: DeleteOptions!) {
-  deleteDataGroup(options: $options) {
+    mutation DeleteDataGroup($deleteOptions: DeleteOptions!) {
+  deleteDataGroup(options: $deleteOptions) {
     numRows
   }
 }
@@ -1496,8 +1496,8 @@ export const useGetAllEntriesQuery = <
       options
     );
 export const InsertEntryDocument = `
-    mutation InsertEntry($options: EntryInsertOptions!) {
-  insertEntry(options: $options) {
+    mutation InsertEntry($insertOptions: EntryInsertOptions!) {
+  insertEntry(options: $insertOptions) {
     ...EntryParts
   }
 }
@@ -1516,8 +1516,8 @@ export const useInsertEntryMutation = <
       options
     );
 export const UpdateEntryDocument = `
-    mutation UpdateEntry($options: EntryUpdateOptions!) {
-  updateEntry(options: $options) {
+    mutation UpdateEntry($updateOptions: EntryUpdateOptions!) {
+  updateEntry(options: $updateOptions) {
     ...EntryParts
   }
 }
@@ -1536,8 +1536,8 @@ export const useUpdateEntryMutation = <
       options
     );
 export const DeleteEntryDocument = `
-    mutation DeleteEntry($options: DeleteOptions!) {
-  deleteEntry(options: $options) {
+    mutation DeleteEntry($deleteOptions: DeleteOptions!) {
+  deleteEntry(options: $deleteOptions) {
     numRows
   }
 }

@@ -56,11 +56,10 @@ impl FetchExisting<get_cultures::CultureParts> for GetCultures {
             .await?
             .data
         {
-            let culture_count = data.cultures.results.len();
             let mut cultures = data.cultures.results;
             existing_cultures.append(&mut cultures);
 
-            if data.cultures.total_items > culture_count as i64 * page {
+            if data.cultures.total_items > existing_cultures.len() as i64 {
                 page += 1;
             } else {
                 break;

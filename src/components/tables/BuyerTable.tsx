@@ -167,7 +167,7 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
                 deleteFn={() => {
                     if (selectedBuyer) {
                         deleteBuyer.mutate({
-                            options: { id: selectedBuyer.id },
+                            deleteOptions: { id: selectedBuyer.id },
                         });
                     }
                 }}

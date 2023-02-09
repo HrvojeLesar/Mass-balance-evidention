@@ -19,20 +19,20 @@ query GetAllCellCulturePairs($options: CellCultureFetchOptions!) {
     }
 }
 
-mutation InsertCellCulturePair($options: CellCulturePairIds!) {
-    insertCellCulturePair(options: $options) {
+mutation InsertCellCulturePair($insertOptions: CellCulturePairIds!) {
+    insertCellCulturePair(options: $insertOptions) {
         ...CellCultureParts
     }
 }
 
-mutation UpdateCellCulturePair($options: CellCulturePairUpdateOptions!) {
-    updateCellCulturePair(options: $options) {
+mutation UpdateCellCulturePair($updateOptions: CellCulturePairUpdateOptions!) {
+    updateCellCulturePair(options: $updateOptions) {
         ...CellCultureParts
     }
 }
 
-mutation DeleteCellCulturePair($options: CellCulturePairDeleteOptions!) {
-    deleteCellCulturePair(options: $options) {
+mutation DeleteCellCulturePair($deleteOptions: CellCulturePairDeleteOptions!) {
+    deleteCellCulturePair(options: $deleteOptions) {
         numRows
     }
 }

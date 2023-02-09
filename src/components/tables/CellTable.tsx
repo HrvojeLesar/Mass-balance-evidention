@@ -161,7 +161,7 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
                 deleteFn={() => {
                     if (selectedCell) {
                         deleteCell.mutate({
-                            options: { id: selectedCell.id },
+                            deleteOptions: { id: selectedCell.id },
                         });
                     }
                 }}

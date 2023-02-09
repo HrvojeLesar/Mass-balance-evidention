@@ -321,7 +321,7 @@ impl Migrate {
                 let client = self.client.clone();
                 async move {
                     let request_body = InsertBuyer::build_query(insert_buyer::Variables {
-                        options: insert_buyer::BuyerInsertOptions {
+                        insert_options: insert_buyer::BuyerInsertOptions {
                             name: buyer.naziv.unwrap_or_else(|| "".to_owned()),
                             address: None,
                             contact: None,
@@ -417,7 +417,7 @@ impl Migrate {
                 let client = self.client.clone();
                 async move {
                     let request_body = InsertCell::build_query(insert_cell::Variables {
-                        options: insert_cell::CellInsertOptions {
+                        insert_options: insert_cell::CellInsertOptions {
                             name: cell.naziv.unwrap_or_else(|| "".to_owned()),
                             description: None,
                             d_group: Some(data_group_id),
@@ -512,7 +512,7 @@ impl Migrate {
                 let client = self.client.clone();
                 async move {
                     let request_body = InsertCulture::build_query(insert_culture::Variables {
-                        options: insert_culture::CultureInsertOptions {
+                        insert_options: insert_culture::CultureInsertOptions {
                             name: culture.naziv.unwrap_or_else(|| "".to_owned()),
                             description: None,
                             d_group: Some(data_group_id),
@@ -657,7 +657,7 @@ impl Migrate {
                 async move {
                     let request_body =
                         InsertCellCulturePair::build_query(insert_cell_culture_pair::Variables {
-                            options: insert_cell_culture_pair::CellCulturePairIds {
+                            insert_options: insert_cell_culture_pair::CellCulturePairIds {
                                 id_cell: ccp.cell_id,
                                 id_culture: ccp.culture_id,
                                 d_group: data_group_id,
@@ -845,7 +845,7 @@ impl Migrate {
                 let client = self.client.clone();
                 async move {
                     let request_body = InsertEntry::build_query(insert_entry::Variables {
-                        options: insert_entry::EntryInsertOptions {
+                        insert_options: insert_entry::EntryInsertOptions {
                             date: entry.date.unwrap_or_else(Utc::now),
                             weight: entry.weight,
                             weight_type: None,

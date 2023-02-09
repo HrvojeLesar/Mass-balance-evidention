@@ -19,20 +19,20 @@ query GetAllEntries($options: EntryFetchOptions!) {
     }
 }
 
-mutation InsertEntry($options: EntryInsertOptions!) {
-    insertEntry(options: $options) {
+mutation InsertEntry($insertOptions: EntryInsertOptions!) {
+    insertEntry(options: $insertOptions) {
         ...EntryParts
     }
 }
 
-mutation UpdateEntry($options: EntryUpdateOptions!) {
-    updateEntry(options: $options) {
+mutation UpdateEntry($updateOptions: EntryUpdateOptions!) {
+    updateEntry(options: $updateOptions) {
         ...EntryParts
     }
 }
 
-mutation DeleteEntry($options: DeleteOptions!) {
-    deleteEntry(options: $options) {
+mutation DeleteEntry($deleteOptions: DeleteOptions!) {
+    deleteEntry(options: $deleteOptions) {
         numRows
     }
 }

@@ -34,20 +34,20 @@ query GetPairedCultures($options: CultureParityFetchOptions!) {
     }
 }
 
-mutation InsertCulture($options: CultureInsertOptions!) {
-    insertCulture(options: $options) {
+mutation InsertCulture($insertOptions: CultureInsertOptions!) {
+    insertCulture(options: $insertOptions) {
         ...CultureParts
     }
 }
 
-mutation UpdateCulture($options: CultureUpdateOptions!) {
-    updateCulture(options: $options) {
+mutation UpdateCulture($updateOptions: CultureUpdateOptions!) {
+    updateCulture(options: $updateOptions) {
         ...CultureParts
     }
 }
 
-mutation DeleteCulture($options: DeleteOptions!) {
-    deleteCulture(options: $options) {
+mutation DeleteCulture($deleteOptions: DeleteOptions!) {
+    deleteCulture(options: $deleteOptions) {
         numRows
     }
 }

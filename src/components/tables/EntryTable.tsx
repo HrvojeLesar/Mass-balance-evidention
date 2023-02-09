@@ -161,7 +161,7 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
                 deleteFn={() => {
                     if (selectedEntry) {
                         deleteEntry.mutate({
-                            options: { id: selectedEntry.id },
+                            deleteOptions: { id: selectedEntry.id },
                         });
                     }
                 }}

@@ -51,7 +51,7 @@ pub async fn insert_data_group(
     client: &Client,
 ) -> Result<graphql_client::Response<insert_data_group::ResponseData>> {
     let request_body = InsertDataGroup::build_query(insert_data_group::Variables {
-        options: insert_data_group::DataGroupInsertOptions {
+        insert_options: insert_data_group::DataGroupInsertOptions {
             name: data_group_name.to_string(),
             description: None,
         },
