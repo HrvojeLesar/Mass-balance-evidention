@@ -11,16 +11,19 @@ use sea_orm::{
 use anyhow::Result;
 
 use self::graphql_schema::{
-    DeleteOptions, FetchOptions, FieldTypes, Filter, OrderingOptions, Pagination,
+    DeleteOptions, FetchOptions, FieldTypes, Filter, OrderingOptions, Pagination, QueryResults,
 };
 
 pub mod prelude;
 
+pub mod article;
 pub mod buyer;
 pub mod cell;
 pub mod cell_culture_pair;
 pub mod culture;
 pub mod data_group;
+pub mod dispatch_note;
+pub mod dispatch_note_article;
 pub mod entry;
 pub mod graphql_schema;
 pub mod weight_types;
@@ -83,31 +86,6 @@ where
                 total_pages: items_and_page_number.number_of_pages,
             },
         }
-    }
-}
-
-#[derive(SimpleObject, Debug)]
-#[graphql(concrete(name = "BuyerResult", params(buyer::Model)))]
-#[graphql(concrete(name = "CellResult", params(cell::Model)))]
-#[graphql(concrete(name = "CultureResult", params(culture::Model)))]
-#[graphql(concrete(name = "DataGroupResult", params(data_group::Model)))]
-#[graphql(concrete(
-    name = "CellCulturePairResult",
-    params(cell_culture_pair::CellCulturePair)
-))]
-#[graphql(concrete(name = "EntryResult", params(entry::Entry)))]
-pub struct QueryResults<T: OutputType> {
-    pub results: Vec<T>,
-    #[graphql(flatten)]
-    pub pagination: Pagination,
-}
-
-impl<T> QueryResultsTrait<T> for QueryResults<T>
-where
-    T: OutputType,
-{
-    fn get_results(&self) -> &[T] {
-        self.results.as_ref()
     }
 }
 

@@ -3,9 +3,9 @@ use async_trait::async_trait;
 use log::warn;
 use sea_orm::{
     entity::prelude::*,
-    sea_query::{Expr, Func, PostgresQueryBuilder, Query},
-    ActiveValue, ConnectionTrait, DatabaseTransaction, DbBackend, DeleteResult, FromQueryResult,
-    Order, QueryOrder, QuerySelect, Statement, TransactionTrait,
+    sea_query::{Expr, Func},
+    ActiveValue, DatabaseTransaction, DeleteResult, FromQueryResult, Order, QueryOrder,
+    QuerySelect, TransactionTrait,
 };
 use serde::{Deserialize, Serialize};
 
@@ -119,11 +119,9 @@ pub struct CellCulturePairIds {
 
 #[derive(InputObject)]
 pub struct CellCulturePairUpdateOptions {
-    pub id_cell_new: i32,
-    pub id_culture_new: i32,
-    pub id_cell_old: i32,
-    pub id_culture_old: i32,
-    pub id_d_group: i32,
+    pub id: i32,
+    pub id_cell: Option<i32>,
+    pub id_culture: Option<i32>,
 }
 
 #[derive(Debug, Clone, FromQueryResult)]
@@ -196,6 +194,7 @@ impl From<QueryResultsHelperType<CellCulturePairFlattened>> for QueryResults<Cel
                     },
                 })
                 .collect(),
+            // TODO: Sort this out
             pagination: Pagination {
                 page: 0,
                 page_size: 0,
@@ -333,44 +332,35 @@ impl QueryDatabase for Entity {
         db: &DatabaseConnection,
         options: Self::UpdateOptions,
     ) -> Result<Self::InnerQueryResultType> {
-        let (update_query, values) = Query::update()
-            .table(Self.table_ref())
-            .values([
-                (Self::Column::IdCell, options.id_cell_new.into()),
-                (Self::Column::IdCulture, options.id_culture_new.into()),
-            ])
-            .and_where(Self::Column::IdCell.eq(options.id_cell_old))
-            .and_where(Self::Column::IdCulture.eq(options.id_culture_old))
-            .and_where(Self::Column::DGroup.eq(options.id_d_group))
-            .returning_all()
-            .to_owned()
-            .build(PostgresQueryBuilder);
-
         let transaction = db.begin().await?;
-        // WARN: uses manually built query
-        // SeaOrm doesn't support changing primary key in update
-        transaction
-            .query_one(Statement::from_sql_and_values(
-                DbBackend::Postgres,
-                &update_query,
-                values,
-            ))
-            .await?;
+
+        let model = ActiveModel {
+            id: ActiveValue::Set(options.id),
+            id_cell: options
+                .id_cell
+                .map_or(ActiveValue::NotSet, ActiveValue::Set),
+            id_culture: options
+                .id_cell
+                .map_or(ActiveValue::NotSet, ActiveValue::Set),
+            ..Default::default()
+        };
+        let res = Entity::update(model).exec(&transaction).await?;
+
         transaction.commit().await?;
 
         Ok(Self::fetch(
             db,
             FetchOptions::<CellCulturePairFields, Option<CellCulturePairIds>> {
                 id: Some(CellCulturePairIds {
-                    id_cell: options.id_cell_new,
-                    id_culture: options.id_culture_new,
-                    d_group: options.id_d_group,
+                    id_cell: res.id_cell,
+                    id_culture: res.id_culture,
+                    d_group: res.d_group,
                 }),
                 page_size: None,
                 page: None,
                 ordering: None,
                 filters: None,
-                data_group_id: Some(options.id_d_group),
+                data_group_id: None,
             },
         )
         .await?

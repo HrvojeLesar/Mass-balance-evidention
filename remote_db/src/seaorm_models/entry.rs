@@ -242,6 +242,7 @@ impl From<QueryResultsHelperType<EntryFlattened>> for QueryResults<Entry> {
                     }),
                 })
                 .collect(),
+            // TODO: Sort this out
             pagination: Pagination {
                 page: 0,
                 page_size: 0,
