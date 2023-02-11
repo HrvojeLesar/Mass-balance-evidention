@@ -1,3 +1,4 @@
+import { Select } from "@mantine/core";
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -6,7 +7,7 @@ import {
 } from "@tanstack/react-table";
 import moment from "moment";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Card, Form } from "react-bootstrap";
+import { Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { DataGroupContext } from "../../DataGroupProvider";
 import {
@@ -20,6 +21,7 @@ import DataTable from "../DataTable";
 import DeleteModal from "../DeleteModal";
 import EditModal from "../EditModal";
 import EntryForm from "../forms/EntryForm";
+import CardUtil from "../util/CardUtil";
 import { TableProps } from "./TableUtils";
 
 type SelectValue = "disabled" | "cell_name" | "culture_name" | "buyer_name";
@@ -144,7 +146,7 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
     });
 
     return (
-        <Card className="p-2 shadow">
+        <CardUtil>
             <EditModal
                 title={t("titles.edit").toString()}
                 show={isModalShown}
@@ -181,36 +183,39 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
                 </>
             )}
             <Form className="d-flex flex-row-reverse mb-2">
-                <div>
-                    <Form.Label>
-                        {t("selectOptions.grouping").toString()}
-                    </Form.Label>
-                    <Form.Select
-                        value={selectValue}
-                        onChange={(e) => {
-                            const value = e.target.value as SelectValue;
-                            setSelectValue(value);
-                            if (value === "disabled") {
-                                setGroupingState([]);
-                            } else {
-                                setGroupingState([value]);
-                            }
-                        }}
-                    >
-                        <option value="disabled">
-                            {t("selectOptions.disabled").toString()}
-                        </option>
-                        <option value="culture_name">
-                            {t("selectOptions.culture").toString()}
-                        </option>
-                        <option value="cell_name">
-                            {t("selectOptions.cell").toString()}
-                        </option>
-                        <option value="buyer_name">
-                            {t("selectOptions.buyer").toString()}
-                        </option>
-                    </Form.Select>
-                </div>
+                <Select
+                    label={t("selectOptions.grouping").toString()}
+                    value={selectValue}
+                    onChange={(value: SelectValue | null) => {
+                        if (value === null) {
+                            return;
+                        }
+                        setSelectValue(value);
+                        if (value === "disabled") {
+                            setGroupingState([]);
+                        } else {
+                            setGroupingState([value]);
+                        }
+                    }}
+                    data={[
+                        {
+                            value: "disabled",
+                            label: t("selectOptions.disabled").toString(),
+                        },
+                        {
+                            value: "culture_name",
+                            label: t("selectOptions.culture").toString(),
+                        },
+                        {
+                            value: "cell_name",
+                            label: t("selectOptions.cell").toString(),
+                        },
+                        {
+                            value: "buyer_name",
+                            label: t("selectOptions.buyer").toString(),
+                        },
+                    ]}
+                />
             </Form>
             <DataTable
                 columns={columns}
@@ -221,6 +226,6 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
                 groupingState={{ groupingState, setGroupingState }}
                 dataLoadingState={{ isInitialLoading }}
             />
-        </Card>
+        </CardUtil>
     );
 }

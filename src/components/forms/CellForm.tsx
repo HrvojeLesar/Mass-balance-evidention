@@ -1,5 +1,5 @@
+import { Grid, TextInput } from "@mantine/core";
 import { useContext } from "react";
-import { Col, Form, Row } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { DataGroupContext } from "../../DataGroupProvider";
@@ -81,36 +81,39 @@ export default function CellForm({
                       })
             }
         >
-            <Row className="mb-3">
-                <Col>
-                    <Form.Group>
-                        <Form.Label>{t("cell.name")}*</Form.Label>
-                        <Form.Control
-                            {...register("name", {
-                                required: t("cell.errors.name"),
-                            })}
-                            type="input"
-                            placeholder={t("cell.name")}
-                            autoComplete="off"
-                            isInvalid={errors.name !== undefined}
-                        />
-                        <Form.Control.Feedback type="invalid">
-                            {t("cell.errors.name")}
-                        </Form.Control.Feedback>
-                    </Form.Group>
-                </Col>
-                {/* <Col>
-                    <Form.Group>
-                        <Form.Label>{t("cell.description")}</Form.Label>
-                        <Form.Control
+            <Grid mb="sm">
+                <Grid.Col>
+                    <TextInput
+                        {...register("name", {
+                            required: t("cell.errors.name"),
+                        })}
+                        label={t("cell.name")}
+                        placeholder={t("cell.name")}
+                        autoComplete="off"
+                        withAsterisk
+                        error={
+                            errors.name === undefined
+                                ? undefined
+                                : t("cell.errors.name")
+                        }
+                        spellCheck={false}
+                    />
+                </Grid.Col>
+                {/* <Grid.Col>
+                        <TextInput
                             {...register("description", {})}
-                            type="input"
+                            label={t("cell.description")}
                             placeholder={t("cell.description")}
                             autoComplete="off"
+                            withAsterisk
+                            error={
+                                errors.name === undefined
+                                    ? undefined
+                                    : t("cell.errors.name")
+                            }
                         />
-                    </Form.Group>
-                </Col> */}
-            </Row>
+                    </Grid.Col> */}
+            </Grid>
         </BaseForm>
     );
 }

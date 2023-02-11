@@ -1,5 +1,5 @@
+import { Grid, TextInput } from "@mantine/core";
 import { useEffect } from "react";
-import { Form, Row } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
@@ -64,47 +64,49 @@ export default function DataGroupForm({
             onSubmit={
                 edit
                     ? handleSubmit((data) => {
-                        update.mutate({
-                            updateOptions: { ...data, id: edit.id },
-                        });
-                    })
+                          update.mutate({
+                              updateOptions: { ...data, id: edit.id },
+                          });
+                      })
                     : handleSubmit((data) => {
-                        insert.mutate({
-                            insertOptions: {
-                                ...data,
-                            },
-                        });
-                    })
+                          insert.mutate({
+                              insertOptions: {
+                                  ...data,
+                              },
+                          });
+                      })
             }
         >
-            <Row className="mb-3">
-                <Form.Group>
-                    <Form.Label>{t("dataGroup.name")}*</Form.Label>
-                    <Form.Control
+            <Grid mb="sm">
+                <Grid.Col>
+                    <TextInput
                         {...register("name", {
                             required: t("dataGroup.errors.name"),
                         })}
-                        type="input"
+                        label={t("dataGroup.name")}
                         placeholder={t("dataGroup.name")}
                         autoComplete="off"
-                        isInvalid={errors.name !== undefined}
+                        withAsterisk
+                        error={
+                            errors.name === undefined
+                                ? undefined
+                                : t("culture.errors.name")
+                        }
+                        spellCheck={false}
                     />
-                    <Form.Control.Feedback type="invalid">
-                        {t("culture.errors.name")}
-                    </Form.Control.Feedback>
-                </Form.Group>
-            </Row>
-            <Row className="mb-3">
-                <Form.Group>
-                    <Form.Label>{t("dataGroup.description")}</Form.Label>
-                    <Form.Control
+                </Grid.Col>
+            </Grid>
+            <Grid mb="sm">
+                <Grid.Col>
+                    <TextInput
                         {...register("description", {})}
-                        type="input"
+                        label={t("dataGroup.description")}
                         placeholder={t("dataGroup.description")}
                         autoComplete="off"
+                        spellCheck={false}
                     />
-                </Form.Group>
-            </Row>
+                </Grid.Col>
+            </Grid>
         </BaseForm>
     );
 }

@@ -50,6 +50,62 @@ export type AllEntires = {
   total: Scalars['Int'];
 };
 
+export type Article = {
+  __typename?: 'Article';
+  createdAt: Scalars['DateTime'];
+  dGroup: Scalars['Int'];
+  description?: Maybe<Scalars['String']>;
+  id: Scalars['Int'];
+  name: Scalars['String'];
+};
+
+export type ArticleFetchOptions = {
+  dataGroupId?: InputMaybe<Scalars['Int']>;
+  filters?: InputMaybe<Array<ArticleFilterOptions>>;
+  id?: InputMaybe<Scalars['Int']>;
+  ordering?: InputMaybe<ArticleOrderingOptions>;
+  page?: InputMaybe<Scalars['Int']>;
+  pageSize?: InputMaybe<Scalars['Int']>;
+};
+
+export enum ArticleFields {
+  Description = 'DESCRIPTION',
+  Id = 'ID',
+  Name = 'NAME'
+}
+
+export type ArticleFilterOptions = {
+  field: ArticleFields;
+  fieldType: FieldTypes;
+  value: Scalars['String'];
+};
+
+export type ArticleInsertOptions = {
+  dGroup: Scalars['Int'];
+  description?: InputMaybe<Scalars['String']>;
+  name: Scalars['String'];
+};
+
+export type ArticleOrderingOptions = {
+  order: Ordering;
+  orderBy: ArticleFields;
+};
+
+export type ArticleResults = {
+  __typename?: 'ArticleResults';
+  page: Scalars['Int'];
+  pageSize: Scalars['Int'];
+  results: Array<Article>;
+  totalItems: Scalars['Int'];
+  totalPages: Scalars['Int'];
+};
+
+export type ArticleUpdateOptions = {
+  description?: InputMaybe<Scalars['String']>;
+  id: Scalars['Int'];
+  name?: InputMaybe<Scalars['String']>;
+};
+
 export type Buyer = {
   __typename?: 'Buyer';
   address?: Maybe<Scalars['String']>;
@@ -171,11 +227,9 @@ export type CellCulturePairResult = {
 };
 
 export type CellCulturePairUpdateOptions = {
-  idCellNew: Scalars['Int'];
-  idCellOld: Scalars['Int'];
-  idCultureNew: Scalars['Int'];
-  idCultureOld: Scalars['Int'];
-  idDGroup: Scalars['Int'];
+  id: Scalars['Int'];
+  idCell?: InputMaybe<Scalars['Int']>;
+  idCulture?: InputMaybe<Scalars['Int']>;
 };
 
 export type CellFetchOptions = {
@@ -358,6 +412,134 @@ export type DeleteOptions = {
   id: Scalars['Int'];
 };
 
+export type DispatchNoteArticle = {
+  __typename?: 'DispatchNoteArticle';
+  article: Article;
+  createdAt: Scalars['DateTime'];
+  dGroup: DataGroup;
+  dispatchNote: Dispatch_Note;
+  quantity: Scalars['Float'];
+  weightType?: Maybe<Scalars['String']>;
+};
+
+export type DispatchNoteArticleFetchOptions = {
+  dataGroupId?: InputMaybe<Scalars['Int']>;
+  filters?: InputMaybe<Array<DispatchNoteArticleFilterOptions>>;
+  id?: InputMaybe<DispatchNoteArticleIds>;
+  ordering?: InputMaybe<DispatchNoteArticleOrderingOptions>;
+  page?: InputMaybe<Scalars['Int']>;
+  pageSize?: InputMaybe<Scalars['Int']>;
+};
+
+export enum DispatchNoteArticleFields {
+  ArticleDescription = 'ARTICLE_DESCRIPTION',
+  ArticleName = 'ARTICLE_NAME',
+  Quantity = 'QUANTITY',
+  WeightType = 'WEIGHT_TYPE'
+}
+
+export type DispatchNoteArticleFilterOptions = {
+  field: DispatchNoteArticleFields;
+  fieldType: FieldTypes;
+  value: Scalars['String'];
+};
+
+export type DispatchNoteArticleIds = {
+  dGroup?: InputMaybe<Scalars['Int']>;
+  idArticle?: InputMaybe<Scalars['Int']>;
+  idDispatchNote?: InputMaybe<Scalars['Int']>;
+};
+
+export type DispatchNoteArticleInsertOptions = {
+  dGroup: Scalars['Int'];
+  idArticle: Scalars['Int'];
+  idDispatchNote: Scalars['Int'];
+  quantity: Scalars['Float'];
+  weightType?: InputMaybe<Scalars['String']>;
+};
+
+export type DispatchNoteArticleOrderingOptions = {
+  order: Ordering;
+  orderBy: DispatchNoteArticleFields;
+};
+
+export type DispatchNoteArticleResults = {
+  __typename?: 'DispatchNoteArticleResults';
+  page: Scalars['Int'];
+  pageSize: Scalars['Int'];
+  results: Array<DispatchNoteArticle>;
+  totalItems: Scalars['Int'];
+  totalPages: Scalars['Int'];
+};
+
+export type DispatchNoteArticleUpdateOptions = {
+  id: Scalars['Int'];
+  idArticle?: InputMaybe<Scalars['Int']>;
+  idDispatchNote?: InputMaybe<Scalars['Int']>;
+  quantity?: InputMaybe<Scalars['Float']>;
+  weightType?: InputMaybe<Scalars['String']>;
+};
+
+export type DispatchNoteFetchOptions = {
+  dataGroupId?: InputMaybe<Scalars['Int']>;
+  filters?: InputMaybe<Array<DispatchNoteFilterOptions>>;
+  id?: InputMaybe<Scalars['Int']>;
+  ordering?: InputMaybe<DispatchNoteOrderingOptions>;
+  page?: InputMaybe<Scalars['Int']>;
+  pageSize?: InputMaybe<Scalars['Int']>;
+};
+
+export enum DispatchNoteFields {
+  Id = 'ID',
+  IssuingDate = 'ISSUING_DATE',
+  NoteType = 'NOTE_TYPE',
+  NumericalIdentifier = 'NUMERICAL_IDENTIFIER'
+}
+
+export type DispatchNoteFilterOptions = {
+  field: DispatchNoteFields;
+  fieldType: FieldTypes;
+  value: Scalars['String'];
+};
+
+export type DispatchNoteInsertOptions = {
+  dGroup: Scalars['Int'];
+  issuingDate?: InputMaybe<Scalars['DateTime']>;
+  noteType?: InputMaybe<Scalars['Int']>;
+  numericalIdentifier?: InputMaybe<Scalars['Int']>;
+};
+
+export type DispatchNoteOrderingOptions = {
+  order: Ordering;
+  orderBy: DispatchNoteFields;
+};
+
+export type DispatchNoteResults = {
+  __typename?: 'DispatchNoteResults';
+  page: Scalars['Int'];
+  pageSize: Scalars['Int'];
+  results: Array<Dispatch_Note>;
+  totalItems: Scalars['Int'];
+  totalPages: Scalars['Int'];
+};
+
+export type DispatchNoteUpdateOptions = {
+  id: Scalars['Int'];
+  issuingDate?: InputMaybe<Scalars['DateTime']>;
+  noteType?: InputMaybe<Scalars['Int']>;
+  numericalIdentifier?: InputMaybe<Scalars['Int']>;
+};
+
+export type Dispatch_Note = {
+  __typename?: 'Dispatch_note';
+  createdAt: Scalars['DateTime'];
+  dGroup: Scalars['Int'];
+  id: Scalars['Int'];
+  issuingDate?: Maybe<Scalars['DateTime']>;
+  noteType?: Maybe<Scalars['Int']>;
+  numericalIdentifier?: Maybe<Scalars['Int']>;
+};
+
 export type Entry = {
   __typename?: 'Entry';
   buyer?: Maybe<Buyer>;
@@ -441,24 +623,38 @@ export enum FieldTypes {
 
 export type MutationRoot = {
   __typename?: 'MutationRoot';
+  deleteArticle: RowsDeleted;
   deleteBuyer: RowsDeleted;
   deleteCell: RowsDeleted;
   deleteCellCulturePair: RowsDeleted;
   deleteCulture: RowsDeleted;
   deleteDataGroup: RowsDeleted;
+  deleteDispatchNote: RowsDeleted;
+  deleteDispatchNoteArticle: RowsDeleted;
   deleteEntry: RowsDeleted;
+  insertArticle: Article;
   insertBuyer: Buyer;
   insertCell: Cell;
   insertCellCulturePair: CellCulturePair;
   insertCulture: Culture;
   insertDataGroup: DataGroup;
+  insertDispatchNote: Dispatch_Note;
+  insertDispatchNoteArticle: DispatchNoteArticle;
   insertEntry: Entry;
+  updateArticle: Article;
   updateBuyer: Buyer;
   updateCell: Cell;
   updateCellCulturePair: CellCulturePair;
   updateCulture: Culture;
   updateDataGroup: DataGroup;
+  updateDispatchNote: Dispatch_Note;
+  updateDispatchNoteArticle: DispatchNoteArticle;
   updateEntry: Entry;
+};
+
+
+export type MutationRootDeleteArticleArgs = {
+  options: DeleteOptions;
 };
 
 
@@ -487,8 +683,23 @@ export type MutationRootDeleteDataGroupArgs = {
 };
 
 
+export type MutationRootDeleteDispatchNoteArgs = {
+  options: DeleteOptions;
+};
+
+
+export type MutationRootDeleteDispatchNoteArticleArgs = {
+  options: DeleteOptions;
+};
+
+
 export type MutationRootDeleteEntryArgs = {
   options: DeleteOptions;
+};
+
+
+export type MutationRootInsertArticleArgs = {
+  options: ArticleInsertOptions;
 };
 
 
@@ -517,8 +728,23 @@ export type MutationRootInsertDataGroupArgs = {
 };
 
 
+export type MutationRootInsertDispatchNoteArgs = {
+  options: DispatchNoteInsertOptions;
+};
+
+
+export type MutationRootInsertDispatchNoteArticleArgs = {
+  options: DispatchNoteArticleInsertOptions;
+};
+
+
 export type MutationRootInsertEntryArgs = {
   options: EntryInsertOptions;
+};
+
+
+export type MutationRootUpdateArticleArgs = {
+  options: ArticleUpdateOptions;
 };
 
 
@@ -547,6 +773,16 @@ export type MutationRootUpdateDataGroupArgs = {
 };
 
 
+export type MutationRootUpdateDispatchNoteArgs = {
+  options: DispatchNoteUpdateOptions;
+};
+
+
+export type MutationRootUpdateDispatchNoteArticleArgs = {
+  options: DispatchNoteArticleUpdateOptions;
+};
+
+
 export type MutationRootUpdateEntryArgs = {
   options: EntryUpdateOptions;
 };
@@ -565,11 +801,14 @@ export type QueryRoot = {
   __typename?: 'QueryRoot';
   allCellCulturePairs: AllCellCulturePairs;
   allEntries: AllEntires;
+  articles: ArticleResults;
   buyers: BuyerResult;
   cellCulturePairs: CellCulturePairResult;
   cells: CellResult;
   cultures: CultureResult;
   dataGroups: Array<DataGroup>;
+  dispatchNoteArticles: DispatchNoteArticleResults;
+  dispatchNotes: DispatchNoteResults;
   entries: EntryResult;
   pairedCells: CellResult;
   pairedCultures: CultureResult;
@@ -585,6 +824,11 @@ export type QueryRootAllCellCulturePairsArgs = {
 
 export type QueryRootAllEntriesArgs = {
   options: EntryFetchOptions;
+};
+
+
+export type QueryRootArticlesArgs = {
+  options: ArticleFetchOptions;
 };
 
 
@@ -610,6 +854,16 @@ export type QueryRootCulturesArgs = {
 
 export type QueryRootDataGroupsArgs = {
   options: DataGroupFetchOptions;
+};
+
+
+export type QueryRootDispatchNoteArticlesArgs = {
+  options: DispatchNoteArticleFetchOptions;
+};
+
+
+export type QueryRootDispatchNotesArgs = {
+  options: DispatchNoteFetchOptions;
 };
 
 

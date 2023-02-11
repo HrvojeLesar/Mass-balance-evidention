@@ -1,4 +1,4 @@
-import { Button, ButtonGroup } from "react-bootstrap";
+import { ActionIcon, Flex, } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { FaEdit, FaTrash } from "react-icons/fa";
 
@@ -13,23 +13,23 @@ export default function ActionButtons({
 }: ActionButtonsProps) {
     const { t } = useTranslation();
     return (
-        <ButtonGroup>
-            <Button
+        <Flex gap="xs">
+            <ActionIcon
                 onClick={editFn}
-                variant="warning"
-                className="actions-button"
+                color="yellow"
+                variant="filled"
                 title={t("titles.edit").toString()}
             >
                 <FaEdit />
-            </Button>
-            <Button
+            </ActionIcon>
+            <ActionIcon
                 onClick={deleteFn}
-                variant="danger"
-                className="actions-button"
+                color="red"
+                variant="filled"
                 title={t("titles.delete").toString()}
             >
                 <FaTrash />
-            </Button>
-        </ButtonGroup>
+            </ActionIcon>
+        </Flex>
     );
 }

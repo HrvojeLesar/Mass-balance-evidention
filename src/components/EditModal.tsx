@@ -1,5 +1,5 @@
+import { Modal, Title } from "@mantine/core";
 import { ReactNode } from "react";
-import { Modal } from "react-bootstrap";
 
 type EditModalProps = {
     children?: ReactNode;
@@ -15,11 +15,14 @@ export default function EditModal({
     children,
 }: EditModalProps) {
     return (
-        <Modal show={show} onHide={onHide} centered backdrop="static">
-            <Modal.Header closeButton>
-                <Modal.Title>{title}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>{children}</Modal.Body>
+        <Modal
+            opened={show}
+            onClose={onHide}
+            centered
+            title={<Title order={3}>{title}</Title>}
+            size="auto"
+        >
+            {children}
         </Modal>
     );
 }

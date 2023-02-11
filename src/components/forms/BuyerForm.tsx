@@ -1,5 +1,5 @@
+import { Grid, TextInput } from "@mantine/core";
 import { useContext } from "react";
-import { Col, Form, Row } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { DataGroupContext } from "../../DataGroupProvider";
@@ -59,6 +59,8 @@ export default function BuyerForm({
         },
     });
 
+    console.log(errors.name);
+
     return (
         <BaseForm
             submitDisabled={insert.isLoading || update.isLoading}
@@ -73,56 +75,60 @@ export default function BuyerForm({
                           insert.mutate({
                               insertOptions: {
                                   ...data,
-                                  dGroup: dataGroupContextValue.selectedGroup ?? 1,
+                                  dGroup:
+                                      dataGroupContextValue.selectedGroup ?? 1,
                               },
                           });
                       })
             }
         >
-            <Row className="mb-3">
-                <Col>
-                    <Form.Group>
-                        <Form.Label>{t("buyer.name")}*</Form.Label>
-                        <Form.Control
-                            {...register("name", {
-                                required: t("buyer.errors.name"),
-                            })}
-                            type="input"
-                            placeholder={t("buyer.name")}
-                            autoComplete="off"
-                            isInvalid={errors.name !== undefined}
-                        />
-                        <Form.Control.Feedback type="invalid">
-                            {t("buyer.errors.name")}
-                        </Form.Control.Feedback>
-                    </Form.Group>
-                </Col>
-            </Row>
-
-            {/* <Row className="mb-3">
-                <Col>
-                    <Form.Group>
-                        <Form.Label>{t("buyer.address")}</Form.Label>
-                        <Form.Control
-                            {...register("address", {})}
-                            type="input"
-                            placeholder={t("buyer.address")}
-                            autoComplete="off"
-                        />
-                    </Form.Group>
-                </Col>
-                <Col>
-                    <Form.Group>
-                        <Form.Label>{t("buyer.contact")}</Form.Label>
-                        <Form.Control
-                            {...register("contact", {})}
-                            type="input"
-                            placeholder={t("buyer.contact")}
-                            autoComplete="off"
-                        />
-                    </Form.Group>
-                </Col>
-            </Row> */}
+            <Grid mb="sm">
+                <Grid.Col>
+                    <TextInput
+                        {...register("name", {
+                            required: t("buyer.errors.name"),
+                        })}
+                        label={t("buyer.name")}
+                        placeholder={t("buyer.name")}
+                        autoComplete="off"
+                        withAsterisk
+                        error={
+                            errors.name === undefined
+                                ? undefined
+                                : t("buyer.errors.name")
+                        }
+                        spellCheck={false}
+                    />
+                </Grid.Col>
+                {/* <Grid.Col>
+                    <TextInput
+                        {...register("address", {})}
+                        label={t("buyer.address")}
+                        placeholder={t("buyer.address")}
+                        autoComplete="off"
+                        withAsterisk
+                        error={
+                            errors.name === undefined
+                                ? undefined
+                                : "err"
+                        }
+                    />
+                </Grid.Col>
+                <Grid.Col>
+                    <TextInput
+                        {...register("contact", {})}
+                        label={t("buyer.contact")}
+                        placeholder={t("buyer.contact")}
+                        autoComplete="off"
+                        withAsterisk
+                        error={
+                            errors.name === undefined
+                                ? undefined
+                                : "err"
+                        }
+                    />
+                </ Grid.Col> */}
+            </Grid>
         </BaseForm>
     );
 }

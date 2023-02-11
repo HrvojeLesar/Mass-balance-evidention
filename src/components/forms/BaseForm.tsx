@@ -1,5 +1,5 @@
+import { Button } from "@mantine/core";
 import { FormEventHandler, ReactNode } from "react";
-import { Button, Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { FaSave } from "react-icons/fa";
 
@@ -17,17 +17,17 @@ export default function BaseForm({
 }: BaseFormProps) {
     const { t } = useTranslation();
     return (
-        <Form onSubmit={onSubmit}>
+        <form onSubmit={onSubmit}>
             {children}
             <Button
-                variant="success"
+                color="teal"
                 type="submit"
-                className="d-flex align-items-center"
+                // className="d-flex align-items-center"
                 disabled={submitDisabled}
+                leftIcon={<FaSave />}
             >
-                <FaSave className="me-1" />
                 {t("save")}
             </Button>
-        </Form>
+        </form>
     );
 }

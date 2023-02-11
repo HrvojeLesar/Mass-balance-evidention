@@ -8,6 +8,60 @@ type AllEntires {
 	total: Int!
 }
 
+type Article {
+	id: Int!
+	name: String!
+	description: String
+	dGroup: Int!
+	createdAt: DateTime!
+}
+
+input ArticleFetchOptions {
+	id: Int
+	pageSize: Int
+	page: Int
+	ordering: ArticleOrderingOptions
+	filters: [ArticleFilterOptions!]
+	dataGroupId: Int
+}
+
+enum ArticleFields {
+	ID
+	NAME
+	DESCRIPTION
+}
+
+input ArticleFilterOptions {
+	field: ArticleFields!
+	fieldType: FieldTypes!
+	value: String!
+}
+
+input ArticleInsertOptions {
+	name: String!
+	description: String
+	dGroup: Int!
+}
+
+input ArticleOrderingOptions {
+	order: Ordering!
+	orderBy: ArticleFields!
+}
+
+type ArticleResults {
+	results: [Article!]!
+	page: Int!
+	pageSize: Int!
+	totalItems: Int!
+	totalPages: Int!
+}
+
+input ArticleUpdateOptions {
+	id: Int!
+	name: String
+	description: String
+}
+
 
 type Buyer {
 	id: Int!
@@ -125,11 +179,9 @@ type CellCulturePairResult {
 }
 
 input CellCulturePairUpdateOptions {
-	idCellNew: Int!
-	idCultureNew: Int!
-	idCellOld: Int!
-	idCultureOld: Int!
-	idDGroup: Int!
+	id: Int!
+	idCell: Int
+	idCulture: Int
 }
 
 input CellFetchOptions {
@@ -319,6 +371,130 @@ input DeleteOptions {
 	id: Int!
 }
 
+type DispatchNoteArticle {
+	dispatchNote: Dispatch_note!
+	article: Article!
+	weightType: String
+	quantity: Float!
+	createdAt: DateTime!
+	dGroup: DataGroup!
+}
+
+input DispatchNoteArticleFetchOptions {
+	id: DispatchNoteArticleIds
+	pageSize: Int
+	page: Int
+	ordering: DispatchNoteArticleOrderingOptions
+	filters: [DispatchNoteArticleFilterOptions!]
+	dataGroupId: Int
+}
+
+enum DispatchNoteArticleFields {
+	ARTICLE_NAME
+	ARTICLE_DESCRIPTION
+	WEIGHT_TYPE
+	QUANTITY
+}
+
+input DispatchNoteArticleFilterOptions {
+	field: DispatchNoteArticleFields!
+	fieldType: FieldTypes!
+	value: String!
+}
+
+input DispatchNoteArticleIds {
+	idDispatchNote: Int
+	idArticle: Int
+	dGroup: Int
+}
+
+input DispatchNoteArticleInsertOptions {
+	idDispatchNote: Int!
+	idArticle: Int!
+	weightType: String
+	quantity: Float!
+	dGroup: Int!
+}
+
+input DispatchNoteArticleOrderingOptions {
+	order: Ordering!
+	orderBy: DispatchNoteArticleFields!
+}
+
+type DispatchNoteArticleResults {
+	results: [DispatchNoteArticle!]!
+	page: Int!
+	pageSize: Int!
+	totalItems: Int!
+	totalPages: Int!
+}
+
+input DispatchNoteArticleUpdateOptions {
+	id: Int!
+	idDispatchNote: Int
+	idArticle: Int
+	weightType: String
+	quantity: Float
+}
+
+input DispatchNoteFetchOptions {
+	id: Int
+	pageSize: Int
+	page: Int
+	ordering: DispatchNoteOrderingOptions
+	filters: [DispatchNoteFilterOptions!]
+	dataGroupId: Int
+}
+
+enum DispatchNoteFields {
+	ID
+	NOTE_TYPE
+	NUMERICAL_IDENTIFIER
+	ISSUING_DATE
+}
+
+input DispatchNoteFilterOptions {
+	field: DispatchNoteFields!
+	fieldType: FieldTypes!
+	value: String!
+}
+
+input DispatchNoteInsertOptions {
+	noteType: Int
+	numericalIdentifier: Int
+	issuingDate: DateTime
+	dGroup: Int!
+}
+
+input DispatchNoteOrderingOptions {
+	order: Ordering!
+	orderBy: DispatchNoteFields!
+}
+
+type DispatchNoteResults {
+	results: [Dispatch_note!]!
+	page: Int!
+	pageSize: Int!
+	totalItems: Int!
+	totalPages: Int!
+}
+
+input DispatchNoteUpdateOptions {
+	id: Int!
+	noteType: Int
+	numericalIdentifier: Int
+	issuingDate: DateTime
+}
+
+type Dispatch_note {
+	id: Int!
+	noteType: Int
+	numericalIdentifier: Int
+	issuingDate: DateTime
+	dGroup: Int!
+	createdAt: DateTime!
+}
+
 type Entry {
 	id: Int!
 	weight: Float
@@ -420,6 +596,15 @@ type MutationRoot {
 	insertEntry(options: EntryInsertOptions!): Entry!
 	updateEntry(options: EntryUpdateOptions!): Entry!
 	deleteEntry(options: DeleteOptions!): RowsDeleted!
+	insertArticle(options: ArticleInsertOptions!): Article!
+	updateArticle(options: ArticleUpdateOptions!): Article!
+	deleteArticle(options: DeleteOptions!): RowsDeleted!
+	insertDispatchNote(options: DispatchNoteInsertOptions!): Dispatch_note!
+	updateDispatchNote(options: DispatchNoteUpdateOptions!): Dispatch_note!
+	deleteDispatchNote(options: DeleteOptions!): RowsDeleted!
+	insertDispatchNoteArticle(options: DispatchNoteArticleInsertOptions!): DispatchNoteArticle!
+	updateDispatchNoteArticle(options: DispatchNoteArticleUpdateOptions!): DispatchNoteArticle!
+	deleteDispatchNoteArticle(options: DeleteOptions!): RowsDeleted!
 }
 
 enum Ordering {
@@ -445,6 +630,9 @@ type QueryRoot {
 	allCellCulturePairs(options: CellCultureFetchOptions!): AllCellCulturePairs!
 	entries(options: EntryFetchOptions!): EntryResult!
 	allEntries(options: EntryFetchOptions!): AllEntires!
+	articles(options: ArticleFetchOptions!): ArticleResults!
+	dispatchNotes(options: DispatchNoteFetchOptions!): DispatchNoteResults!
+	dispatchNoteArticles(options: DispatchNoteArticleFetchOptions!): DispatchNoteArticleResults!
 }
 
 type RowsDeleted {

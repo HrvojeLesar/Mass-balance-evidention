@@ -4,7 +4,6 @@ import {
     SortingState,
 } from "@tanstack/react-table";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Card } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { DataGroupContext } from "../../DataGroupProvider";
 import {
@@ -22,6 +21,7 @@ import DataTable from "../DataTable";
 import DeleteModal from "../DeleteModal";
 import EditModal from "../EditModal";
 import CellForm from "../forms/CellForm";
+import CardUtil from "../util/CardUtil";
 import { TableProps } from "./TableUtils";
 
 type T = Cell;
@@ -144,7 +144,7 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
     });
 
     return (
-        <Card className="p-2 shadow">
+        <CardUtil>
             <EditModal
                 title={t("titles.edit").toString()}
                 show={isModalShown}
@@ -188,6 +188,6 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
                 filterState={{ columnFilters, setColumnFilters }}
                 dataLoadingState={{ isInitialLoading }}
             />
-        </Card>
+        </CardUtil>
     );
 }

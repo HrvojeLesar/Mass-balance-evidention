@@ -38,6 +38,7 @@ CREATE TABLE cell_culture_pair (
     id_cell INT REFERENCES cell(id) NOT NULL,
     id_culture INT REFERENCES culture(id) NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    UNIQUE (id_cell, id_culture, d_group),
     d_group INT REFERENCES data_group(id) NOT NULL
 );
 

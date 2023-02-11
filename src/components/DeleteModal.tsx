@@ -1,5 +1,5 @@
+import { Button, Divider, Flex, Modal, Title } from "@mantine/core";
 import { ReactNode } from "react";
-import { Button, Modal } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
 type DeleteModalProps = {
@@ -11,7 +11,7 @@ type DeleteModalProps = {
     errorMsg: ReactNode | string | undefined;
 };
 
-export default function EditModal({
+export default function DeleteModal({
     title,
     show,
     onHide,
@@ -22,34 +22,28 @@ export default function EditModal({
 
     return (
         <Modal
-            show={show}
-            onHide={isLoading ? undefined : onHide}
+            opened={show}
+            onClose={() => {
+                if (!isLoading) {
+                    onHide();
+                }
+            }}
             centered
-            backdrop={isLoading ? "static" : true}
-            keyboard={isLoading ? false : true}
+            closeOnClickOutside={isLoading ? false : true}
+            closeOnEscape={isLoading ? false : true}
+            title={<Title order={3}>{title}</Title>}
+            size="auto"
         >
-            <Modal.Header closeButton={!isLoading}>
-                <Modal.Title>{title}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                {t("deleteModal.deleteConfirmText").toString()}
-            </Modal.Body>
-            <Modal.Footer>
-                <Button
-                    variant="secondary"
-                    onClick={onHide}
-                    disabled={isLoading}
-                >
+            {t("deleteModal.deleteConfirmText").toString()}
+            <Divider my="sm" />
+            <Flex justify="end" gap="sm">
+                <Button color="gray" onClick={onHide} disabled={isLoading}>
                     {t("deleteModal.cancelButton").toString()}
                 </Button>
-                <Button
-                    variant="danger"
-                    onClick={deleteFn}
-                    disabled={isLoading}
-                >
+                <Button color="red" onClick={deleteFn} disabled={isLoading}>
                     {t("deleteModal.confirmButton").toString()}
                 </Button>
-            </Modal.Footer>
+            </Flex>
         </Modal>
     );
 }

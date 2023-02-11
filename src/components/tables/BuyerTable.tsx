@@ -4,7 +4,6 @@ import {
     SortingState,
 } from "@tanstack/react-table";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Card } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import {
     Buyer,
@@ -23,6 +22,8 @@ import ActionButtons from "../ActionButtons";
 import EditModal from "../EditModal";
 import DeleteModal from "../DeleteModal";
 import { DataGroupContext } from "../../DataGroupProvider";
+import CardUtil from "../util/CardUtil";
+import { Divider } from "@mantine/core";
 
 type T = Buyer;
 type TFields = BuyerFields;
@@ -50,21 +51,21 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
                 page: pagination.pageIndex + 1,
                 ordering: sorting[0]
                     ? {
-                        order: !sorting[0].desc
-                            ? Ordering.Asc
-                            : Ordering.Desc,
-                        orderBy: sorting[0].id.toUpperCase() as TFields,
-                    }
+                          order: !sorting[0].desc
+                              ? Ordering.Asc
+                              : Ordering.Desc,
+                          orderBy: sorting[0].id.toUpperCase() as TFields,
+                      }
                     : undefined,
                 filters:
                     columnFilters.length > 0
                         ? columnFilters.map((filter) => {
-                            return {
-                                value: filter.value as string,
-                                fieldType: FieldTypes.String,
-                                field: filter.id.toUpperCase() as TFields,
-                            };
-                        })
+                              return {
+                                  value: filter.value as string,
+                                  fieldType: FieldTypes.String,
+                                  field: filter.id.toUpperCase() as TFields,
+                              };
+                          })
                         : undefined,
                 dataGroupId: dataGroupContextValue.selectedGroup,
             },
@@ -150,7 +151,7 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
     });
 
     return (
-        <Card className="p-2 shadow">
+        <CardUtil>
             <EditModal
                 title={t("titles.edit").toString()}
                 show={isModalShown}
@@ -183,7 +184,7 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
             {isInsertable && (
                 <>
                     <BuyerForm onInsertSuccess={onSuccess} />
-                    <div className="divider"></div>
+                    <Divider my="sm" variant="dashed" />
                 </>
             )}
             <DataTable
@@ -194,6 +195,6 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
                 filterState={{ columnFilters, setColumnFilters }}
                 dataLoadingState={{ isInitialLoading }}
             />
-        </Card>
+        </CardUtil>
     );
 }

@@ -1,5 +1,5 @@
+import { Grid, TextInput } from "@mantine/core";
 import { useContext } from "react";
-import { Col, Form, Row } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { DataGroupContext } from "../../DataGroupProvider";
@@ -79,36 +79,39 @@ export default function CultureForm({
                       })
             }
         >
-            <Row className="mb-3">
-                <Col>
-                    <Form.Group>
-                        <Form.Label>{t("culture.name")}*</Form.Label>
-                        <Form.Control
-                            {...register("name", {
-                                required: t("culture.errors.name"),
-                            })}
-                            type="input"
-                            placeholder={t("culture.name")}
-                            autoComplete="off"
-                            isInvalid={errors.name !== undefined}
-                        />
-                        <Form.Control.Feedback type="invalid">
-                            {t("culture.errors.name")}
-                        </Form.Control.Feedback>
-                    </Form.Group>
-                </Col>
-                {/* <Col>
-                    <Form.Group>
-                        <Form.Label>{t("culture.description")}</Form.Label>
-                        <Form.Control
+            <Grid mb="sm">
+                <Grid.Col>
+                    <TextInput
+                        {...register("name", {
+                            required: t("culture.errors.name"),
+                        })}
+                        label={t("culture.name")}
+                        placeholder={t("culture.name")}
+                        autoComplete="off"
+                        withAsterisk
+                        error={
+                            errors.name === undefined
+                                ? undefined
+                                : t("culture.errors.name")
+                        }
+                        spellCheck={false}
+                    />
+                </Grid.Col>
+                {/* <Grid.Col>
+                        <TextInput
                             {...register("description", {})}
-                            type="input"
+                            label={t("culture.description")}
                             placeholder={t("culture.description")}
                             autoComplete="off"
+                            withAsterisk
+                            error={
+                                errors.name === undefined
+                                    ? undefined
+                                    : t("culture.errors.name")
+                            }
                         />
-                    </Form.Group>
-                </Col> */}
-            </Row>
+                    </Grid.Col> */}
+            </Grid>
         </BaseForm>
     );
 }

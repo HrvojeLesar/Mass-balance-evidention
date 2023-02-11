@@ -1,4 +1,4 @@
-import { Col, Form, Row } from "react-bootstrap";
+import { Form } from "react-bootstrap";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
@@ -35,6 +35,8 @@ import {
 } from "./FormUtils";
 import moment from "moment";
 import { DataGroupContext } from "../../DataGroupProvider";
+import { Grid, NumberInput } from "@mantine/core";
+import { DatePicker } from "@mantine/dates";
 
 type FormInput = {
     cell: SelectOption<Cell> | undefined;
@@ -65,7 +67,6 @@ export default function EntryForm({
         control,
         handleSubmit,
         setValue,
-        register,
         reset,
         getValues,
         formState: { errors },
@@ -165,9 +166,9 @@ export default function EntryForm({
             edit === undefined
                 ? undefined
                 : ({
-                    value: edit?.cell,
-                    label: edit?.cell?.name ?? "",
-                } as SelectOption<Cell>),
+                      value: edit?.cell,
+                      label: edit?.cell?.name ?? "",
+                  } as SelectOption<Cell>),
         page: 1,
         pages: {},
         limit: LIMIT,
@@ -182,9 +183,9 @@ export default function EntryForm({
             edit === undefined
                 ? undefined
                 : ({
-                    value: edit?.culture,
-                    label: edit?.culture?.name ?? "",
-                } as SelectOption<Culture>),
+                      value: edit?.culture,
+                      label: edit?.culture?.name ?? "",
+                  } as SelectOption<Culture>),
         page: 1,
         pages: {},
         limit: LIMIT,
@@ -199,9 +200,9 @@ export default function EntryForm({
             edit === undefined
                 ? undefined
                 : ({
-                    value: edit?.buyer,
-                    label: edit?.buyer?.name ?? "",
-                } as SelectOption<Buyer>),
+                      value: edit?.buyer,
+                      label: edit?.buyer?.name ?? "",
+                  } as SelectOption<Buyer>),
         page: 1,
         pages: {},
         limit: LIMIT,
@@ -244,12 +245,12 @@ export default function EntryForm({
                     filters:
                         cellSelectState.filter !== ""
                             ? [
-                                {
-                                    value: cellSelectState.filter,
-                                    fieldType: FieldTypes.String,
-                                    field: CellFields.Name,
-                                },
-                            ]
+                                  {
+                                      value: cellSelectState.filter,
+                                      fieldType: FieldTypes.String,
+                                      field: CellFields.Name,
+                                  },
+                              ]
                             : undefined,
                     dataGroupId: dataGroupContextValue.selectedGroup,
                 },
@@ -282,12 +283,12 @@ export default function EntryForm({
                     filters:
                         cultureSelectState.filter !== ""
                             ? [
-                                {
-                                    value: cultureSelectState.filter,
-                                    fieldType: FieldTypes.String,
-                                    field: CultureFields.Name,
-                                },
-                            ]
+                                  {
+                                      value: cultureSelectState.filter,
+                                      fieldType: FieldTypes.String,
+                                      field: CultureFields.Name,
+                                  },
+                              ]
                             : undefined,
                     dataGroupId: dataGroupContextValue.selectedGroup,
                 },
@@ -317,12 +318,12 @@ export default function EntryForm({
                 filters:
                     buyerSelectState.filter !== ""
                         ? [
-                            {
-                                value: buyerSelectState.filter,
-                                fieldType: FieldTypes.String,
-                                field: BuyerFields.Name,
-                            },
-                        ]
+                              {
+                                  value: buyerSelectState.filter,
+                                  fieldType: FieldTypes.String,
+                                  field: BuyerFields.Name,
+                              },
+                          ]
                         : undefined,
                 dataGroupId: dataGroupContextValue.selectedGroup,
             },
@@ -425,253 +426,225 @@ export default function EntryForm({
                     : handleSubmit(onInsertSubmit)
             }
         >
-            <Row className="mb-3">
-                <Col>
-                    <Form.Group>
-                        <Form.Label>{t("culture.name")}*</Form.Label>
-                        <Controller
-                            name="culture"
-                            control={control}
-                            rules={{ required: t("culture.errors.name") }}
-                            render={() => (
-                                <Select
-                                    placeholder={t("culture.selectPlaceholder")}
-                                    loadingMessage={() => t("loading")}
-                                    noOptionsMessage={() => t("noOptions")}
-                                    styles={selectStyle(errors.culture)}
-                                    isMulti={false}
-                                    className={
-                                        errors.culture
-                                            ? "is-invalid"
-                                            : undefined
+            <Grid mb="sm" grow>
+                <Grid.Col sm={12} md={6} lg={6}>
+                    <Form.Label>{t("culture.name")}*</Form.Label>
+                    <Controller
+                        name="culture"
+                        control={control}
+                        rules={{ required: t("culture.errors.name") }}
+                        render={() => (
+                            <Select
+                                placeholder={t("culture.selectPlaceholder")}
+                                loadingMessage={() => t("loading")}
+                                noOptionsMessage={() => t("noOptions")}
+                                styles={selectStyle(errors.culture)}
+                                isMulti={false}
+                                className={
+                                    errors.culture ? "is-invalid" : undefined
+                                }
+                                value={cultureSelectState.selected}
+                                options={cultureOptions}
+                                onMenuClose={() => {
+                                    setCultureSelectState((old) => ({
+                                        ...old,
+                                        page: 1,
+                                    }));
+                                }}
+                                onMenuScrollToBottom={
+                                    cultureSelectState.page <
+                                    cultureSelectState.maxPage
+                                        ? () => {
+                                              setCultureSelectState((old) => ({
+                                                  ...old,
+                                                  page: old.page + 1,
+                                              }));
+                                          }
+                                        : undefined
+                                }
+                                onInputChange={(value, actionMeta) => {
+                                    if (actionMeta.action === "input-change") {
+                                        setDebouncedCultureInputValue(value);
                                     }
-                                    value={cultureSelectState.selected}
-                                    options={cultureOptions}
-                                    onMenuClose={() => {
-                                        setCultureSelectState((old) => ({
-                                            ...old,
-                                            page: 1,
-                                        }));
-                                    }}
-                                    onMenuScrollToBottom={
-                                        cultureSelectState.page <
-                                            cultureSelectState.maxPage
-                                            ? () => {
-                                                setCultureSelectState(
-                                                    (old) => ({
-                                                        ...old,
-                                                        page: old.page + 1,
-                                                    })
-                                                );
-                                            }
-                                            : undefined
-                                    }
-                                    onInputChange={(value, actionMeta) => {
-                                        if (
-                                            actionMeta.action === "input-change"
-                                        ) {
-                                            setDebouncedCultureInputValue(
-                                                value
-                                            );
-                                        }
-                                    }}
-                                    onChange={(value, actionMeta) => {
-                                        onChange(
-                                            value,
-                                            actionMeta,
-                                            setCultureSelectState
-                                        );
-                                        setValue(
-                                            "culture",
-                                            value ?? undefined,
-                                            { shouldValidate: true }
-                                        );
-                                        if (actionMeta.action === "clear") {
-                                            setCellSelectState((old) => ({
-                                                ...old,
-                                                filter: "",
-                                                selected: null,
-                                            }));
-                                        }
-                                    }}
-                                    isLoading={isFetchingCultures}
-                                    isClearable
-                                />
-                            )}
-                        />
-                        <div className="invalid-feedback">
-                            {t("culture.errors.name")}
-                        </div>
-                    </Form.Group>
-                </Col>
-                <Col>
-                    <Form.Group>
-                        <Form.Label>{t("cell.name")}*</Form.Label>
-                        <Controller
-                            name="cell"
-                            control={control}
-                            rules={{ required: t("cell.errors.name") }}
-                            render={() => (
-                                <Select
-                                    placeholder={t("cell.selectPlaceholder")}
-                                    loadingMessage={() => t("loading")}
-                                    noOptionsMessage={() => t("noOptions")}
-                                    styles={selectStyle(errors.cell)}
-                                    isMulti={false}
-                                    className={
-                                        errors.cell ? "is-invalid" : undefined
-                                    }
-                                    value={cellSelectState.selected}
-                                    options={cellOptions}
-                                    onMenuClose={() => {
+                                }}
+                                onChange={(value, actionMeta) => {
+                                    onChange(
+                                        value,
+                                        actionMeta,
+                                        setCultureSelectState
+                                    );
+                                    setValue("culture", value ?? undefined, {
+                                        shouldValidate: true,
+                                    });
+                                    if (actionMeta.action === "clear") {
                                         setCellSelectState((old) => ({
                                             ...old,
-                                            page: 1,
+                                            filter: "",
+                                            selected: null,
                                         }));
-                                    }}
-                                    onMenuScrollToBottom={
-                                        cellSelectState.page <
-                                            cellSelectState.maxPage
-                                            ? () => {
-                                                setCellSelectState((old) => ({
-                                                    ...old,
-                                                    page: old.page + 1,
-                                                }));
-                                            }
-                                            : undefined
                                     }
-                                    onInputChange={(value, actionMeta) => {
-                                        if (
-                                            actionMeta.action === "input-change"
-                                        ) {
-                                            setDebouncedCellInputValue(value);
-                                        }
-                                    }}
-                                    onChange={(value, actionMeta) => {
-                                        onChange(
-                                            value,
-                                            actionMeta,
-                                            setCellSelectState
-                                        );
-                                        setValue("cell", value ?? undefined, {
-                                            shouldValidate: true,
-                                        });
-                                    }}
-                                    isLoading={isFetchingCells}
-                                    isClearable
-                                />
-                            )}
-                        />
-                        <div className="invalid-feedback">
-                            {t("cell.errors.name")}
-                        </div>
-                    </Form.Group>
-                </Col>
-            </Row>
-            <Row className="mb-3">
-                <Col>
-                    <Form.Group>
-                        <Form.Label>{t("entry.weight")}*</Form.Label>
-                        <Form.Control
-                            {...register("weight", {
-                                required: t("weight.errors.name"),
-                            })}
-                            type="number"
-                            step="any"
-                            placeholder={t("entry.weight")}
-                            autoComplete="off"
-                            isInvalid={errors.weight !== undefined}
-                        />
-                        <Form.Control.Feedback type="invalid">
-                            {t("weight.errors.name")}
-                        </Form.Control.Feedback>
-                    </Form.Group>
-                </Col>
-                <Col>
-                    <Form.Group>
-                        <Form.Label>{t("buyer.name")}*</Form.Label>
-                        <Controller
-                            name="buyer"
-                            control={control}
-                            rules={{ required: t("buyer.errors.name") }}
-                            render={() => (
-                                <Select
-                                    placeholder={t("buyer.selectPlaceholder")}
-                                    loadingMessage={() => t("loading")}
-                                    noOptionsMessage={() => t("noOptions")}
-                                    styles={selectStyle(errors.buyer)}
-                                    isMulti={false}
-                                    className={
-                                        errors.buyer ? "is-invalid" : undefined
+                                }}
+                                isLoading={isFetchingCultures}
+                                isClearable
+                            />
+                        )}
+                    />
+                </Grid.Col>
+                <Grid.Col sm={12} md={6} lg={6}>
+                    <Form.Label>{t("cell.name")}*</Form.Label>
+                    <Controller
+                        name="cell"
+                        control={control}
+                        rules={{ required: t("cell.errors.name") }}
+                        render={() => (
+                            <Select
+                                placeholder={t("cell.selectPlaceholder")}
+                                loadingMessage={() => t("loading")}
+                                noOptionsMessage={() => t("noOptions")}
+                                styles={selectStyle(errors.cell)}
+                                isMulti={false}
+                                className={
+                                    errors.cell ? "is-invalid" : undefined
+                                }
+                                value={cellSelectState.selected}
+                                options={cellOptions}
+                                onMenuClose={() => {
+                                    setCellSelectState((old) => ({
+                                        ...old,
+                                        page: 1,
+                                    }));
+                                }}
+                                onMenuScrollToBottom={
+                                    cellSelectState.page <
+                                    cellSelectState.maxPage
+                                        ? () => {
+                                              setCellSelectState((old) => ({
+                                                  ...old,
+                                                  page: old.page + 1,
+                                              }));
+                                          }
+                                        : undefined
+                                }
+                                onInputChange={(value, actionMeta) => {
+                                    if (actionMeta.action === "input-change") {
+                                        setDebouncedCellInputValue(value);
                                     }
-                                    value={buyerSelectState.selected}
-                                    options={buyerOptions}
-                                    onMenuClose={() => {
-                                        setBuyerSelectState((old) => ({
-                                            ...old,
-                                            page: 1,
-                                        }));
-                                    }}
-                                    onMenuScrollToBottom={
-                                        buyerSelectState.page <
-                                            buyerSelectState.maxPage
-                                            ? () => {
-                                                setBuyerSelectState(
-                                                    (old) => ({
-                                                        ...old,
-                                                        page: old.page + 1,
-                                                    })
-                                                );
-                                            }
-                                            : undefined
+                                }}
+                                onChange={(value, actionMeta) => {
+                                    onChange(
+                                        value,
+                                        actionMeta,
+                                        setCellSelectState
+                                    );
+                                    setValue("cell", value ?? undefined, {
+                                        shouldValidate: true,
+                                    });
+                                }}
+                                isLoading={isFetchingCells}
+                                isClearable
+                            />
+                        )}
+                    />
+                </Grid.Col>
+                <Grid.Col sm={12} md={6} lg={6}>
+                    <Controller
+                        name="weight"
+                        control={control}
+                        rules={{ required: t("weight.errors.name") }}
+                        render={() => (
+                            <NumberInput
+                                placeholder={t("entry.weight").toString()}
+                                label={t("entry.weight").toString()}
+                                autoComplete="off"
+                                withAsterisk
+                                error={
+                                    errors.weight === undefined
+                                        ? undefined
+                                        : t("cell.errors.name")
+                                }
+                                spellCheck={false}
+                            />
+                        )}
+                    />
+                </Grid.Col>
+                <Grid.Col sm={12} md={6} lg={6}>
+                    <Form.Label>{t("buyer.name")}*</Form.Label>
+                    <Controller
+                        name="buyer"
+                        control={control}
+                        rules={{ required: t("buyer.errors.name") }}
+                        render={() => (
+                            <Select
+                                placeholder={t("buyer.selectPlaceholder")}
+                                loadingMessage={() => t("loading")}
+                                noOptionsMessage={() => t("noOptions")}
+                                styles={selectStyle(errors.buyer)}
+                                isMulti={false}
+                                className={
+                                    errors.buyer ? "is-invalid" : undefined
+                                }
+                                value={buyerSelectState.selected}
+                                options={buyerOptions}
+                                onMenuClose={() => {
+                                    setBuyerSelectState((old) => ({
+                                        ...old,
+                                        page: 1,
+                                    }));
+                                }}
+                                onMenuScrollToBottom={
+                                    buyerSelectState.page <
+                                    buyerSelectState.maxPage
+                                        ? () => {
+                                              setBuyerSelectState((old) => ({
+                                                  ...old,
+                                                  page: old.page + 1,
+                                              }));
+                                          }
+                                        : undefined
+                                }
+                                onInputChange={(value, actionMeta) => {
+                                    if (actionMeta.action === "input-change") {
+                                        setDebouncedBuyerInputValue(value);
                                     }
-                                    onInputChange={(value, actionMeta) => {
-                                        if (
-                                            actionMeta.action === "input-change"
-                                        ) {
-                                            setDebouncedBuyerInputValue(value);
-                                        }
-                                    }}
-                                    onChange={(value, actionMeta) => {
-                                        onChange(
-                                            value,
-                                            actionMeta,
-                                            setBuyerSelectState
-                                        );
-                                        setValue("buyer", value ?? undefined, {
-                                            shouldValidate: true,
-                                        });
-                                    }}
-                                    isLoading={isFetchingBuyers}
-                                    isClearable
-                                />
-                            )}
-                        />
-                        <div className="invalid-feedback">
-                            {t("buyer.errors.name")}
-                        </div>
-                    </Form.Group>
-                </Col>
-            </Row>
-            <Row className="mb-3">
-                <Col>
-                    <Form.Group>
-                        <Form.Label>{t("entry.date")}*</Form.Label>
-                        <Form.Control
-                            {...register("date", {
-                                required: t("date.errors.name"),
-                            })}
-                            type="date"
-                            placeholder={t("entry.date")}
-                            autoComplete="off"
-                            isInvalid={errors.date !== undefined}
-                        />
-                        <Form.Control.Feedback type="invalid">
-                            {t("date.errors.name")}
-                        </Form.Control.Feedback>
-                    </Form.Group>
-                </Col>
-            </Row>
+                                }}
+                                onChange={(value, actionMeta) => {
+                                    onChange(
+                                        value,
+                                        actionMeta,
+                                        setBuyerSelectState
+                                    );
+                                    setValue("buyer", value ?? undefined, {
+                                        shouldValidate: true,
+                                    });
+                                }}
+                                isLoading={isFetchingBuyers}
+                                isClearable
+                            />
+                        )}
+                    />
+                </Grid.Col>
+                <Grid.Col sm={12} md={6} lg={6}>
+                    <Controller
+                        name="date"
+                        control={control}
+                        rules={{ required: t("date.errors.name") }}
+                        render={() => (
+                            <DatePicker
+                                label={t("entry.date")}
+                                placeholder={t("entry.date")}
+                                autoComplete="off"
+                                withAsterisk
+                                error={
+                                    errors.date === undefined
+                                        ? undefined
+                                        : t("cell.errors.name")
+                                }
+                                spellCheck={false}
+                            />
+                        )}
+                    />
+                </Grid.Col>
+            </Grid>
         </BaseForm>
     );
 }

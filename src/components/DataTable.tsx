@@ -72,28 +72,28 @@ export default function DataTable<T>({
         }
     }, [data, paginationState, pageCount]);
 
-    // WARN: can be very slow if pageIndex is huge and database is missing
-    // loads of pages. E.g. pageIndex is 100, actual first page is 10.
-    // This will count down from 100 to 10 or until it finds a page with
-    // more than 0 data.total
-    useEffect(() => {
-        if (
-            (paginationState.manual ?? true) &&
-            data.total !== undefined &&
-            data.total === 0 &&
-            paginationState.pagination.pageIndex >= 1
-        ) {
-            paginationState.setPagination((old) => ({
-                ...old,
-                pageIndex: old.pageIndex - 1,
-            }));
-        }
-    }, [
-        paginationState,
-        paginationState.manual,
-        data,
-        paginationState.pagination,
-    ]);
+    // // WARN: can be very slow if pageIndex is huge and database is missing
+    // // loads of pages. E.g. pageIndex is 100, actual first page is 10.
+    // // This will count down from 100 to 10 or until it finds a page with
+    // // more than 0 data.total
+    // useEffect(() => {
+    //     if (
+    //         (paginationState.manual ?? true) &&
+    //         data.total !== undefined &&
+    //         data.total === 0 &&
+    //         paginationState.pagination.pageIndex >= 1
+    //     ) {
+    //         paginationState.setPagination((old) => ({
+    //             ...old,
+    //             pageIndex: old.pageIndex - 1,
+    //         }));
+    //     }
+    // }, [
+    //     paginationState,
+    //     paginationState.manual,
+    //     data,
+    //     paginationState.pagination,
+    // ]);
 
     const table = useReactTable({
         data: data.data,

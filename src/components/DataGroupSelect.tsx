@@ -1,7 +1,9 @@
+import { Select } from "@mantine/core";
 import { useContext, useMemo } from "react";
-import { Card, Form } from "react-bootstrap";
+import { Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { DataGroupContext } from "../DataGroupProvider";
+import CardUtil from "./util/CardUtil";
 
 export default function DataGroupSelect() {
     const { t } = useTranslation();
@@ -9,30 +11,28 @@ export default function DataGroupSelect() {
     const isGroupsEmpty = useMemo(() => value.groups?.length === 0, [value]);
     return (
         <Form>
-            <Form.Label>{t("dataGroup.dataGroupSelect").toString()}</Form.Label>
-            <Form.Select
-                value={value.selectedGroup}
+            <Select
+                label={t("dataGroup.dataGroupSelect").toString()}
+                value={
+                    value.selectedGroup
+                        ? value.selectedGroup.toString()
+                        : undefined
+                }
                 disabled={value.isLoading || isGroupsEmpty}
-                onChange={(e) => {
-                    if (value.selectGroup) {
-                        value.selectGroup(Number(e.target.value));
+                onChange={(val) => {
+                    if (value.selectGroup !== undefined) {
+                        value.selectGroup(Number(val));
                     }
                 }}
-            >
-                {value.isLoading ? (
-                    <option>{t("loading").toString()}</option>
-                ) : isGroupsEmpty ? (
-                    <option>{t("dataGroup.noGroups")}</option>
-                ) : (
-                    value.groups?.map((group) => {
-                        return (
-                            <option key={group.id} value={group.id}>
-                                {group.name}
-                            </option>
-                        );
-                    })
-                )}
-            </Form.Select>
+                data={
+                    value.isLoading
+                        ? [{ value: "loading", label: t("loading").toString() }]
+                        : value.groups?.map((group) => ({
+                              value: group.id.toString(),
+                              label: group.name,
+                          })) ?? []
+                }
+            />
         </Form>
     );
 }
@@ -40,9 +40,9 @@ export default function DataGroupSelect() {
 export function DataGroupSelectFlex() {
     return (
         <div className="d-flex flex-row-reverse mb-2">
-            <Card className="p-2 shadow">
+            <CardUtil>
                 <DataGroupSelect />
-            </Card>
+            </CardUtil>
         </div>
     );
 }
