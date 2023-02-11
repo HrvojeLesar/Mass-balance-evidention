@@ -1,3 +1,4 @@
+import { Divider, Title } from "@mantine/core";
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -167,17 +168,15 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
                 }}
             />
             {isInsertable ? (
-                <div className="h5 mb-1">
-                    {t("titles.cellInsertable").toString()}
-                </div>
+                <Title order={4}>{t("titles.cellInsertable").toString()}</Title>
             ) : (
-                <div className="h5 mb-1">{t("titles.cell").toString()}</div>
+                <Title order={4}>{t("titles.cell").toString()}</Title>
             )}
-            <div className="divider"></div>
+            <Divider my="sm" />
             {isInsertable && (
                 <>
                     <CellForm onInsertSuccess={onSuccess} />
-                    <div className="divider"></div>
+                    <Divider my="sm" variant="dashed" />
                 </>
             )}
             <DataTable

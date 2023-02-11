@@ -228,7 +228,7 @@ impl Migrate {
 
             self.progress_message
                 .set_main_task(Some(MainTask::DataGroup))?;
-            let group_id = self.migrate_data_group(&data_groups.results, &dcp).await?;
+            let group_id = self.migrate_data_group(&data_groups, &dcp).await?;
 
             self.progress_message.set_main_task(Some(MainTask::Buyer))?;
             self.migrate_buyer(group_id, &db_pool).await?;
@@ -325,7 +325,7 @@ impl Migrate {
                             name: buyer.naziv.unwrap_or_else(|| "".to_owned()),
                             address: None,
                             contact: None,
-                            d_group: Some(data_group_id),
+                            d_group: data_group_id,
                         },
                     });
 
@@ -420,7 +420,7 @@ impl Migrate {
                         insert_options: insert_cell::CellInsertOptions {
                             name: cell.naziv.unwrap_or_else(|| "".to_owned()),
                             description: None,
-                            d_group: Some(data_group_id),
+                            d_group: data_group_id,
                         },
                     });
 
@@ -515,7 +515,7 @@ impl Migrate {
                         insert_options: insert_culture::CultureInsertOptions {
                             name: culture.naziv.unwrap_or_else(|| "".to_owned()),
                             description: None,
-                            d_group: Some(data_group_id),
+                            d_group: data_group_id,
                         },
                     });
 
@@ -600,8 +600,8 @@ impl Migrate {
             .set_subtask(Some(Task::LoadToMigrateCellCulturePair))?;
         for ccp in cell_culture_pairs {
             match existing_cell_culture_pairs.iter().find(|c| {
-                c.cell.name == ccp.cell.naziv.clone().unwrap_or_default()
-                    && c.culture.name == ccp.culture.naziv.clone().unwrap_or_default()
+                c.cell_culture_parts.cell.name == ccp.cell.naziv.clone().unwrap_or_default()
+                    && c.cell_culture_parts.culture.name == ccp.culture.naziv.clone().unwrap_or_default()
             }) {
                 Some(_exists_do_nothing) => (),
                 None => new_pairs.push(ccp),
@@ -849,13 +849,10 @@ impl Migrate {
                             date: entry.date.unwrap_or_else(Utc::now),
                             weight: entry.weight,
                             weight_type: None,
-                            id_buyer: Some(entry.buyer_id),
-                            cell_culture_pair: insert_entry::CellCulturePairIds {
-                                id_cell: entry.cell_id,
-                                id_culture: entry.culture_id,
-                                d_group: data_group_id,
-                            },
-                            d_group: Some(data_group_id),
+                            id_buyer: entry.buyer_id,
+                            id_cell: entry.cell_id,
+                            id_culture: entry.culture_id,
+                            d_group: data_group_id,
                         },
                     });
 

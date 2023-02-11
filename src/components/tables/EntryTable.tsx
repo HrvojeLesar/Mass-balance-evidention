@@ -1,4 +1,4 @@
-import { Select } from "@mantine/core";
+import { Divider, Flex, Select, Title } from "@mantine/core";
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -7,7 +7,6 @@ import {
 } from "@tanstack/react-table";
 import moment from "moment";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { DataGroupContext } from "../../DataGroupProvider";
 import {
@@ -169,20 +168,20 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
                 }}
             />
             {isInsertable ? (
-                <div className="h5 mb-1">
+                <Title order={4}>
                     {t("titles.entryInsertable").toString()}
-                </div>
+                </Title>
             ) : (
-                <div className="h5 mb-1">{t("titles.entry").toString()}</div>
+                <Title order={4}>{t("titles.entry").toString()}</Title>
             )}
-            <div className="divider"></div>
+            <Divider my="sm" />
             {isInsertable && (
                 <>
                     <EntryForm onInsertSuccess={onSuccess} />
-                    <div className="divider"></div>
+                    <Divider my="sm" variant="dashed" />
                 </>
             )}
-            <Form className="d-flex flex-row-reverse mb-2">
+            <Flex mb="sm" direction="row-reverse">
                 <Select
                     label={t("selectOptions.grouping").toString()}
                     value={selectValue}
@@ -216,7 +215,7 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
                         },
                     ]}
                 />
-            </Form>
+            </Flex>
             <DataTable
                 columns={columns}
                 data={{ data: tableData }}

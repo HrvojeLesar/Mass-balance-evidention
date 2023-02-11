@@ -1,4 +1,10 @@
-import { Box, Table as MantineTable, TextInput } from "@mantine/core";
+import {
+    Box,
+    createStyles,
+    Flex,
+    Table as MantineTable,
+    TextInput,
+} from "@mantine/core";
 import { useDebouncedState } from "@mantine/hooks";
 import { Column, flexRender, Table } from "@tanstack/react-table";
 import { useEffect } from "react";
@@ -10,6 +16,34 @@ import {
     IoMdArrowDropright,
 } from "react-icons/io";
 import { DEBOUNCE_TIME } from "./forms/FormUtils";
+
+const useStyles = createStyles((theme) => ({
+    centerLoadingOrNoData: {
+        textAlign: "center",
+        fontWeight: "bold",
+    },
+    tableHeader: {
+        "&:hover": {
+            cursor: "pointer",
+            userSelect: "none",
+            msUserSelect: "none",
+            WebkitUserSelect: "none",
+            MozUserSelect: "none",
+            backgroundColor: theme.colors.gray[1],
+            color: theme.colors.gray[9],
+        },
+    },
+
+    expandCell: {
+        "&:hover": {
+            cursor: "pointer",
+            userSelect: "none",
+            msUserSelect: "none",
+            WebkitUserSelect: "none",
+            MozUserSelect: "none",
+        },
+    },
+}));
 
 type FilterProps<T> = {
     table: Table<T>;
@@ -54,6 +88,7 @@ export default function BaseTable<T>({
     dataLoadingState,
 }: BaseTableProps<T>) {
     const { t } = useTranslation();
+    const { classes } = useStyles();
     return (
         <Box
             sx={(t) => ({
@@ -61,14 +96,14 @@ export default function BaseTable<T>({
                 overflow: "auto",
             })}
         >
-            <MantineTable highlightOnHover withBorder withColumnBorders>
+            <MantineTable highlightOnHover withBorder withColumnBorders striped>
                 <thead>
                     {table.getHeaderGroups().map((headerGroup) => (
                         <tr key={headerGroup.id}>
                             {headerGroup.headers.map((header) => (
                                 <th
                                     key={header.id}
-                                    className="text-center table-header align-middle"
+                                    className={classes.tableHeader}
                                     onClick={
                                         header.column.getCanSort()
                                             ? () => {
@@ -83,8 +118,8 @@ export default function BaseTable<T>({
                                     }
                                 >
                                     {header.isPlaceholder ? null : (
-                                        <div className="d-flex flex-column">
-                                            <div className="d-flex flex-row justify-content-center">
+                                        <Flex direction="column">
+                                            <Flex justify="center">
                                                 <div>
                                                     {flexRender(
                                                         header.column.columnDef
@@ -114,14 +149,14 @@ export default function BaseTable<T>({
                                                               color="gray"
                                                           />
                                                       )}
-                                            </div>
+                                            </Flex>
                                             {header.column.getCanFilter() && (
                                                 <Filter
                                                     column={header.column}
                                                     table={table}
                                                 />
                                             )}
-                                        </div>
+                                        </Flex>
                                     )}
                                 </th>
                             ))}
@@ -134,22 +169,13 @@ export default function BaseTable<T>({
                             table.getRowModel().rows.map((row) => (
                                 <tr key={row.id}>
                                     {row.getVisibleCells().map((cell) => (
-                                        <td
-                                            key={cell.id}
-                                            className={
-                                                cell.getIsGrouped()
-                                                    ? "bg-info bg-opacity-75 align-middle"
-                                                    : cell.getIsAggregated()
-                                                    ? "bg-warning bg-opacity-50 align-middle"
-                                                    : cell.getIsPlaceholder()
-                                                    ? "bg-danger bg-opacity-50 align-middle"
-                                                    : "align-middle"
-                                            }
-                                        >
+                                        <td key={cell.id}>
                                             {cell.getIsGrouped() ? (
                                                 <div
                                                     onClick={row.getToggleExpandedHandler()}
-                                                    className="expand-cell"
+                                                    className={
+                                                        classes.expandCell
+                                                    }
                                                 >
                                                     {row.getIsExpanded() ? (
                                                         <IoMdArrowDropdown
@@ -192,7 +218,7 @@ export default function BaseTable<T>({
                                         table.getHeaderGroups().at(0)?.headers
                                             .length ?? 10
                                     }
-                                    className="text-center h5"
+                                    className={classes.centerLoadingOrNoData}
                                 >
                                     {t("table.noData")}
                                 </td>
@@ -205,7 +231,7 @@ export default function BaseTable<T>({
                                     table.getHeaderGroups().at(0)?.headers
                                         .length ?? 10
                                 }
-                                className="text-center h5"
+                                className={classes.centerLoadingOrNoData}
                             >
                                 {t("loading")}
                             </td>

@@ -1,9 +1,10 @@
+import { Button, Divider, Grid, Title, Text } from "@mantine/core";
 import { useContext, useMemo, useState } from "react";
-import { Button, Card, Col, Row } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import DataGroupSelect from "../components/DataGroupSelect";
 import DataGroupForm from "../components/forms/DataGroupForm";
 import MigrateModal from "../components/MigrateModal";
+import CardUtil from "../components/util/CardUtil";
 import { DataGroupContext } from "../DataGroupProvider";
 
 export default function OptionsView() {
@@ -21,74 +22,75 @@ export default function OptionsView() {
     }, []);
 
     return (
-        <Row className="my-4">
-            <Col md>
-                <Card className="p-2 shadow mb-4">
-                    <div className="h5 mb-1">
-                        {t("titles.dataGroupSelect").toString()}
-                    </div>
-                    <div className="divider"></div>
-                    <DataGroupSelect />
-                </Card>
-            </Col>
-            <Col md>
-                <Card className="p-2 shadow mb-4">
-                    <div className="h5 mb-1">
-                        {t("titles.newDataGroup").toString()}
-                    </div>
-                    <div className="divider"></div>
-                    <DataGroupForm
-                        onInsertSuccess={() => {
-                            if (value.refetch) {
-                                value.refetch();
-                            }
-                        }}
-                    />
-                </Card>
-            </Col>
-            {editValue && (
-                <Col md>
-                    <Card className="p-2 shadow mb-4">
-                        <div className="h5 mb-1">
-                            {t("titles.editDataGroup").toString()}
-                        </div>
-                        <div className="divider"></div>
+        <>
+            <Grid>
+                <Grid.Col sm={12} md={6} lg={6}>
+                    <CardUtil>
+                        <Title order={4}>
+                            {t("titles.dataGroupSelect").toString()}
+                        </Title>
+                        <Divider my="xs" />
+                        <DataGroupSelect />
+                        {editValue && (
+                            <>
+                                <Divider my="xs" />
+                                <Title order={4}>
+                                    {t("titles.editDataGroup").toString()}
+                                </Title>
+                                <Divider my="xs" />
+                                <DataGroupForm
+                                    edit={editValue}
+                                    onUpdateSuccess={() => {
+                                        if (value.refetch) {
+                                            value.refetch();
+                                        }
+                                    }}
+                                />
+                            </>
+                        )}
+                    </CardUtil>
+                </Grid.Col>
+                <Grid.Col sm={12} md={6} lg={6}>
+                    <CardUtil>
+                        <Title order={4}>
+                            {t("titles.newDataGroup").toString()}
+                        </Title>
+                        <Divider my="xs" />
                         <DataGroupForm
-                            edit={editValue}
-                            onUpdateSuccess={() => {
+                            onInsertSuccess={() => {
                                 if (value.refetch) {
                                     value.refetch();
                                 }
                             }}
                         />
-                    </Card>
-                </Col>
-            )}
-            {displayImport && (
-                <Col md>
-                    <Card className="p-2 shadow mb-4">
-                        <div className="h5 mb-1">
-                            {t("titles.migrationModalTitle").toString()}
-                        </div>
-                        <div className="divider"></div>
-                        <MigrateModal
-                            show={isMigrateModalShown}
-                            onHide={() => {
-                                setIsMigrateModalShown(false);
-                            }}
-                        />
-                        <div className="mb-2">{t("migration.optionText")}</div>
-                        <Button
-                            variant="danger"
-                            onClick={() => {
-                                setIsMigrateModalShown(true);
-                            }}
-                        >
-                            {t("migration.start")}
-                        </Button>
-                    </Card>
-                </Col>
-            )}
-        </Row>
+                    </CardUtil>
+                </Grid.Col>
+                {displayImport && (
+                    <Grid.Col sm={12} md={6} lg={6}>
+                        <CardUtil>
+                            <Title order={4}>
+                                {t("titles.migrationModalTitle").toString()}
+                            </Title>
+                            <Divider my="xs" />
+                            <MigrateModal
+                                show={isMigrateModalShown}
+                                onHide={() => {
+                                    setIsMigrateModalShown(false);
+                                }}
+                            />
+                            <Text>{t("migration.optionText")}</Text>
+                            <Button
+                                color="red"
+                                onClick={() => {
+                                    setIsMigrateModalShown(true);
+                                }}
+                            >
+                                {t("migration.start")}
+                            </Button>
+                        </CardUtil>
+                    </Grid.Col>
+                )}
+            </Grid>
+        </>
     );
 }

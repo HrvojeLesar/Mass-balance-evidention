@@ -19,7 +19,7 @@ export default function EditModal({
             opened={show}
             onClose={onHide}
             centered
-            title={<Title order={3}>{title}</Title>}
+            title={<Title order={4}>{title}</Title>}
             size="auto"
         >
             {children}

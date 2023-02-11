@@ -1,4 +1,3 @@
-import { Form } from "react-bootstrap";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
@@ -428,7 +427,6 @@ export default function EntryForm({
         >
             <Grid mb="sm" grow>
                 <Grid.Col sm={12} md={6} lg={6}>
-                    <Form.Label>{t("culture.name")}*</Form.Label>
                     <Controller
                         name="culture"
                         control={control}
@@ -440,9 +438,9 @@ export default function EntryForm({
                                 noOptionsMessage={() => t("noOptions")}
                                 styles={selectStyle(errors.culture)}
                                 isMulti={false}
-                                className={
-                                    errors.culture ? "is-invalid" : undefined
-                                }
+                                // className={
+                                //     errors.culture ? "is-invalid" : undefined
+                                // }
                                 value={cultureSelectState.selected}
                                 options={cultureOptions}
                                 onMenuClose={() => {
@@ -491,7 +489,6 @@ export default function EntryForm({
                     />
                 </Grid.Col>
                 <Grid.Col sm={12} md={6} lg={6}>
-                    <Form.Label>{t("cell.name")}*</Form.Label>
                     <Controller
                         name="cell"
                         control={control}
@@ -503,9 +500,9 @@ export default function EntryForm({
                                 noOptionsMessage={() => t("noOptions")}
                                 styles={selectStyle(errors.cell)}
                                 isMulti={false}
-                                className={
-                                    errors.cell ? "is-invalid" : undefined
-                                }
+                                // className={
+                                //     errors.cell ? "is-invalid" : undefined
+                                // }
                                 value={cellSelectState.selected}
                                 options={cellOptions}
                                 onMenuClose={() => {
@@ -568,7 +565,6 @@ export default function EntryForm({
                     />
                 </Grid.Col>
                 <Grid.Col sm={12} md={6} lg={6}>
-                    <Form.Label>{t("buyer.name")}*</Form.Label>
                     <Controller
                         name="buyer"
                         control={control}
@@ -580,9 +576,9 @@ export default function EntryForm({
                                 noOptionsMessage={() => t("noOptions")}
                                 styles={selectStyle(errors.buyer)}
                                 isMulti={false}
-                                className={
-                                    errors.buyer ? "is-invalid" : undefined
-                                }
+                                // className={
+                                //     errors.buyer ? "is-invalid" : undefined
+                                // }
                                 value={buyerSelectState.selected}
                                 options={buyerOptions}
                                 onMenuClose={() => {

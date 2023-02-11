@@ -23,7 +23,7 @@ import EditModal from "../EditModal";
 import DeleteModal from "../DeleteModal";
 import { DataGroupContext } from "../../DataGroupProvider";
 import CardUtil from "../util/CardUtil";
-import { Divider } from "@mantine/core";
+import { Divider, Title } from "@mantine/core";
 
 type T = Buyer;
 type TFields = BuyerFields;
@@ -174,13 +174,11 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
                 }}
             />
             {isInsertable ? (
-                <div className="h5 mb-1">
-                    {t("titles.buyerInsertable").toString()}
-                </div>
+                <Title order={4}>{t("titles.buyerInsertable").toString()}</Title>
             ) : (
-                <div className="h5 mb-1">{t("titles.buyer").toString()}</div>
+                <Title>{t("titles.buyer").toString()}</Title>
             )}
-            <div className="divider"></div>
+            <Divider my="sm" />
             {isInsertable && (
                 <>
                     <BuyerForm onInsertSuccess={onSuccess} />

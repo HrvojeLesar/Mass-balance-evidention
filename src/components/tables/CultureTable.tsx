@@ -1,3 +1,4 @@
+import { Divider, Title } from "@mantine/core";
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -171,17 +172,19 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
                 }}
             />
             {isInsertable ? (
-                <div className="h5 mb-1">
+                <Title order={4}>
                     {t("titles.cultureInsertable").toString()}
-                </div>
+                </Title>
             ) : (
-                <div className="h5 mb-1">{t("titles.culture").toString()}</div>
+                <Title order={4}>
+                {t("titles.culture").toString()}
+                </Title>
             )}
-            <div className="divider"></div>
+            <Divider my="sm" />
             {isInsertable && (
                 <>
                     <CultureForm onInsertSuccess={onSuccess} />
-                    <div className="divider"></div>
+                    <Divider my="sm" variant="dashed" />
                 </>
             )}
             <DataTable

@@ -1,4 +1,3 @@
-import { Col, Form, Row } from "react-bootstrap";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
@@ -330,7 +329,7 @@ export default function CellCulturePairForm({
         >
             <Grid mb="sm">
                 <Grid.Col sm={12} md={6} lg={6}>
-                    <Form.Label>{t("cell.name")}*</Form.Label>
+                    {/*  <Form.Label>{t("cell.name")}*</Form.Label> */}
                     <Controller
                         name="cell"
                         control={control}
@@ -342,9 +341,9 @@ export default function CellCulturePairForm({
                                 noOptionsMessage={() => t("noOptions")}
                                 // styles={selectStyle(errors.cell)}
                                 isMulti={false}
-                                className={
-                                    errors.cell ? "is-invalid" : undefined
-                                }
+                                // className={
+                                //     errors.cell ? "is-invalid" : undefined
+                                // }
                                 value={cellSelectState.selected}
                                 options={cellOptions}
                                 onMenuClose={() => {
@@ -386,7 +385,7 @@ export default function CellCulturePairForm({
                     />
                 </Grid.Col>
                 <Grid.Col sm={12} md={6} lg={6}>
-                    <Form.Label>{t("culture.name")}*</Form.Label>
+                    {/* <Form.Label>{t("culture.name")}*</Form.Label> */}
                     <Controller
                         name="culture"
                         control={control}
@@ -398,9 +397,9 @@ export default function CellCulturePairForm({
                                 noOptionsMessage={() => t("noOptions")}
                                 styles={selectStyle(errors.culture)}
                                 isMulti={false}
-                                className={
-                                    errors.culture ? "is-invalid" : undefined
-                                }
+                                // className={
+                                //     errors.culture ? "is-invalid" : undefined
+                                // }
                                 value={cultureSelectState.selected}
                                 options={cultureOptions}
                                 onMenuClose={() => {

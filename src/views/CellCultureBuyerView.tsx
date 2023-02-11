@@ -1,4 +1,4 @@
-import { Col, Row } from "react-bootstrap";
+import { Grid } from "@mantine/core";
 import { DataGroupSelectFlex } from "../components/DataGroupSelect";
 import BuyerTable from "../components/tables/BuyerTable";
 import CellCulturePairTable from "../components/tables/CellCulturePairTable";
@@ -9,16 +9,23 @@ export default function CellCultureBuyerView() {
     return (
         <>
             <DataGroupSelectFlex />
-            <CellCulturePairTable isInsertable={true} isEditable={true} />
-            <Row className="my-4">
-                <Col sm className="mb-4">
+            <Grid>
+                <Grid.Col>
+                    <CellCulturePairTable
+                        isInsertable={true}
+                        isEditable={true}
+                    />
+                </Grid.Col>
+                <Grid.Col sm={12} md={6} lg={6}>
                     <CellTable isInsertable={true} isEditable={true} />
-                </Col>
-                <Col sm className="mb-4">
+                </Grid.Col>
+                <Grid.Col sm={12} md={6} lg={6}>
                     <CultureTable isInsertable={true} isEditable={true} />
-                </Col>
-            </Row>
-            <BuyerTable isInsertable={true} isEditable={true} />
+                </Grid.Col>
+                <Grid.Col>
+                    <BuyerTable isInsertable={true} isEditable={true} />
+                </Grid.Col>
+            </Grid>
         </>
     );
 }

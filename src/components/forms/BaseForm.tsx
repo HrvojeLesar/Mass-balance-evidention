@@ -25,6 +25,7 @@ export default function BaseForm({
                 // className="d-flex align-items-center"
                 disabled={submitDisabled}
                 leftIcon={<FaSave />}
+                title={t("save")}
             >
                 {t("save")}
             </Button>

@@ -48,10 +48,10 @@ async fn get_all_existing_cell_culture_pairs(
 }
 
 #[async_trait]
-impl FetchExisting<get_all_cell_culture_pairs::CellCultureParts> for GetAllCellCulturePairs {
+impl FetchExisting<get_all_cell_culture_pairs::GetAllCellCulturePairsAllCellCulturePairsResults> for GetAllCellCulturePairs {
     async fn get_existing(
         data_group_id: i64,
-    ) -> Result<Vec<get_all_cell_culture_pairs::CellCultureParts>> {
+    ) -> Result<Vec<get_all_cell_culture_pairs::GetAllCellCulturePairsAllCellCulturePairsResults>> {
         let client = Client::new();
         Ok(
             match get_all_existing_cell_culture_pairs(&client, data_group_id)

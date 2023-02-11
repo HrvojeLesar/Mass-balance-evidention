@@ -31,7 +31,7 @@ export default function DeleteModal({
             centered
             closeOnClickOutside={isLoading ? false : true}
             closeOnEscape={isLoading ? false : true}
-            title={<Title order={3}>{title}</Title>}
+            title={<Title order={4}>{title}</Title>}
             size="auto"
         >
             {t("deleteModal.deleteConfirmText").toString()}
