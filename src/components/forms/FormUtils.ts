@@ -16,7 +16,7 @@ export type FormProps<
     InsertMutation,
     InsertOptions,
     UpdateMutation extends unknown,
-    UpdateOptions extends unknown,
+    UpdateOptions extends unknown
 > = {
     edit?: T | undefined;
     onInsertSuccess?: (

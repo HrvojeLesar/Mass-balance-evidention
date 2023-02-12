@@ -52,19 +52,16 @@ export default function DataGroupProvider({
     }, [data]);
 
     const selectGroup = useCallback((id: number) => {
-        console.log("selectedGroups");
         localStorage.setItem(SELECTED_DATA_GROUP_ID, id.toString());
         setSelectedGroup(id);
     }, []);
 
     const initialGroupId = useMemo(() => {
-        console.log("initialGroup");
         const dgId = localStorage.getItem(SELECTED_DATA_GROUP_ID);
         if (dgId !== null) {
             const id = Number(dgId);
             return isNaN(id) ? undefined : id;
         } else {
-            console.log("rem");
             localStorage.removeItem(SELECTED_DATA_GROUP_ID);
             return undefined;
         }
@@ -82,7 +79,6 @@ export default function DataGroupProvider({
     );
 
     useEffect(() => {
-        console.log("useeffect");
         const storedId = localStorage.getItem(SELECTED_DATA_GROUP_ID);
         if (
             initialGroupId === undefined &&
@@ -103,7 +99,7 @@ export default function DataGroupProvider({
             value.groups !== undefined &&
             value.groups.length > 0 &&
             value.groups.find((dg) => dg.id.toString() === storedId) ===
-            undefined
+                undefined
         ) {
             const id = value.groups[0].id;
             setSelectedGroup(id);
@@ -114,12 +110,9 @@ export default function DataGroupProvider({
             value.groups.length === 0
         ) {
             setSelectedGroup(undefined);
-            console.log("remov");
             localStorage.removeItem(SELECTED_DATA_GROUP_ID);
         }
     }, [initialGroupId, value.selectedGroup, value.groups]);
-
-    console.log(localStorage.getItem(SELECTED_DATA_GROUP_ID));
 
     return (
         <DataGroupContext.Provider value={value}>

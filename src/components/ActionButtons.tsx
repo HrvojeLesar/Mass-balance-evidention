@@ -1,4 +1,4 @@
-import { ActionIcon, Flex, } from "@mantine/core";
+import { ActionIcon, Flex } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { FaEdit, FaTrash } from "react-icons/fa";
 

@@ -10,7 +10,6 @@ import {
     useGetBuyersQuery,
     Ordering,
     BuyerFields,
-    BuyerFilterOptions,
     useDeleteBuyerMutation,
     FieldTypes,
 } from "../../generated/graphql";
@@ -27,7 +26,6 @@ import { Divider, Title } from "@mantine/core";
 
 type T = Buyer;
 type TFields = BuyerFields;
-type TFilterOptions = BuyerFilterOptions;
 
 export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
     const { t } = useTranslation();
@@ -174,7 +172,9 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
                 }}
             />
             {isInsertable ? (
-                <Title order={4}>{t("titles.buyerInsertable").toString()}</Title>
+                <Title order={4}>
+                    {t("titles.buyerInsertable").toString()}
+                </Title>
             ) : (
                 <Title>{t("titles.buyer").toString()}</Title>
             )}

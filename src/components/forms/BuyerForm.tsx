@@ -59,8 +59,6 @@ export default function BuyerForm({
         },
     });
 
-    console.log(errors.name);
-
     return (
         <BaseForm
             submitDisabled={insert.isLoading || update.isLoading}

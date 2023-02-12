@@ -11,7 +11,7 @@ import {
     SortingState,
     useReactTable,
 } from "@tanstack/react-table";
-import { Dispatch, SetStateAction, useEffect, useMemo } from "react";
+import { Dispatch, SetStateAction, useMemo } from "react";
 import { Pagination } from "../hooks/usePagination";
 import BaseTable from "./BaseTable";
 import TablePagination from "./TablePagination";

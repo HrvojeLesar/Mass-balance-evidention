@@ -9,7 +9,6 @@ import { useTranslation } from "react-i18next";
 import { DataGroupContext } from "../../DataGroupProvider";
 import {
     Ordering,
-    CultureFilterOptions,
     Culture,
     CultureFields,
     useGetCulturesQuery,
@@ -27,7 +26,6 @@ import { TableProps } from "./TableUtils";
 
 type T = Culture;
 type TFields = CultureFields;
-type TFilterOptions = CultureFilterOptions;
 
 export default function CultureTable({ isInsertable, isEditable }: TableProps) {
     const { t } = useTranslation();
@@ -176,9 +174,7 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
                     {t("titles.cultureInsertable").toString()}
                 </Title>
             ) : (
-                <Title order={4}>
-                {t("titles.culture").toString()}
-                </Title>
+                <Title order={4}>{t("titles.culture").toString()}</Title>
             )}
             <Divider my="sm" />
             {isInsertable && (

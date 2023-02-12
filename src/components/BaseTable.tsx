@@ -35,13 +35,11 @@ const useStyles = createStyles((theme) => ({
     },
 
     expandCell: {
-        "&:hover": {
-            cursor: "pointer",
-            userSelect: "none",
-            msUserSelect: "none",
-            WebkitUserSelect: "none",
-            MozUserSelect: "none",
-        },
+        cursor: "pointer",
+    },
+
+    iconAlignment: {
+        verticalAlign: "middle",
     },
 }));
 
@@ -50,7 +48,7 @@ type FilterProps<T> = {
     column: Column<T, unknown>;
 };
 
-function Filter<T>({ column, table }: FilterProps<T>) {
+function Filter<T>({ column }: FilterProps<T>) {
     const [value, setValue] = useDebouncedState("", DEBOUNCE_TIME);
 
     useEffect(() => {
@@ -133,11 +131,17 @@ export default function BaseTable<T>({
                                                     : {
                                                           asc: (
                                                               <IoMdArrowDropup
+                                                                  className={
+                                                                      classes.iconAlignment
+                                                                  }
                                                                   size={28}
                                                               />
                                                           ),
                                                           desc: (
                                                               <IoMdArrowDropdown
+                                                                  className={
+                                                                      classes.iconAlignment
+                                                                  }
                                                                   size={28}
                                                               />
                                                           ),
@@ -145,6 +149,9 @@ export default function BaseTable<T>({
                                                           header.column.getIsSorted() as string
                                                       ] ?? (
                                                           <IoMdArrowDropup
+                                                              className={
+                                                                  classes.iconAlignment
+                                                              }
                                                               size={28}
                                                               color="gray"
                                                           />
@@ -179,10 +186,16 @@ export default function BaseTable<T>({
                                                 >
                                                     {row.getIsExpanded() ? (
                                                         <IoMdArrowDropdown
+                                                            className={
+                                                                classes.iconAlignment
+                                                            }
                                                             size={28}
                                                         />
                                                     ) : (
                                                         <IoMdArrowDropright
+                                                            className={
+                                                                classes.iconAlignment
+                                                            }
                                                             size={28}
                                                         />
                                                     )}

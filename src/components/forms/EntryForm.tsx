@@ -34,7 +34,7 @@ import {
 } from "./FormUtils";
 import moment from "moment";
 import { DataGroupContext } from "../../DataGroupProvider";
-import { Grid, NumberInput } from "@mantine/core";
+import { Grid, Input, NumberInput } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
 
 type FormInput = {
@@ -432,59 +432,73 @@ export default function EntryForm({
                         control={control}
                         rules={{ required: t("culture.errors.name") }}
                         render={() => (
-                            <Select
-                                placeholder={t("culture.selectPlaceholder")}
-                                loadingMessage={() => t("loading")}
-                                noOptionsMessage={() => t("noOptions")}
-                                styles={selectStyle(errors.culture)}
-                                isMulti={false}
-                                // className={
-                                //     errors.culture ? "is-invalid" : undefined
-                                // }
-                                value={cultureSelectState.selected}
-                                options={cultureOptions}
-                                onMenuClose={() => {
-                                    setCultureSelectState((old) => ({
-                                        ...old,
-                                        page: 1,
-                                    }));
-                                }}
-                                onMenuScrollToBottom={
-                                    cultureSelectState.page <
-                                    cultureSelectState.maxPage
-                                        ? () => {
-                                              setCultureSelectState((old) => ({
-                                                  ...old,
-                                                  page: old.page + 1,
-                                              }));
-                                          }
-                                        : undefined
-                                }
-                                onInputChange={(value, actionMeta) => {
-                                    if (actionMeta.action === "input-change") {
-                                        setDebouncedCultureInputValue(value);
-                                    }
-                                }}
-                                onChange={(value, actionMeta) => {
-                                    onChange(
-                                        value,
-                                        actionMeta,
-                                        setCultureSelectState
-                                    );
-                                    setValue("culture", value ?? undefined, {
-                                        shouldValidate: true,
-                                    });
-                                    if (actionMeta.action === "clear") {
-                                        setCellSelectState((old) => ({
+                            <Input.Wrapper
+                                label={t("culture.selectPlaceholder")}
+                            >
+                                <Select
+                                    placeholder={t("culture.selectPlaceholder")}
+                                    loadingMessage={() => t("loading")}
+                                    noOptionsMessage={() => t("noOptions")}
+                                    styles={selectStyle(errors.culture)}
+                                    isMulti={false}
+                                    // className={
+                                    //     errors.culture ? "is-invalid" : undefined
+                                    // }
+                                    value={cultureSelectState.selected}
+                                    options={cultureOptions}
+                                    onMenuClose={() => {
+                                        setCultureSelectState((old) => ({
                                             ...old,
-                                            filter: "",
-                                            selected: null,
+                                            page: 1,
                                         }));
+                                    }}
+                                    onMenuScrollToBottom={
+                                        cultureSelectState.page <
+                                        cultureSelectState.maxPage
+                                            ? () => {
+                                                  setCultureSelectState(
+                                                      (old) => ({
+                                                          ...old,
+                                                          page: old.page + 1,
+                                                      })
+                                                  );
+                                              }
+                                            : undefined
                                     }
-                                }}
-                                isLoading={isFetchingCultures}
-                                isClearable
-                            />
+                                    onInputChange={(value, actionMeta) => {
+                                        if (
+                                            actionMeta.action === "input-change"
+                                        ) {
+                                            setDebouncedCultureInputValue(
+                                                value
+                                            );
+                                        }
+                                    }}
+                                    onChange={(value, actionMeta) => {
+                                        onChange(
+                                            value,
+                                            actionMeta,
+                                            setCultureSelectState
+                                        );
+                                        setValue(
+                                            "culture",
+                                            value ?? undefined,
+                                            {
+                                                shouldValidate: true,
+                                            }
+                                        );
+                                        if (actionMeta.action === "clear") {
+                                            setCellSelectState((old) => ({
+                                                ...old,
+                                                filter: "",
+                                                selected: null,
+                                            }));
+                                        }
+                                    }}
+                                    isLoading={isFetchingCultures}
+                                    isClearable
+                                />
+                            </Input.Wrapper>
                         )}
                     />
                 </Grid.Col>
@@ -494,52 +508,56 @@ export default function EntryForm({
                         control={control}
                         rules={{ required: t("cell.errors.name") }}
                         render={() => (
-                            <Select
-                                placeholder={t("cell.selectPlaceholder")}
-                                loadingMessage={() => t("loading")}
-                                noOptionsMessage={() => t("noOptions")}
-                                styles={selectStyle(errors.cell)}
-                                isMulti={false}
-                                // className={
-                                //     errors.cell ? "is-invalid" : undefined
-                                // }
-                                value={cellSelectState.selected}
-                                options={cellOptions}
-                                onMenuClose={() => {
-                                    setCellSelectState((old) => ({
-                                        ...old,
-                                        page: 1,
-                                    }));
-                                }}
-                                onMenuScrollToBottom={
-                                    cellSelectState.page <
-                                    cellSelectState.maxPage
-                                        ? () => {
-                                              setCellSelectState((old) => ({
-                                                  ...old,
-                                                  page: old.page + 1,
-                                              }));
-                                          }
-                                        : undefined
-                                }
-                                onInputChange={(value, actionMeta) => {
-                                    if (actionMeta.action === "input-change") {
-                                        setDebouncedCellInputValue(value);
+                            <Input.Wrapper label={t("cell.selectPlaceholder")}>
+                                <Select
+                                    placeholder={t("cell.selectPlaceholder")}
+                                    loadingMessage={() => t("loading")}
+                                    noOptionsMessage={() => t("noOptions")}
+                                    styles={selectStyle(errors.cell)}
+                                    isMulti={false}
+                                    // className={
+                                    //     errors.cell ? "is-invalid" : undefined
+                                    // }
+                                    value={cellSelectState.selected}
+                                    options={cellOptions}
+                                    onMenuClose={() => {
+                                        setCellSelectState((old) => ({
+                                            ...old,
+                                            page: 1,
+                                        }));
+                                    }}
+                                    onMenuScrollToBottom={
+                                        cellSelectState.page <
+                                        cellSelectState.maxPage
+                                            ? () => {
+                                                  setCellSelectState((old) => ({
+                                                      ...old,
+                                                      page: old.page + 1,
+                                                  }));
+                                              }
+                                            : undefined
                                     }
-                                }}
-                                onChange={(value, actionMeta) => {
-                                    onChange(
-                                        value,
-                                        actionMeta,
-                                        setCellSelectState
-                                    );
-                                    setValue("cell", value ?? undefined, {
-                                        shouldValidate: true,
-                                    });
-                                }}
-                                isLoading={isFetchingCells}
-                                isClearable
-                            />
+                                    onInputChange={(value, actionMeta) => {
+                                        if (
+                                            actionMeta.action === "input-change"
+                                        ) {
+                                            setDebouncedCellInputValue(value);
+                                        }
+                                    }}
+                                    onChange={(value, actionMeta) => {
+                                        onChange(
+                                            value,
+                                            actionMeta,
+                                            setCellSelectState
+                                        );
+                                        setValue("cell", value ?? undefined, {
+                                            shouldValidate: true,
+                                        });
+                                    }}
+                                    isLoading={isFetchingCells}
+                                    isClearable
+                                />
+                            </Input.Wrapper>
                         )}
                     />
                 </Grid.Col>
@@ -570,52 +588,58 @@ export default function EntryForm({
                         control={control}
                         rules={{ required: t("buyer.errors.name") }}
                         render={() => (
-                            <Select
-                                placeholder={t("buyer.selectPlaceholder")}
-                                loadingMessage={() => t("loading")}
-                                noOptionsMessage={() => t("noOptions")}
-                                styles={selectStyle(errors.buyer)}
-                                isMulti={false}
-                                // className={
-                                //     errors.buyer ? "is-invalid" : undefined
-                                // }
-                                value={buyerSelectState.selected}
-                                options={buyerOptions}
-                                onMenuClose={() => {
-                                    setBuyerSelectState((old) => ({
-                                        ...old,
-                                        page: 1,
-                                    }));
-                                }}
-                                onMenuScrollToBottom={
-                                    buyerSelectState.page <
-                                    buyerSelectState.maxPage
-                                        ? () => {
-                                              setBuyerSelectState((old) => ({
-                                                  ...old,
-                                                  page: old.page + 1,
-                                              }));
-                                          }
-                                        : undefined
-                                }
-                                onInputChange={(value, actionMeta) => {
-                                    if (actionMeta.action === "input-change") {
-                                        setDebouncedBuyerInputValue(value);
+                            <Input.Wrapper label={t("buyer.selectPlaceholder")}>
+                                <Select
+                                    placeholder={t("buyer.selectPlaceholder")}
+                                    loadingMessage={() => t("loading")}
+                                    noOptionsMessage={() => t("noOptions")}
+                                    styles={selectStyle(errors.buyer)}
+                                    isMulti={false}
+                                    // className={
+                                    //     errors.buyer ? "is-invalid" : undefined
+                                    // }
+                                    value={buyerSelectState.selected}
+                                    options={buyerOptions}
+                                    onMenuClose={() => {
+                                        setBuyerSelectState((old) => ({
+                                            ...old,
+                                            page: 1,
+                                        }));
+                                    }}
+                                    onMenuScrollToBottom={
+                                        buyerSelectState.page <
+                                        buyerSelectState.maxPage
+                                            ? () => {
+                                                  setBuyerSelectState(
+                                                      (old) => ({
+                                                          ...old,
+                                                          page: old.page + 1,
+                                                      })
+                                                  );
+                                              }
+                                            : undefined
                                     }
-                                }}
-                                onChange={(value, actionMeta) => {
-                                    onChange(
-                                        value,
-                                        actionMeta,
-                                        setBuyerSelectState
-                                    );
-                                    setValue("buyer", value ?? undefined, {
-                                        shouldValidate: true,
-                                    });
-                                }}
-                                isLoading={isFetchingBuyers}
-                                isClearable
-                            />
+                                    onInputChange={(value, actionMeta) => {
+                                        if (
+                                            actionMeta.action === "input-change"
+                                        ) {
+                                            setDebouncedBuyerInputValue(value);
+                                        }
+                                    }}
+                                    onChange={(value, actionMeta) => {
+                                        onChange(
+                                            value,
+                                            actionMeta,
+                                            setBuyerSelectState
+                                        );
+                                        setValue("buyer", value ?? undefined, {
+                                            shouldValidate: true,
+                                        });
+                                    }}
+                                    isLoading={isFetchingBuyers}
+                                    isClearable
+                                />
+                            </Input.Wrapper>
                         )}
                     />
                 </Grid.Col>

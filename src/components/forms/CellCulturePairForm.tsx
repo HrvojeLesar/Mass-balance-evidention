@@ -30,7 +30,7 @@ import {
     selectStyle,
 } from "./FormUtils";
 import { DataGroupContext } from "../../DataGroupProvider";
-import { Grid } from "@mantine/core";
+import { Grid, Input } from "@mantine/core";
 
 type FormInput = {
     cell: SelectOption<Cell> | undefined;
@@ -335,52 +335,56 @@ export default function CellCulturePairForm({
                         control={control}
                         rules={{ required: t("cell.errors.name") }}
                         render={() => (
-                            <Select
-                                placeholder={t("cell.selectPlaceholder")}
-                                loadingMessage={() => t("loading")}
-                                noOptionsMessage={() => t("noOptions")}
-                                // styles={selectStyle(errors.cell)}
-                                isMulti={false}
-                                // className={
-                                //     errors.cell ? "is-invalid" : undefined
-                                // }
-                                value={cellSelectState.selected}
-                                options={cellOptions}
-                                onMenuClose={() => {
-                                    setCellSelectState((old) => ({
-                                        ...old,
-                                        page: 1,
-                                    }));
-                                }}
-                                onMenuScrollToBottom={
-                                    cellSelectState.page <
-                                    cellSelectState.maxPage
-                                        ? () => {
-                                              setCellSelectState((old) => ({
-                                                  ...old,
-                                                  page: old.page + 1,
-                                              }));
-                                          }
-                                        : undefined
-                                }
-                                onInputChange={(value, actionMeta) => {
-                                    if (actionMeta.action === "input-change") {
-                                        setDebouncedCellInputValue(value);
+                            <Input.Wrapper label={t("cell.selectPlaceholder")}>
+                                <Select
+                                    placeholder={t("cell.selectPlaceholder")}
+                                    loadingMessage={() => t("loading")}
+                                    noOptionsMessage={() => t("noOptions")}
+                                    // styles={selectStyle(errors.cell)}
+                                    isMulti={false}
+                                    // className={
+                                    //     errors.cell ? "is-invalid" : undefined
+                                    // }
+                                    value={cellSelectState.selected}
+                                    options={cellOptions}
+                                    onMenuClose={() => {
+                                        setCellSelectState((old) => ({
+                                            ...old,
+                                            page: 1,
+                                        }));
+                                    }}
+                                    onMenuScrollToBottom={
+                                        cellSelectState.page <
+                                        cellSelectState.maxPage
+                                            ? () => {
+                                                  setCellSelectState((old) => ({
+                                                      ...old,
+                                                      page: old.page + 1,
+                                                  }));
+                                              }
+                                            : undefined
                                     }
-                                }}
-                                onChange={(value, actionMeta) => {
-                                    onChange(
-                                        value,
-                                        actionMeta,
-                                        setCellSelectState
-                                    );
-                                    setValue("cell", value ?? undefined, {
-                                        shouldValidate: true,
-                                    });
-                                }}
-                                isLoading={isFetchingCells}
-                                isClearable
-                            />
+                                    onInputChange={(value, actionMeta) => {
+                                        if (
+                                            actionMeta.action === "input-change"
+                                        ) {
+                                            setDebouncedCellInputValue(value);
+                                        }
+                                    }}
+                                    onChange={(value, actionMeta) => {
+                                        onChange(
+                                            value,
+                                            actionMeta,
+                                            setCellSelectState
+                                        );
+                                        setValue("cell", value ?? undefined, {
+                                            shouldValidate: true,
+                                        });
+                                    }}
+                                    isLoading={isFetchingCells}
+                                    isClearable
+                                />
+                            </Input.Wrapper>
                         )}
                     />
                 </Grid.Col>
@@ -391,52 +395,66 @@ export default function CellCulturePairForm({
                         control={control}
                         rules={{ required: t("culture.errors.name") }}
                         render={() => (
-                            <Select
-                                placeholder={t("culture.selectPlaceholder")}
-                                loadingMessage={() => t("loading")}
-                                noOptionsMessage={() => t("noOptions")}
-                                styles={selectStyle(errors.culture)}
-                                isMulti={false}
-                                // className={
-                                //     errors.culture ? "is-invalid" : undefined
-                                // }
-                                value={cultureSelectState.selected}
-                                options={cultureOptions}
-                                onMenuClose={() => {
-                                    setCultureSelectState((old) => ({
-                                        ...old,
-                                        page: 1,
-                                    }));
-                                }}
-                                onMenuScrollToBottom={
-                                    cultureSelectState.page <
-                                    cultureSelectState.maxPage
-                                        ? () => {
-                                              setCultureSelectState((old) => ({
-                                                  ...old,
-                                                  page: old.page + 1,
-                                              }));
-                                          }
-                                        : undefined
-                                }
-                                onInputChange={(value, actionMeta) => {
-                                    if (actionMeta.action === "input-change") {
-                                        setDebouncedCultureInputValue(value);
+                            <Input.Wrapper
+                                label={t("culture.selectPlaceholder")}
+                            >
+                                <Select
+                                    placeholder={t("culture.selectPlaceholder")}
+                                    loadingMessage={() => t("loading")}
+                                    noOptionsMessage={() => t("noOptions")}
+                                    styles={selectStyle(errors.culture)}
+                                    isMulti={false}
+                                    // className={
+                                    //     errors.culture ? "is-invalid" : undefined
+                                    // }
+                                    value={cultureSelectState.selected}
+                                    options={cultureOptions}
+                                    onMenuClose={() => {
+                                        setCultureSelectState((old) => ({
+                                            ...old,
+                                            page: 1,
+                                        }));
+                                    }}
+                                    onMenuScrollToBottom={
+                                        cultureSelectState.page <
+                                        cultureSelectState.maxPage
+                                            ? () => {
+                                                  setCultureSelectState(
+                                                      (old) => ({
+                                                          ...old,
+                                                          page: old.page + 1,
+                                                      })
+                                                  );
+                                              }
+                                            : undefined
                                     }
-                                }}
-                                onChange={(value, actionMeta) => {
-                                    onChange(
-                                        value,
-                                        actionMeta,
-                                        setCultureSelectState
-                                    );
-                                    setValue("culture", value ?? undefined, {
-                                        shouldValidate: true,
-                                    });
-                                }}
-                                isLoading={isFetchingCultures}
-                                isClearable
-                            />
+                                    onInputChange={(value, actionMeta) => {
+                                        if (
+                                            actionMeta.action === "input-change"
+                                        ) {
+                                            setDebouncedCultureInputValue(
+                                                value
+                                            );
+                                        }
+                                    }}
+                                    onChange={(value, actionMeta) => {
+                                        onChange(
+                                            value,
+                                            actionMeta,
+                                            setCultureSelectState
+                                        );
+                                        setValue(
+                                            "culture",
+                                            value ?? undefined,
+                                            {
+                                                shouldValidate: true,
+                                            }
+                                        );
+                                    }}
+                                    isLoading={isFetchingCultures}
+                                    isClearable
+                                />
+                            </Input.Wrapper>
                         )}
                     />
                 </Grid.Col>

@@ -11,7 +11,6 @@ import {
     Ordering,
     useGetCellsQuery,
     CellFields,
-    CellFilterOptions,
     Cell,
     useDeleteCellMutation,
     FieldTypes,
@@ -27,7 +26,6 @@ import { TableProps } from "./TableUtils";
 
 type T = Cell;
 type TFields = CellFields;
-type TFilterOptions = CellFilterOptions;
 
 export default function CellTable({ isInsertable, isEditable }: TableProps) {
     const { t } = useTranslation();
