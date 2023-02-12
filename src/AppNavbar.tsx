@@ -9,8 +9,11 @@ import {
     createStyles,
     Container,
     ActionIcon,
+    MediaQuery,
+    Flex,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import React from "react";
 import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FaCog } from "react-icons/fa";
@@ -145,8 +148,9 @@ export default function AppNavbar({ children }: AppNavbarProps) {
             <a
                 key={link.label}
                 href={link.link}
+                title={link.label}
                 className={cx(classes.link, {
-                    [classes.linkActive]: active === link.link
+                    [classes.linkActive]: active === link.link,
                 })}
                 onClick={(event) => {
                     event.preventDefault();
@@ -162,19 +166,43 @@ export default function AppNavbar({ children }: AppNavbarProps) {
 
     const generateIconLink = (link: NavigationLink) => {
         return (
-            <ActionIcon
-                key={link.label}
-                color={active === link.link ? "blue" : "gray"}
-                variant="outline"
-                onClick={(event) => {
-                    event.preventDefault();
-                    setActive(link.link);
-                    close();
-                    navigate(link.link);
-                }}
-            >
-                <FaCog />
-            </ActionIcon>
+            <React.Fragment key={link.label}>
+                <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
+                    <ActionIcon
+                        title={link.label}
+                        color={active === link.link ? "blue" : "gray"}
+                        variant="outline"
+                        onClick={(event) => {
+                            event.preventDefault();
+                            setActive(link.link);
+                            close();
+                            navigate(link.link);
+                        }}
+                    >
+                        <FaCog />
+                    </ActionIcon>
+                </MediaQuery>
+                <MediaQuery largerThan="sm" styles={{ display: "none" }}>
+                    <a
+                        href={link.link}
+                        title={link.label}
+                        className={cx(classes.link, {
+                            [classes.linkActive]: active === link.link,
+                        })}
+                        onClick={(event) => {
+                            event.preventDefault();
+                            setActive(link.link);
+                            close();
+                            navigate(link.link);
+                        }}
+                    >
+                        <Flex gap="sm" align="center">
+                            <FaCog />
+                            <Text>{link.label}</Text>
+                        </Flex>
+                    </a>
+                </MediaQuery>
+            </React.Fragment>
         );
     };
 
