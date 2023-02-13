@@ -88,9 +88,7 @@ export default function DataGroupForm({
                         autoComplete="off"
                         withAsterisk
                         error={
-                            errors.name === undefined
-                                ? undefined
-                                : t("culture.errors.name")
+                            errors.name ? t("culture.errors.name") : undefined
                         }
                         spellCheck={false}
                     />

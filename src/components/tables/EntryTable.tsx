@@ -26,7 +26,7 @@ import { TableProps } from "./TableUtils";
 type SelectValue = "disabled" | "cell_name" | "culture_name" | "buyer_name";
 
 export default function EntryTable({ isInsertable, isEditable }: TableProps) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     const [tableData, setTableData] = useState<Entry[]>([]);
     const { pagination, setPagination } = usePagination({ pageSize: 20 });
@@ -95,7 +95,7 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
                 accessorKey: "weight",
                 cell: (info) => {
                     if (info.getValue() !== null) {
-                        return `${info.getValue<number>().toLocaleString()} kg`;
+                        return `${info.getValue<number>().toLocaleString(i18n.language)} kg`;
                     }
                     return "0 kg";
                 },
@@ -103,7 +103,7 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
                 enableColumnFilter: false,
                 aggregationFn: "sum",
                 aggregatedCell: ({ getValue }) =>
-                    `Suma: ${getValue<number>().toLocaleString()} kg`,
+                    `Suma: ${getValue<number>().toLocaleString(i18n.language)} kg`,
             },
         ];
         if (isEditable) {
@@ -128,7 +128,7 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
             });
         }
         return columns;
-    }, [t, isEditable, setSelectedEntry, setIsModalShown]);
+    }, [t, isEditable, setSelectedEntry, setIsModalShown, i18n]);
 
     const onSuccess = useCallback(() => {
         refetch();

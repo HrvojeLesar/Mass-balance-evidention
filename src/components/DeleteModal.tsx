@@ -1,4 +1,4 @@
-import { Button, Divider, Flex, Modal, Title } from "@mantine/core";
+import { Button, Divider, Flex, Modal, Title, Text } from "@mantine/core";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -34,7 +34,7 @@ export default function DeleteModal({
             title={<Title order={4}>{title}</Title>}
             size="auto"
         >
-            {t("deleteModal.deleteConfirmText").toString()}
+            <Text>{t("deleteModal.deleteConfirmText").toString()}</Text>
             <Divider my="sm" />
             <Flex justify="end" gap="sm">
                 <Button color="gray" onClick={onHide} disabled={isLoading}>

@@ -1,12 +1,6 @@
+import { MantineTheme } from "@mantine/core";
 import { Dispatch, SetStateAction } from "react";
-import {
-    ActionMeta,
-    ControlProps,
-    CSSObjectWithLabel,
-    GroupBase,
-    MultiValue,
-    SingleValue,
-} from "react-select";
+import { ActionMeta, MultiValue, SingleValue } from "react-select";
 import { Buyer, Cell, Culture, Exact } from "../../generated/graphql";
 
 export const DEBOUNCE_TIME = 350;
@@ -84,33 +78,29 @@ export const onChange = <
         }));
     }
 };
-export const selectStyle = (error: any) => {
+export const selectStyle = (error: any, theme: MantineTheme) => {
     return {
-        control: <T, TT extends boolean, TTT extends GroupBase<T>>(
-            provided: CSSObjectWithLabel,
-            state: ControlProps<T, TT, TTT>
-        ) => {
+        control: (provided: any, state: any) => {
             return {
                 ...provided,
-                border: error
+                borderStyle: "solid",
+                borderWidth: "1px",
+                borderColor: error
                     ? state.isFocused
-                        ? "1px solid #dc3545" // red
-                        : "1px solid #dc3545" // red
+                        ? theme.colors.blue[6]
+                        : theme.colors.red[5]
                     : state.isFocused
-                    ? "1px solid #86b7fe" // blue
-                    : "1px solid #ced4da", // gray
-                boxShadow: error
-                    ? state.isFocused
-                        ? "0 0 0 0.25rem rgb(220 53 69 / 25%)"
-                        : "none"
-                    : state.isFocused
-                    ? "0 0 0 0.25rem rgb(13 110 253 / 25%)"
-                    : "none",
-                color: "#212529",
-                backgroundColor: "#fff",
-                borderColor: "#86b7fe",
+                    ? theme.colors.blue[6]
+                    : theme.colors.gray[4],
+                boxShadow: "none",
                 outline: 0,
                 "&:hover": {},
+            };
+        },
+        placeholder: (provided: any) => {
+            return {
+                ...provided,
+                color: error ? theme.colors.red[5] : theme.colors.gray[5],
             };
         },
     };

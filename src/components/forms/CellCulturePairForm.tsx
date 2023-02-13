@@ -30,11 +30,12 @@ import {
     selectStyle,
 } from "./FormUtils";
 import { DataGroupContext } from "../../DataGroupProvider";
-import { Grid, Input } from "@mantine/core";
+import { Grid, Input, useMantineTheme } from "@mantine/core";
 
 type FormInput = {
     cell: SelectOption<Cell> | undefined;
     culture: SelectOption<Culture> | undefined;
+    other: SelectOption<{ ay: number; lmao: string }> | undefined;
 };
 
 const LIMIT = 10;
@@ -54,27 +55,35 @@ export default function CellCulturePairForm({
     const { t } = useTranslation();
     const dataGroupContextValue = useContext(DataGroupContext);
 
+    const theme = useMantineTheme();
+
     const {
         control,
         handleSubmit,
         setValue,
         formState: { errors },
+        reset,
     } = useForm<FormInput>({
         mode: "onSubmit",
         defaultValues: {
-            cell: {
-                value: edit?.cell ?? undefined,
-                label: edit?.cell?.name ?? undefined,
-            },
-            culture: {
-                value: edit?.culture ?? undefined,
-                label: edit?.culture?.name ?? undefined,
-            },
+            cell: edit
+                ? {
+                      value: edit.cell ?? undefined,
+                      label: edit.cell.name ?? undefined,
+                  }
+                : undefined,
+            culture: edit
+                ? {
+                      value: edit.culture ?? undefined,
+                      label: edit.culture.name ?? undefined,
+                  }
+                : undefined,
         },
     });
 
     const insert = useInsertCellCulturePairMutation({
         onSuccess: (data, variables, context) => {
+            reset();
             resetSelects();
             if (onInsertSuccess) {
                 onInsertSuccess(data, variables, context);
@@ -329,22 +338,26 @@ export default function CellCulturePairForm({
         >
             <Grid mb="sm">
                 <Grid.Col sm={12} md={6} lg={6}>
-                    {/*  <Form.Label>{t("cell.name")}*</Form.Label> */}
                     <Controller
                         name="cell"
                         control={control}
                         rules={{ required: t("cell.errors.name") }}
                         render={() => (
-                            <Input.Wrapper label={t("cell.selectPlaceholder")}>
+                            <Input.Wrapper
+                                label={t("cell.selectPlaceholder")}
+                                withAsterisk
+                                error={
+                                    errors.cell
+                                        ? t("cell.errors.name")
+                                        : undefined
+                                }
+                            >
                                 <Select
                                     placeholder={t("cell.selectPlaceholder")}
                                     loadingMessage={() => t("loading")}
                                     noOptionsMessage={() => t("noOptions")}
-                                    // styles={selectStyle(errors.cell)}
+                                    styles={selectStyle(errors.cell, theme)}
                                     isMulti={false}
-                                    // className={
-                                    //     errors.cell ? "is-invalid" : undefined
-                                    // }
                                     value={cellSelectState.selected}
                                     options={cellOptions}
                                     onMenuClose={() => {
@@ -389,7 +402,6 @@ export default function CellCulturePairForm({
                     />
                 </Grid.Col>
                 <Grid.Col sm={12} md={6} lg={6}>
-                    {/* <Form.Label>{t("culture.name")}*</Form.Label> */}
                     <Controller
                         name="culture"
                         control={control}
@@ -397,16 +409,19 @@ export default function CellCulturePairForm({
                         render={() => (
                             <Input.Wrapper
                                 label={t("culture.selectPlaceholder")}
+                                withAsterisk
+                                error={
+                                    errors.culture
+                                        ? t("culture.errors.name")
+                                        : undefined
+                                }
                             >
                                 <Select
                                     placeholder={t("culture.selectPlaceholder")}
                                     loadingMessage={() => t("loading")}
                                     noOptionsMessage={() => t("noOptions")}
-                                    styles={selectStyle(errors.culture)}
+                                    styles={selectStyle(errors.culture, theme)}
                                     isMulti={false}
-                                    // className={
-                                    //     errors.culture ? "is-invalid" : undefined
-                                    // }
                                     value={cultureSelectState.selected}
                                     options={cultureOptions}
                                     onMenuClose={() => {

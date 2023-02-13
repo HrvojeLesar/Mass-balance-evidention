@@ -92,9 +92,9 @@ export default function CellForm({
                         autoComplete="off"
                         withAsterisk
                         error={
-                            errors.name === undefined
-                                ? undefined
-                                : t("cell.errors.name")
+                            errors.name
+                                ? t("cell.errors.name")
+                                : undefined
                         }
                         spellCheck={false}
                     />

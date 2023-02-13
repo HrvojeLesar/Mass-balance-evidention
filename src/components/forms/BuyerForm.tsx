@@ -90,11 +90,7 @@ export default function BuyerForm({
                         placeholder={t("buyer.name")}
                         autoComplete="off"
                         withAsterisk
-                        error={
-                            errors.name === undefined
-                                ? undefined
-                                : t("buyer.errors.name")
-                        }
+                        error={errors.name ? t("buyer.errors.name") : undefined}
                         spellCheck={false}
                     />
                 </Grid.Col>

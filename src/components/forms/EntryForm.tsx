@@ -1,5 +1,6 @@
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import "dayjs/locale/hr";
 import {
     Buyer,
     BuyerFields,
@@ -34,7 +35,7 @@ import {
 } from "./FormUtils";
 import moment from "moment";
 import { DataGroupContext } from "../../DataGroupProvider";
-import { Grid, Input, NumberInput } from "@mantine/core";
+import { Grid, Input, NumberInput, useMantineTheme } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
 
 type FormInput = {
@@ -59,8 +60,9 @@ export default function EntryForm({
     UpdateEntryMutation,
     EntryUpdateOptions
 >) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const dataGroupContextValue = useContext(DataGroupContext);
+    const theme = useMantineTheme();
 
     const {
         control,
@@ -72,23 +74,30 @@ export default function EntryForm({
     } = useForm<FormInput>({
         mode: "onSubmit",
         defaultValues: {
-            cell: {
-                value: edit?.cell,
-                label: edit?.cell?.name ?? undefined,
-            },
-            culture: {
-                value: edit?.culture ?? undefined,
-                label: edit?.culture?.name ?? undefined,
-            },
-            buyer: {
-                value: edit?.buyer ?? undefined,
-                label: edit?.buyer?.name ?? undefined,
-            },
-            date:
-                edit !== undefined
-                    ? moment(edit.date as Date).format("YYYY-MM-DD")
-                    : undefined,
-            weight: edit?.weight ?? undefined,
+            cell: edit
+                ? {
+                      value: edit.cell,
+                      label: edit.cell.name ?? undefined,
+                  }
+                : undefined,
+            culture: edit
+                ? {
+                      value: edit?.culture ?? undefined,
+                      label: edit?.culture?.name ?? undefined,
+                  }
+                : undefined,
+            buyer: edit
+                ? {
+                      value: edit?.buyer ?? undefined,
+                      label: edit?.buyer?.name ?? undefined,
+                  }
+                : undefined,
+            // date: moment(Date.now()).format("YYYY-MM-DD"),
+            date: edit
+                ? moment(edit.date as Date).format("YYYY-MM-DD")
+                : undefined,
+            weight: edit ? edit.weight : undefined,
+            // weight: 123,
         },
     });
 
@@ -239,7 +248,7 @@ export default function EntryForm({
                     page: cellSelectState.page,
                     ordering: {
                         order: Ordering.Asc,
-                        orderBy: CellFields.Name,
+                        orderBy: CellFields.Id,
                     },
                     filters:
                         cellSelectState.filter !== ""
@@ -277,7 +286,7 @@ export default function EntryForm({
                     page: cultureSelectState.page,
                     ordering: {
                         order: Ordering.Asc,
-                        orderBy: CultureFields.Name,
+                        orderBy: CultureFields.Id,
                     },
                     filters:
                         cultureSelectState.filter !== ""
@@ -312,7 +321,7 @@ export default function EntryForm({
                 page: buyerSelectState.page,
                 ordering: {
                     order: Ordering.Asc,
-                    orderBy: BuyerFields.Name,
+                    orderBy: BuyerFields.Id,
                 },
                 filters:
                     buyerSelectState.filter !== ""
@@ -434,16 +443,19 @@ export default function EntryForm({
                         render={() => (
                             <Input.Wrapper
                                 label={t("culture.selectPlaceholder")}
+                                withAsterisk
+                                error={
+                                    errors.culture
+                                        ? t("culture.errors.name")
+                                        : undefined
+                                }
                             >
                                 <Select
                                     placeholder={t("culture.selectPlaceholder")}
                                     loadingMessage={() => t("loading")}
                                     noOptionsMessage={() => t("noOptions")}
-                                    styles={selectStyle(errors.culture)}
+                                    styles={selectStyle(errors.culture, theme)}
                                     isMulti={false}
-                                    // className={
-                                    //     errors.culture ? "is-invalid" : undefined
-                                    // }
                                     value={cultureSelectState.selected}
                                     options={cultureOptions}
                                     onMenuClose={() => {
@@ -508,16 +520,21 @@ export default function EntryForm({
                         control={control}
                         rules={{ required: t("cell.errors.name") }}
                         render={() => (
-                            <Input.Wrapper label={t("cell.selectPlaceholder")}>
+                            <Input.Wrapper
+                                label={t("cell.selectPlaceholder")}
+                                withAsterisk
+                                error={
+                                    errors.cell
+                                        ? t("cell.errors.name")
+                                        : undefined
+                                }
+                            >
                                 <Select
                                     placeholder={t("cell.selectPlaceholder")}
                                     loadingMessage={() => t("loading")}
                                     noOptionsMessage={() => t("noOptions")}
-                                    styles={selectStyle(errors.cell)}
+                                    styles={selectStyle(errors.cell, theme)}
                                     isMulti={false}
-                                    // className={
-                                    //     errors.cell ? "is-invalid" : undefined
-                                    // }
                                     value={cellSelectState.selected}
                                     options={cellOptions}
                                     onMenuClose={() => {
@@ -566,18 +583,25 @@ export default function EntryForm({
                         name="weight"
                         control={control}
                         rules={{ required: t("weight.errors.name") }}
-                        render={() => (
+                        render={({ field: { value, onChange } }) => (
                             <NumberInput
+                                decimalSeparator={
+                                    i18n.language === "hr" ? "," : "."
+                                }
+                                value={value ? value : undefined}
+                                onChange={onChange}
                                 placeholder={t("entry.weight").toString()}
                                 label={t("entry.weight").toString()}
                                 autoComplete="off"
                                 withAsterisk
                                 error={
-                                    errors.weight === undefined
-                                        ? undefined
-                                        : t("cell.errors.name")
+                                    errors.weight
+                                        ? t("cell.errors.name")
+                                        : undefined
                                 }
                                 spellCheck={false}
+                                precision={2}
+                                step={0.5}
                             />
                         )}
                     />
@@ -588,16 +612,21 @@ export default function EntryForm({
                         control={control}
                         rules={{ required: t("buyer.errors.name") }}
                         render={() => (
-                            <Input.Wrapper label={t("buyer.selectPlaceholder")}>
+                            <Input.Wrapper
+                                label={t("buyer.selectPlaceholder")}
+                                withAsterisk
+                                error={
+                                    errors.buyer
+                                        ? t("buyer.errors.name")
+                                        : undefined
+                                }
+                            >
                                 <Select
                                     placeholder={t("buyer.selectPlaceholder")}
                                     loadingMessage={() => t("loading")}
                                     noOptionsMessage={() => t("noOptions")}
-                                    styles={selectStyle(errors.buyer)}
+                                    styles={selectStyle(errors.buyer, theme)}
                                     isMulti={false}
-                                    // className={
-                                    //     errors.buyer ? "is-invalid" : undefined
-                                    // }
                                     value={buyerSelectState.selected}
                                     options={buyerOptions}
                                     onMenuClose={() => {
@@ -648,20 +677,29 @@ export default function EntryForm({
                         name="date"
                         control={control}
                         rules={{ required: t("date.errors.name") }}
-                        render={() => (
-                            <DatePicker
-                                label={t("entry.date")}
-                                placeholder={t("entry.date")}
-                                autoComplete="off"
-                                withAsterisk
-                                error={
-                                    errors.date === undefined
-                                        ? undefined
-                                        : t("cell.errors.name")
-                                }
-                                spellCheck={false}
-                            />
-                        )}
+                        render={({ field: { value, onChange } }) => {
+                            const date =
+                                typeof value === "string"
+                                    ? new Date(value)
+                                    : value;
+                            return (
+                                <DatePicker
+                                    locale={i18n.language}
+                                    value={date}
+                                    label={t("entry.date")}
+                                    placeholder={t("entry.date")}
+                                    autoComplete="off"
+                                    onChange={onChange}
+                                    withAsterisk
+                                    error={
+                                        errors.date
+                                            ? t("cell.errors.name")
+                                            : undefined
+                                    }
+                                    spellCheck={false}
+                                />
+                            );
+                        }}
                     />
                 </Grid.Col>
             </Grid>
