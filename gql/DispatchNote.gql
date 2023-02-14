@@ -1,0 +1,42 @@
+# WARN: Same as CellCulturePair
+
+# WARN: For some reason graphql-codegen fails if id field is set in fragment
+# so its manually added to everywhere needed
+query GetDispatchNotes($options: DispatchNoteFetchOptions!) {
+    dispatchNotes(options: $options) {
+        page
+        pageSize
+        totalItems
+        totalPages
+        results {
+            ...DispatchNoteParts
+        }
+    }
+}
+
+mutation InsertDispatchNote($insertOptions: DispatchNoteInsertOptions!) {
+    insertDispatchNote(options: $insertOptions) {
+        ...DispatchNoteParts
+    }
+}
+
+mutation UpdateDispatchNote($updateOptions: DispatchNoteUpdateOptions!) {
+    updateDispatchNote(options: $updateOptions) {
+        ...DispatchNoteParts
+    }
+}
+
+mutation DeleteDispatchNote($deleteOptions: DeleteOptions!) {
+    deleteDispatchNote(options: $deleteOptions) {
+        numRows
+    }
+}
+
+fragment DispatchNoteParts on DispatchNote {
+    id
+    noteType
+    numericalIdentifier
+    issuingDate
+    createdAt
+    dGroup
+}

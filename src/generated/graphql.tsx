@@ -412,12 +412,22 @@ export type DeleteOptions = {
   id: Scalars['Int'];
 };
 
+export type DispatchNote = {
+  __typename?: 'DispatchNote';
+  createdAt: Scalars['DateTime'];
+  dGroup: Scalars['Int'];
+  id: Scalars['Int'];
+  issuingDate?: Maybe<Scalars['DateTime']>;
+  noteType?: Maybe<Scalars['Int']>;
+  numericalIdentifier?: Maybe<Scalars['Int']>;
+};
+
 export type DispatchNoteArticle = {
   __typename?: 'DispatchNoteArticle';
   article: Article;
   createdAt: Scalars['DateTime'];
   dGroup: DataGroup;
-  dispatchNote: Dispatch_Note;
+  dispatchNote: DispatchNote;
   quantity: Scalars['Float'];
   weightType?: Maybe<Scalars['String']>;
 };
@@ -518,7 +528,7 @@ export type DispatchNoteResults = {
   __typename?: 'DispatchNoteResults';
   page: Scalars['Int'];
   pageSize: Scalars['Int'];
-  results: Array<Dispatch_Note>;
+  results: Array<DispatchNote>;
   totalItems: Scalars['Int'];
   totalPages: Scalars['Int'];
 };
@@ -528,16 +538,6 @@ export type DispatchNoteUpdateOptions = {
   issuingDate?: InputMaybe<Scalars['DateTime']>;
   noteType?: InputMaybe<Scalars['Int']>;
   numericalIdentifier?: InputMaybe<Scalars['Int']>;
-};
-
-export type Dispatch_Note = {
-  __typename?: 'Dispatch_note';
-  createdAt: Scalars['DateTime'];
-  dGroup: Scalars['Int'];
-  id: Scalars['Int'];
-  issuingDate?: Maybe<Scalars['DateTime']>;
-  noteType?: Maybe<Scalars['Int']>;
-  numericalIdentifier?: Maybe<Scalars['Int']>;
 };
 
 export type Entry = {
@@ -638,7 +638,7 @@ export type MutationRoot = {
   insertCellCulturePair: CellCulturePair;
   insertCulture: Culture;
   insertDataGroup: DataGroup;
-  insertDispatchNote: Dispatch_Note;
+  insertDispatchNote: DispatchNote;
   insertDispatchNoteArticle: DispatchNoteArticle;
   insertEntry: Entry;
   updateArticle: Article;
@@ -647,7 +647,7 @@ export type MutationRoot = {
   updateCellCulturePair: CellCulturePair;
   updateCulture: Culture;
   updateDataGroup: DataGroup;
-  updateDispatchNote: Dispatch_Note;
+  updateDispatchNote: DispatchNote;
   updateDispatchNoteArticle: DispatchNoteArticle;
   updateEntry: Entry;
 };
@@ -896,6 +896,36 @@ export type RowsDeleted = {
   numRows: Scalars['Int'];
 };
 
+export type GetArticlesQueryVariables = Exact<{
+  options: ArticleFetchOptions;
+}>;
+
+
+export type GetArticlesQuery = { __typename?: 'QueryRoot', articles: { __typename?: 'ArticleResults', page: number, pageSize: number, totalItems: number, totalPages: number, results: Array<{ __typename?: 'Article', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }> } };
+
+export type InsertArticleMutationVariables = Exact<{
+  insertOptions: ArticleInsertOptions;
+}>;
+
+
+export type InsertArticleMutation = { __typename?: 'MutationRoot', insertArticle: { __typename?: 'Article', id: number, name: string, description?: string | null, createdAt: any, dGroup: number } };
+
+export type UpdateArticleMutationVariables = Exact<{
+  updateOptions: ArticleUpdateOptions;
+}>;
+
+
+export type UpdateArticleMutation = { __typename?: 'MutationRoot', updateArticle: { __typename?: 'Article', id: number, name: string, description?: string | null, createdAt: any, dGroup: number } };
+
+export type DeleteArticleMutationVariables = Exact<{
+  deleteOptions: DeleteOptions;
+}>;
+
+
+export type DeleteArticleMutation = { __typename?: 'MutationRoot', deleteArticle: { __typename?: 'RowsDeleted', numRows: number } };
+
+export type ArticlePartsFragment = { __typename?: 'Article', id: number, name: string, description?: string | null, createdAt: any, dGroup: number };
+
 export type GetBuyersQueryVariables = Exact<{
   options: BuyerFetchOptions;
 }>;
@@ -1081,6 +1111,66 @@ export type DeleteDataGroupMutationVariables = Exact<{
 
 export type DeleteDataGroupMutation = { __typename?: 'MutationRoot', deleteDataGroup: { __typename?: 'RowsDeleted', numRows: number } };
 
+export type GetDispatchNotesQueryVariables = Exact<{
+  options: DispatchNoteFetchOptions;
+}>;
+
+
+export type GetDispatchNotesQuery = { __typename?: 'QueryRoot', dispatchNotes: { __typename?: 'DispatchNoteResults', page: number, pageSize: number, totalItems: number, totalPages: number, results: Array<{ __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, createdAt: any, dGroup: number }> } };
+
+export type InsertDispatchNoteMutationVariables = Exact<{
+  insertOptions: DispatchNoteInsertOptions;
+}>;
+
+
+export type InsertDispatchNoteMutation = { __typename?: 'MutationRoot', insertDispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, createdAt: any, dGroup: number } };
+
+export type UpdateDispatchNoteMutationVariables = Exact<{
+  updateOptions: DispatchNoteUpdateOptions;
+}>;
+
+
+export type UpdateDispatchNoteMutation = { __typename?: 'MutationRoot', updateDispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, createdAt: any, dGroup: number } };
+
+export type DeleteDispatchNoteMutationVariables = Exact<{
+  deleteOptions: DeleteOptions;
+}>;
+
+
+export type DeleteDispatchNoteMutation = { __typename?: 'MutationRoot', deleteDispatchNote: { __typename?: 'RowsDeleted', numRows: number } };
+
+export type DispatchNotePartsFragment = { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, createdAt: any, dGroup: number };
+
+export type GetDispatchNotesArticlesQueryVariables = Exact<{
+  options: DispatchNoteArticleFetchOptions;
+}>;
+
+
+export type GetDispatchNotesArticlesQuery = { __typename?: 'QueryRoot', dispatchNoteArticles: { __typename?: 'DispatchNoteArticleResults', page: number, pageSize: number, totalItems: number, totalPages: number, results: Array<{ __typename?: 'DispatchNoteArticle', weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } }> } };
+
+export type InsertDispatchNoteArticleMutationVariables = Exact<{
+  insertOptions: DispatchNoteArticleInsertOptions;
+}>;
+
+
+export type InsertDispatchNoteArticleMutation = { __typename?: 'MutationRoot', insertDispatchNoteArticle: { __typename?: 'DispatchNoteArticle', weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } } };
+
+export type UpdateDispatchNoteArticleMutationVariables = Exact<{
+  updateOptions: DispatchNoteArticleUpdateOptions;
+}>;
+
+
+export type UpdateDispatchNoteArticleMutation = { __typename?: 'MutationRoot', updateDispatchNoteArticle: { __typename?: 'DispatchNoteArticle', weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } } };
+
+export type DeleteDispatchNoteArticleMutationVariables = Exact<{
+  deleteOptions: DeleteOptions;
+}>;
+
+
+export type DeleteDispatchNoteArticleMutation = { __typename?: 'MutationRoot', deleteDispatchNoteArticle: { __typename?: 'RowsDeleted', numRows: number } };
+
+export type DispatchNoteArticlePartsFragment = { __typename?: 'DispatchNoteArticle', weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } };
+
 export type GetEntriesQueryVariables = Exact<{
   options: EntryFetchOptions;
 }>;
@@ -1118,6 +1208,15 @@ export type DeleteEntryMutation = { __typename?: 'MutationRoot', deleteEntry: { 
 
 export type EntryPartsFragment = { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number } | null, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup?: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } | null };
 
+export const ArticlePartsFragmentDoc = `
+    fragment ArticleParts on Article {
+  id
+  name
+  description
+  createdAt
+  dGroup
+}
+    `;
 export const CellPartsFragmentDoc = `
     fragment CellParts on Cell {
   id
@@ -1158,6 +1257,44 @@ export const CellCulturePartsFragmentDoc = `
   }
 }
     `;
+export const DispatchNotePartsFragmentDoc = `
+    fragment DispatchNoteParts on DispatchNote {
+  id
+  noteType
+  numericalIdentifier
+  issuingDate
+  createdAt
+  dGroup
+}
+    `;
+export const DispatchNoteArticlePartsFragmentDoc = `
+    fragment DispatchNoteArticleParts on DispatchNoteArticle {
+  dispatchNote {
+    id
+    noteType
+    numericalIdentifier
+    issuingDate
+    dGroup
+    createdAt
+  }
+  article {
+    id
+    name
+    description
+    dGroup
+    createdAt
+  }
+  weightType
+  quantity
+  createdAt
+  dGroup {
+    id
+    name
+    description
+    createdAt
+  }
+}
+    `;
 export const BuyerPartsFragmentDoc = `
     fragment BuyerParts on Buyer {
   id
@@ -1189,6 +1326,79 @@ export const EntryPartsFragmentDoc = `
   }
 }
     `;
+export const GetArticlesDocument = `
+    query GetArticles($options: ArticleFetchOptions!) {
+  articles(options: $options) {
+    page
+    pageSize
+    totalItems
+    totalPages
+    results {
+      ...ArticleParts
+    }
+  }
+}
+    ${ArticlePartsFragmentDoc}`;
+export const useGetArticlesQuery = <
+      TData = GetArticlesQuery,
+      TError = unknown
+    >(
+      variables: GetArticlesQueryVariables,
+      options?: UseQueryOptions<GetArticlesQuery, TError, TData>
+    ) =>
+    useQuery<GetArticlesQuery, TError, TData>(
+      ['GetArticles', variables],
+      fetcher<GetArticlesQuery, GetArticlesQueryVariables>(GetArticlesDocument, variables),
+      options
+    );
+export const InsertArticleDocument = `
+    mutation InsertArticle($insertOptions: ArticleInsertOptions!) {
+  insertArticle(options: $insertOptions) {
+    ...ArticleParts
+  }
+}
+    ${ArticlePartsFragmentDoc}`;
+export const useInsertArticleMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<InsertArticleMutation, TError, InsertArticleMutationVariables, TContext>) =>
+    useMutation<InsertArticleMutation, TError, InsertArticleMutationVariables, TContext>(
+      ['InsertArticle'],
+      (variables?: InsertArticleMutationVariables) => fetcher<InsertArticleMutation, InsertArticleMutationVariables>(InsertArticleDocument, variables)(),
+      options
+    );
+export const UpdateArticleDocument = `
+    mutation UpdateArticle($updateOptions: ArticleUpdateOptions!) {
+  updateArticle(options: $updateOptions) {
+    ...ArticleParts
+  }
+}
+    ${ArticlePartsFragmentDoc}`;
+export const useUpdateArticleMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<UpdateArticleMutation, TError, UpdateArticleMutationVariables, TContext>) =>
+    useMutation<UpdateArticleMutation, TError, UpdateArticleMutationVariables, TContext>(
+      ['UpdateArticle'],
+      (variables?: UpdateArticleMutationVariables) => fetcher<UpdateArticleMutation, UpdateArticleMutationVariables>(UpdateArticleDocument, variables)(),
+      options
+    );
+export const DeleteArticleDocument = `
+    mutation DeleteArticle($deleteOptions: DeleteOptions!) {
+  deleteArticle(options: $deleteOptions) {
+    numRows
+  }
+}
+    `;
+export const useDeleteArticleMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<DeleteArticleMutation, TError, DeleteArticleMutationVariables, TContext>) =>
+    useMutation<DeleteArticleMutation, TError, DeleteArticleMutationVariables, TContext>(
+      ['DeleteArticle'],
+      (variables?: DeleteArticleMutationVariables) => fetcher<DeleteArticleMutation, DeleteArticleMutationVariables>(DeleteArticleDocument, variables)(),
+      options
+    );
 export const GetBuyersDocument = `
     query GetBuyers($options: BuyerFetchOptions!) {
   buyers(options: $options) {
@@ -1684,6 +1894,152 @@ export const useDeleteDataGroupMutation = <
     useMutation<DeleteDataGroupMutation, TError, DeleteDataGroupMutationVariables, TContext>(
       ['DeleteDataGroup'],
       (variables?: DeleteDataGroupMutationVariables) => fetcher<DeleteDataGroupMutation, DeleteDataGroupMutationVariables>(DeleteDataGroupDocument, variables)(),
+      options
+    );
+export const GetDispatchNotesDocument = `
+    query GetDispatchNotes($options: DispatchNoteFetchOptions!) {
+  dispatchNotes(options: $options) {
+    page
+    pageSize
+    totalItems
+    totalPages
+    results {
+      ...DispatchNoteParts
+    }
+  }
+}
+    ${DispatchNotePartsFragmentDoc}`;
+export const useGetDispatchNotesQuery = <
+      TData = GetDispatchNotesQuery,
+      TError = unknown
+    >(
+      variables: GetDispatchNotesQueryVariables,
+      options?: UseQueryOptions<GetDispatchNotesQuery, TError, TData>
+    ) =>
+    useQuery<GetDispatchNotesQuery, TError, TData>(
+      ['GetDispatchNotes', variables],
+      fetcher<GetDispatchNotesQuery, GetDispatchNotesQueryVariables>(GetDispatchNotesDocument, variables),
+      options
+    );
+export const InsertDispatchNoteDocument = `
+    mutation InsertDispatchNote($insertOptions: DispatchNoteInsertOptions!) {
+  insertDispatchNote(options: $insertOptions) {
+    ...DispatchNoteParts
+  }
+}
+    ${DispatchNotePartsFragmentDoc}`;
+export const useInsertDispatchNoteMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<InsertDispatchNoteMutation, TError, InsertDispatchNoteMutationVariables, TContext>) =>
+    useMutation<InsertDispatchNoteMutation, TError, InsertDispatchNoteMutationVariables, TContext>(
+      ['InsertDispatchNote'],
+      (variables?: InsertDispatchNoteMutationVariables) => fetcher<InsertDispatchNoteMutation, InsertDispatchNoteMutationVariables>(InsertDispatchNoteDocument, variables)(),
+      options
+    );
+export const UpdateDispatchNoteDocument = `
+    mutation UpdateDispatchNote($updateOptions: DispatchNoteUpdateOptions!) {
+  updateDispatchNote(options: $updateOptions) {
+    ...DispatchNoteParts
+  }
+}
+    ${DispatchNotePartsFragmentDoc}`;
+export const useUpdateDispatchNoteMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<UpdateDispatchNoteMutation, TError, UpdateDispatchNoteMutationVariables, TContext>) =>
+    useMutation<UpdateDispatchNoteMutation, TError, UpdateDispatchNoteMutationVariables, TContext>(
+      ['UpdateDispatchNote'],
+      (variables?: UpdateDispatchNoteMutationVariables) => fetcher<UpdateDispatchNoteMutation, UpdateDispatchNoteMutationVariables>(UpdateDispatchNoteDocument, variables)(),
+      options
+    );
+export const DeleteDispatchNoteDocument = `
+    mutation DeleteDispatchNote($deleteOptions: DeleteOptions!) {
+  deleteDispatchNote(options: $deleteOptions) {
+    numRows
+  }
+}
+    `;
+export const useDeleteDispatchNoteMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<DeleteDispatchNoteMutation, TError, DeleteDispatchNoteMutationVariables, TContext>) =>
+    useMutation<DeleteDispatchNoteMutation, TError, DeleteDispatchNoteMutationVariables, TContext>(
+      ['DeleteDispatchNote'],
+      (variables?: DeleteDispatchNoteMutationVariables) => fetcher<DeleteDispatchNoteMutation, DeleteDispatchNoteMutationVariables>(DeleteDispatchNoteDocument, variables)(),
+      options
+    );
+export const GetDispatchNotesArticlesDocument = `
+    query GetDispatchNotesArticles($options: DispatchNoteArticleFetchOptions!) {
+  dispatchNoteArticles(options: $options) {
+    page
+    pageSize
+    totalItems
+    totalPages
+    results {
+      ...DispatchNoteArticleParts
+    }
+  }
+}
+    ${DispatchNoteArticlePartsFragmentDoc}`;
+export const useGetDispatchNotesArticlesQuery = <
+      TData = GetDispatchNotesArticlesQuery,
+      TError = unknown
+    >(
+      variables: GetDispatchNotesArticlesQueryVariables,
+      options?: UseQueryOptions<GetDispatchNotesArticlesQuery, TError, TData>
+    ) =>
+    useQuery<GetDispatchNotesArticlesQuery, TError, TData>(
+      ['GetDispatchNotesArticles', variables],
+      fetcher<GetDispatchNotesArticlesQuery, GetDispatchNotesArticlesQueryVariables>(GetDispatchNotesArticlesDocument, variables),
+      options
+    );
+export const InsertDispatchNoteArticleDocument = `
+    mutation InsertDispatchNoteArticle($insertOptions: DispatchNoteArticleInsertOptions!) {
+  insertDispatchNoteArticle(options: $insertOptions) {
+    ...DispatchNoteArticleParts
+  }
+}
+    ${DispatchNoteArticlePartsFragmentDoc}`;
+export const useInsertDispatchNoteArticleMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<InsertDispatchNoteArticleMutation, TError, InsertDispatchNoteArticleMutationVariables, TContext>) =>
+    useMutation<InsertDispatchNoteArticleMutation, TError, InsertDispatchNoteArticleMutationVariables, TContext>(
+      ['InsertDispatchNoteArticle'],
+      (variables?: InsertDispatchNoteArticleMutationVariables) => fetcher<InsertDispatchNoteArticleMutation, InsertDispatchNoteArticleMutationVariables>(InsertDispatchNoteArticleDocument, variables)(),
+      options
+    );
+export const UpdateDispatchNoteArticleDocument = `
+    mutation UpdateDispatchNoteArticle($updateOptions: DispatchNoteArticleUpdateOptions!) {
+  updateDispatchNoteArticle(options: $updateOptions) {
+    ...DispatchNoteArticleParts
+  }
+}
+    ${DispatchNoteArticlePartsFragmentDoc}`;
+export const useUpdateDispatchNoteArticleMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<UpdateDispatchNoteArticleMutation, TError, UpdateDispatchNoteArticleMutationVariables, TContext>) =>
+    useMutation<UpdateDispatchNoteArticleMutation, TError, UpdateDispatchNoteArticleMutationVariables, TContext>(
+      ['UpdateDispatchNoteArticle'],
+      (variables?: UpdateDispatchNoteArticleMutationVariables) => fetcher<UpdateDispatchNoteArticleMutation, UpdateDispatchNoteArticleMutationVariables>(UpdateDispatchNoteArticleDocument, variables)(),
+      options
+    );
+export const DeleteDispatchNoteArticleDocument = `
+    mutation DeleteDispatchNoteArticle($deleteOptions: DeleteOptions!) {
+  deleteDispatchNoteArticle(options: $deleteOptions) {
+    numRows
+  }
+}
+    `;
+export const useDeleteDispatchNoteArticleMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<DeleteDispatchNoteArticleMutation, TError, DeleteDispatchNoteArticleMutationVariables, TContext>) =>
+    useMutation<DeleteDispatchNoteArticleMutation, TError, DeleteDispatchNoteArticleMutationVariables, TContext>(
+      ['DeleteDispatchNoteArticle'],
+      (variables?: DeleteDispatchNoteArticleMutationVariables) => fetcher<DeleteDispatchNoteArticleMutation, DeleteDispatchNoteArticleMutationVariables>(DeleteDispatchNoteArticleDocument, variables)(),
       options
     );
 export const GetEntriesDocument = `

@@ -371,8 +371,17 @@ input DeleteOptions {
 	id: Int!
 }
 
+type DispatchNote {
+	id: Int!
+	noteType: Int
+	numericalIdentifier: Int
+	issuingDate: DateTime
+	dGroup: Int!
+	createdAt: DateTime!
+}
+
 type DispatchNoteArticle {
-	dispatchNote: Dispatch_note!
+	dispatchNote: DispatchNote!
 	article: Article!
 	weightType: String
 	quantity: Float!
@@ -472,7 +481,7 @@ input DispatchNoteOrderingOptions {
 }
 
 type DispatchNoteResults {
-	results: [Dispatch_note!]!
+	results: [DispatchNote!]!
 	page: Int!
 	pageSize: Int!
 	totalItems: Int!
@@ -484,15 +493,6 @@ input DispatchNoteUpdateOptions {
 	noteType: Int
 	numericalIdentifier: Int
 	issuingDate: DateTime
-}
-
-type Dispatch_note {
-	id: Int!
-	noteType: Int
-	numericalIdentifier: Int
-	issuingDate: DateTime
-	dGroup: Int!
-	createdAt: DateTime!
 }
 
 type Entry {
@@ -599,8 +599,8 @@ type MutationRoot {
 	insertArticle(options: ArticleInsertOptions!): Article!
 	updateArticle(options: ArticleUpdateOptions!): Article!
 	deleteArticle(options: DeleteOptions!): RowsDeleted!
-	insertDispatchNote(options: DispatchNoteInsertOptions!): Dispatch_note!
-	updateDispatchNote(options: DispatchNoteUpdateOptions!): Dispatch_note!
+	insertDispatchNote(options: DispatchNoteInsertOptions!): DispatchNote!
+	updateDispatchNote(options: DispatchNoteUpdateOptions!): DispatchNote!
 	deleteDispatchNote(options: DeleteOptions!): RowsDeleted!
 	insertDispatchNoteArticle(options: DispatchNoteArticleInsertOptions!): DispatchNoteArticle!
 	updateDispatchNoteArticle(options: DispatchNoteArticleUpdateOptions!): DispatchNoteArticle!

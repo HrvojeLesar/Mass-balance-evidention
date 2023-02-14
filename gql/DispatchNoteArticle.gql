@@ -1,0 +1,60 @@
+query GetDispatchNotesArticles($options: DispatchNoteArticleFetchOptions!) {
+    dispatchNoteArticles(options: $options) {
+        page
+        pageSize
+        totalItems
+        totalPages
+        results {
+            ...DispatchNoteArticleParts
+        }
+    }
+}
+
+mutation InsertDispatchNoteArticle(
+    $insertOptions: DispatchNoteArticleInsertOptions!
+) {
+    insertDispatchNoteArticle(options: $insertOptions) {
+        ...DispatchNoteArticleParts
+    }
+}
+
+mutation UpdateDispatchNoteArticle(
+    $updateOptions: DispatchNoteArticleUpdateOptions!
+) {
+    updateDispatchNoteArticle(options: $updateOptions) {
+        ...DispatchNoteArticleParts
+    }
+}
+
+mutation DeleteDispatchNoteArticle($deleteOptions: DeleteOptions!) {
+    deleteDispatchNoteArticle(options: $deleteOptions) {
+        numRows
+    }
+}
+
+fragment DispatchNoteArticleParts on DispatchNoteArticle {
+    dispatchNote {
+        id
+        noteType
+        numericalIdentifier
+        issuingDate
+        dGroup
+        createdAt
+    }
+    article {
+        id
+        name
+        description
+        dGroup
+        createdAt
+    }
+    weightType
+    quantity
+    createdAt
+    dGroup {
+        id
+        name
+        description
+        createdAt
+    }
+}

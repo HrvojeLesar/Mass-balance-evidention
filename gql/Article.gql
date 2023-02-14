@@ -1,0 +1,37 @@
+query GetArticles($options: ArticleFetchOptions!) {
+    articles(options: $options) {
+        page
+        pageSize
+        totalItems
+        totalPages
+        results {
+            ...ArticleParts
+        }
+    }
+}
+
+mutation InsertArticle($insertOptions: ArticleInsertOptions!) {
+    insertArticle(options: $insertOptions) {
+        ...ArticleParts
+    }
+}
+
+mutation UpdateArticle($updateOptions: ArticleUpdateOptions!) {
+    updateArticle(options: $updateOptions) {
+        ...ArticleParts
+    }
+}
+
+mutation DeleteArticle($deleteOptions: DeleteOptions!) {
+    deleteArticle(options: $deleteOptions) {
+        numRows
+    }
+}
+
+fragment ArticleParts on Article {
+    id
+    name
+    description
+    createdAt
+    dGroup
+}

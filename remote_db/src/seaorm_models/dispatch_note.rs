@@ -17,7 +17,7 @@ use anyhow::Result;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, SimpleObject)]
 #[sea_orm(table_name = "dispatch_note")]
-#[graphql(name = "Dispatch_note")]
+#[graphql(name = "DispatchNote")]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
