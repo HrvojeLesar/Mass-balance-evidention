@@ -684,6 +684,7 @@ export default function EntryForm({
                                     : value;
                             return (
                                 <DatePicker
+                                    allowFreeInput
                                     locale={i18n.language}
                                     value={date}
                                     label={t("entry.date")}

@@ -16,6 +16,11 @@ import {
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import ActionButtons from "../ActionButtons";
+import {
+    ColumnFilterType,
+    DateFilterValues,
+    NumberFilterValues,
+} from "../BaseTable";
 import DataTable from "../DataTable";
 import DeleteModal from "../DeleteModal";
 import EditModal from "../EditModal";
@@ -89,21 +94,75 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
                 cell: (info) =>
                     moment(info.getValue<string>()).format("DD.MM.YYYY"),
                 header: t("entry.date").toString(),
-                enableColumnFilter: false,
+                enableColumnFilter: true,
+                meta: { type: ColumnFilterType.Date },
+                filterFn: (row, columnId, filterValue: DateFilterValues) => {
+                    if (filterValue.value === null) {
+                        return true;
+                    }
+                    let columnDate = new Date(row.getValue<string>(columnId));
+                    if (filterValue.value instanceof Date) {
+                        // WARN: Equality doesn't work as expected
+                        switch (filterValue.comparator) {
+                            case "<":
+                                return columnDate < filterValue.value;
+                            case ">":
+                                return columnDate > filterValue.value;
+                            case "=":
+                                return columnDate === filterValue.value;
+                            case "<=":
+                                return columnDate <= filterValue.value;
+                            case ">=":
+                                return columnDate >= filterValue.value;
+                        }
+                    } else {
+                        if (filterValue.value[0] && filterValue.value[1]) {
+                            return (
+                                columnDate >= filterValue.value[0] &&
+                                columnDate <= filterValue.value[1]
+                            );
+                        } else {
+                            return true;
+                        }
+                    }
+                },
             },
             {
                 accessorKey: "weight",
                 cell: (info) => {
                     if (info.getValue() !== null) {
-                        return `${info.getValue<number>().toLocaleString(i18n.language)} kg`;
+                        return `${info
+                            .getValue<number>()
+                            .toLocaleString(i18n.language)} kg`;
                     }
                     return "0 kg";
                 },
                 header: t("entry.weight").toString(),
-                enableColumnFilter: false,
+                enableColumnFilter: true,
                 aggregationFn: "sum",
                 aggregatedCell: ({ getValue }) =>
-                    `Suma: ${getValue<number>().toLocaleString(i18n.language)} kg`,
+                    `Suma: ${getValue<number>().toLocaleString(
+                        i18n.language
+                    )} kg`,
+                meta: { type: ColumnFilterType.Number },
+                filterFn: (row, columnId, filterValue: NumberFilterValues) => {
+                    if (filterValue.value === null) {
+                        return true;
+                    }
+                    let number = row.getValue<number>(columnId);
+                    switch (filterValue.comparator) {
+                        case "<":
+                            return number < filterValue.value;
+                        case ">":
+                            return number > filterValue.value;
+                        case "=":
+                            return number === filterValue.value;
+                        case "<=":
+                            return number <= filterValue.value;
+                        case ">=":
+                            return number >= filterValue.value;
+                    }
+                },
             },
         ];
         if (isEditable) {

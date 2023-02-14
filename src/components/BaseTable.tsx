@@ -1,13 +1,21 @@
 import {
     Box,
+    Checkbox,
     createStyles,
     Flex,
+    NumberInput,
+    Select,
     Table as MantineTable,
     TextInput,
 } from "@mantine/core";
+import {
+    DatePicker,
+    DateRangePicker,
+    DateRangePickerValue,
+} from "@mantine/dates";
 import { useDebouncedState } from "@mantine/hooks";
 import { Column, flexRender, Table } from "@tanstack/react-table";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -43,12 +51,22 @@ const useStyles = createStyles((theme) => ({
     },
 }));
 
+export enum ColumnFilterType {
+    String,
+    Number,
+    Date,
+}
+
+export type ColumnFilter = {
+    type: ColumnFilterType;
+};
+
 type FilterProps<T> = {
     table: Table<T>;
     column: Column<T, unknown>;
 };
 
-function Filter<T>({ column }: FilterProps<T>) {
+function TextFilter<T>({ column }: FilterProps<T>) {
     const [value, setValue] = useDebouncedState("", DEBOUNCE_TIME);
 
     useEffect(() => {
@@ -70,6 +88,204 @@ function Filter<T>({ column }: FilterProps<T>) {
             size="sm"
         />
     );
+}
+
+type Comparators = "<" | ">" | "=" | "<=" | ">=";
+
+export type DateFilterValues = {
+    value: DateRangePickerValue | Date | null;
+    comparator: Comparators;
+};
+
+const DEFAULT_COMPARATOR = "=";
+
+function DateFilter<T>({ column }: FilterProps<T>) {
+    const { i18n } = useTranslation();
+
+    const [filterValue, setFilterValue] = useState<DateFilterValues>({
+        value: null,
+        comparator: DEFAULT_COMPARATOR,
+    });
+
+    const [isRangePicker, setIsRangePicker] = useState(false);
+
+    useEffect(() => {
+        column.setFilterValue(filterValue);
+    }, [column, filterValue]);
+
+    return (
+        <Flex
+            align="center"
+            gap="sm"
+            onClick={(e) => {
+                e.stopPropagation();
+            }}
+        >
+            <Checkbox
+                onClick={() => {
+                    setIsRangePicker((old) => !old);
+                }}
+            />
+            {!isRangePicker ? (
+                <>
+                    <DatePicker
+                        allowFreeInput
+                        locale={i18n.language}
+                        withinPortal
+                        placeholder={column.columnDef.header?.toString()}
+                        onChange={(date) => {
+                            setFilterValue((old) => ({
+                                ...old,
+                                value: date,
+                            }));
+                        }}
+                        // rightSection={
+                        //     <Select
+                        //         withinPortal
+                        //         defaultValue={defaultComparator}
+                        //         rightSection={<></>}
+                        //         rightSectionWidth={0}
+                        //         onChange={(compValue) => {
+                        //             if (compValue) {
+                        //                 setFilterValue((old) => ({
+                        //                     ...old,
+                        //                     comparator: compValue as Comparators,
+                        //                 }));
+                        //             }
+                        //         }}
+                        //         data={[
+                        //             { value: "<", label: "<" },
+                        //             { value: ">", label: ">" },
+                        //             { value: "=", label: "=" },
+                        //             { value: "<=", label: "<=" },
+                        //             { value: ">=", label: ">=" },
+                        //         ]}
+                        //     />
+                        // }
+                        rightSectionWidth={50}
+                        autoComplete="off"
+                        spellCheck={false}
+                    />
+                    <Select
+                        withinPortal
+                        defaultValue={DEFAULT_COMPARATOR}
+                        rightSection={<></>}
+                        rightSectionWidth={0}
+                        onChange={(compValue) => {
+                            if (compValue) {
+                                setFilterValue((old) => ({
+                                    ...old,
+                                    comparator: compValue as Comparators,
+                                }));
+                            }
+                        }}
+                        data={[
+                            { value: "<", label: "<" },
+                            { value: ">", label: ">" },
+                            { value: "=", label: "=" },
+                            { value: "<=", label: "<=" },
+                            { value: ">=", label: ">=" },
+                        ]}
+                    />
+                </>
+            ) : (
+                <DateRangePicker
+                    locale={i18n.language}
+                    withinPortal
+                    placeholder={column.columnDef.header?.toString()}
+                    onChange={(date) => {
+                        setFilterValue((old) => ({
+                            ...old,
+                            value: date,
+                        }));
+                    }}
+                    autoComplete="off"
+                    spellCheck={false}
+                />
+            )}
+        </Flex>
+    );
+}
+
+export type NumberFilterValues = {
+    value: number | null;
+    comparator: Comparators;
+};
+
+function NumberFilter<T>({ column }: FilterProps<T>) {
+    const { i18n } = useTranslation();
+
+    const [filterValue, setFilterValue] = useState<NumberFilterValues>({
+        value: null,
+        comparator: DEFAULT_COMPARATOR,
+    });
+
+    useEffect(() => {
+        column.setFilterValue(filterValue);
+    }, [column, filterValue]);
+
+    return (
+        <Flex
+            align="center"
+            gap="sm"
+            onClick={(e) => {
+                e.stopPropagation();
+            }}
+        >
+            <NumberInput
+                decimalSeparator={i18n.language === "hr" ? "," : "."}
+                value={filterValue.value ? filterValue.value : undefined}
+                onChange={(val) => {
+                    setFilterValue((old) => ({
+                        ...old,
+                        value: val ?? null,
+                    }));
+                }}
+                placeholder={column.columnDef.header?.toString()}
+                autoComplete="off"
+                spellCheck={false}
+                precision={2}
+                step={0.5}
+            />
+            <Select
+                withinPortal
+                defaultValue={DEFAULT_COMPARATOR}
+                rightSection={<></>}
+                rightSectionWidth={0}
+                onChange={(compValue) => {
+                    if (compValue) {
+                        setFilterValue((old) => ({
+                            ...old,
+                            comparator: compValue as Comparators,
+                        }));
+                    }
+                }}
+                data={[
+                    { value: "<", label: "<" },
+                    { value: ">", label: ">" },
+                    { value: "=", label: "=" },
+                    { value: "<=", label: "<=" },
+                    { value: ">=", label: ">=" },
+                ]}
+            />
+        </Flex>
+    );
+}
+
+function Filter<T>({ column, table }: FilterProps<T>) {
+    const columnType = column.columnDef.meta as ColumnFilter | undefined;
+    if (columnType === undefined) {
+        return <TextFilter column={column} table={table} />;
+    }
+    switch (columnType.type) {
+        default:
+        case ColumnFilterType.String:
+            return <TextFilter column={column} table={table} />;
+        case ColumnFilterType.Date:
+            return <DateFilter column={column} table={table} />;
+        case ColumnFilterType.Number:
+            return <NumberFilter column={column} table={table} />;
+    }
 }
 
 type BaseTableProps<T> = {

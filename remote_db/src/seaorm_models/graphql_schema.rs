@@ -145,7 +145,9 @@ pub struct OrderingOptions<T: InputType> {
 ))]
 pub struct Filter<T: InputType> {
     pub field: T,
+    // TODO: Remove this, we know what type a field is, user doesn't need to specify this
     pub field_type: FieldTypes,
+    // TODO: Make value something that implements some kind of trait
     pub value: String,
 }
 

@@ -196,82 +196,88 @@ export default function CellCulturePairForm({
         return makeOptions(cultureSelectState.page, cultureSelectState.pages);
     }, [cultureSelectState.page, cultureSelectState.pages]);
 
-    const { data: cellData, isFetching: isFetchingCells } =
-        useGetUnpairedCellsQuery(
-            {
-                options: {
-                    id: {
-                        idCulture:
-                            cultureSelectState.selected?.value.id ?? undefined,
-                    },
-                    pageSize: cellSelectState.limit,
-                    page: cellSelectState.page,
-                    ordering: {
-                        order: Ordering.Asc,
-                        orderBy: CellFields.Id,
-                    },
-                    filters:
-                        cellSelectState.filter !== ""
-                            ? [
-                                  {
-                                      value: cellSelectState.filter,
-                                      fieldType: FieldTypes.String,
-                                      field: CellFields.Name,
-                                  },
-                              ]
-                            : undefined,
-                    dataGroupId: dataGroupContextValue.selectedGroup,
+    const {
+        data: cellData,
+        isFetching: isFetchingCells,
+        refetch: refetchCells,
+    } = useGetUnpairedCellsQuery(
+        {
+            options: {
+                id: {
+                    idCulture:
+                        cultureSelectState.selected?.value.id ?? undefined,
                 },
+                pageSize: cellSelectState.limit,
+                page: cellSelectState.page,
+                ordering: {
+                    order: Ordering.Asc,
+                    orderBy: CellFields.Id,
+                },
+                filters:
+                    cellSelectState.filter !== ""
+                        ? [
+                              {
+                                  value: cellSelectState.filter,
+                                  fieldType: FieldTypes.String,
+                                  field: CellFields.Name,
+                              },
+                          ]
+                        : undefined,
+                dataGroupId: dataGroupContextValue.selectedGroup,
             },
-            {
-                queryKey: [
-                    "getUnpairedCellsForm",
-                    cellSelectState.limit,
-                    cellSelectState.page,
-                    cultureSelectState.selected,
-                    dataGroupContextValue.selectedGroup,
-                ],
-                keepPreviousData: true,
-            }
-        );
+        },
+        {
+            queryKey: [
+                "getUnpairedCellsForm",
+                cellSelectState.limit,
+                cellSelectState.page,
+                cultureSelectState.selected,
+                dataGroupContextValue.selectedGroup,
+            ],
+            keepPreviousData: true,
+        }
+    );
 
-    const { data: cultureData, isFetching: isFetchingCultures } =
-        useGetUnpairedCulturesQuery(
-            {
-                options: {
-                    id: {
-                        idCell: cellSelectState.selected?.value.id ?? undefined,
-                    },
-                    pageSize: cultureSelectState.limit,
-                    page: cultureSelectState.page,
-                    ordering: {
-                        order: Ordering.Asc,
-                        orderBy: CultureFields.Name,
-                    },
-                    filters:
-                        cultureSelectState.filter !== ""
-                            ? [
-                                  {
-                                      value: cultureSelectState.filter,
-                                      fieldType: FieldTypes.String,
-                                      field: CultureFields.Name,
-                                  },
-                              ]
-                            : undefined,
-                    dataGroupId: dataGroupContextValue.selectedGroup,
+    const {
+        data: cultureData,
+        isFetching: isFetchingCultures,
+        refetch: refetchCultures,
+    } = useGetUnpairedCulturesQuery(
+        {
+            options: {
+                id: {
+                    idCell: cellSelectState.selected?.value.id ?? undefined,
                 },
+                pageSize: cultureSelectState.limit,
+                page: cultureSelectState.page,
+                ordering: {
+                    order: Ordering.Asc,
+                    orderBy: CultureFields.Name,
+                },
+                filters:
+                    cultureSelectState.filter !== ""
+                        ? [
+                              {
+                                  value: cultureSelectState.filter,
+                                  fieldType: FieldTypes.String,
+                                  field: CultureFields.Name,
+                              },
+                          ]
+                        : undefined,
+                dataGroupId: dataGroupContextValue.selectedGroup,
             },
-            {
-                queryKey: [
-                    "getUnpairedCulturesForm",
-                    cultureSelectState.limit,
-                    cultureSelectState.page,
-                    cellSelectState.selected,
-                    dataGroupContextValue.selectedGroup,
-                ],
-                keepPreviousData: true,
-            }
-        );
+        },
+        {
+            queryKey: [
+                "getUnpairedCulturesForm",
+                cultureSelectState.limit,
+                cultureSelectState.page,
+                cellSelectState.selected,
+                dataGroupContextValue.selectedGroup,
+            ],
+            keepPreviousData: true,
+        }
+    );
 
     useEffect(() => {
         if (cellData) {
@@ -360,6 +366,9 @@ export default function CellCulturePairForm({
                                     isMulti={false}
                                     value={cellSelectState.selected}
                                     options={cellOptions}
+                                    onMenuOpen={() => {
+                                        refetchCells();
+                                    }}
                                     onMenuClose={() => {
                                         setCellSelectState((old) => ({
                                             ...old,
@@ -424,6 +433,9 @@ export default function CellCulturePairForm({
                                     isMulti={false}
                                     value={cultureSelectState.selected}
                                     options={cultureOptions}
+                                    onMenuOpen={() => {
+                                        refetchCultures();
+                                    }}
                                     onMenuClose={() => {
                                         setCultureSelectState((old) => ({
                                             ...old,

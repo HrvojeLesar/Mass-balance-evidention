@@ -18,6 +18,7 @@ import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FaCog } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
+import { ReactComponent as MBELogo } from "./assets/mbe.svg";
 
 type AppNavbarProps = {
     children?: ReactNode;
@@ -103,6 +104,10 @@ const useStyles = createStyles((theme) => ({
     mbeHome: {
         cursor: "pointer",
     },
+
+    logo: {
+        marginRight: "2px",
+    },
 }));
 
 enum NavigationLinkType {
@@ -143,6 +148,13 @@ export default function AppNavbar({ children }: AppNavbarProps) {
 
     const [active, setActive] = useState(location.pathname);
 
+    const handleOnClick = (event: React.MouseEvent, link: string) => {
+        event.preventDefault();
+        setActive(link);
+        close();
+        navigate(link);
+    };
+
     const generateLabelLink = (link: NavigationLink) => {
         return (
             <a
@@ -153,10 +165,7 @@ export default function AppNavbar({ children }: AppNavbarProps) {
                     [classes.linkActive]: active === link.link,
                 })}
                 onClick={(event) => {
-                    event.preventDefault();
-                    setActive(link.link);
-                    close();
-                    navigate(link.link);
+                    handleOnClick(event, link.link);
                 }}
             >
                 {link.label}
@@ -173,10 +182,7 @@ export default function AppNavbar({ children }: AppNavbarProps) {
                         color={active === link.link ? "blue" : "gray"}
                         variant="outline"
                         onClick={(event) => {
-                            event.preventDefault();
-                            setActive(link.link);
-                            close();
-                            navigate(link.link);
+                            handleOnClick(event, link.link);
                         }}
                     >
                         <FaCog />
@@ -190,10 +196,7 @@ export default function AppNavbar({ children }: AppNavbarProps) {
                             [classes.linkActive]: active === link.link,
                         })}
                         onClick={(event) => {
-                            event.preventDefault();
-                            setActive(link.link);
-                            close();
-                            navigate(link.link);
+                            handleOnClick(event, link.link);
                         }}
                     >
                         <Flex gap="sm" align="center">
@@ -224,16 +227,22 @@ export default function AppNavbar({ children }: AppNavbarProps) {
                 header={
                     <Header height={HEADER_HEIGHT}>
                         <Container size="xl" className={classes.header}>
-                            <Text
-                                size="xl"
-                                fw={700}
-                                onClick={() => {
-                                    navigate("/");
-                                }}
+                            <Flex
+                                align="center"
                                 className={classes.mbeHome}
+                                onClick={(event) => {
+                                    handleOnClick(event, "/");
+                                }}
                             >
-                                Mass Balance Evidention
-                            </Text>
+                                <MBELogo
+                                    width="1.5em"
+                                    height="1.5em"
+                                    className={classes.logo}
+                                />
+                                <Text size="xl" fw={700}>
+                                    Mass Balance Evidention
+                                </Text>
+                            </Flex>
                             <Group spacing={5} className={classes.links}>
                                 {items}
                             </Group>
