@@ -1,6 +1,6 @@
 use async_graphql::{Context, Enum, InputObject, Object, SimpleObject};
 use async_trait::async_trait;
-use log::warn;
+
 use sea_orm::{
     entity::prelude::*,
     sea_query::{Expr, Func},
@@ -12,9 +12,7 @@ use serde::{Deserialize, Serialize};
 use crate::SeaOrmPool;
 
 use super::{
-    graphql_schema::{
-        DeleteOptions, FetchOptions, FieldTypes, Filter, OrderingOptions, Pagination,
-    },
+    graphql_schema::{DeleteOptions, FetchOptions, Filter, OrderingOptions, Pagination},
     GetDataGroupColumnTrait, QueryDatabase, QueryResults, QueryResultsHelperType, RowsDeleted,
 };
 
@@ -165,9 +163,9 @@ pub struct AllCellCulturePairs {
 
 impl From<QueryResultsHelperType<CellCulturePairFlattened>> for QueryResults<CellCulturePair> {
     fn from(inp: QueryResultsHelperType<CellCulturePairFlattened>) -> Self {
+        let (results, items_and_page_number, page, page_size) = inp;
         Self {
-            results: inp
-                .0
+            results: results
                 .into_iter()
                 .map(|flat| CellCulturePair {
                     id: flat.id,
@@ -194,12 +192,11 @@ impl From<QueryResultsHelperType<CellCulturePairFlattened>> for QueryResults<Cel
                     },
                 })
                 .collect(),
-            // TODO: Sort this out
             pagination: Pagination {
-                page: 0,
-                page_size: 0,
-                total_items: inp.1.number_of_items,
-                total_pages: inp.1.number_of_pages,
+                page: page.page,
+                page_size: page_size.0,
+                total_items: items_and_page_number.number_of_items,
+                total_pages: items_and_page_number.number_of_pages,
             },
         }
     }
@@ -222,6 +219,8 @@ impl QueryDatabase for Entity {
     type DeleteOptionsType = i32;
 
     type FetchIdType = Option<CellCulturePairIds>;
+
+    type FilterValueType = String;
 
     fn get_query() -> Select<Self> {
         Entity::find()
@@ -298,34 +297,37 @@ impl QueryDatabase for Entity {
         query
     }
 
-    fn add_filter(mut query: Select<Self>, filter: Filter<Self::InputFields>) -> Select<Self> {
-        match filter.field_type {
-            FieldTypes::String => {
-                query = match filter.field {
-                    Self::InputFields::CellName => query.filter(
-                        Expr::expr(Func::lower(Expr::col(super::cell::Column::Name)))
-                            .like(format!("%{}%", filter.value.trim().to_lowercase())),
-                    ),
-                    Self::InputFields::CellDescription => query.filter(
-                        Expr::expr(Func::lower(Expr::col(super::cell::Column::Description)))
-                            .like(format!("%{}%", filter.value.trim().to_lowercase())),
-                    ),
-                    Self::InputFields::CultureName => query.filter(
-                        Expr::expr(Func::lower(Expr::col(super::culture::Column::Name)))
-                            .like(format!("%{}%", filter.value.trim().to_lowercase())),
-                    ),
-                    Self::InputFields::CultureDescription => query.filter(
-                        Expr::expr(Func::lower(Expr::col(super::culture::Column::Description)))
-                            .like(format!("%{}%", filter.value.trim().to_lowercase())),
-                    ),
-                };
-            }
-            // Should do nothing, no field can be filtered by these types
-            FieldTypes::Number | FieldTypes::Date => {
-                warn!("Number or Date filter field used on CellCulturePair");
-            }
+    fn add_filter(query: Select<Self>, filter: Filter<Self::InputFields>) -> Select<Self> {
+        match filter.field {
+            Self::InputFields::CellName => query.filter(
+                Expr::expr(Func::lower(Expr::col((
+                    super::cell::Entity,
+                    super::cell::Column::Name,
+                ))))
+                .like(format!("%{}%", filter.value.trim().to_lowercase())),
+            ),
+            Self::InputFields::CellDescription => query.filter(
+                Expr::expr(Func::lower(Expr::col((
+                    super::cell::Entity,
+                    super::cell::Column::Description,
+                ))))
+                .like(format!("%{}%", filter.value.trim().to_lowercase())),
+            ),
+            Self::InputFields::CultureName => query.filter(
+                Expr::expr(Func::lower(Expr::col((
+                    super::culture::Entity,
+                    super::culture::Column::Name,
+                ))))
+                .like(format!("%{}%", filter.value.trim().to_lowercase())),
+            ),
+            Self::InputFields::CultureDescription => query.filter(
+                Expr::expr(Func::lower(Expr::col((
+                    super::culture::Entity,
+                    super::culture::Column::Description,
+                ))))
+                .like(format!("%{}%", filter.value.trim().to_lowercase())),
+            ),
         }
-        query
     }
 
     async fn update_entity(

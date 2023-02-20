@@ -13,7 +13,7 @@ use crate::SeaOrmPool;
 
 use super::{
     graphql_schema::{
-        DeleteOptions, FetchOptions, FieldTypes, Filter, OrderingOptions, Pagination, QueryResults,
+        DeleteOptions, FetchOptions, Filter, OrderingOptions, Pagination, QueryResults,
     },
     GetDataGroupColumnTrait, QueryDatabase, QueryResultsHelperType, RowsDeleted,
 };
@@ -122,7 +122,7 @@ impl GetDataGroupColumnTrait<Column> for Entity {
 pub struct DispatchNoteArticleIds {
     pub id_dispatch_note: Option<i32>,
     pub id_article: Option<i32>,
-    pub d_group: Option<i32>,
+    // pub d_group: Option<i32>,
 }
 
 #[derive(InputObject)]
@@ -151,6 +151,8 @@ pub struct DispatchNoteArticleDeleteOptions {
 
 #[derive(Debug, Clone, FromQueryResult)]
 pub struct DispatchNoteArticleFlattened {
+    pub id: i32,
+
     pub id_dispatch_note: i32,
     pub weight_type: Option<String>,
     pub quantity: f64,
@@ -165,7 +167,7 @@ pub struct DispatchNoteArticleFlattened {
 
     pub note_type_dispatch_note: Option<i32>,
     pub numerical_identifier_dispatch_note: Option<i32>,
-    pub issuing_date_dispatch_note: Option<DateTimeWithTimeZone>,
+    pub issuing_date_dispatch_note: Option<Date>,
     pub created_at_dispatch_note: DateTimeWithTimeZone,
     pub d_group_dispatch_note: i32,
 
@@ -177,6 +179,7 @@ pub struct DispatchNoteArticleFlattened {
 
 #[derive(Debug, SimpleObject)]
 pub struct DispatchNoteArticle {
+    pub id: i32,
     pub dispatch_note: super::dispatch_note::Model,
     pub article: super::article::Model,
     pub weight_type: Option<String>,
@@ -189,11 +192,12 @@ impl From<QueryResultsHelperType<DispatchNoteArticleFlattened>>
     for QueryResults<DispatchNoteArticle>
 {
     fn from(inp: QueryResultsHelperType<DispatchNoteArticleFlattened>) -> Self {
+        let (results, items_and_page_number, page, page_size) = inp;
         Self {
-            results: inp
-                .0
+            results: results
                 .into_iter()
                 .map(|flat| DispatchNoteArticle {
+                    id: flat.id,
                     quantity: flat.quantity,
                     weight_type: flat.weight_type,
                     created_at: flat.created_at,
@@ -220,12 +224,11 @@ impl From<QueryResultsHelperType<DispatchNoteArticleFlattened>>
                     },
                 })
                 .collect(),
-            // TODO: Sort this out
             pagination: Pagination {
-                page: 0,
-                page_size: 0,
-                total_items: inp.1.number_of_items,
-                total_pages: inp.1.number_of_pages,
+                page: page.page,
+                page_size: page_size.0,
+                total_items: items_and_page_number.number_of_items,
+                total_pages: items_and_page_number.number_of_pages,
             },
         }
     }
@@ -248,6 +251,8 @@ impl QueryDatabase for Entity {
     type DeleteOptionsType = i32;
 
     type FetchIdType = Option<DispatchNoteArticleIds>;
+
+    type FilterValueType = String;
 
     fn get_query() -> Select<Self> {
         Entity::find()
@@ -278,7 +283,7 @@ impl QueryDatabase for Entity {
             )
             .column_as(
                 super::dispatch_note::Column::CreatedAt,
-                "create_ad_dispatch_note",
+                "created_at_dispatch_note",
             )
             .column_as(super::data_group::Column::Id, "id_d_group")
             .column_as(super::data_group::Column::Name, "name_d_group")
@@ -315,7 +320,7 @@ impl QueryDatabase for Entity {
                 };
             }
             None => {
-                query = query.order_by(super::article::Column::Name, Order::Asc);
+                query = query.order_by(super::article::Column::Id, Order::Asc);
             }
         }
         query
@@ -327,10 +332,13 @@ impl QueryDatabase for Entity {
     ) -> Select<Self> {
         // common_add_id_and_data_group_filters(query, fetch_options)
         if let Some(ids) = &fetch_options.id {
-            query = query
-                .filter(Column::IdDispatchNote.eq(ids.id_dispatch_note))
-                .filter(Column::IdArticle.eq(ids.id_article))
-                .filter(Column::DGroup.eq(ids.d_group))
+            if let Some(id_dispatch_note) = ids.id_dispatch_note {
+                query = query.filter(Column::IdDispatchNote.eq(id_dispatch_note))
+            }
+            if let Some(id_article) = ids.id_article {
+                query = query.filter(Column::IdArticle.eq(id_article))
+            }
+            // .filter(Column::DGroup.eq(ids.d_group))
         }
         if let Some(data_group) = fetch_options.data_group_id {
             query = query.filter(Column::DGroup.eq(data_group));
@@ -338,34 +346,28 @@ impl QueryDatabase for Entity {
         query
     }
 
-    fn add_filter(mut query: Select<Self>, filter: Filter<Self::InputFields>) -> Select<Self> {
-        match filter.field_type {
-            FieldTypes::String => {
-                query = match filter.field {
-                    Self::InputFields::ArticleName => query.filter(
-                        Expr::expr(Func::lower(Expr::col(super::article::Column::Name)))
-                            .like(format!("%{}%", filter.value.trim().to_lowercase())),
-                    ),
-                    Self::InputFields::ArticleDescription => query.filter(
-                        Expr::expr(Func::lower(Expr::col(super::article::Column::Description)))
-                            .like(format!("%{}%", filter.value.trim().to_lowercase())),
-                    ),
-                    Self::InputFields::WeightType => query.filter(
-                        Expr::expr(Func::lower(Expr::col(Column::WeightType)))
-                            .like(format!("%{}%", filter.value.trim().to_lowercase())),
-                    ),
-                    _ => query,
-                };
-            }
-            FieldTypes::Number | FieldTypes::Date => {
-                todo!("Number and date filtering");
-                // Self::InputFields::Quantity => query.filter(
-                //     Expr::expr(Func::lower(Expr::col(Column::Quantity)))
-                //         .like(format!("%{}%", filter.value.trim().to_lowercase())),
-                // ),
-            }
+    fn add_filter(query: Select<Self>, filter: Filter<Self::InputFields>) -> Select<Self> {
+        match filter.field {
+            Self::InputFields::ArticleName => query.filter(
+                Expr::expr(Func::lower(Expr::col((
+                    super::article::Entity,
+                    super::article::Column::Name,
+                ))))
+                .like(format!("%{}%", filter.value.trim().to_lowercase())),
+            ),
+            Self::InputFields::ArticleDescription => query.filter(
+                Expr::expr(Func::lower(Expr::col((
+                    super::article::Entity,
+                    super::article::Column::Description,
+                ))))
+                .like(format!("%{}%", filter.value.trim().to_lowercase())),
+            ),
+            Self::InputFields::WeightType => query.filter(
+                Expr::expr(Func::lower(Expr::col((Entity, Column::WeightType))))
+                    .like(format!("%{}%", filter.value.trim().to_lowercase())),
+            ),
+            _ => query,
         }
-        query
     }
 
     async fn update_entity(
@@ -400,7 +402,7 @@ impl QueryDatabase for Entity {
                 id: Some(DispatchNoteArticleIds {
                     id_dispatch_note: Some(res.id_dispatch_note),
                     id_article: Some(res.id_article),
-                    d_group: Some(res.d_group),
+                    // d_group: res.d_group,
                 }),
                 page_size: None,
                 page: None,
@@ -441,7 +443,7 @@ impl QueryDatabase for Entity {
                 id: Some(DispatchNoteArticleIds {
                     id_dispatch_note: Some(res.id_dispatch_note),
                     id_article: Some(res.id_article),
-                    d_group: Some(res.d_group),
+                    // d_group: res.d_group,
                 }),
                 page_size: None,
                 page: None,

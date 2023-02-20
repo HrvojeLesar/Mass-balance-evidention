@@ -1,16 +1,16 @@
 use async_graphql::{Context, Enum, InputObject, Object, SimpleObject};
 use async_trait::async_trait;
 use sea_orm::{
-    entity::prelude::*, sea_query::Query, ActiveValue, Condition, DatabaseTransaction,
-    DeleteResult, TransactionTrait,
+    entity::prelude::*,
+    sea_query::{Expr, Func, Query},
+    ActiveValue, Condition, DatabaseTransaction, DeleteResult, TransactionTrait,
 };
 use serde::{Deserialize, Serialize};
 
 use crate::SeaOrmPool;
 
 use super::{
-    calculate_page_size, common_add_filter, common_add_id_and_data_group_filters,
-    common_add_ordering,
+    calculate_page_size, common_add_id_and_data_group_filters, common_add_ordering,
     graphql_schema::{DeleteOptions, FetchOptions, Filter, OrderingOptions},
     GetDataGroupColumnTrait, Page, PageSize, QueryDatabase, QueryResults, RowsDeleted,
 };
@@ -128,6 +128,8 @@ impl QueryDatabase for Entity {
 
     type FetchIdType = Option<i32>;
 
+    type FilterValueType = String;
+
     async fn delete_query(
         transaction: &DatabaseTransaction,
         options: DeleteOptions<Self::DeleteOptionsType>,
@@ -137,7 +139,7 @@ impl QueryDatabase for Entity {
 
     fn add_id_and_data_group_filters(
         query: Select<Self>,
-        fetch_options: &FetchOptions<Self::InputFields, Self::FetchIdType>,
+        fetch_options: &FetchOptions<Self::InputFields, Self::FetchIdType, Self::FilterValueType>,
     ) -> Select<Self> {
         common_add_id_and_data_group_filters(query, fetch_options)
     }
@@ -180,7 +182,14 @@ impl QueryDatabase for Entity {
     }
 
     fn add_filter(query: Select<Self>, filter: Filter<Self::InputFields>) -> Select<Self> {
-        common_add_filter(query, filter)
+        let column: Self::Column = filter.field.into();
+        match filter.field {
+            CultureFields::Name | CultureFields::Description => query.filter(
+                Expr::expr(Func::lower(Expr::col((Entity, column))))
+                    .like(format!("%{}%", filter.value.trim().to_lowercase())),
+            ),
+            CultureFields::Id => query,
+        }
     }
 
     fn add_ordering(

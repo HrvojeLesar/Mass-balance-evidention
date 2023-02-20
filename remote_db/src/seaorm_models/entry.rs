@@ -15,9 +15,7 @@ use anyhow::Result;
 use crate::SeaOrmPool;
 
 use super::{
-    graphql_schema::{
-        DeleteOptions, FetchOptions, FieldTypes, Filter, OrderingOptions, Pagination,
-    },
+    graphql_schema::{DeleteOptions, FetchOptions, Filter, OrderingOptions, Pagination},
     GetDataGroupColumnTrait, QueryDatabase, QueryResults, QueryResultsHelperType, RowsDeleted,
 };
 
@@ -28,7 +26,7 @@ pub struct Model {
     pub id: i32,
     pub weight: Option<f64>,
     pub weight_type: Option<String>,
-    pub date: DateTimeWithTimeZone,
+    pub date: Date,
     pub created_at: DateTimeWithTimeZone,
     pub id_buyer: i32,
     pub id_cell_culture_pair: i32,
@@ -105,7 +103,7 @@ impl Default for Column {
 
 #[derive(InputObject)]
 pub struct EntryInsertOptions {
-    pub date: DateTimeWithTimeZone,
+    pub date: Date,
     pub weight: Option<f64>,
     pub weight_type: Option<String>,
     pub id_buyer: i32,
@@ -126,7 +124,7 @@ pub struct EntryUpdateOptions {
     pub id: i32,
     pub weight: Option<f64>,
     pub weight_type: Option<String>,
-    pub date: Option<DateTimeWithTimeZone>,
+    pub date: Option<Date>,
     pub id_buyer: Option<i32>,
     pub pair_ids: Option<PairIds>,
     pub d_group: Option<i32>,
@@ -151,7 +149,7 @@ pub struct EntryFlattened {
     pub id: i32,
     pub weight: Option<f64>,
     pub weight_type: Option<String>,
-    pub date: DateTimeWithTimeZone,
+    pub date: Date,
     pub created_at: DateTimeWithTimeZone,
     pub d_group: i32,
 
@@ -185,7 +183,7 @@ pub struct Entry {
     pub id: i32,
     pub weight: Option<f64>,
     pub weight_type: Option<String>,
-    pub date: DateTimeWithTimeZone,
+    pub date: Date,
     pub created_at: DateTimeWithTimeZone,
 
     pub buyer: Option<super::buyer::Model>,
@@ -202,9 +200,9 @@ pub struct AllEntires {
 
 impl From<QueryResultsHelperType<EntryFlattened>> for QueryResults<Entry> {
     fn from(inp: QueryResultsHelperType<EntryFlattened>) -> Self {
+        let (results, items_and_page_number, page, page_size) = inp;
         Self {
-            results: inp
-                .0
+            results: results
                 .into_iter()
                 .map(|flat| Entry {
                     id: flat.id,
@@ -242,12 +240,11 @@ impl From<QueryResultsHelperType<EntryFlattened>> for QueryResults<Entry> {
                     }),
                 })
                 .collect(),
-            // TODO: Sort this out
             pagination: Pagination {
-                page: 0,
-                page_size: 0,
-                total_items: inp.1.number_of_items,
-                total_pages: inp.1.number_of_pages,
+                page: page.page,
+                page_size: page_size.0,
+                total_items: items_and_page_number.number_of_items,
+                total_pages: items_and_page_number.number_of_pages,
             },
         }
     }
@@ -279,6 +276,8 @@ impl QueryDatabase for Entity {
     type DeleteOptionsType = i32;
 
     type FetchIdType = Option<i32>;
+
+    type FilterValueType = String;
 
     fn get_query() -> Select<Self> {
         Entity::find()
@@ -378,43 +377,58 @@ impl QueryDatabase for Entity {
     }
 
     fn add_filter(mut query: Select<Self>, filter: Filter<Self::InputFields>) -> Select<Self> {
-        match filter.field_type {
-            FieldTypes::String => {
-                query = match filter.field {
-                    Self::InputFields::BuyerName => query.filter(
-                        Expr::expr(Func::lower(Expr::col(super::buyer::Column::Name)))
-                            .like(format!("%{}%", filter.value.trim().to_lowercase())),
-                    ),
-                    Self::InputFields::BuyerAddress => query.filter(
-                        Expr::expr(Func::lower(Expr::col(super::buyer::Column::Address)))
-                            .like(format!("%{}%", filter.value.trim().to_lowercase())),
-                    ),
-                    Self::InputFields::BuyerContact => query.filter(
-                        Expr::expr(Func::lower(Expr::col(super::buyer::Column::Contact)))
-                            .like(format!("%{}%", filter.value.trim().to_lowercase())),
-                    ),
-                    Self::InputFields::CellName => query.filter(
-                        Expr::expr(Func::lower(Expr::col(super::cell::Column::Name)))
-                            .like(format!("%{}%", filter.value.trim().to_lowercase())),
-                    ),
-                    Self::InputFields::CellDescription => query.filter(
-                        Expr::expr(Func::lower(Expr::col(super::cell::Column::Description)))
-                            .like(format!("%{}%", filter.value.trim().to_lowercase())),
-                    ),
-                    Self::InputFields::CultureName => query.filter(
-                        Expr::expr(Func::lower(Expr::col(super::culture::Column::Name)))
-                            .like(format!("%{}%", filter.value.trim().to_lowercase())),
-                    ),
-                    Self::InputFields::CultureDescription => query.filter(
-                        Expr::expr(Func::lower(Expr::col(super::culture::Column::Description)))
-                            .like(format!("%{}%", filter.value.trim().to_lowercase())),
-                    ),
-                    Self::InputFields::Id | Self::InputFields::Weight | Self::InputFields::Date => {
-                        query
-                    }
-                };
-            }
-            FieldTypes::Number => {
+        match filter.field {
+            Self::InputFields::BuyerName => query.filter(
+                Expr::expr(Func::lower(Expr::col((
+                    super::buyer::Entity,
+                    super::buyer::Column::Name,
+                ))))
+                .like(format!("%{}%", filter.value.trim().to_lowercase())),
+            ),
+            Self::InputFields::BuyerAddress => query.filter(
+                Expr::expr(Func::lower(Expr::col((
+                    super::buyer::Entity,
+                    super::buyer::Column::Address,
+                ))))
+                .like(format!("%{}%", filter.value.trim().to_lowercase())),
+            ),
+            Self::InputFields::BuyerContact => query.filter(
+                Expr::expr(Func::lower(Expr::col((
+                    super::buyer::Entity,
+                    super::buyer::Column::Contact,
+                ))))
+                .like(format!("%{}%", filter.value.trim().to_lowercase())),
+            ),
+            Self::InputFields::CellName => query.filter(
+                Expr::expr(Func::lower(Expr::col((
+                    super::cell::Entity,
+                    super::cell::Column::Name,
+                ))))
+                .like(format!("%{}%", filter.value.trim().to_lowercase())),
+            ),
+            Self::InputFields::CellDescription => query.filter(
+                Expr::expr(Func::lower(Expr::col((
+                    super::cell::Entity,
+                    super::cell::Column::Description,
+                ))))
+                .like(format!("%{}%", filter.value.trim().to_lowercase())),
+            ),
+            Self::InputFields::CultureName => query.filter(
+                Expr::expr(Func::lower(Expr::col((
+                    super::culture::Entity,
+                    super::culture::Column::Name,
+                ))))
+                .like(format!("%{}%", filter.value.trim().to_lowercase())),
+            ),
+            Self::InputFields::CultureDescription => query.filter(
+                Expr::expr(Func::lower(Expr::col((
+                    super::culture::Entity,
+                    super::culture::Column::Description,
+                ))))
+                .like(format!("%{}%", filter.value.trim().to_lowercase())),
+            ),
+            // TODO: Other operations on weight like less than, more than...
+            Self::InputFields::Id | Self::InputFields::Weight => {
                 query = match filter.value.parse::<i32>() {
                     Ok(val) => match filter.field {
                         Self::InputFields::Id => query.filter(Column::Id.eq(val)),
@@ -426,12 +440,11 @@ impl QueryDatabase for Entity {
                         query
                     }
                 };
+                query
             }
-            FieldTypes::Date => {
-                todo!("Proper date filtering")
-            }
+            // TODO: Proper date filtering
+            Self::InputFields::Date => query,
         }
-        query
     }
 
     async fn update_entity(

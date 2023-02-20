@@ -1,8 +1,7 @@
 use async_graphql::{InputType, OutputType, SimpleObject};
 use async_trait::async_trait;
-use log::error;
+
 use sea_orm::{
-    sea_query::{Expr, Func},
     ColumnTrait, DatabaseConnection, DatabaseTransaction, DeleteResult, EntityTrait,
     FromQueryResult, ItemsAndPagesNumber, Order, Paginator, PaginatorTrait, QueryFilter,
     QueryOrder, Select, SelectModel, TransactionTrait,
@@ -11,7 +10,7 @@ use sea_orm::{
 use anyhow::Result;
 
 use self::graphql_schema::{
-    DeleteOptions, FetchOptions, FieldTypes, Filter, OrderingOptions, Pagination, QueryResults,
+    DeleteOptions, FetchOptions, Filter, OrderingOptions, Pagination, QueryResults,
 };
 
 pub mod prelude;
@@ -95,7 +94,7 @@ where
     Self: EntityTrait + GetDataGroupColumnTrait<<Self as EntityTrait>::Column>,
     <Self as EntityTrait>::Model: Sync,
     <Self as EntityTrait>::Column: Default,
-    Filter<Self::InputFields>: InputType,
+    Filter<Self::InputFields, Self::FilterValueType>: InputType,
     OrderingOptions<Self::InputFields>: InputType,
 {
     type InnerQueryResultType: OutputType;
@@ -115,6 +114,8 @@ where
 
     type FetchIdType: InputType;
 
+    type FilterValueType: InputType;
+
     // TODO: better name
     fn get_query() -> Select<Self> {
         <Self as EntityTrait>::find()
@@ -132,7 +133,7 @@ where
 
     fn add_id_and_data_group_filters(
         query: Select<Self>,
-        fetch_options: &FetchOptions<Self::InputFields, Self::FetchIdType>,
+        fetch_options: &FetchOptions<Self::InputFields, Self::FetchIdType, Self::FilterValueType>,
     ) -> Select<Self>;
 
     fn paginate_query(
@@ -145,11 +146,14 @@ where
             .paginate(transaction, page_size.0)
     }
 
-    fn add_filter(query: Select<Self>, filter: Filter<Self::InputFields>) -> Select<Self>;
+    fn add_filter(
+        query: Select<Self>,
+        filter: Filter<Self::InputFields, Self::FilterValueType>,
+    ) -> Select<Self>;
 
     fn add_filters(
         mut query: Select<Self>,
-        filters: Option<Vec<Filter<Self::InputFields>>>,
+        filters: Option<Vec<Filter<Self::InputFields, Self::FilterValueType>>>,
     ) -> Select<Self> {
         if let Some(filters) = filters {
             for filter in filters {
@@ -161,7 +165,7 @@ where
 
     async fn fetch(
         db: &DatabaseConnection,
-        fetch_options: FetchOptions<Self::InputFields, Self::FetchIdType>,
+        fetch_options: FetchOptions<Self::InputFields, Self::FetchIdType, Self::FilterValueType>,
     ) -> Result<Self::QueryResultType>
     where
         Self::QueryResultType: From<QueryResultsHelperType<Self::FetchModel>>,
@@ -235,39 +239,6 @@ fn calculate_page_size(page_size: Option<u64>) -> u64 {
     }
 }
 
-// TODO: Make a usable filter
-pub fn common_add_filter<E, T>(mut query: Select<E>, filter: Filter<T>) -> Select<E>
-where
-    T: InputType,
-    E: EntityTrait,
-    <E as EntityTrait>::Column: From<T>,
-{
-    let column: <E as EntityTrait>::Column = filter.field.into();
-    match filter.field_type {
-        FieldTypes::String => {
-            query = query.filter(
-                Expr::expr(Func::lower(Expr::col(column)))
-                    .like(format!("%{}%", filter.value.trim().to_lowercase())),
-            );
-        }
-        FieldTypes::Number => {
-            match filter.value.parse::<i32>() {
-                Ok(val) => {
-                    query = query.filter(column.eq(val));
-                }
-                Err(e) => {
-                    error!("Inputed field value for Number is not a number, ignoring filter option: {:#?}", e);
-                }
-            }
-        }
-        // Range exact, range based
-        FieldTypes::Date => {
-            todo!();
-        }
-    }
-    query
-}
-
 pub fn common_add_ordering<E, T>(
     mut query: Select<E>,
     ordering_options: Option<OrderingOptions<T>>,
@@ -294,15 +265,16 @@ where
     query
 }
 
-pub fn common_add_id_and_data_group_filters<E, T>(
+pub fn common_add_id_and_data_group_filters<E, T, V>(
     mut query: Select<E>,
-    fetch_options: &FetchOptions<T, Option<i32>>,
+    fetch_options: &FetchOptions<T, Option<i32>, V>,
 ) -> Select<E>
 where
     E: EntityTrait + GetDataGroupColumnTrait<<E as EntityTrait>::Column>,
     T: InputType,
+    V: InputType,
     OrderingOptions<T>: InputType,
-    Filter<T>: InputType,
+    Filter<T, V>: InputType,
 {
     if let Some(id) = fetch_options.id {
         query = query.filter(E::get_id_column().eq(id));

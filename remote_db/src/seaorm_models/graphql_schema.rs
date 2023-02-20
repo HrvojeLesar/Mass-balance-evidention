@@ -10,7 +10,9 @@ use super::{
     },
     culture::{CultureFields, CultureMutation, CultureParity, CultureQuery},
     data_group::{DataGroupFields, DataGroupMutation, DataGroupQuery},
-    dispatch_note::{DispatchNoteFields, DispatchNoteMutation, DispatchNoteQuery},
+    dispatch_note::{
+        DispatchNoteFields, DispatchNoteFilterValue, DispatchNoteMutation, DispatchNoteQuery,
+    },
     dispatch_note_article::{
         DispatchNoteArticleFields, DispatchNoteArticleIds, DispatchNoteArticleMutation,
         DispatchNoteArticleQuery,
@@ -138,21 +140,27 @@ pub struct OrderingOptions<T: InputType> {
 #[graphql(concrete(name = "CellCultureFilterOptions", params(CellCulturePairFields)))]
 #[graphql(concrete(name = "EntryFilterOptions", params(EntryFields)))]
 #[graphql(concrete(name = "ArticleFilterOptions", params(ArticleFields)))]
-#[graphql(concrete(name = "DispatchNoteFilterOptions", params(DispatchNoteFields)))]
+#[graphql(concrete(
+    name = "DispatchNoteFilterOptions",
+    params(DispatchNoteFields, DispatchNoteFilterValue)
+))]
+// #[graphql(concrete(
+//     name = "DispatchNoteFilterOptions",
+//     params(DispatchNoteFields)
+// ))]
 #[graphql(concrete(
     name = "DispatchNoteArticleFilterOptions",
     params(DispatchNoteArticleFields)
 ))]
-pub struct Filter<T: InputType> {
+pub struct Filter<T: InputType, V: InputType = String> {
     pub field: T,
-    // TODO: Remove this, we know what type a field is, user doesn't need to specify this
-    pub field_type: FieldTypes,
     // TODO: Make value something that implements some kind of trait
-    pub value: String,
+    pub value: V,
 }
 
 type OptionalCellCulturePairIds = Option<CellCulturePairIds>;
 type OptionalDispatchNoteArticleIds = Option<DispatchNoteArticleIds>;
+type OptionalI = Option<i32>;
 
 #[derive(InputObject)]
 #[graphql(concrete(name = "BuyerFetchOptions", params(BuyerFields)))]
@@ -170,23 +178,27 @@ type OptionalDispatchNoteArticleIds = Option<DispatchNoteArticleIds>;
 ))]
 #[graphql(concrete(name = "EntryFetchOptions", params(EntryFields)))]
 #[graphql(concrete(name = "ArticleFetchOptions", params(ArticleFields)))]
-#[graphql(concrete(name = "DispatchNoteFetchOptions", params(DispatchNoteFields)))]
+#[graphql(concrete(
+    name = "DispatchNoteFetchOptions",
+    params(DispatchNoteFields, OptionalI, DispatchNoteFilterValue)
+))]
 #[graphql(concrete(
     name = "DispatchNoteArticleFetchOptions",
     params(DispatchNoteArticleFields, OptionalDispatchNoteArticleIds)
 ))]
-pub struct FetchOptions<T, I = Option<i32>, O = T>
+pub struct FetchOptions<T, I = Option<i32>, V = String, O = T>
 where
     T: InputType,
     O: InputType,
     I: InputType,
-    Filter<T>: InputType,
+    V: InputType,
+    Filter<T, V>: InputType,
     OrderingOptions<O>: InputType,
 {
     pub id: I,
     pub page_size: Option<u64>,
     pub page: Option<u64>,
     pub ordering: Option<OrderingOptions<O>>,
-    pub filters: Option<Vec<Filter<T>>>,
+    pub filters: Option<Vec<Filter<T, V>>>,
     pub data_group_id: Option<i32>,
 }

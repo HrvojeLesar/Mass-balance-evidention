@@ -56,7 +56,7 @@ CREATE TABLE entry (
     id SERIAL PRIMARY KEY,
     weight DOUBLE PRECISION,
     weight_type VARCHAR(5) REFERENCES weight_types(id) DEFAULT 'kg',
-    date TIMESTAMPTZ NOT NULL,
+    date DATE NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     id_buyer INT REFERENCES buyer(id) NOT NULL,
     id_cell_culture_pair INT REFERENCES cell_culture_pair(id) NOT NULL,
@@ -67,7 +67,7 @@ CREATE TABLE dispatch_note (
     id SERIAL PRIMARY KEY,
     note_type INT,
     numerical_identifier INT,
-    issuing_date TIMESTAMPTZ,
+    issuing_date DATE,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     d_group INT REFERENCES data_group(id) NOT NULL
 );

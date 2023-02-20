@@ -1,5 +1,6 @@
 use async_graphql::{Context, Enum, InputObject, Object, SimpleObject};
 use async_trait::async_trait;
+use log::error;
 use sea_orm::{
     entity::prelude::*, ActiveValue, DatabaseTransaction, DeleteResult, TransactionTrait,
 };
@@ -8,12 +9,12 @@ use serde::{Deserialize, Serialize};
 use crate::SeaOrmPool;
 
 use super::{
-    common_add_filter, common_add_id_and_data_group_filters, common_add_ordering,
+    common_add_id_and_data_group_filters, common_add_ordering,
     graphql_schema::{DeleteOptions, FetchOptions, Filter, OrderingOptions},
     GetDataGroupColumnTrait, QueryDatabase, QueryResults, RowsDeleted,
 };
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, SimpleObject)]
 #[sea_orm(table_name = "dispatch_note")]
@@ -23,9 +24,9 @@ pub struct Model {
     pub id: i32,
     pub note_type: Option<i32>,
     pub numerical_identifier: Option<i32>,
-    pub issuing_date: Option<DateTimeWithTimeZone>,
-    pub d_group: i32,
+    pub issuing_date: Option<Date>,
     pub created_at: DateTimeWithTimeZone,
+    pub d_group: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -95,15 +96,60 @@ pub struct DispatchNoteUpdateOptions {
     pub id: i32,
     pub note_type: Option<i32>,
     pub numerical_identifier: Option<i32>,
-    pub issuing_date: Option<DateTimeWithTimeZone>,
+    pub issuing_date: Option<Date>,
 }
 
 #[derive(InputObject, Serialize, Deserialize)]
 pub struct DispatchNoteInsertOptions {
     pub note_type: Option<i32>,
     pub numerical_identifier: Option<i32>,
-    pub issuing_date: Option<DateTimeWithTimeZone>,
+    pub issuing_date: Option<Date>,
     pub d_group: i32,
+}
+
+#[derive(Enum, Clone, Copy, PartialEq, Eq)]
+pub enum Comparator {
+    Eq,
+    Ne,
+    Gt,
+    Gte,
+    Lt,
+    Lte,
+}
+
+trait DispatchNoteFilterValueTrait {
+    fn get_date(&self) -> Result<Date>;
+    fn get_date_range(&self) -> Result<(Date, Date)>;
+    fn get_number(&self) -> Result<i32>;
+}
+
+impl DispatchNoteFilterValueTrait for String {
+    fn get_date(&self) -> Result<Date> {
+        Ok(self.parse()?)
+    }
+
+    fn get_date_range(&self) -> Result<(Date, Date)> {
+        let mut dates = Vec::with_capacity(2);
+        for date in self.split(", ").take(2) {
+            dates.push(date.parse()?);
+        }
+        if dates.len() != 2 {
+            return Err(anyhow!("Date range must be exactly 2 valid dates!"));
+        }
+        Ok((dates[0], dates[1]))
+    }
+
+    fn get_number(&self) -> Result<i32> {
+        Ok(self.parse()?)
+    }
+}
+
+#[derive(InputObject)]
+pub struct DispatchNoteFilterValue {
+    /// Number, date or date range as string
+    /// Date range is expected to be in format Date, Date
+    value: String,
+    comparator: Option<Comparator>,
 }
 
 #[async_trait]
@@ -124,6 +170,8 @@ impl QueryDatabase for Entity {
 
     type FetchIdType = Option<i32>;
 
+    type FilterValueType = DispatchNoteFilterValue;
+
     async fn delete_query(
         transaction: &DatabaseTransaction,
         options: DeleteOptions<Self::DeleteOptionsType>,
@@ -140,13 +188,67 @@ impl QueryDatabase for Entity {
 
     fn add_id_and_data_group_filters(
         query: Select<Self>,
-        fetch_options: &FetchOptions<Self::InputFields, Self::FetchIdType>,
+        fetch_options: &FetchOptions<Self::InputFields, Self::FetchIdType, Self::FilterValueType>,
     ) -> Select<Self> {
         common_add_id_and_data_group_filters(query, fetch_options)
     }
 
-    fn add_filter(query: Select<Self>, filter: Filter<Self::InputFields>) -> Select<Self> {
-        common_add_filter(query, filter)
+    fn add_filter(
+        mut query: Select<Self>,
+        filter: Filter<Self::InputFields, Self::FilterValueType>,
+    ) -> Select<Self> {
+        let column: Self::Column = filter.field.into();
+        match filter.field {
+            DispatchNoteFields::IssuingDate => {
+                if let Some(comparator) = filter.value.comparator {
+                    let val = match filter.value.value.get_date() {
+                        Ok(val) => val,
+                        Err(e) => {
+                            error!("Failed to parse filter date value: {:#?}", e);
+                            return query;
+                        }
+                    };
+                    match comparator {
+                        Comparator::Eq => query.filter(column.eq(val)),
+                        Comparator::Ne => query.filter(column.ne(val)),
+                        Comparator::Gt => query.filter(column.gt(val)),
+                        Comparator::Gte => query.filter(column.gte(val)),
+                        Comparator::Lt => query.filter(column.lt(val)),
+                        Comparator::Lte => query.filter(column.lte(val)),
+                    }
+                } else {
+                    let val = match filter.value.value.get_date_range() {
+                        Ok(val) => val,
+                        Err(e) => {
+                            error!("Failed to parse filter date range value: {:#?}", e);
+                            return query;
+                        }
+                    };
+                    query.filter(column.between(val.0, val.1))
+                }
+            }
+            DispatchNoteFields::NoteType | DispatchNoteFields::NumericalIdentifier => {
+                let val = match filter.value.value.get_number() {
+                    Ok(val) => val,
+                    Err(e) => {
+                        error!("Failed to parse filter value: {:#?}", e);
+                        return query;
+                    }
+                };
+                if let Some(comparator) = filter.value.comparator {
+                    query = match comparator {
+                        Comparator::Eq => query.filter(column.eq(val)),
+                        Comparator::Ne => query.filter(column.ne(val)),
+                        Comparator::Gt => query.filter(column.gt(val)),
+                        Comparator::Gte => query.filter(column.gte(val)),
+                        Comparator::Lt => query.filter(column.lt(val)),
+                        Comparator::Lte => query.filter(column.lte(val)),
+                    };
+                }
+                query
+            }
+            DispatchNoteFields::Id => query,
+        }
     }
 
     async fn update_entity(
@@ -201,7 +303,11 @@ impl DispatchNoteQuery {
     async fn dispatch_notes(
         &self,
         ctx: &Context<'_>,
-        options: FetchOptions<DispatchNoteFields>,
+        options: FetchOptions<
+            DispatchNoteFields,
+            <Entity as QueryDatabase>::FetchIdType,
+            DispatchNoteFilterValue,
+        >,
     ) -> Result<QueryResults<Model>> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::fetch(db, options).await

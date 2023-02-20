@@ -1,7 +1,9 @@
 use async_graphql::{Context, Enum, InputObject, Object, SimpleObject};
 use async_trait::async_trait;
 use sea_orm::{
-    entity::prelude::*, ActiveValue, DatabaseTransaction, DeleteResult, TransactionTrait,
+    entity::prelude::*,
+    sea_query::{Expr, Func},
+    ActiveValue, DatabaseTransaction, DeleteResult, TransactionTrait,
 };
 use serde::{Deserialize, Serialize};
 
@@ -10,7 +12,7 @@ use anyhow::Result;
 use crate::SeaOrmPool;
 
 use super::{
-    common_add_filter, common_add_id_and_data_group_filters, common_add_ordering,
+    common_add_id_and_data_group_filters, common_add_ordering,
     graphql_schema::{DeleteOptions, FetchOptions, Filter, OrderingOptions},
     GetDataGroupColumnTrait, QueryDatabase, QueryResults, RowsDeleted,
 };
@@ -127,6 +129,8 @@ impl QueryDatabase for Entity {
 
     type FetchIdType = Option<i32>;
 
+    type FilterValueType = String;
+
     async fn delete_query(
         transaction: &DatabaseTransaction,
         options: DeleteOptions<Self::DeleteOptionsType>,
@@ -149,7 +153,14 @@ impl QueryDatabase for Entity {
     }
 
     fn add_filter(query: Select<Self>, filter: Filter<Self::InputFields>) -> Select<Self> {
-        common_add_filter(query, filter)
+        let column: Self::Column = filter.field.into();
+        match filter.field {
+            BuyerFields::Name | BuyerFields::Address | BuyerFields::Contact => query.filter(
+                Expr::expr(Func::lower(Expr::col((Entity, column))))
+                    .like(format!("%{}%", filter.value.trim().to_lowercase())),
+            ),
+            BuyerFields::Id => query,
+        }
     }
 
     async fn update_entity(
