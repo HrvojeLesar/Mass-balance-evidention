@@ -103,7 +103,7 @@ impl Default for Column {
 
 #[derive(InputObject)]
 pub struct EntryInsertOptions {
-    pub date: Date,
+    pub date: DateTimeWithTimeZone,
     pub weight: Option<f64>,
     pub weight_type: Option<String>,
     pub id_buyer: i32,
@@ -124,7 +124,7 @@ pub struct EntryUpdateOptions {
     pub id: i32,
     pub weight: Option<f64>,
     pub weight_type: Option<String>,
-    pub date: Option<Date>,
+    pub date: Option<DateTimeWithTimeZone>,
     pub id_buyer: Option<i32>,
     pub pair_ids: Option<PairIds>,
     pub d_group: Option<i32>,
@@ -472,7 +472,9 @@ impl QueryDatabase for Entity {
             weight_type: options
                 .weight_type
                 .map_or(ActiveValue::NotSet, |val| ActiveValue::Set(Some(val))),
-            date: options.date.map_or(ActiveValue::NotSet, ActiveValue::Set),
+            date: options.date.map_or(ActiveValue::NotSet, |val| {
+                ActiveValue::Set(val.date_naive())
+            }),
             id_buyer: options
                 .id_buyer
                 .map_or(ActiveValue::NotSet, ActiveValue::Set),
@@ -517,7 +519,7 @@ impl QueryDatabase for Entity {
             .ok_or_else(|| anyhow!("CellCulturePair with provided ids must exist!"))?;
 
         let model = ActiveModel {
-            date: ActiveValue::Set(options.date),
+            date: ActiveValue::Set(options.date.date_naive()),
             weight: ActiveValue::Set(options.weight),
             weight_type: ActiveValue::Set(options.weight_type),
             id_buyer: ActiveValue::Set(options.id_buyer),

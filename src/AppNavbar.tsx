@@ -140,8 +140,16 @@ export default function AppNavbar({ children }: AppNavbarProps) {
             label: t("navigation.insertOther").toString(),
         },
         {
+            link: "/article",
+            label: t("navigation.article").toString(),
+        },
+        {
+            link: "/dispatch-note",
+            label: t("navigation.dispatchNote").toString(),
+        },
+        {
             link: "/options",
-            label: "Options",
+            label: t("navigation.options").toString(),
             type: NavigationLinkType.IconLink,
         },
     ];

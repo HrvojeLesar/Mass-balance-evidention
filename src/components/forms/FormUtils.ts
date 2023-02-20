@@ -1,7 +1,7 @@
 import { MantineTheme } from "@mantine/core";
 import { Dispatch, SetStateAction } from "react";
 import { ActionMeta, MultiValue, SingleValue } from "react-select";
-import { Buyer, Cell, Culture, Exact } from "../../generated/graphql";
+import { Article, Buyer, Cell, Culture, Exact } from "../../generated/graphql";
 
 export const DEBOUNCE_TIME = 350;
 
@@ -39,7 +39,7 @@ export type SelectState<T> = {
     filter: string;
 };
 
-export const makeOptions = <T extends Cell | Culture | Buyer>(
+export const makeOptions = <T extends Cell | Culture | Buyer | Article>(
     currentPage: number,
     pages: Record<number, T[]>
 ) => {

@@ -8,7 +8,6 @@ import {
     CellFields,
     Culture,
     CultureFields,
-    FieldTypes,
     InsertCellCulturePairMutation,
     Ordering,
     UpdateCellCulturePairMutation,
@@ -35,7 +34,6 @@ import { Grid, Input, useMantineTheme } from "@mantine/core";
 type FormInput = {
     cell: SelectOption<Cell> | undefined;
     culture: SelectOption<Culture> | undefined;
-    other: SelectOption<{ ay: number; lmao: string }> | undefined;
 };
 
 const LIMIT = 10;
@@ -218,7 +216,6 @@ export default function CellCulturePairForm({
                         ? [
                               {
                                   value: cellSelectState.filter,
-                                  fieldType: FieldTypes.String,
                                   field: CellFields.Name,
                               },
                           ]
@@ -259,7 +256,6 @@ export default function CellCulturePairForm({
                         ? [
                               {
                                   value: cultureSelectState.filter,
-                                  fieldType: FieldTypes.String,
                                   field: CultureFields.Name,
                               },
                           ]

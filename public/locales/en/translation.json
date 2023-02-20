@@ -58,7 +58,10 @@
     "navigation": {
         "root": "Entry review",
         "insertEntry": "Entry insertion",
-        "insertOther": "Cell, culture, buyer insertion"
+        "insertOther": "Cell, culture, buyer insertion",
+        "article": "Article insertion",
+        "dispatchNote": "Dispatch notes",
+        "options": "Options"
     },
     "titles": {
         "entry": "Entry review",
@@ -77,7 +80,11 @@
         "dataGroupSelect": "Select global data group",
         "newDataGroup": "New data group",
         "editDataGroup": "Edit current data group",
-        "migrationModalTitle": "Migrate from local databases"
+        "migrationModalTitle": "Migrate from local databases",
+        "article": "Article review",
+        "articleInsertable": "Article insertion",
+        "dispatchNote": "Dispatch note review",
+        "dispatchNoteInsertable": "Dispatch note insertion"
     },
     "deleteModal": {
         "deleteConfirmText": "Are you sure you want to delete the selected row?",
@@ -142,5 +149,22 @@
     },
     "table": {
         "noData": "No data."
+    },
+    "article": {
+        "name": "Article",
+        "description": "Description",
+        "selectPlaceholder": "Select an article",
+        "errors": {
+            "name": "This field is required!"
+        }
+    },
+    "dispatchNote": {
+        "noteType": "Type",
+        "numericalIdentifier": "Identifier",
+        "issuingDate": "Issuing date"
+    },
+    "measureType": {
+        "name": "Unit",
+        "quantity": "Quantity"
     }
 }

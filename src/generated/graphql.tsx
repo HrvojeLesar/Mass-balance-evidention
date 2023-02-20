@@ -36,6 +36,16 @@ export type Scalars = {
    * The input/output is a string in RFC3339 format.
    */
   DateTime: any;
+  /**
+   * ISO 8601 calendar date without timezone.
+   * Format: %Y-%m-%d
+   *
+   * # Examples
+   *
+   * * `1994-11-13`
+   * * `2000-02-24`
+   */
+  NaiveDate: any;
 };
 
 export type AllCellCulturePairs = {
@@ -76,7 +86,6 @@ export enum ArticleFields {
 
 export type ArticleFilterOptions = {
   field: ArticleFields;
-  fieldType: FieldTypes;
   value: Scalars['String'];
 };
 
@@ -134,7 +143,6 @@ export enum BuyerFields {
 
 export type BuyerFilterOptions = {
   field: BuyerFields;
-  fieldType: FieldTypes;
   value: Scalars['String'];
 };
 
@@ -186,7 +194,6 @@ export type CellCultureFetchOptions = {
 
 export type CellCultureFilterOptions = {
   field: CellCulturePairFields;
-  fieldType: FieldTypes;
   value: Scalars['String'];
 };
 
@@ -249,7 +256,6 @@ export enum CellFields {
 
 export type CellFilterOptions = {
   field: CellFields;
-  fieldType: FieldTypes;
   value: Scalars['String'];
 };
 
@@ -293,6 +299,15 @@ export type CellUpdateOptions = {
   name?: InputMaybe<Scalars['String']>;
 };
 
+export enum Comparator {
+  Eq = 'EQ',
+  Gt = 'GT',
+  Gte = 'GTE',
+  Lt = 'LT',
+  Lte = 'LTE',
+  Ne = 'NE'
+}
+
 export type Culture = {
   __typename?: 'Culture';
   createdAt: Scalars['DateTime'];
@@ -319,7 +334,6 @@ export enum CultureFields {
 
 export type CultureFilterOptions = {
   field: CultureFields;
-  fieldType: FieldTypes;
   value: Scalars['String'];
 };
 
@@ -388,7 +402,6 @@ export enum DataGroupFields {
 
 export type DataGroupFilterOptions = {
   field: DataGroupFields;
-  fieldType: FieldTypes;
   value: Scalars['String'];
 };
 
@@ -417,7 +430,7 @@ export type DispatchNote = {
   createdAt: Scalars['DateTime'];
   dGroup: Scalars['Int'];
   id: Scalars['Int'];
-  issuingDate?: Maybe<Scalars['DateTime']>;
+  issuingDate?: Maybe<Scalars['NaiveDate']>;
   noteType?: Maybe<Scalars['Int']>;
   numericalIdentifier?: Maybe<Scalars['Int']>;
 };
@@ -428,6 +441,7 @@ export type DispatchNoteArticle = {
   createdAt: Scalars['DateTime'];
   dGroup: DataGroup;
   dispatchNote: DispatchNote;
+  id: Scalars['Int'];
   quantity: Scalars['Float'];
   weightType?: Maybe<Scalars['String']>;
 };
@@ -450,12 +464,10 @@ export enum DispatchNoteArticleFields {
 
 export type DispatchNoteArticleFilterOptions = {
   field: DispatchNoteArticleFields;
-  fieldType: FieldTypes;
   value: Scalars['String'];
 };
 
 export type DispatchNoteArticleIds = {
-  dGroup?: InputMaybe<Scalars['Int']>;
   idArticle?: InputMaybe<Scalars['Int']>;
   idDispatchNote?: InputMaybe<Scalars['Int']>;
 };
@@ -508,7 +520,15 @@ export enum DispatchNoteFields {
 
 export type DispatchNoteFilterOptions = {
   field: DispatchNoteFields;
-  fieldType: FieldTypes;
+  value: DispatchNoteFilterValue;
+};
+
+export type DispatchNoteFilterValue = {
+  comparator?: InputMaybe<Comparator>;
+  /**
+   * Number, date or date range as string
+   * Date range is expected to be in format Date, Date
+   */
   value: Scalars['String'];
 };
 
@@ -547,7 +567,7 @@ export type Entry = {
   createdAt: Scalars['DateTime'];
   culture: Culture;
   dGroup?: Maybe<DataGroup>;
-  date: Scalars['DateTime'];
+  date: Scalars['NaiveDate'];
   id: Scalars['Int'];
   weight?: Maybe<Scalars['Float']>;
   weightType?: Maybe<Scalars['String']>;
@@ -577,7 +597,6 @@ export enum EntryFields {
 
 export type EntryFilterOptions = {
   field: EntryFields;
-  fieldType: FieldTypes;
   value: Scalars['String'];
 };
 
@@ -614,12 +633,6 @@ export type EntryUpdateOptions = {
   weight?: InputMaybe<Scalars['Float']>;
   weightType?: InputMaybe<Scalars['String']>;
 };
-
-export enum FieldTypes {
-  Date = 'DATE',
-  Number = 'NUMBER',
-  String = 'STRING'
-}
 
 export type MutationRoot = {
   __typename?: 'MutationRoot';
@@ -1146,21 +1159,21 @@ export type GetDispatchNotesArticlesQueryVariables = Exact<{
 }>;
 
 
-export type GetDispatchNotesArticlesQuery = { __typename?: 'QueryRoot', dispatchNoteArticles: { __typename?: 'DispatchNoteArticleResults', page: number, pageSize: number, totalItems: number, totalPages: number, results: Array<{ __typename?: 'DispatchNoteArticle', weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } }> } };
+export type GetDispatchNotesArticlesQuery = { __typename?: 'QueryRoot', dispatchNoteArticles: { __typename?: 'DispatchNoteArticleResults', page: number, pageSize: number, totalItems: number, totalPages: number, results: Array<{ __typename?: 'DispatchNoteArticle', id: number, weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } }> } };
 
 export type InsertDispatchNoteArticleMutationVariables = Exact<{
   insertOptions: DispatchNoteArticleInsertOptions;
 }>;
 
 
-export type InsertDispatchNoteArticleMutation = { __typename?: 'MutationRoot', insertDispatchNoteArticle: { __typename?: 'DispatchNoteArticle', weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } } };
+export type InsertDispatchNoteArticleMutation = { __typename?: 'MutationRoot', insertDispatchNoteArticle: { __typename?: 'DispatchNoteArticle', id: number, weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } } };
 
 export type UpdateDispatchNoteArticleMutationVariables = Exact<{
   updateOptions: DispatchNoteArticleUpdateOptions;
 }>;
 
 
-export type UpdateDispatchNoteArticleMutation = { __typename?: 'MutationRoot', updateDispatchNoteArticle: { __typename?: 'DispatchNoteArticle', weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } } };
+export type UpdateDispatchNoteArticleMutation = { __typename?: 'MutationRoot', updateDispatchNoteArticle: { __typename?: 'DispatchNoteArticle', id: number, weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } } };
 
 export type DeleteDispatchNoteArticleMutationVariables = Exact<{
   deleteOptions: DeleteOptions;
@@ -1169,7 +1182,7 @@ export type DeleteDispatchNoteArticleMutationVariables = Exact<{
 
 export type DeleteDispatchNoteArticleMutation = { __typename?: 'MutationRoot', deleteDispatchNoteArticle: { __typename?: 'RowsDeleted', numRows: number } };
 
-export type DispatchNoteArticlePartsFragment = { __typename?: 'DispatchNoteArticle', weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } };
+export type DispatchNoteArticlePartsFragment = { __typename?: 'DispatchNoteArticle', id: number, weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } };
 
 export type GetEntriesQueryVariables = Exact<{
   options: EntryFetchOptions;
@@ -1269,6 +1282,7 @@ export const DispatchNotePartsFragmentDoc = `
     `;
 export const DispatchNoteArticlePartsFragmentDoc = `
     fragment DispatchNoteArticleParts on DispatchNoteArticle {
+  id
   dispatchNote {
     id
     noteType

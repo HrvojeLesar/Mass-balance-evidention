@@ -96,14 +96,14 @@ pub struct DispatchNoteUpdateOptions {
     pub id: i32,
     pub note_type: Option<i32>,
     pub numerical_identifier: Option<i32>,
-    pub issuing_date: Option<Date>,
+    pub issuing_date: Option<DateTimeWithTimeZone>,
 }
 
 #[derive(InputObject, Serialize, Deserialize)]
 pub struct DispatchNoteInsertOptions {
     pub note_type: Option<i32>,
     pub numerical_identifier: Option<i32>,
-    pub issuing_date: Option<Date>,
+    pub issuing_date: Option<DateTimeWithTimeZone>,
     pub d_group: i32,
 }
 
@@ -125,13 +125,13 @@ trait DispatchNoteFilterValueTrait {
 
 impl DispatchNoteFilterValueTrait for String {
     fn get_date(&self) -> Result<Date> {
-        Ok(self.parse()?)
+        Ok(self.parse::<DateTimeWithTimeZone>()?.date_naive())
     }
 
     fn get_date_range(&self) -> Result<(Date, Date)> {
         let mut dates = Vec::with_capacity(2);
         for date in self.split(", ").take(2) {
-            dates.push(date.parse()?);
+            dates.push(date.parse::<DateTimeWithTimeZone>()?.date_naive());
         }
         if dates.len() != 2 {
             return Err(anyhow!("Date range must be exactly 2 valid dates!"));
@@ -263,9 +263,9 @@ impl QueryDatabase for Entity {
             numerical_identifier: options
                 .numerical_identifier
                 .map_or(ActiveValue::NotSet, |val| ActiveValue::Set(Some(val))),
-            issuing_date: options
-                .issuing_date
-                .map_or(ActiveValue::NotSet, |val| ActiveValue::Set(Some(val))),
+            issuing_date: options.issuing_date.map_or(ActiveValue::NotSet, |val| {
+                ActiveValue::Set(Some(val.date_naive()))
+            }),
             ..Default::default()
         };
         let transaction = db.begin().await?;
@@ -282,7 +282,7 @@ impl QueryDatabase for Entity {
         let model = ActiveModel {
             note_type: ActiveValue::Set(options.note_type),
             numerical_identifier: ActiveValue::Set(options.numerical_identifier),
-            issuing_date: ActiveValue::Set(options.issuing_date),
+            issuing_date: ActiveValue::Set(options.issuing_date.map(|d| d.date_naive())),
             d_group: ActiveValue::Set(options.d_group),
             ..Default::default()
         };

@@ -33,6 +33,7 @@ mutation DeleteDispatchNoteArticle($deleteOptions: DeleteOptions!) {
 }
 
 fragment DispatchNoteArticleParts on DispatchNoteArticle {
+    id
     dispatchNote {
         id
         noteType

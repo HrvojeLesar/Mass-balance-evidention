@@ -58,7 +58,10 @@
     "navigation": {
         "root": "Pregled zapisa",
         "insertEntry": "Unos zapisa",
-        "insertOther": "Unos čestica, kultura, kupaca"
+        "insertOther": "Unos čestica, kultura, kupaca",
+        "article": "Unos artikala",
+        "dispatchNote": "Otpremnice",
+        "options": "Postavke"
     },
     "titles": {
         "entry": "Pregled zapisa",
@@ -77,7 +80,11 @@
         "dataGroupSelect": "Odabir globalne grupacije podataka",
         "newDataGroup": "Dodavanje nove grupacije podataka",
         "editDataGroup": "Uređivanje trenutne grupacije podataka",
-        "migrationModalTitle": "Migracija s lokalnih baza podataka"
+        "migrationModalTitle": "Migracija s lokalnih baza podataka",
+        "article": "Pregled artikala",
+        "articleInsertable": "Unos artikla",
+        "dispatchNote": "Pregled otpremnnica",
+        "dispatchNoteInsertable": "Dodavanje artikla u otpremnicu"
     },
     "deleteModal": {
         "deleteConfirmText": "Jeste li sigurni da želite obrisati odabrani red?",
@@ -142,5 +149,22 @@
     },
     "table": {
         "noData": "Nema podataka."
+    },
+    "article": {
+        "name": "Artikl",
+        "description": "Opis",
+        "selectPlaceholder": "Odabir artikla",
+        "errors": {
+            "name": "Ovo polje je obavezno!"
+        }
+    },
+    "dispatchNote": {
+        "noteType": "Tip",
+        "numericalIdentifier": "Identifikator",
+        "issuingDate": "Datum"
+    },
+    "measureType": {
+        "name": "Mjerna jedinica",
+        "quantity": "Količina"
     }
 }

@@ -1,4 +1,3 @@
-import { Divider, Title } from "@mantine/core";
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -6,27 +5,28 @@ import {
 } from "@tanstack/react-table";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { DataGroupContext } from "../../DataGroupProvider";
 import {
     Ordering,
-    useGetCellsQuery,
-    CellFields,
-    Cell,
-    useDeleteCellMutation,
+    Article,
+    useGetArticlesQuery,
+    ArticleFields,
+    useDeleteArticleMutation,
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
-import ActionButtons from "../ActionButtons";
 import DataTable from "../DataTable";
-import DeleteModal from "../DeleteModal";
-import EditModal from "../EditModal";
-import CellForm from "../forms/CellForm";
-import CardUtil from "../util/CardUtil";
 import { TableProps } from "./TableUtils";
+import ActionButtons from "../ActionButtons";
+import EditModal from "../EditModal";
+import DeleteModal from "../DeleteModal";
+import { DataGroupContext } from "../../DataGroupProvider";
+import CardUtil from "../util/CardUtil";
+import { Divider, Title } from "@mantine/core";
+import ArticleForm from "../forms/ArticleForm";
 
-type T = Cell;
-type TFields = CellFields;
+type T = Article;
+type TFields = ArticleFields;
 
-export default function CellTable({ isInsertable, isEditable }: TableProps) {
+export default function ArticleTable({ isInsertable, isEditable }: TableProps) {
     const { t } = useTranslation();
     const [tableData, setTableData] = useState<T[]>([]);
 
@@ -36,11 +36,11 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
 
     const [isModalShown, setIsModalShown] = useState(false);
     const [isDeleteModalShown, setIsDeleteModalShown] = useState(false);
-    const [selectedCell, setSelectedCell] = useState<T | undefined>();
+    const [selectedArticle, setSelectedArticle] = useState<T | undefined>();
 
     const dataGroupContextValue = useContext(DataGroupContext);
 
-    const { data, refetch, isInitialLoading } = useGetCellsQuery(
+    const { data, refetch, isInitialLoading } = useGetArticlesQuery(
         {
             options: {
                 id: undefined,
@@ -68,11 +68,11 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
         },
         {
             queryKey: [
-                "getCells",
+                "getArticles",
                 pagination,
                 sorting,
                 columnFilters,
-                dataGroupContextValue.selectedGroup,
+                dataGroupContextValue,
             ],
             keepPreviousData: true,
         }
@@ -83,13 +83,13 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
             {
                 accessorKey: "name",
                 cell: (info) => info.getValue(),
-                header: t("cell.name").toString(),
+                header: t("article.name").toString(),
             },
-            // {
-            //     accessorKey: "description",
-            //     cell: (info) => info.getValue(),
-            //     header: t("cell.description").toString(),
-            // },
+            {
+                accessorKey: "description",
+                cell: (info) => info.getValue(),
+                header: t("article.description").toString(),
+            },
         ];
         if (isEditable) {
             columns.push({
@@ -100,11 +100,11 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
                         <ActionButtons
                             editFn={() => {
                                 setIsModalShown(true);
-                                setSelectedCell(row.original);
+                                setSelectedArticle(row.original);
                             }}
                             deleteFn={() => {
                                 setIsDeleteModalShown(true);
-                                setSelectedCell(row.original);
+                                setSelectedArticle(row.original);
                             }}
                         />
                     );
@@ -112,12 +112,11 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
                 size: 20,
             });
         }
-
         return columns;
     }, [t, isEditable]);
 
     const total = useMemo<number>(() => {
-        return data?.cells.totalItems ?? -1;
+        return data?.articles.totalItems ?? -1;
     }, [data]);
 
     const onSuccess = useCallback(() => {
@@ -128,12 +127,14 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
     }, [refetch, isModalShown, setIsModalShown]);
 
     useEffect(() => {
-        if (data?.cells.results) {
-            setTableData([...data.cells.results.slice(0, pagination.pageSize)]);
+        if (data?.articles.results) {
+            setTableData([
+                ...data.articles.results.slice(0, pagination.pageSize),
+            ]);
         }
     }, [data, pagination.pageSize]);
 
-    const deleteCell = useDeleteCellMutation({
+    const deleteArticle = useDeleteArticleMutation({
         onSuccess: () => {
             refetch();
             setIsDeleteModalShown(false);
@@ -147,31 +148,36 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
                 show={isModalShown}
                 onHide={() => setIsModalShown(false)}
             >
-                <CellForm onUpdateSuccess={onSuccess} edit={selectedCell} />
+                <ArticleForm
+                    onUpdateSuccess={onSuccess}
+                    edit={selectedArticle}
+                />
             </EditModal>
             <DeleteModal
                 title={t("titles.delete").toString()}
                 show={isDeleteModalShown}
                 onHide={() => setIsDeleteModalShown(false)}
-                isLoading={deleteCell.isLoading}
+                isLoading={deleteArticle.isLoading}
                 errorMsg={undefined}
                 deleteFn={() => {
-                    if (selectedCell) {
-                        deleteCell.mutate({
-                            deleteOptions: { id: selectedCell.id },
+                    if (selectedArticle) {
+                        deleteArticle.mutate({
+                            deleteOptions: { id: selectedArticle.id },
                         });
                     }
                 }}
             />
             {isInsertable ? (
-                <Title order={4}>{t("titles.cellInsertable").toString()}</Title>
+                <Title order={4}>
+                    {t("titles.articleInsertable").toString()}
+                </Title>
             ) : (
-                <Title order={4}>{t("titles.cell").toString()}</Title>
+                <Title>{t("titles.article").toString()}</Title>
             )}
             <Divider my="sm" />
             {isInsertable && (
                 <>
-                    <CellForm onInsertSuccess={onSuccess} />
+                    <ArticleForm onInsertSuccess={onSuccess} />
                     <Divider my="sm" variant="dashed" />
                 </>
             )}

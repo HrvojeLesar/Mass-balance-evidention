@@ -4,7 +4,6 @@ query GetDataGroups($options: DataGroupFetchOptions!) {
     }
 }
 
-
 mutation InsertDataGroup($insertOptions: DataGroupInsertOptions!) {
     insertDataGroup(options: $insertOptions) {
         ...DataGroupParts

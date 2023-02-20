@@ -11,7 +11,6 @@ import {
     Ordering,
     BuyerFields,
     useDeleteBuyerMutation,
-    FieldTypes,
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import BuyerForm from "../forms/BuyerForm";
@@ -23,6 +22,7 @@ import DeleteModal from "../DeleteModal";
 import { DataGroupContext } from "../../DataGroupProvider";
 import CardUtil from "../util/CardUtil";
 import { Divider, Title } from "@mantine/core";
+import { ColumnFilterType } from "../BaseTable";
 
 type T = Buyer;
 type TFields = BuyerFields;
@@ -60,7 +60,6 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
                         ? columnFilters.map((filter) => {
                               return {
                                   value: filter.value as string,
-                                  fieldType: FieldTypes.String,
                                   field: filter.id.toUpperCase() as TFields,
                               };
                           })

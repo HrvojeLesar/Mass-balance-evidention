@@ -23,6 +23,7 @@ import {
     IoMdArrowDropdown,
     IoMdArrowDropright,
 } from "react-icons/io";
+import { Comparator } from "../generated/graphql";
 import { DEBOUNCE_TIME } from "./forms/FormUtils";
 
 const useStyles = createStyles((theme) => ({
@@ -90,14 +91,31 @@ function TextFilter<T>({ column }: FilterProps<T>) {
     );
 }
 
-type Comparators = "<" | ">" | "=" | "<=" | ">=";
+export enum Comparators {
+    Eq = "EQ",
+    Ne = "NE",
+    Gt = "GT",
+    Gte = "GTE",
+    Lt = "LT",
+    Lte = "LTE",
+}
+
+const SELECT_COMPARATOR_DATA = [
+    { value: Comparators.Eq, label: "=" },
+    { value: Comparators.Ne, label: "!=" },
+    { value: Comparators.Gt, label: ">" },
+    { value: Comparators.Gte, label: ">=" },
+    { value: Comparators.Lt, label: "<" },
+    { value: Comparators.Lte, label: "<=" },
+];
 
 export type DateFilterValues = {
-    value: DateRangePickerValue | Date | null;
-    comparator: Comparators;
+    value: [Date, Date] | Date | null;
+    comparator: Comparators | null;
+    desc: ColumnFilterType.Date;
 };
 
-const DEFAULT_COMPARATOR = "=";
+const DEFAULT_COMPARATOR = Comparators.Eq;
 
 function DateFilter<T>({ column }: FilterProps<T>) {
     const { i18n } = useTranslation();
@@ -105,12 +123,18 @@ function DateFilter<T>({ column }: FilterProps<T>) {
     const [filterValue, setFilterValue] = useState<DateFilterValues>({
         value: null,
         comparator: DEFAULT_COMPARATOR,
+        desc: ColumnFilterType.Date,
     });
 
     const [isRangePicker, setIsRangePicker] = useState(false);
 
     useEffect(() => {
-        column.setFilterValue(filterValue);
+        if (filterValue.value === null) {
+            // WARN: Filters are extremly dumb and work only for strings
+            column.setFilterValue(undefined);
+        } else {
+            column.setFilterValue(filterValue);
+        }
     }, [column, filterValue]);
 
     return (
@@ -179,13 +203,7 @@ function DateFilter<T>({ column }: FilterProps<T>) {
                                 }));
                             }
                         }}
-                        data={[
-                            { value: "<", label: "<" },
-                            { value: ">", label: ">" },
-                            { value: "=", label: "=" },
-                            { value: "<=", label: "<=" },
-                            { value: ">=", label: ">=" },
-                        ]}
+                        data={SELECT_COMPARATOR_DATA}
                     />
                 </>
             ) : (
@@ -194,10 +212,20 @@ function DateFilter<T>({ column }: FilterProps<T>) {
                     withinPortal
                     placeholder={column.columnDef.header?.toString()}
                     onChange={(date) => {
-                        setFilterValue((old) => ({
-                            ...old,
-                            value: date,
-                        }));
+                        if (date[0] === null && date[1] === null) {
+                            return setFilterValue((old) => ({
+                                ...old,
+                                comparator: null,
+                                value: null,
+                            }));
+                        }
+                        if (date[0] !== null && date[1] !== null) {
+                            return setFilterValue((old) => ({
+                                ...old,
+                                comparator: null,
+                                value: date as [Date, Date],
+                            }));
+                        }
                     }}
                     autoComplete="off"
                     spellCheck={false}
@@ -210,6 +238,7 @@ function DateFilter<T>({ column }: FilterProps<T>) {
 export type NumberFilterValues = {
     value: number | null;
     comparator: Comparators;
+    desc: ColumnFilterType.Number;
 };
 
 function NumberFilter<T>({ column }: FilterProps<T>) {
@@ -218,10 +247,16 @@ function NumberFilter<T>({ column }: FilterProps<T>) {
     const [filterValue, setFilterValue] = useState<NumberFilterValues>({
         value: null,
         comparator: DEFAULT_COMPARATOR,
+        desc: ColumnFilterType.Number,
     });
 
     useEffect(() => {
-        column.setFilterValue(filterValue);
+        if (filterValue.value === null) {
+            // WARN: Filters are extremly dumb and work only for strings
+            column.setFilterValue(undefined);
+        } else {
+            column.setFilterValue(filterValue);
+        }
     }, [column, filterValue]);
 
     return (
@@ -260,13 +295,7 @@ function NumberFilter<T>({ column }: FilterProps<T>) {
                         }));
                     }
                 }}
-                data={[
-                    { value: "<", label: "<" },
-                    { value: ">", label: ">" },
-                    { value: "=", label: "=" },
-                    { value: "<=", label: "<=" },
-                    { value: ">=", label: ">=" },
-                ]}
+                data={SELECT_COMPARATOR_DATA}
             />
         </Flex>
     );

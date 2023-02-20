@@ -1,4 +1,3 @@
-import { Divider, Title } from "@mantine/core";
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -6,29 +5,42 @@ import {
 } from "@tanstack/react-table";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { DataGroupContext } from "../../DataGroupProvider";
 import {
     Ordering,
-    Culture,
-    CultureFields,
-    useGetCulturesQuery,
-    useDeleteCultureMutation,
+    useGetDispatchNotesQuery,
+    DispatchNote,
+    DispatchNoteFields,
+    useDeleteDispatchNoteMutation,
+    Comparator,
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
-import ActionButtons from "../ActionButtons";
 import DataTable from "../DataTable";
-import DeleteModal from "../DeleteModal";
-import EditModal from "../EditModal";
-import CultureForm from "../forms/CultureForm";
-import CardUtil from "../util/CardUtil";
 import { TableProps } from "./TableUtils";
+import ActionButtons from "../ActionButtons";
+import EditModal from "../EditModal";
+import DeleteModal from "../DeleteModal";
+import { DataGroupContext } from "../../DataGroupProvider";
+import CardUtil from "../util/CardUtil";
+import { Divider, Title } from "@mantine/core";
+import { useNavigate } from "react-router-dom";
+import {
+    ColumnFilterType,
+    Comparators,
+    DateFilterValues,
+    NumberFilterValues,
+} from "../BaseTable";
+import moment from "moment";
 
-type T = Culture;
-type TFields = CultureFields;
+type T = DispatchNote;
+type TFields = DispatchNoteFields;
 
-export default function CultureTable({ isInsertable, isEditable }: TableProps) {
+export default function DispatchNoteTable({
+    isInsertable,
+    isEditable,
+}: TableProps) {
     const { t } = useTranslation();
     const [tableData, setTableData] = useState<T[]>([]);
+    const navigate = useNavigate();
 
     const { pagination, setPagination } = usePagination();
     const [sorting, setSorting] = useState<SortingState>([]);
@@ -36,11 +48,13 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
 
     const [isModalShown, setIsModalShown] = useState(false);
     const [isDeleteModalShown, setIsDeleteModalShown] = useState(false);
-    const [selectedCulture, setSelectedCulture] = useState<T | undefined>();
+    const [selectedDispatchNote, setSelectedDispatchNote] = useState<
+        T | undefined
+    >();
 
     const dataGroupContextValue = useContext(DataGroupContext);
 
-    const { data, refetch, isInitialLoading } = useGetCulturesQuery(
+    const { data, refetch, isInitialLoading } = useGetDispatchNotesQuery(
         {
             options: {
                 id: undefined,
@@ -57,8 +71,26 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
                 filters:
                     columnFilters.length > 0
                         ? columnFilters.map((filter) => {
+                              const val = filter.value as {
+                                  value: [Date, Date] | Date | number;
+                                  comparator: Comparators | null;
+                                  desc: ColumnFilterType;
+                              };
                               return {
-                                  value: filter.value as string,
+                                  value: {
+                                      value:
+                                          val.desc ===
+                                              ColumnFilterType.Number ||
+                                          val.desc === ColumnFilterType.String
+                                              ? val.value.toString()
+                                              : val.value instanceof Date
+                                              ? val.value.toJSON()
+                                              : val.value instanceof Array
+                                              ? `${val.value[0].toJSON()}, ${val.value[1].toJSON()}`
+                                              : val.value.toString(),
+                                      comparator:
+                                          val.comparator?.toUpperCase() as Comparator,
+                                  },
                                   field: filter.id.toUpperCase() as TFields,
                               };
                           })
@@ -68,11 +100,11 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
         },
         {
             queryKey: [
-                "getCultures",
+                "getDispatchNotes",
                 pagination,
                 sorting,
                 columnFilters,
-                dataGroupContextValue.selectedGroup,
+                dataGroupContextValue,
             ],
             keepPreviousData: true,
         }
@@ -81,15 +113,33 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
     const columns = useMemo<ColumnDef<T>[]>(() => {
         let columns: ColumnDef<T>[] = [
             {
-                accessorKey: "name",
+                accessorKey: "noteType",
+                accessorFn: (originalRow) =>
+                    originalRow.noteType ? originalRow.noteType.toString() : "",
                 cell: (info) => info.getValue(),
-                header: t("culture.name").toString(),
+                header: t("dispatchNote.noteType").toString(),
+                id: "note_type",
+                meta: { type: ColumnFilterType.Number },
             },
-            // {
-            //     accessorKey: "description",
-            //     cell: (info) => info.getValue(),
-            //     header: t("culture.description").toString(),
-            // },
+            {
+                accessorKey: "numericalIdentifier",
+                accessorFn: (originalRow) =>
+                    originalRow.numericalIdentifier
+                        ? originalRow.numericalIdentifier.toString()
+                        : "",
+                cell: (info) => info.getValue(),
+                header: t("dispatchNote.numericalIdentifier").toString(),
+                id: "numerical_identifier",
+                meta: { type: ColumnFilterType.Number },
+            },
+            {
+                accessorKey: "issuingDate",
+                cell: (info) =>
+                    moment(info.getValue<string>()).format("DD.MM.YYYY"),
+                header: t("dispatchNote.issuingDate").toString(),
+                id: "issuing_date",
+                meta: { type: ColumnFilterType.Date },
+            },
         ];
         if (isEditable) {
             columns.push({
@@ -99,12 +149,11 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
                     return (
                         <ActionButtons
                             editFn={() => {
-                                setIsModalShown(true);
-                                setSelectedCulture(row.original);
+                                navigate(`/dispatch-note/${row.original.id}`);
                             }}
                             deleteFn={() => {
                                 setIsDeleteModalShown(true);
-                                setSelectedCulture(row.original);
+                                setSelectedDispatchNote(row.original);
                             }}
                         />
                     );
@@ -113,10 +162,10 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
             });
         }
         return columns;
-    }, [t, isEditable]);
+    }, [t, isEditable, navigate]);
 
     const total = useMemo<number>(() => {
-        return data?.cultures.totalItems ?? -1;
+        return data?.dispatchNotes.totalItems ?? -1;
     }, [data]);
 
     const onSuccess = useCallback(() => {
@@ -127,14 +176,14 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
     }, [refetch, isModalShown, setIsModalShown]);
 
     useEffect(() => {
-        if (data?.cultures.results) {
+        if (data?.dispatchNotes.results) {
             setTableData([
-                ...data.cultures.results.slice(0, pagination.pageSize),
+                ...data.dispatchNotes.results.slice(0, pagination.pageSize),
             ]);
         }
     }, [data, pagination.pageSize]);
 
-    const deleteCulture = useDeleteCultureMutation({
+    const deleteDispatchNote = useDeleteDispatchNoteMutation({
         onSuccess: () => {
             refetch();
             setIsDeleteModalShown(false);
@@ -143,41 +192,36 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
 
     return (
         <CardUtil>
-            <EditModal
+            {/* <EditModal
                 title={t("titles.edit").toString()}
                 show={isModalShown}
                 onHide={() => setIsModalShown(false)}
             >
-                <CultureForm
-                    onUpdateSuccess={onSuccess}
-                    edit={selectedCulture}
-                />
-            </EditModal>
+                <BuyerForm onUpdateSuccess={onSuccess} edit={selectedBuyer} />
+            </EditModal> */}
             <DeleteModal
                 title={t("titles.delete").toString()}
                 show={isDeleteModalShown}
                 onHide={() => setIsDeleteModalShown(false)}
-                isLoading={deleteCulture.isLoading}
+                isLoading={deleteDispatchNote.isLoading}
                 errorMsg={undefined}
                 deleteFn={() => {
-                    if (selectedCulture) {
-                        deleteCulture.mutate({
-                            deleteOptions: { id: selectedCulture.id },
+                    if (selectedDispatchNote) {
+                        deleteDispatchNote.mutate({
+                            deleteOptions: { id: selectedDispatchNote.id },
                         });
                     }
                 }}
             />
             {isInsertable ? (
-                <Title order={4}>
-                    {t("titles.cultureInsertable").toString()}
-                </Title>
+                <Title order={4}>{t("titles.dispatchNote").toString()}</Title>
             ) : (
-                <Title order={4}>{t("titles.culture").toString()}</Title>
+                <Title>{t("titles.dispatchNote").toString()}</Title>
             )}
-            <Divider my="sm" />
+            {<Divider my="sm" />}
             {isInsertable && (
                 <>
-                    <CultureForm onInsertSuccess={onSuccess} />
+                    {/* <BuyerForm onInsertSuccess={onSuccess} /> */}
                     <Divider my="sm" variant="dashed" />
                 </>
             )}

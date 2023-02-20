@@ -18,6 +18,7 @@ import { usePagination } from "../../hooks/usePagination";
 import ActionButtons from "../ActionButtons";
 import {
     ColumnFilterType,
+    Comparators,
     DateFilterValues,
     NumberFilterValues,
 } from "../BaseTable";
@@ -104,16 +105,18 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
                     if (filterValue.value instanceof Date) {
                         // WARN: Equality doesn't work as expected
                         switch (filterValue.comparator) {
-                            case "<":
-                                return columnDate < filterValue.value;
-                            case ">":
+                            case Comparators.Eq:
+                                return columnDate.getTime() === filterValue.value.getTime();
+                            case Comparators.Ne:
+                                return columnDate !== filterValue.value;
+                            case Comparators.Gt:
                                 return columnDate > filterValue.value;
-                            case "=":
-                                return columnDate === filterValue.value;
-                            case "<=":
-                                return columnDate <= filterValue.value;
-                            case ">=":
+                            case Comparators.Gte:
                                 return columnDate >= filterValue.value;
+                            case Comparators.Lt:
+                                return columnDate < filterValue.value;
+                            case Comparators.Lte:
+                                return columnDate <= filterValue.value;
                         }
                     } else {
                         if (filterValue.value[0] && filterValue.value[1]) {
@@ -151,16 +154,18 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
                     }
                     let number = row.getValue<number>(columnId);
                     switch (filterValue.comparator) {
-                        case "<":
-                            return number < filterValue.value;
-                        case ">":
-                            return number > filterValue.value;
-                        case "=":
+                        case Comparators.Eq:
                             return number === filterValue.value;
-                        case "<=":
-                            return number <= filterValue.value;
-                        case ">=":
+                        case Comparators.Ne:
+                            return number !== filterValue.value;
+                        case Comparators.Gt:
+                            return number > filterValue.value;
+                        case Comparators.Gte:
                             return number >= filterValue.value;
+                        case Comparators.Lt:
+                            return number < filterValue.value;
+                        case Comparators.Lte:
+                            return number <= filterValue.value;
                     }
                 },
             },

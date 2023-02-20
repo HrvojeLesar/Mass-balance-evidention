@@ -12,8 +12,8 @@ type Article {
 	id: Int!
 	name: String!
 	description: String
-	dGroup: Int!
 	createdAt: DateTime!
+	dGroup: Int!
 }
 
 input ArticleFetchOptions {
@@ -33,7 +33,6 @@ enum ArticleFields {
 
 input ArticleFilterOptions {
 	field: ArticleFields!
-	fieldType: FieldTypes!
 	value: String!
 }
 
@@ -90,7 +89,6 @@ enum BuyerFields {
 
 input BuyerFilterOptions {
 	field: BuyerFields!
-	fieldType: FieldTypes!
 	value: String!
 }
 
@@ -140,7 +138,6 @@ input CellCultureFetchOptions {
 
 input CellCultureFilterOptions {
 	field: CellCulturePairFields!
-	fieldType: FieldTypes!
 	value: String!
 }
 
@@ -201,7 +198,6 @@ enum CellFields {
 
 input CellFilterOptions {
 	field: CellFields!
-	fieldType: FieldTypes!
 	value: String!
 }
 
@@ -246,6 +242,15 @@ input CellUpdateOptions {
 	description: String
 }
 
+enum Comparator {
+	EQ
+	NE
+	GT
+	GTE
+	LT
+	LTE
+}
+
 type Culture {
 	id: Int!
 	name: String!
@@ -271,7 +276,6 @@ enum CultureFields {
 
 input CultureFilterOptions {
 	field: CultureFields!
-	fieldType: FieldTypes!
 	value: String!
 }
 
@@ -340,7 +344,6 @@ enum DataGroupFields {
 
 input DataGroupFilterOptions {
 	field: DataGroupFields!
-	fieldType: FieldTypes!
 	value: String!
 }
 
@@ -375,12 +378,13 @@ type DispatchNote {
 	id: Int!
 	noteType: Int
 	numericalIdentifier: Int
-	issuingDate: DateTime
-	dGroup: Int!
+	issuingDate: NaiveDate
 	createdAt: DateTime!
+	dGroup: Int!
 }
 
 type DispatchNoteArticle {
+	id: Int!
 	dispatchNote: DispatchNote!
 	article: Article!
 	weightType: String
@@ -407,14 +411,12 @@ enum DispatchNoteArticleFields {
 
 input DispatchNoteArticleFilterOptions {
 	field: DispatchNoteArticleFields!
-	fieldType: FieldTypes!
 	value: String!
 }
 
 input DispatchNoteArticleIds {
 	idDispatchNote: Int
 	idArticle: Int
-	dGroup: Int
 }
 
 input DispatchNoteArticleInsertOptions {
@@ -464,8 +466,16 @@ enum DispatchNoteFields {
 
 input DispatchNoteFilterOptions {
 	field: DispatchNoteFields!
-	fieldType: FieldTypes!
+	value: DispatchNoteFilterValue!
+}
+
+input DispatchNoteFilterValue {
+	"""
+	Number, date or date range as string
+	Date range is expected to be in format Date, Date
+	"""
 	value: String!
+	comparator: Comparator
 }
 
 input DispatchNoteInsertOptions {
@@ -499,7 +509,7 @@ type Entry {
 	id: Int!
 	weight: Float
 	weightType: String
-	date: DateTime!
+	date: NaiveDate!
 	createdAt: DateTime!
 	buyer: Buyer
 	cell: Cell!
@@ -531,7 +541,6 @@ enum EntryFields {
 
 input EntryFilterOptions {
 	field: EntryFields!
-	fieldType: FieldTypes!
 	value: String!
 }
 
@@ -568,12 +577,6 @@ input EntryUpdateOptions {
 	dGroup: Int
 }
 
-enum FieldTypes {
-	STRING
-	NUMBER
-	DATE
-}
-
 
 
 
@@ -606,6 +609,17 @@ type MutationRoot {
 	updateDispatchNoteArticle(options: DispatchNoteArticleUpdateOptions!): DispatchNoteArticle!
 	deleteDispatchNoteArticle(options: DeleteOptions!): RowsDeleted!
 }
+
+"""
+ISO 8601 calendar date without timezone.
+Format: %Y-%m-%d
+
+# Examples
+
+* `1994-11-13`
+* `2000-02-24`
+"""
+scalar NaiveDate
 
 enum Ordering {
 	ASC

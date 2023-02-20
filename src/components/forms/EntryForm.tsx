@@ -11,7 +11,6 @@ import {
     Entry,
     EntryInsertOptions,
     EntryUpdateOptions,
-    FieldTypes,
     InsertEntryMutation,
     Ordering,
     UpdateEntryMutation,
@@ -255,7 +254,6 @@ export default function EntryForm({
                             ? [
                                   {
                                       value: cellSelectState.filter,
-                                      fieldType: FieldTypes.String,
                                       field: CellFields.Name,
                                   },
                               ]
@@ -293,7 +291,6 @@ export default function EntryForm({
                             ? [
                                   {
                                       value: cultureSelectState.filter,
-                                      fieldType: FieldTypes.String,
                                       field: CultureFields.Name,
                                   },
                               ]
@@ -328,7 +325,6 @@ export default function EntryForm({
                         ? [
                               {
                                   value: buyerSelectState.filter,
-                                  fieldType: FieldTypes.String,
                                   field: BuyerFields.Name,
                               },
                           ]
