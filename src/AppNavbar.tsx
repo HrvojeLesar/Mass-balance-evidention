@@ -154,11 +154,10 @@ export default function AppNavbar({ children }: AppNavbarProps) {
         },
     ];
 
-    const [active, setActive] = useState(location.pathname);
+    const active = location.pathname;
 
     const handleOnClick = (event: React.MouseEvent, link: string) => {
         event.preventDefault();
-        setActive(link);
         close();
         navigate(link);
     };
