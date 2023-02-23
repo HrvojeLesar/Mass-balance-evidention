@@ -22,7 +22,6 @@ import DeleteModal from "../DeleteModal";
 import { DataGroupContext } from "../../DataGroupProvider";
 import CardUtil from "../util/CardUtil";
 import { Divider, Title } from "@mantine/core";
-import { ColumnFilterType } from "../BaseTable";
 
 type T = Buyer;
 type TFields = BuyerFields;

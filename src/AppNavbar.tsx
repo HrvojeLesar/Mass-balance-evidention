@@ -14,7 +14,7 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import React from "react";
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { FaCog } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";

@@ -1,12 +1,16 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
 import i18n from "i18next";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { initReactI18next } from "react-i18next";
 import Backend from "i18next-http-backend";
 import DataGroupProvider from "./DataGroupProvider";
-import { createBrowserRouter, Outlet, redirect, RouterProvider } from "react-router-dom";
+import {
+    createBrowserRouter,
+    Outlet,
+    redirect,
+    RouterProvider,
+} from "react-router-dom";
 import AppNavbar from "./AppNavbar";
 import EntryView from "./views/EntryView";
 import InsertEntryView from "./views/InsertEntryView";

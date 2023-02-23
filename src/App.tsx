@@ -1,10 +1,4 @@
-import {
-    BrowserRouter,
-    Outlet,
-    redirect,
-    Route,
-    Routes,
-} from "react-router-dom";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import AppNavbar from "./AppNavbar";
 import ArticleView from "./views/ArticleView";
 import CellCultureBuyerView from "./views/CellCultureBuyerView";

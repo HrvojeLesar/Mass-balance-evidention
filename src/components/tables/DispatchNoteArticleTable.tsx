@@ -21,11 +21,10 @@ import EditModal from "../EditModal";
 import DeleteModal from "../DeleteModal";
 import { DataGroupContext } from "../../DataGroupProvider";
 import CardUtil from "../util/CardUtil";
-import { ActionIcon, Box, Divider, Flex, Title } from "@mantine/core";
+import { ActionIcon, Divider, Flex, Title } from "@mantine/core";
 import DispatchNoteArticleForm from "../forms/DispatchNoteArticleForm";
-import ArticleForm from "../forms/ArticleForm";
 import DispatchNoteForm from "../forms/DisptachNoteForm";
-import { FaCog, FaEdit } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
 import { useToggle } from "@mantine/hooks";
 
 type T = DispatchNoteArticle;
@@ -221,7 +220,9 @@ export default function DispatchNoteArticleTable({
                 }}
             />
             <Flex justify="space-between">
-                <Title order={3}>{t("titles.dispatchNoteArticle").toString()}</Title>
+                <Title order={3}>
+                    {t("titles.dispatchNoteArticle").toString()}
+                </Title>
                 <ActionIcon
                     color="yellow"
                     variant={editToggleValue ? "filled" : "outline"}
@@ -237,10 +238,7 @@ export default function DispatchNoteArticleTable({
             {editToggleValue &&
             dispatchNoteData &&
             dispatchNoteData?.dispatchNotes.results.length > 0 ? (
-                <Box 
-                style={{
-                        transition: "ease-in 1s"
-                    }}>
+                <>
                     <DispatchNoteForm
                         onUpdateSuccess={() => {
                             refetchDispatchNote();
@@ -248,7 +246,7 @@ export default function DispatchNoteArticleTable({
                         edit={dispatchNoteData?.dispatchNotes.results[0]}
                     />
                     <Divider my="sm" variant="dashed" />
-                </Box>
+                </>
             ) : (
                 <></>
             )}

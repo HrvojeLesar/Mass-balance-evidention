@@ -91,11 +91,7 @@ export default function CellForm({
                         placeholder={t("cell.name")}
                         autoComplete="off"
                         withAsterisk
-                        error={
-                            errors.name
-                                ? t("cell.errors.name")
-                                : undefined
-                        }
+                        error={errors.name ? t("cell.errors.name") : undefined}
                         spellCheck={false}
                     />
                 </Grid.Col>

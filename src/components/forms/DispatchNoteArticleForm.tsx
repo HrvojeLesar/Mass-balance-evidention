@@ -4,31 +4,15 @@ import "dayjs/locale/hr";
 import {
     Article,
     ArticleFields,
-    Buyer,
-    BuyerFields,
-    Cell,
-    CellFields,
-    Culture,
-    CultureFields,
     DispatchNoteArticle,
     DispatchNoteArticleInsertOptions,
     DispatchNoteArticleUpdateOptions,
-    Entry,
-    EntryInsertOptions,
-    EntryUpdateOptions,
     InsertDispatchNoteArticleMutation,
-    InsertEntryMutation,
     Ordering,
     UpdateDispatchNoteArticleMutation,
-    UpdateEntryMutation,
     useGetArticlesQuery,
-    useGetBuyersQuery,
-    useGetPairedCellsQuery,
-    useGetPairedCulturesQuery,
     useInsertDispatchNoteArticleMutation,
-    useInsertEntryMutation,
     useUpdateDispatchNoteArticleMutation,
-    useUpdateEntryMutation,
 } from "../../generated/graphql";
 import BaseForm from "./BaseForm";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -42,7 +26,6 @@ import {
     SelectState,
     selectStyle,
 } from "./FormUtils";
-import moment from "moment";
 import { DataGroupContext } from "../../DataGroupProvider";
 import {
     Grid,
@@ -51,7 +34,6 @@ import {
     TextInput,
     useMantineTheme,
 } from "@mantine/core";
-import { DatePicker } from "@mantine/dates";
 
 type FormInput = {
     article: SelectOption<Article> | undefined;
