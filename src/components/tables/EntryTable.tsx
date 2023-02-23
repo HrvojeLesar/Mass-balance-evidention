@@ -106,7 +106,10 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
                         // WARN: Equality doesn't work as expected
                         switch (filterValue.comparator) {
                             case Comparators.Eq:
-                                return columnDate.getTime() === filterValue.value.getTime();
+                                return (
+                                    columnDate.getTime() ===
+                                    filterValue.value.getTime()
+                                );
                             case Comparators.Ne:
                                 return columnDate !== filterValue.value;
                             case Comparators.Gt:
@@ -128,6 +131,8 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
                             return true;
                         }
                     }
+                    console.log("Is this reachable ???");
+                    return true;
                 },
             },
             {

@@ -83,8 +83,10 @@
         "migrationModalTitle": "Migrate from local databases",
         "article": "Article review",
         "articleInsertable": "Article insertion",
-        "dispatchNote": "Dispatch note review",
-        "dispatchNoteInsertable": "Dispatch note insertion"
+        "dispatchNote": "Dispatch notes review",
+        "dispatchNoteInsertable": "Dispatch note insertion",
+        "dispatchNoteArticle": "Dispatch note review",
+        "dispatchNoteArticleEdit": "Edit dispatch note"
     },
     "deleteModal": {
         "deleteConfirmText": "Are you sure you want to delete the selected row?",

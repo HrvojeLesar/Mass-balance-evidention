@@ -117,7 +117,6 @@ export default function DispatchNoteForm({
                     <Controller
                         name="issuingDate"
                         control={control}
-                        rules={{ required: t("date.errors.name") }}
                         render={({ field: { value, onChange } }) => {
                             const date =
                                 typeof value === "string"

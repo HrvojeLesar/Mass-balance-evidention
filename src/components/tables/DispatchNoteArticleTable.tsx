@@ -11,6 +11,7 @@ import {
     DispatchNoteArticleFields,
     useGetDispatchNotesArticlesQuery,
     useDeleteDispatchNoteArticleMutation,
+    useGetDispatchNotesQuery,
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import DataTable from "../DataTable";
@@ -20,8 +21,12 @@ import EditModal from "../EditModal";
 import DeleteModal from "../DeleteModal";
 import { DataGroupContext } from "../../DataGroupProvider";
 import CardUtil from "../util/CardUtil";
-import { Divider, Title } from "@mantine/core";
+import { ActionIcon, Box, Divider, Flex, Title } from "@mantine/core";
 import DispatchNoteArticleForm from "../forms/DispatchNoteArticleForm";
+import ArticleForm from "../forms/ArticleForm";
+import DispatchNoteForm from "../forms/DisptachNoteForm";
+import { FaCog, FaEdit } from "react-icons/fa";
+import { useToggle } from "@mantine/hooks";
 
 type T = DispatchNoteArticle;
 type TFields = DispatchNoteArticleFields;
@@ -48,6 +53,10 @@ export default function DispatchNoteArticleTable({
         useState<T | undefined>();
 
     const dataGroupContextValue = useContext(DataGroupContext);
+
+    const [editToggleValue, editToggle] = useToggle();
+
+    console.log(editToggleValue);
 
     const { data, refetch, isInitialLoading } =
         useGetDispatchNotesArticlesQuery(
@@ -88,6 +97,28 @@ export default function DispatchNoteArticleTable({
             }
         );
 
+    const {
+        data: dispatchNoteData,
+        refetch: refetchDispatchNote,
+        // isInitialLoading: isInitialLoadingDispatchNote,
+    } = useGetDispatchNotesQuery(
+        {
+            options: {
+                id: dispatchNoteId,
+            },
+        },
+        {
+            queryKey: [
+                "getDispatchNoteArticles",
+                pagination,
+                sorting,
+                columnFilters,
+                dataGroupContextValue,
+            ],
+            keepPreviousData: true,
+        }
+    );
+
     const columns = useMemo<ColumnDef<T>[]>(() => {
         let columns: ColumnDef<T>[] = [
             {
@@ -99,6 +130,7 @@ export default function DispatchNoteArticleTable({
                 accessorKey: "weightType",
                 cell: (info) => info.getValue(),
                 header: t("measureType.name").toString(),
+                id: "weight_type",
             },
             {
                 accessorKey: "quantity",
@@ -161,19 +193,17 @@ export default function DispatchNoteArticleTable({
 
     return (
         <CardUtil>
-            {
-                <EditModal
-                    title={t("titles.edit").toString()}
-                    show={isModalShown}
-                    onHide={() => setIsModalShown(false)}
-                >
-                    {/* <BuyerForm
-                onUpdateSuccess={onSuccess}
-                edit={selectedDispatchNoteArticle}
+            <EditModal
+                title={t("titles.edit").toString()}
+                show={isModalShown}
+                onHide={() => setIsModalShown(false)}
+            >
+                <DispatchNoteArticleForm
+                    dispatchNoteId={dispatchNoteId}
+                    onUpdateSuccess={onSuccess}
+                    edit={selectedDispatchNoteArticle}
                 />
-*/}
-                </EditModal>
-            }
+            </EditModal>
             <DeleteModal
                 title={t("titles.delete").toString()}
                 show={isDeleteModalShown}
@@ -190,7 +220,38 @@ export default function DispatchNoteArticleTable({
                     }
                 }}
             />
-            {/* TODO: Title */}
+            <Flex justify="space-between">
+                <Title order={3}>{t("titles.dispatchNoteArticle").toString()}</Title>
+                <ActionIcon
+                    color="yellow"
+                    variant={editToggleValue ? "filled" : "outline"}
+                    onClick={() => {
+                        editToggle();
+                    }}
+                    title={t("titles.edit")}
+                >
+                    <FaEdit />
+                </ActionIcon>
+            </Flex>
+            <Divider my="sm" />
+            {editToggleValue &&
+            dispatchNoteData &&
+            dispatchNoteData?.dispatchNotes.results.length > 0 ? (
+                <Box 
+                style={{
+                        transition: "ease-in 1s"
+                    }}>
+                    <DispatchNoteForm
+                        onUpdateSuccess={() => {
+                            refetchDispatchNote();
+                        }}
+                        edit={dispatchNoteData?.dispatchNotes.results[0]}
+                    />
+                    <Divider my="sm" variant="dashed" />
+                </Box>
+            ) : (
+                <></>
+            )}
             {isInsertable ? (
                 <Title order={4}>
                     {t("titles.dispatchNoteInsertable").toString()}
@@ -198,7 +259,7 @@ export default function DispatchNoteArticleTable({
             ) : (
                 <Title>{t("titles.dispatchNote").toString()}</Title>
             )}
-            {<Divider my="sm" />}
+            <Divider my="sm" />
             {isInsertable && (
                 <>
                     <DispatchNoteArticleForm

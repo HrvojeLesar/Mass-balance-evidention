@@ -84,7 +84,9 @@
         "article": "Pregled artikala",
         "articleInsertable": "Unos artikla",
         "dispatchNote": "Pregled otpremnnica",
-        "dispatchNoteInsertable": "Dodavanje artikla u otpremnicu"
+        "dispatchNoteInsertable": "Dodavanje artikla u otpremnicu",
+        "dispatchNoteArticle": "Pregled otpremnnice",
+        "dispatchNoteArticleEdit": "Uređivanje otpremnice"
     },
     "deleteModal": {
         "deleteConfirmText": "Jeste li sigurni da želite obrisati odabrani red?",

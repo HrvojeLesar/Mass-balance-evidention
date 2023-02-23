@@ -12,24 +12,20 @@ import {
     DispatchNoteFields,
     useDeleteDispatchNoteMutation,
     Comparator,
+    InsertDispatchNoteMutation,
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import DataTable from "../DataTable";
 import { TableProps } from "./TableUtils";
 import ActionButtons from "../ActionButtons";
-import EditModal from "../EditModal";
 import DeleteModal from "../DeleteModal";
 import { DataGroupContext } from "../../DataGroupProvider";
 import CardUtil from "../util/CardUtil";
 import { Divider, Title } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
-import {
-    ColumnFilterType,
-    Comparators,
-    DateFilterValues,
-    NumberFilterValues,
-} from "../BaseTable";
+import { ColumnFilterType, Comparators } from "../BaseTable";
 import moment from "moment";
+import DispatchNoteForm from "../forms/DisptachNoteForm";
 
 type T = DispatchNote;
 type TFields = DispatchNoteFields;
@@ -46,7 +42,6 @@ export default function DispatchNoteTable({
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-    const [isModalShown, setIsModalShown] = useState(false);
     const [isDeleteModalShown, setIsDeleteModalShown] = useState(false);
     const [selectedDispatchNote, setSelectedDispatchNote] = useState<
         T | undefined
@@ -168,12 +163,12 @@ export default function DispatchNoteTable({
         return data?.dispatchNotes.totalItems ?? -1;
     }, [data]);
 
-    const onSuccess = useCallback(() => {
-        refetch();
-        if (isModalShown) {
-            setIsModalShown(false);
-        }
-    }, [refetch, isModalShown, setIsModalShown]);
+    const onSuccess = useCallback(
+        (data: InsertDispatchNoteMutation) => {
+            navigate(`/dispatch-note/${data.insertDispatchNote.id}`);
+        },
+        [navigate]
+    );
 
     useEffect(() => {
         if (data?.dispatchNotes.results) {
@@ -192,13 +187,6 @@ export default function DispatchNoteTable({
 
     return (
         <CardUtil>
-            {/* <EditModal
-                title={t("titles.edit").toString()}
-                show={isModalShown}
-                onHide={() => setIsModalShown(false)}
-            >
-                <BuyerForm onUpdateSuccess={onSuccess} edit={selectedBuyer} />
-            </EditModal> */}
             <DeleteModal
                 title={t("titles.delete").toString()}
                 show={isDeleteModalShown}
@@ -221,7 +209,7 @@ export default function DispatchNoteTable({
             {<Divider my="sm" />}
             {isInsertable && (
                 <>
-                    {/* <BuyerForm onInsertSuccess={onSuccess} /> */}
+                    <DispatchNoteForm onInsertSuccess={onSuccess} />
                     <Divider my="sm" variant="dashed" />
                 </>
             )}
