@@ -1,6 +1,16 @@
-import { Button, Divider, Grid, Title, Text } from "@mantine/core";
+import {
+    Button,
+    Divider,
+    Grid,
+    Title,
+    Text,
+    Flex,
+    ActionIcon,
+} from "@mantine/core";
+import { useToggle } from "@mantine/hooks";
 import { useContext, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { FaEdit } from "react-icons/fa";
 import DataGroupSelect from "../components/DataGroupSelect";
 import DataGroupForm from "../components/forms/DataGroupForm";
 import MigrateModal from "../components/MigrateModal";
@@ -12,6 +22,7 @@ export default function OptionsView() {
     const value = useContext(DataGroupContext);
 
     const [isMigrateModalShown, setIsMigrateModalShown] = useState(false);
+    const [editToggleValue, editToggle] = useToggle();
 
     const editValue = useMemo(() => {
         return value.groups?.find((group) => group.id === value.selectedGroup);
@@ -26,12 +37,24 @@ export default function OptionsView() {
             <Grid>
                 <Grid.Col sm={12} md={6} lg={6}>
                     <CardUtil>
-                        <Title order={4}>
-                            {t("titles.dataGroupSelect").toString()}
-                        </Title>
+                        <Flex justify="space-between">
+                            <Title order={4}>
+                                {t("titles.dataGroupSelect").toString()}
+                            </Title>
+                            <ActionIcon
+                                color="yellow"
+                                variant={editToggleValue ? "filled" : "outline"}
+                                onClick={() => {
+                                    editToggle();
+                                }}
+                                title={t("titles.edit")}
+                            >
+                                <FaEdit />
+                            </ActionIcon>
+                        </Flex>
                         <Divider my="xs" />
                         <DataGroupSelect />
-                        {editValue && (
+                        {editValue && editToggleValue ? (
                             <>
                                 <Divider my="xs" />
                                 <Title order={4}>
@@ -47,6 +70,8 @@ export default function OptionsView() {
                                     }}
                                 />
                             </>
+                        ) : (
+                            <></>
                         )}
                     </CardUtil>
                 </Grid.Col>
