@@ -1,5 +1,6 @@
 import { Grid, NumberInput } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
+import moment from "moment";
 import { useContext } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -64,13 +65,28 @@ export default function DispatchNoteForm({
                 edit
                     ? handleSubmit((data) => {
                           update.mutate({
-                              updateOptions: { ...data, id: edit.id },
+                              updateOptions: {
+                                  ...data,
+                                  id: edit.id,
+                                  // WARN: Very dumb hacky way to fix a day off value
+                                  issuingDate: new Date(
+                                      moment(data.issuingDate).format(
+                                          "YYYY-MM-DD"
+                                      )
+                                  ),
+                              },
                           });
                       })
                     : handleSubmit((data) => {
                           insert.mutate({
                               insertOptions: {
                                   ...data,
+                                  // WARN: Very dumb hacky way to fix a day off value
+                                  issuingDate: new Date(
+                                      moment(data.issuingDate).format(
+                                          "YYYY-MM-DD"
+                                      )
+                                  ),
                                   dGroup:
                                       dataGroupContextValue.selectedGroup ?? 1,
                               },
@@ -124,6 +140,8 @@ export default function DispatchNoteForm({
                                     : value;
                             return (
                                 <DatePicker
+                                    // dropdownType="modal"
+                                    inputFormat="DD.MM.YYYY"
                                     allowFreeInput
                                     locale={i18n.language}
                                     value={date}

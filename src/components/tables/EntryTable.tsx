@@ -101,32 +101,28 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
                     if (filterValue.value === null) {
                         return true;
                     }
-                    let columnDate = new Date(row.getValue<string>(columnId));
+                    const columnDate = moment(row.getValue<string>(columnId));
                     if (filterValue.value instanceof Date) {
-                        // WARN: Equality doesn't work as expected
+                        const value = moment(filterValue.value);
                         switch (filterValue.comparator) {
                             case Comparators.Eq:
-                                return (
-                                    columnDate.getTime() ===
-                                    filterValue.value.getTime()
-                                );
+                                return columnDate.isSame(value, "day");
                             case Comparators.Ne:
-                                return columnDate !== filterValue.value;
+                                return !columnDate.isSame(value, "day");
                             case Comparators.Gt:
-                                return columnDate > filterValue.value;
+                                return columnDate.isAfter(value, "day");
                             case Comparators.Gte:
-                                return columnDate >= filterValue.value;
+                                return columnDate.isSameOrAfter(value, "day");
                             case Comparators.Lt:
-                                return columnDate < filterValue.value;
+                                return columnDate.isBefore(value, "day");
                             case Comparators.Lte:
-                                return columnDate <= filterValue.value;
+                                return columnDate.isSameOrBefore(value, "day");
                         }
                     } else {
                         if (filterValue.value[0] && filterValue.value[1]) {
-                            return (
-                                columnDate >= filterValue.value[0] &&
-                                columnDate <= filterValue.value[1]
-                            );
+                            const firstDate = moment(filterValue.value[0]);
+                            const secondDate = moment(filterValue.value[1]);
+                            return columnDate.isBetween(firstDate, secondDate);
                         } else {
                             return true;
                         }

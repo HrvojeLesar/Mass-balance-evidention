@@ -8,11 +8,7 @@ import {
     Table as MantineTable,
     TextInput,
 } from "@mantine/core";
-import {
-    DatePicker,
-    DateRangePicker,
-    DateRangePickerValue,
-} from "@mantine/dates";
+import { DatePicker, DateRangePicker } from "@mantine/dates";
 import { useDebouncedState } from "@mantine/hooks";
 import { Column, flexRender, Table } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
@@ -23,7 +19,6 @@ import {
     IoMdArrowDropdown,
     IoMdArrowDropright,
 } from "react-icons/io";
-import { Comparator } from "../generated/graphql";
 import { DEBOUNCE_TIME } from "./forms/FormUtils";
 
 const useStyles = createStyles((theme) => ({
@@ -148,11 +143,17 @@ function DateFilter<T>({ column }: FilterProps<T>) {
             <Checkbox
                 onClick={() => {
                     setIsRangePicker((old) => !old);
+                    setFilterValue((old) => ({
+                        ...old,
+                        value: null,
+                    }));
                 }}
             />
             {!isRangePicker ? (
                 <>
                     <DatePicker
+                        // dropdownType="modal"
+                        inputFormat="DD.MM.YYYY"
                         allowFreeInput
                         locale={i18n.language}
                         withinPortal
@@ -163,29 +164,6 @@ function DateFilter<T>({ column }: FilterProps<T>) {
                                 value: date,
                             }));
                         }}
-                        // rightSection={
-                        //     <Select
-                        //         withinPortal
-                        //         defaultValue={defaultComparator}
-                        //         rightSection={<></>}
-                        //         rightSectionWidth={0}
-                        //         onChange={(compValue) => {
-                        //             if (compValue) {
-                        //                 setFilterValue((old) => ({
-                        //                     ...old,
-                        //                     comparator: compValue as Comparators,
-                        //                 }));
-                        //             }
-                        //         }}
-                        //         data={[
-                        //             { value: "<", label: "<" },
-                        //             { value: ">", label: ">" },
-                        //             { value: "=", label: "=" },
-                        //             { value: "<=", label: "<=" },
-                        //             { value: ">=", label: ">=" },
-                        //         ]}
-                        //     />
-                        // }
                         rightSectionWidth={50}
                         autoComplete="off"
                         spellCheck={false}
@@ -208,6 +186,8 @@ function DateFilter<T>({ column }: FilterProps<T>) {
                 </>
             ) : (
                 <DateRangePicker
+                    // dropdownType="modal"
+                    inputFormat="DD.MM.YYYY"
                     locale={i18n.language}
                     withinPortal
                     placeholder={column.columnDef.header?.toString()}
@@ -313,6 +293,7 @@ function Filter<T>({ column, table }: FilterProps<T>) {
         case ColumnFilterType.Date:
             return <DateFilter column={column} table={table} />;
         case ColumnFilterType.Number:
+            // TODO: Add configurable precision
             return <NumberFilter column={column} table={table} />;
     }
 }

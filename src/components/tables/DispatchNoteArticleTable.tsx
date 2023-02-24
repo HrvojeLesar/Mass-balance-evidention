@@ -55,8 +55,6 @@ export default function DispatchNoteArticleTable({
 
     const [editToggleValue, editToggle] = useToggle();
 
-    console.log(editToggleValue);
-
     const { data, refetch, isInitialLoading } =
         useGetDispatchNotesArticlesQuery(
             {
@@ -108,7 +106,7 @@ export default function DispatchNoteArticleTable({
         },
         {
             queryKey: [
-                "getDispatchNoteArticles",
+                "getDispatchNote",
                 pagination,
                 sorting,
                 columnFilters,

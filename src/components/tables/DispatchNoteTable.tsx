@@ -79,9 +79,21 @@ export default function DispatchNoteTable({
                                           val.desc === ColumnFilterType.String
                                               ? val.value.toString()
                                               : val.value instanceof Date
-                                              ? val.value.toJSON()
+                                              ? new Date(
+                                                    moment(val.value).format(
+                                                        "YYYY-MM-DD"
+                                                    )
+                                                ).toJSON()
                                               : val.value instanceof Array
-                                              ? `${val.value[0].toJSON()}, ${val.value[1].toJSON()}`
+                                              ? `${new Date(
+                                                    moment(val.value[0]).format(
+                                                        "YYYY-MM-DD"
+                                                    )
+                                                ).toJSON()}, ${new Date(
+                                                    moment(val.value[1]).format(
+                                                        "YYYY-MM-DD"
+                                                    )
+                                                ).toJSON()}`
                                               : val.value.toString(),
                                       comparator:
                                           val.comparator?.toUpperCase() as Comparator,

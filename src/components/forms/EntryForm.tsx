@@ -91,7 +91,6 @@ export default function EntryForm({
                       label: edit?.buyer?.name ?? undefined,
                   }
                 : undefined,
-            // date: moment(Date.now()).format("YYYY-MM-DD"),
             date: edit
                 ? moment(edit.date as Date).format("YYYY-MM-DD")
                 : undefined,
@@ -121,11 +120,13 @@ export default function EntryForm({
     const onInsertSubmit = useCallback(
         (data: FormInput) => {
             if (data.cell && data.culture && data.buyer && data.date) {
+                debugger;
                 insert.mutate({
                     insertOptions: {
                         idCell: data.cell.value.id,
                         idCulture: data.culture.value.id,
-                        date: new Date(data.date),
+                        // WARN: Very dumb hacky way to fix a day off value
+                        date: new Date(moment(data.date).format("YYYY-MM-DD")),
                         weight: Number(data.weight),
                         idBuyer: data.buyer.value.id,
                         dGroup: dataGroupContextValue.selectedGroup ?? 1,
@@ -152,7 +153,8 @@ export default function EntryForm({
                             idCell: data.cell.value.id,
                             idCulture: data.culture.value.id,
                         },
-                        date: new Date(data.date),
+                        // WARN: Very dumb hacky way to fix a day off value
+                        date: new Date(moment(data.date).format("YYYY-MM-DD")),
                         weight: Number(data.weight),
                         idBuyer: data.buyer.value.id,
                         // weightType: "kg",
@@ -680,6 +682,8 @@ export default function EntryForm({
                                     : value;
                             return (
                                 <DatePicker
+                                    inputFormat="DD.MM.YYYY"
+                                    // dropdownType="modal"
                                     allowFreeInput
                                     locale={i18n.language}
                                     value={date}
