@@ -1,15 +1,20 @@
 use std::{env, future::Future, pin::Pin};
 
+use actix_session::Session;
 use actix_web::{get, http::header::LOCATION, web::Query, FromRequest, HttpResponse};
 use log::error;
 use oauth2::{
     basic::BasicClient, AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken,
     PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, Scope, TokenResponse, TokenUrl,
 };
-use redis::{aio::ConnectionLike, FromRedisValue};
-use serde::Deserialize;
+use redis::{aio::ConnectionLike, Cmd};
+use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, TransactionTrait};
+use serde::{Deserialize, Serialize};
 
-use crate::redis_csrf_cache::RedisConnectionManagerExt;
+use crate::{
+    http_response_errors::AuthError, redis_csrf_cache::RedisConnectionManagerExt,
+    user_models::mbe_user, SeaOrmPool,
+};
 
 const GOOGLE_AUTH_ENDPOINT: &str = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_ENDPOINT: &str = "https://oauth2.googleapis.com/token";
@@ -31,12 +36,40 @@ const FACEBOOK_USER_INFO_ENDPOINT: &str = "https://graph.facebook.com/v16.0/me?f
 
 const CSRF_CACHE_EXPIRY: usize = 60 * 5;
 
-#[derive(Deserialize, Debug)]
-struct GoogleUserInfo {
-    picture: Option<String>,
-    email: Option<String>,
-    email_verified: Option<bool>,
+pub const SESSION_DATA_KEY: &str = "SESSION_DATA";
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SessionData {
+    pub authorized: bool,
 }
+
+impl SessionData {
+    fn new_authorized() -> Self {
+        Self { authorized: true }
+    }
+}
+
+trait ExtractEmail {
+    fn get_email(self) -> Result<String, AuthError>;
+}
+
+#[derive(Deserialize, Debug)]
+struct UserInfo {
+    email: Option<String>,
+}
+
+impl ExtractEmail for UserInfo {
+    fn get_email(self) -> Result<String, AuthError> {
+        self.email.ok_or(AuthError::MissingEmailInResponse)
+    }
+}
+
+// #[derive(Deserialize, Debug)]
+// struct GoogleUserInfo {
+// picture: Option<String>,
+// email: Option<String>,
+// email_verified: Option<bool>,
+// }
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -45,15 +78,24 @@ struct MicrosoftUserInfo {
     mail: Option<String>,
 }
 
-#[derive(Deserialize, Debug)]
-struct GithubUserInfo {
-    email: Option<String>,
+impl ExtractEmail for MicrosoftUserInfo {
+    fn get_email(self) -> Result<String, AuthError> {
+        match self.user_principal_name {
+            Some(email) => Ok(email),
+            None => self.mail.ok_or(AuthError::MissingEmailInResponse),
+        }
+    }
 }
 
-#[derive(Deserialize, Debug)]
-struct FacebookUserInfo {
-    email: Option<String>,
-}
+// #[derive(Deserialize, Debug)]
+// struct GithubUserInfo {
+//     email: Option<String>,
+// }
+
+// #[derive(Deserialize, Debug)]
+// struct FacebookUserInfo {
+//     email: Option<String>,
+// }
 
 #[derive(Deserialize, Debug)]
 pub struct AuthCallbackParams {
@@ -161,8 +203,7 @@ impl_oauth_client![
     "http://localhost:8000/callback-fb"
 ];
 
-macro_rules! login_route {
-    (
+macro_rules! login_route {(
         $(#[$attr:meta])*
         $name:ident,
         $type:ty,
@@ -172,7 +213,7 @@ macro_rules! login_route {
         pub async fn $name(
             RedisConnectionManagerExt(mut redis_cache): RedisConnectionManagerExt,
             client: $type,
-        ) -> HttpResponse {
+        ) -> Result<HttpResponse, AuthError> {
             let (pkce_challange, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
 
             let (url, csrf_token) = client
@@ -190,12 +231,11 @@ macro_rules! login_route {
                     pkce_verifier.secret(),
                     CSRF_CACHE_EXPIRY,
                 ))
-                .await
-                .unwrap();
+                .await?;
 
-            HttpResponse::TemporaryRedirect()
+            Ok(HttpResponse::TemporaryRedirect()
                 .insert_header((LOCATION, url.to_string()))
-                .finish()
+                .finish())
         }
     };
 }
@@ -228,252 +268,105 @@ login_route![
     "email"
 ];
 
-#[get("/callback-google")]
-pub async fn login_callback_google(
-    Query(params): Query<AuthCallbackParams>,
-    RedisConnectionManagerExt(mut redis_cache): RedisConnectionManagerExt,
-    OAuthClientGoogle(client): OAuthClientGoogle,
-) -> String {
-    if let (Some(csrf_state), Some(auth_code)) = (params.state, params.code) {
-        let pkce_verifier_value = &redis_cache
-            .req_packed_command(&redis::Cmd::get(&csrf_state))
-            .await
-            .unwrap();
+macro_rules! callback_route {(
+        $(#[$attr:meta])*
+        $name:ident,
+        $client:ty,
+        $endpoint:expr,
+        $user_info_type:ty
+        ) => {
+        $(#[$attr])*
+        pub async fn $name(
+            Query(params): Query<AuthCallbackParams>,
+            RedisConnectionManagerExt(mut redis_cache): RedisConnectionManagerExt,
+            client: $client,
+            db_pool: SeaOrmPool,
+            session: Session,
+        ) -> Result<HttpResponse, AuthError> {
+            if let (Some(csrf_state), Some(auth_code)) = (params.state, params.code) {
+                let pkce_verifier: Option<String> =
+                    Cmd::get(&csrf_state).query_async(&mut redis_cache).await?;
 
-        // pkce_verifier exists
-        let pkce_verifier = if redis::Value::Nil.ne(pkce_verifier_value) {
-            match redis_cache
-                .req_packed_command(&redis::Cmd::del(csrf_state))
-                .await
-            {
-                Ok(_o) => (),
-                Err(e) => {
+                if let Err(e) = Cmd::del(csrf_state)
+                    .query_async::<_, i64>(&mut redis_cache)
+                    .await
+                {
                     error!("Redis key deletion failed: {}", e);
                 }
-            }
 
-            Some(String::from_redis_value(pkce_verifier_value).unwrap())
-        } else {
-            None
-        };
+                let pkce_verifier = match pkce_verifier {
+                    Some(pv) => pv,
+                    None => Err(AuthError::InvalidPkceVerifier)?,
+                };
 
-        let pkce_verifier = match pkce_verifier {
-            Some(pv) => pv,
-            None => todo!("Redirect to login???"),
-        };
+                let token = client
+                    .0
+                    .exchange_code(AuthorizationCode::new(auth_code))
+                    .set_pkce_verifier(PkceCodeVerifier::new(pkce_verifier))
+                    .request_async(oauth2::reqwest::async_http_client)
+                    .await?;
 
-        let token = client
-            .exchange_code(AuthorizationCode::new(auth_code))
-            .set_pkce_verifier(PkceCodeVerifier::new(pkce_verifier))
-            .request_async(oauth2::reqwest::async_http_client)
-            .await
-            .unwrap();
+                let reqwest_client = reqwest::Client::new();
 
-        println!("Access token: {}", token.access_token().secret());
+                let response = reqwest_client
+                    .get($endpoint)
+                    .bearer_auth(token.access_token().secret())
+                    .send()
+                    .await?
+                    .json::<$user_info_type>()
+                    .await?;
 
-        let reqwest_client = reqwest::Client::new();
+                let transaction = db_pool.begin().await?;
 
-        let response = reqwest_client
-            .get(GOOGLE_USER_INFO_ENDPOINT)
-            .bearer_auth(token.access_token().secret())
-            .send()
-            .await
-            .unwrap()
-            .json::<GoogleUserInfo>()
-            .await
-            .unwrap();
+                let user = mbe_user::Entity::find()
+                    .filter(mbe_user::Column::Email.eq(response.get_email()?))
+                    .one(&transaction)
+                    .await?;
 
-        println!("Response: {:#?}", response);
-        return format!("{:#?}", response).into();
+                transaction.commit().await?;
 
-        // TODO: check db for retrieved email
-        // if valid grant entry
-    }
-    todo!()
-}
-
-#[get("/callback-ms")]
-pub async fn login_callback_microsoft(
-    Query(params): Query<AuthCallbackParams>,
-    RedisConnectionManagerExt(mut redis_cache): RedisConnectionManagerExt,
-    OAuthClientMicrosoft(client): OAuthClientMicrosoft,
-) -> String {
-    if let (Some(csrf_state), Some(auth_code)) = (params.state, params.code) {
-        let pkce_verifier_value = &redis_cache
-            .req_packed_command(&redis::Cmd::get(&csrf_state))
-            .await
-            .unwrap();
-
-        // pkce_verifier exists
-        let pkce_verifier = if redis::Value::Nil.ne(pkce_verifier_value) {
-            match redis_cache
-                .req_packed_command(&redis::Cmd::del(csrf_state))
-                .await
-            {
-                Ok(_o) => (),
-                Err(e) => {
-                    error!("Redis key deletion failed: {}", e);
+                match user {
+                    Some(_user) => {
+                        session.insert(SESSION_DATA_KEY, SessionData::new_authorized())?;
+                        Ok(HttpResponse::Ok().finish())
+                    }
+                    None => Err(AuthError::UserNotFound),
                 }
+            } else {
+                Err(AuthError::MissingStateOrAuthCode)?
             }
-
-            Some(String::from_redis_value(pkce_verifier_value).unwrap())
-        } else {
-            None
-        };
-
-        let pkce_verifier = match pkce_verifier {
-            Some(pv) => pv,
-            None => todo!("Redirect to login???"),
-        };
-
-        let token = client
-            .exchange_code(AuthorizationCode::new(auth_code))
-            .set_pkce_verifier(PkceCodeVerifier::new(pkce_verifier))
-            .request_async(oauth2::reqwest::async_http_client)
-            .await
-            .unwrap();
-
-        println!("Access token: {}", token.access_token().secret());
-
-        let reqwest_client = reqwest::Client::new();
-
-        let response = reqwest_client
-            .get(MICROSOFT_USER_INFO_ENDPOINT)
-            .bearer_auth(token.access_token().secret())
-            .send()
-            .await
-            .unwrap()
-            .json::<MicrosoftUserInfo>()
-            .await
-            .unwrap();
-
-        println!("Response: {:#?}", response);
-        return format!("{:#?}", response).into();
-    }
-    todo!()
+        }
+    };
 }
 
-#[get("/callback-gh")]
-pub async fn login_callback_github(
-    Query(params): Query<AuthCallbackParams>,
-    RedisConnectionManagerExt(mut redis_cache): RedisConnectionManagerExt,
-    OAuthClientGithub(client): OAuthClientGithub,
-) -> String {
-    if let (Some(csrf_state), Some(auth_code)) = (params.state, params.code) {
-        let pkce_verifier_value = &redis_cache
-            .req_packed_command(&redis::Cmd::get(&csrf_state))
-            .await
-            .unwrap();
+callback_route![
+    #[get("/callback-google")]
+    login_callback_google,
+    OAuthClientGoogle,
+    GOOGLE_USER_INFO_ENDPOINT,
+    UserInfo
+];
 
-        // pkce_verifier exists
-        let pkce_verifier = if redis::Value::Nil.ne(pkce_verifier_value) {
-            match redis_cache
-                .req_packed_command(&redis::Cmd::del(csrf_state))
-                .await
-            {
-                Ok(_o) => (),
-                Err(e) => {
-                    error!("Redis key deletion failed: {}", e);
-                }
-            }
+callback_route![
+    #[get("/callback-ms")]
+    login_callback_microsoft,
+    OAuthClientMicrosoft,
+    MICROSOFT_USER_INFO_ENDPOINT,
+    MicrosoftUserInfo
+];
 
-            Some(String::from_redis_value(pkce_verifier_value).unwrap())
-        } else {
-            None
-        };
+callback_route![
+    #[get("/callback-gh")]
+    login_callback_github,
+    OAuthClientGithub,
+    GITHUB_USER_INFO_ENDPOINT,
+    UserInfo
+];
 
-        let pkce_verifier = match pkce_verifier {
-            Some(pv) => pv,
-            None => todo!("Redirect to login???"),
-        };
-
-        let token = client
-            .exchange_code(AuthorizationCode::new(auth_code))
-            .set_pkce_verifier(PkceCodeVerifier::new(pkce_verifier))
-            .request_async(oauth2::reqwest::async_http_client)
-            .await
-            .unwrap();
-
-        println!("Access token: {}", token.access_token().secret());
-
-        let reqwest_client = reqwest::Client::builder()
-            .user_agent("MBE")
-            .build()
-            .unwrap();
-
-        let response = reqwest_client
-            .get(GITHUB_USER_INFO_ENDPOINT)
-            .bearer_auth(token.access_token().secret())
-            .send()
-            .await
-            .unwrap()
-            .json::<GithubUserInfo>()
-            .await
-            .unwrap();
-
-        println!("Response: {:#?}", response);
-        return format!("{:#?}", response).into();
-    }
-    todo!()
-}
-
-#[get("/callback-fb")]
-pub async fn login_callback_facebook(
-    Query(params): Query<AuthCallbackParams>,
-    RedisConnectionManagerExt(mut redis_cache): RedisConnectionManagerExt,
-    OAuthClientFacebook(client): OAuthClientFacebook,
-) -> String {
-    if let (Some(csrf_state), Some(auth_code)) = (params.state, params.code) {
-        let pkce_verifier_value = &redis_cache
-            .req_packed_command(&redis::Cmd::get(&csrf_state))
-            .await
-            .unwrap();
-
-        // pkce_verifier exists
-        let pkce_verifier = if redis::Value::Nil.ne(pkce_verifier_value) {
-            match redis_cache
-                .req_packed_command(&redis::Cmd::del(csrf_state))
-                .await
-            {
-                Ok(_o) => (),
-                Err(e) => {
-                    error!("Redis key deletion failed: {}", e);
-                }
-            }
-
-            Some(String::from_redis_value(pkce_verifier_value).unwrap())
-        } else {
-            None
-        };
-
-        let pkce_verifier = match pkce_verifier {
-            Some(pv) => pv,
-            None => todo!("Redirect to login???"),
-        };
-
-        let token = client
-            .exchange_code(AuthorizationCode::new(auth_code))
-            .set_pkce_verifier(PkceCodeVerifier::new(pkce_verifier))
-            .request_async(oauth2::reqwest::async_http_client)
-            .await
-            .unwrap();
-
-        println!("Access token: {}", token.access_token().secret());
-
-        let reqwest_client = reqwest::Client::new();
-
-        let response = reqwest_client
-            .get(FACEBOOK_USER_INFO_ENDPOINT)
-            .bearer_auth(token.access_token().secret())
-            .send()
-            .await
-            .unwrap()
-            .json::<FacebookUserInfo>()
-            .await
-            .unwrap();
-
-        println!("Response: {:#?}", response);
-        return format!("{:#?}", response).into();
-    }
-    todo!()
-}
+callback_route![
+    #[get("/callback-fb")]
+    login_callback_facebook,
+    OAuthClientFacebook,
+    FACEBOOK_USER_INFO_ENDPOINT,
+    UserInfo
+];

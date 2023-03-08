@@ -9,7 +9,6 @@ edition = "2021"
 actix-web = "4"
 async-graphql = { version = "4.0", features = ["chrono", "log"] }
 async-graphql-actix-web = "4.0"
-
 thiserror = "1.0.33"
 
 serde = { version = "1.0", features = ["derive"] }

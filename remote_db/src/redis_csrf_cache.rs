@@ -1,7 +1,7 @@
 use std::{env, future::Future, pin::Pin};
 
-use actix_web::{FromRequest, HttpMessage};
-use redis::{aio::ConnectionManager, Cmd};
+use actix_web::FromRequest;
+use redis::aio::ConnectionManager;
 
 #[derive(Clone)]
 pub struct RedisConnectionManagerExt(pub ConnectionManager);

@@ -1,11 +1,16 @@
 use std::env;
 
+use actix_session::{
+    config::{PersistentSession, TtlExtensionPolicy},
+    storage::RedisSessionStore,
+    Session, SessionMiddleware,
+};
 use anyhow::Result;
 
 use actix_cors::Cors;
 use actix_web::{
+    cookie::Key,
     get,
-    http::header::LOCATION,
     middleware::Logger,
     post,
     web::{self, Data},
@@ -19,28 +24,31 @@ use auth::{
     OAuthClientFacebook, OAuthClientGithub, OAuthClientGoogle, OAuthClientMicrosoft,
 };
 use dotenvy::dotenv;
-use oauth2::{
-    basic::BasicClient, AuthUrl, ClientId, ClientSecret, CsrfToken, PkceCodeChallenge, RedirectUrl,
-    Scope, TokenUrl,
-};
-use redis::aio::{ConnectionLike, ConnectionManager};
-use redis_csrf_cache::{create_redis_connection_manager, RedisConnectionManagerExt};
+use http_response_errors::AuthError;
+
+use redis_csrf_cache::create_redis_connection_manager;
 use sea_orm::{ConnectOptions, DatabaseConnection};
 use seaorm_models::graphql_schema::{MutationRoot, QueryRoot};
-use serde::Deserialize;
+
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
+
+use crate::auth::{SessionData, SESSION_DATA_KEY};
 
 // mod models;
 mod auth;
+mod http_response_errors;
 mod redis_csrf_cache;
 mod seaorm_models;
+mod user_models;
 
 pub type DatabasePool = Data<Pool<Postgres>>;
 pub type GQLSchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
 pub type SeaOrmPool = Data<DatabaseConnection>;
 
+const MONTH: i64 = 60 * 60 * 24 * 30;
+
 #[get("/graphiql")]
-async fn graphql_playground() -> actix_web::Result<HttpResponse> {
+async fn graphql_playground(_session: Session) -> actix_web::Result<HttpResponse> {
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(GraphiQLSource::build().endpoint("/graphiql").finish()))
@@ -52,8 +60,16 @@ async fn index(schema: web::Data<GQLSchema>, req: GraphQLRequest) -> GraphQLResp
 }
 
 #[get("/schema")]
-async fn get_schema(schema: web::Data<GQLSchema>) -> String {
-    schema.sdl()
+async fn get_schema(schema: web::Data<GQLSchema>, session: Session) -> Result<String, AuthError> {
+    let d = session
+        .get::<SessionData>(SESSION_DATA_KEY)?
+        .ok_or(AuthError::Unauthorized)?;
+
+    if d.authorized {
+        Ok(schema.sdl())
+    } else {
+        Err(AuthError::Unauthorized)
+    }
 }
 
 #[cfg(debug_assertions)]
@@ -77,28 +93,35 @@ fn build_schema(pool: Data<Pool<Postgres>>) -> GQLSchema {
         EmptySubscription,
     )
     .data(pool)
+    .data(sea_orm_pool)
     .extension(async_graphql::extensions::Logger)
     .disable_introspection()
     .finish()
 }
 
+macro_rules! oauth_client_env_check {
+    ($name:literal) => {
+        env::var(concat!("OAUTH_CLIENT_ID_", $name)).expect(concat!(
+            "OAUTH_CLIENT_ID_",
+            $name,
+            "env variable to be present"
+        ));
+        env::var(concat!("OAUTH_CLIENT_SECRET_", $name)).expect(concat!(
+            "OAUTH_CLIENT_SECRET_",
+            $name,
+            "env variable to be present"
+        ));
+    };
+}
+
 fn check_env_variables() {
     env::var("REDIS_CONNECTION").expect("REDIS_CONNECTION env variable to be present");
     env::var("DATABASE_URL").expect("DATABASE_URL env variable to be present");
-    env::var("OAUTH_CLIENT_ID_GOOGLE").expect("OAUTH_CLIENT_ID_GOOGLE env variable to be present");
-    env::var("OAUTH_CLIENT_SECRET_GOOGLE")
-        .expect("OAUTH_CLIENT_SECRET_GOOGLE env variable to be present");
-    env::var("OAUTH_CLIENT_ID_MICROSOFT")
-        .expect("OAUTH_CLIENT_ID_MICROSOFT env variable to be present");
-    env::var("OAUTH_CLIENT_SECRET_MICROSOFT")
-        .expect("OAUTH_CLIENT_SECRET_MICROSOFT env variable to be present");
-    env::var("OAUTH_CLIENT_ID_GITHUB").expect("OAUTH_CLIENT_ID_GITHUB env variable to be present");
-    env::var("OAUTH_CLIENT_SECRET_GITHUB")
-        .expect("OAUTH_CLIENT_SECRET_GITHUB env variable to be present");
-    env::var("OAUTH_CLIENT_ID_FACEBOOK")
-        .expect("OAUTH_CLIENT_ID_FACEBOOK env variable to be present");
-    env::var("OAUTH_CLIENT_SECRET_FACEBOOK")
-        .expect("OAUTH_CLIENT_SECRET_FACEBOOK env variable to be present");
+    env::var("SESSION_SECRET_KEY").expect("SESSION_SECRET_KEY env variable to be present");
+    oauth_client_env_check!("GOOGLE");
+    oauth_client_env_check!("MICROSOFT");
+    oauth_client_env_check!("GITHUB");
+    oauth_client_env_check!("FACEBOOK");
 }
 
 #[actix_web::main]
@@ -108,6 +131,7 @@ async fn main() -> std::io::Result<()> {
 
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
+    // TODO: remove this
     let pool = Data::new(
         PgPoolOptions::new()
             .max_connections(5)
@@ -123,10 +147,10 @@ async fn main() -> std::io::Result<()> {
     let sea_orm_pool = Data::new(
         sea_orm::Database::connect(seaorm_connection_options)
             .await
-            .unwrap(),
+            .expect("Database connection"),
     );
 
-    let schema = build_schema(pool.clone(), sea_orm_pool);
+    let schema = build_schema(pool.clone(), sea_orm_pool.clone());
 
     let redis_csrf_cache = create_redis_connection_manager().await;
 
@@ -135,9 +159,19 @@ async fn main() -> std::io::Result<()> {
     let oauth_client_github = OAuthClientGithub::new();
     let oauth_client_facebook = OAuthClientFacebook::new();
 
+    let session_secret_key = Key::from(
+        env::var("SESSION_SECRET_KEY")
+            .expect("Existing key")
+            .as_bytes(),
+    );
+    let redis_connection_string =
+        env::var("REDIS_CONNECTION").expect("REDIS_CONNECTION env variable to be present");
+    let session_store = RedisSessionStore::new(&redis_connection_string)
+        .await
+        .expect("Valid redis connection");
+
     HttpServer::new(move || {
         App::new()
-            .wrap(Logger::default())
             .wrap(
                 Cors::default()
                     .allow_any_origin()
@@ -146,7 +180,18 @@ async fn main() -> std::io::Result<()> {
                     .max_age(3600)
                     .send_wildcard(),
             )
+            .wrap(
+                SessionMiddleware::builder(session_store.clone(), session_secret_key.clone())
+                    .session_lifecycle(
+                        PersistentSession::default()
+                            .session_ttl_extension_policy(TtlExtensionPolicy::OnStateChanges)
+                            .session_ttl(actix_web::cookie::time::Duration::seconds(MONTH)),
+                    )
+                    .build(),
+            )
+            .wrap(Logger::default())
             .app_data(Data::new(schema.clone()))
+            .app_data(sea_orm_pool.clone())
             .app_data(redis_csrf_cache.clone())
             .app_data(pool.clone())
             .app_data(oauth_client_google.clone())
