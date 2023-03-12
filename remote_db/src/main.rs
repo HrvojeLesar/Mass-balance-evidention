@@ -1,7 +1,7 @@
 use std::env;
 
 use actix_session::{
-    config::{PersistentSession, TtlExtensionPolicy},
+    config::{CookieContentSecurity, PersistentSession, TtlExtensionPolicy},
     storage::RedisSessionStore,
     Session, SessionMiddleware,
 };
@@ -21,7 +21,8 @@ use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use auth::{
     login_callback_facebook, login_callback_github, login_callback_google,
     login_callback_microsoft, login_facebook, login_github, login_google, login_microsoft,
-    OAuthClientFacebook, OAuthClientGithub, OAuthClientGoogle, OAuthClientMicrosoft,
+    GlobalReqwestClient, OAuthClientFacebook, OAuthClientGithub, OAuthClientGoogle,
+    OAuthClientMicrosoft,
 };
 use dotenvy::dotenv;
 use http_response_errors::AuthError;
@@ -157,7 +158,7 @@ async fn main() -> std::io::Result<()> {
     let oauth_client_google = OAuthClientGoogle::new();
     let oauth_client_microsoft = OAuthClientMicrosoft::new();
     let oauth_client_github = OAuthClientGithub::new();
-    let oauth_client_facebook = OAuthClientFacebook::new();
+    let _oauth_client_facebook = OAuthClientFacebook::new();
 
     let session_secret_key = Key::from(
         env::var("SESSION_SECRET_KEY")
@@ -169,6 +170,8 @@ async fn main() -> std::io::Result<()> {
     let session_store = RedisSessionStore::new(&redis_connection_string)
         .await
         .expect("Valid redis connection");
+
+    let global_reqwest_client = GlobalReqwestClient::new();
 
     HttpServer::new(move || {
         App::new()
@@ -187,6 +190,9 @@ async fn main() -> std::io::Result<()> {
                             .session_ttl_extension_policy(TtlExtensionPolicy::OnStateChanges)
                             .session_ttl(actix_web::cookie::time::Duration::seconds(MONTH)),
                     )
+                    // WARN: potentially dangerous
+                    .cookie_http_only(false)
+                    .cookie_content_security(CookieContentSecurity::Signed)
                     .build(),
             )
             .wrap(Logger::default())
@@ -197,7 +203,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(oauth_client_google.clone())
             .app_data(oauth_client_microsoft.clone())
             .app_data(oauth_client_github.clone())
-            .app_data(oauth_client_facebook.clone())
+            .app_data(global_reqwest_client.clone())
             .service(graphql_playground)
             .service(index)
             .service(get_schema)

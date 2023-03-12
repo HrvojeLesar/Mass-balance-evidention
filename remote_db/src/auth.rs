@@ -64,13 +64,6 @@ impl ExtractEmail for UserInfo {
     }
 }
 
-// #[derive(Deserialize, Debug)]
-// struct GoogleUserInfo {
-// picture: Option<String>,
-// email: Option<String>,
-// email_verified: Option<bool>,
-// }
-
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct MicrosoftUserInfo {
@@ -87,15 +80,45 @@ impl ExtractEmail for MicrosoftUserInfo {
     }
 }
 
-// #[derive(Deserialize, Debug)]
-// struct GithubUserInfo {
-//     email: Option<String>,
-// }
+#[derive(Clone)]
+pub struct GlobalReqwestClient(pub reqwest::Client);
 
-// #[derive(Deserialize, Debug)]
-// struct FacebookUserInfo {
-//     email: Option<String>,
-// }
+impl GlobalReqwestClient {
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
+
+impl Default for GlobalReqwestClient {
+    fn default() -> Self {
+        GlobalReqwestClient(
+            reqwest::Client::builder()
+                .user_agent("MBE-client")
+                .build()
+                .expect("Valid global reqwest client"),
+        )
+    }
+}
+
+impl FromRequest for GlobalReqwestClient {
+    type Error = actix_web::Error;
+
+    type Future = Pin<Box<dyn Future<Output = Result<Self, Self::Error>>>>;
+
+    fn from_request(
+        req: &actix_web::HttpRequest,
+        _payload: &mut actix_web::dev::Payload,
+    ) -> Self::Future {
+        let req = req.clone();
+
+        Box::pin(async move {
+            Ok(req
+                .app_data::<Self>()
+                .cloned()
+                .expect("An existing global reqwest client"))
+        })
+    }
+}
 
 #[derive(Deserialize, Debug)]
 pub struct AuthCallbackParams {
@@ -279,6 +302,7 @@ macro_rules! callback_route {(
         pub async fn $name(
             Query(params): Query<AuthCallbackParams>,
             RedisConnectionManagerExt(mut redis_cache): RedisConnectionManagerExt,
+            reqwest_client: GlobalReqwestClient,
             client: $client,
             db_pool: SeaOrmPool,
             session: Session,
@@ -287,11 +311,16 @@ macro_rules! callback_route {(
                 let pkce_verifier: Option<String> =
                     Cmd::get(&csrf_state).query_async(&mut redis_cache).await?;
 
-                if let Err(e) = Cmd::del(csrf_state)
+                match Cmd::del(csrf_state)
                     .query_async::<_, i64>(&mut redis_cache)
                     .await
                 {
-                    error!("Redis key deletion failed: {}", e);
+                    Ok(num_keys_deleted) => {
+                        if num_keys_deleted == 0 {
+                            return Err(AuthError::InvalidPkceVerifier);
+                        }
+                    }
+                    Err(e) => error!("Redis key deletion failed: {}", e),
                 }
 
                 let pkce_verifier = match pkce_verifier {
@@ -306,15 +335,16 @@ macro_rules! callback_route {(
                     .request_async(oauth2::reqwest::async_http_client)
                     .await?;
 
-                let reqwest_client = reqwest::Client::new();
-
                 let response = reqwest_client
+                    .0
                     .get($endpoint)
                     .bearer_auth(token.access_token().secret())
                     .send()
                     .await?
                     .json::<$user_info_type>()
                     .await?;
+
+                session.insert(SESSION_DATA_KEY, SessionData::new_authorized())?;
 
                 let transaction = db_pool.begin().await?;
 
@@ -327,8 +357,17 @@ macro_rules! callback_route {(
 
                 match user {
                     Some(_user) => {
+                        session.renew();
                         session.insert(SESSION_DATA_KEY, SessionData::new_authorized())?;
-                        Ok(HttpResponse::Ok().finish())
+
+                        #[cfg(not(debug_assertions))]
+                        panic!("Change location header to env var");
+
+                        Ok(HttpResponse::TemporaryRedirect()
+                           // TODO: change to env variable
+                           .insert_header((LOCATION, "http://localhost:1420/login-callback"))
+                           .finish())
+                        // Ok(HttpResponse::Ok().finish())
                     }
                     None => Err(AuthError::UserNotFound),
                 }
