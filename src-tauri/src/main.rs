@@ -3,30 +3,11 @@
     windows_subsystem = "windows"
 )]
 
-use errors::MBEError;
-use migrate_to_new_db::migrate::Migrate;
-use serde::Serialize;
-use tauri::AppHandle;
-
 mod errors;
-mod migrate_to_new_db;
-
-#[derive(Clone, Serialize)]
-struct TestEventPayload {
-    msg: String,
-}
-
-#[tauri::command]
-async fn try_start_import(app: AppHandle) -> Result<(), MBEError> {
-    let mut mig = Migrate::new(app);
-    mig.start_migrating().await?;
-    Ok(())
-}
 
 #[tokio::main]
 async fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![try_start_import])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
