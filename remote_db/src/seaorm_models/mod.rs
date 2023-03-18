@@ -279,8 +279,6 @@ where
     if let Some(id) = fetch_options.id {
         query = query.filter(E::get_id_column().eq(id));
     }
-    if let Some(data_group) = fetch_options.data_group_id {
-        query = query.filter(E::get_data_group_column().eq(data_group));
-    }
+    query = query.filter(E::get_data_group_column().eq(fetch_options.data_group_id));
     query
 }

@@ -26,10 +26,13 @@ pub struct Model {
     #[sea_orm(column_type = "Text", nullable)]
     pub description: Option<String>,
     pub created_at: DateTimeWithTimeZone,
+    pub id_mbe_group: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+    #[sea_orm(has_many = "super::article::Entity")]
+    Article,
     #[sea_orm(has_many = "super::buyer::Entity")]
     Buyer,
     #[sea_orm(has_many = "super::cell::Entity")]
@@ -38,8 +41,26 @@ pub enum Relation {
     CellCulturePair,
     #[sea_orm(has_many = "super::culture::Entity")]
     Culture,
+    #[sea_orm(has_many = "super::dispatch_note::Entity")]
+    DispatchNote,
+    #[sea_orm(has_many = "super::dispatch_note_article::Entity")]
+    DispatchNoteArticle,
     #[sea_orm(has_many = "super::entry::Entity")]
     Entry,
+    #[sea_orm(
+        belongs_to = "crate::user_models::mbe_group::Entity",
+        from = "Column::IdMbeGroup",
+        to = "crate::user_models::mbe_group::Column::Id",
+        on_update = "NoAction",
+        on_delete = "NoAction"
+    )]
+    MbeGroup,
+}
+
+impl Related<super::article::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Article.def()
+    }
 }
 
 impl Related<super::buyer::Entity> for Entity {
@@ -66,9 +87,27 @@ impl Related<super::culture::Entity> for Entity {
     }
 }
 
+impl Related<super::dispatch_note::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::DispatchNote.def()
+    }
+}
+
+impl Related<super::dispatch_note_article::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::DispatchNoteArticle.def()
+    }
+}
+
 impl Related<super::entry::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Entry.def()
+    }
+}
+
+impl Related<crate::user_models::mbe_group::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::MbeGroup.def()
     }
 }
 
@@ -216,8 +255,10 @@ impl DataGroupQuery {
     async fn data_groups(
         &self,
         ctx: &Context<'_>,
+        // TODO: Change to new type
         options: FetchOptions<DataGroupFields>,
     ) -> Result<Vec<Model>> {
+        // TODO: change to only fetch data groups user has access to
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         let mut query = Entity::get_query();
 

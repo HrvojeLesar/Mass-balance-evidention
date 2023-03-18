@@ -1,5 +1,12 @@
-use async_graphql::{Enum, InputObject, InputType, MergedObject, OutputType, SimpleObject};
-use sea_orm::Order;
+use async_graphql::{
+    Context, Enum, Guard, InputObject, InputType, MergedObject, OutputType, SimpleObject,
+};
+use async_trait::async_trait;
+use sea_orm::{ColumnTrait, EntityTrait, Order, QueryFilter, TransactionTrait};
+
+use crate::{
+    auth::SessionData, http_response_errors::AuthError, user_models::mbe_group_members, SeaOrmPool,
+};
 
 use super::{
     article::{ArticleFields, ArticleMutation, ArticleQuery},
@@ -9,6 +16,7 @@ use super::{
         CellCulturePairFields, CellCulturePairIds, CellCulturePairMutation, CellCulturePairQuery,
     },
     culture::{CultureFields, CultureMutation, CultureParity, CultureQuery},
+    data_group,
     data_group::{DataGroupFields, DataGroupMutation, DataGroupQuery},
     dispatch_note::{
         DispatchNoteFields, DispatchNoteFilterValue, DispatchNoteMutation, DispatchNoteQuery,
@@ -200,5 +208,44 @@ where
     pub page: Option<u64>,
     pub ordering: Option<OrderingOptions<O>>,
     pub filters: Option<Vec<Filter<T, V>>>,
-    pub data_group_id: Option<i32>,
+    pub data_group_id: i32,
+}
+
+pub struct DataGroupGuard {
+    data_group_id: i32,
+}
+
+impl DataGroupGuard {
+    pub fn new(data_group_id: i32) -> Self {
+        Self { data_group_id }
+    }
+}
+
+#[async_trait]
+impl Guard for DataGroupGuard {
+    async fn check(&self, ctx: &Context<'_>) -> Result<(), async_graphql::Error> {
+        let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
+        let session_data = ctx.data::<SessionData>()?;
+        let transaction = db.begin().await?;
+
+        let data_group = data_group::Entity::find()
+            .filter(data_group::Column::Id.eq(self.data_group_id))
+            .one(&transaction)
+            .await?
+            .ok_or(AuthError::Unauthorized)?;
+
+        let is_group_member = mbe_group_members::Entity::find()
+            .filter(mbe_group_members::Column::IdMbeUser.eq(session_data.user_id))
+            .filter(mbe_group_members::Column::IdMbeGroup.eq(data_group.id_mbe_group))
+            .one(&transaction)
+            .await?;
+
+        transaction.commit().await?;
+
+        if is_group_member.is_some() {
+            Ok(())
+        } else {
+            Err(AuthError::Unauthorized.into())
+        }
+    }
 }

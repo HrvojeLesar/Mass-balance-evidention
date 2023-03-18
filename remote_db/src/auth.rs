@@ -1,6 +1,6 @@
 use std::{env, future::Future, pin::Pin};
 
-use actix_session::Session;
+use actix_session::{Session, SessionExt};
 use actix_web::{get, http::header::LOCATION, web::Query, FromRequest, HttpResponse};
 use log::error;
 use oauth2::{
@@ -40,12 +40,33 @@ pub const SESSION_DATA_KEY: &str = "SESSION_DATA";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SessionData {
-    pub authorized: bool,
+    pub user_id: i32,
 }
 
 impl SessionData {
-    fn new_authorized() -> Self {
-        Self { authorized: true }
+    fn new(user_id: i32) -> Self {
+        Self { user_id }
+    }
+}
+
+impl FromRequest for SessionData {
+    type Error = actix_web::Error;
+
+    type Future = Pin<Box<dyn Future<Output = Result<Self, Self::Error>>>>;
+
+    fn from_request(
+        req: &actix_web::HttpRequest,
+        _payload: &mut actix_web::dev::Payload,
+    ) -> Self::Future {
+        let req = req.clone();
+
+        Box::pin(async move {
+            let session = req.get_session();
+            Ok(session
+                .get::<SessionData>(SESSION_DATA_KEY)
+                .map_err(|_e| AuthError::InvalidSession)?
+                .ok_or(AuthError::InvalidSession)?)
+        })
     }
 }
 
@@ -124,6 +145,7 @@ impl FromRequest for GlobalReqwestClient {
 pub struct AuthCallbackParams {
     code: Option<String>,
     state: Option<String>,
+    error: Option<String>,
 }
 
 macro_rules! impl_oauth_client {
@@ -307,6 +329,18 @@ macro_rules! callback_route {(
             db_pool: SeaOrmPool,
             session: Session,
         ) -> Result<HttpResponse, AuthError> {
+            if let Some(error_param) = params.error {
+                match error_param.as_ref() {
+                    "access_denied" => return Ok(HttpResponse::TemporaryRedirect()
+                           // TODO: change to env variable
+                           .insert_header((LOCATION, "http://localhost:1420/login"))
+                           .finish()),
+                    _ => return Ok(HttpResponse::TemporaryRedirect()
+                           // TODO: change to env variable
+                           .insert_header((LOCATION, "http://localhost:1420/login"))
+                           .finish())
+                }
+            }
             if let (Some(csrf_state), Some(auth_code)) = (params.state, params.code) {
                 let pkce_verifier: Option<String> =
                     Cmd::get(&csrf_state).query_async(&mut redis_cache).await?;
@@ -344,8 +378,6 @@ macro_rules! callback_route {(
                     .json::<$user_info_type>()
                     .await?;
 
-                session.insert(SESSION_DATA_KEY, SessionData::new_authorized())?;
-
                 let transaction = db_pool.begin().await?;
 
                 let user = mbe_user::Entity::find()
@@ -356,9 +388,9 @@ macro_rules! callback_route {(
                 transaction.commit().await?;
 
                 match user {
-                    Some(_user) => {
+                    Some(user) => {
                         session.renew();
-                        session.insert(SESSION_DATA_KEY, SessionData::new_authorized())?;
+                        session.insert(SESSION_DATA_KEY, SessionData::new(user.id))?;
 
                         #[cfg(not(debug_assertions))]
                         panic!("Change location header to env var");

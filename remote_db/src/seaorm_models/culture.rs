@@ -225,9 +225,7 @@ impl CultureQuery {
         let page: Page = options.page.into();
 
         let mut query = Entity::find();
-        if let Some(data_group) = options.data_group_id {
-            query = query.filter(Entity::get_data_group_column().eq(data_group));
-        }
+        query = query.filter(Entity::get_data_group_column().eq(options.data_group_id));
         query = Entity::add_ordering(query, options.ordering);
         query = Entity::add_filters(query, options.filters);
         if let Some(id_cell) = options.id.id_cell {
@@ -265,9 +263,7 @@ impl CultureQuery {
         let page: Page = options.page.into();
 
         let mut query = Entity::find();
-        if let Some(data_group) = options.data_group_id {
-            query = query.filter(Entity::get_data_group_column().eq(data_group));
-        }
+        query = query.filter(Entity::get_data_group_column().eq(options.data_group_id));
         query = Entity::add_ordering(query, options.ordering);
         query = Entity::add_filters(query, options.filters);
         query = query.filter(

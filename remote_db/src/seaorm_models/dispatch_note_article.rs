@@ -175,6 +175,7 @@ pub struct DispatchNoteArticleFlattened {
     pub name_d_group: String,
     pub description_d_group: Option<String>,
     pub created_at_d_group: DateTimeWithTimeZone,
+    pub id_mbe_group: i32,
 }
 
 #[derive(Debug, SimpleObject)]
@@ -221,6 +222,7 @@ impl From<QueryResultsHelperType<DispatchNoteArticleFlattened>>
                         name: flat.name_d_group,
                         description: flat.description_d_group,
                         created_at: flat.created_at_d_group,
+                        id_mbe_group: flat.id_mbe_group,
                     },
                 })
                 .collect(),
@@ -292,6 +294,7 @@ impl QueryDatabase for Entity {
                 "description_d_group",
             )
             .column_as(super::data_group::Column::CreatedAt, "created_at_d_group")
+            .column_as(super::data_group::Column::IdMbeGroup, "id_mbe_group")
     }
 
     async fn delete_query(
@@ -340,9 +343,7 @@ impl QueryDatabase for Entity {
             }
             // .filter(Column::DGroup.eq(ids.d_group))
         }
-        if let Some(data_group) = fetch_options.data_group_id {
-            query = query.filter(Column::DGroup.eq(data_group));
-        }
+        query = query.filter(Column::DGroup.eq(fetch_options.data_group_id));
         query
     }
 
@@ -408,7 +409,7 @@ impl QueryDatabase for Entity {
                 page: None,
                 ordering: None,
                 filters: None,
-                data_group_id: None,
+                data_group_id: res.d_group,
             },
         )
         .await?
@@ -449,7 +450,7 @@ impl QueryDatabase for Entity {
                 page: None,
                 ordering: None,
                 filters: None,
-                data_group_id: None,
+                data_group_id: res.d_group,
             },
         )
         .await?

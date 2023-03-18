@@ -33,7 +33,7 @@ use seaorm_models::graphql_schema::{MutationRoot, QueryRoot};
 
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 
-use crate::auth::{SessionData, SESSION_DATA_KEY};
+use crate::auth::SessionData;
 
 // mod models;
 mod auth;
@@ -56,21 +56,22 @@ async fn graphql_playground(_session: Session) -> actix_web::Result<HttpResponse
 }
 
 #[post("/graphiql")]
-async fn index(schema: web::Data<GQLSchema>, req: GraphQLRequest) -> GraphQLResponse {
-    schema.execute(req.into_inner()).await.into()
+async fn index(
+    schema: web::Data<GQLSchema>,
+    req: GraphQLRequest,
+    session_data: SessionData,
+) -> GraphQLResponse {
+    let req = req.into_inner();
+    let req = req.data(session_data);
+    schema.execute(req).await.into()
 }
 
 #[get("/schema")]
-async fn get_schema(schema: web::Data<GQLSchema>, session: Session) -> Result<String, AuthError> {
-    let d = session
-        .get::<SessionData>(SESSION_DATA_KEY)?
-        .ok_or(AuthError::Unauthorized)?;
-
-    if d.authorized {
-        Ok(schema.sdl())
-    } else {
-        Err(AuthError::Unauthorized)
-    }
+async fn get_schema(
+    schema: web::Data<GQLSchema>,
+    _session_data: SessionData,
+) -> Result<String, AuthError> {
+    Ok(schema.sdl())
 }
 
 #[cfg(debug_assertions)]
@@ -158,7 +159,7 @@ async fn main() -> std::io::Result<()> {
     let oauth_client_google = OAuthClientGoogle::new();
     let oauth_client_microsoft = OAuthClientMicrosoft::new();
     let oauth_client_github = OAuthClientGithub::new();
-    let _oauth_client_facebook = OAuthClientFacebook::new();
+    let oauth_client_facebook = OAuthClientFacebook::new();
 
     let session_secret_key = Key::from(
         env::var("SESSION_SECRET_KEY")
@@ -203,10 +204,8 @@ async fn main() -> std::io::Result<()> {
             .app_data(oauth_client_google.clone())
             .app_data(oauth_client_microsoft.clone())
             .app_data(oauth_client_github.clone())
+            .app_data(oauth_client_facebook.clone())
             .app_data(global_reqwest_client.clone())
-            .service(graphql_playground)
-            .service(index)
-            .service(get_schema)
             .service(login_google)
             .service(login_callback_google)
             .service(login_microsoft)
@@ -215,6 +214,9 @@ async fn main() -> std::io::Result<()> {
             .service(login_callback_github)
             .service(login_facebook)
             .service(login_callback_facebook)
+            .service(graphql_playground)
+            .service(index)
+            .service(get_schema)
     })
     .bind("127.0.0.1:8000")?
     .run()

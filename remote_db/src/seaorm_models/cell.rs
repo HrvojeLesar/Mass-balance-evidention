@@ -13,7 +13,7 @@ use crate::SeaOrmPool;
 
 use super::{
     calculate_page_size, common_add_id_and_data_group_filters, common_add_ordering,
-    graphql_schema::{DeleteOptions, FetchOptions, Filter, OrderingOptions},
+    graphql_schema::{DataGroupGuard, DeleteOptions, FetchOptions, Filter, OrderingOptions},
     GetDataGroupColumnTrait, Page, PageSize, QueryDatabase, QueryResults, RowsDeleted,
 };
 
@@ -205,6 +205,7 @@ pub struct CellQuery;
 
 #[Object]
 impl CellQuery {
+    #[graphql(guard = "DataGroupGuard::new(options.data_group_id)")]
     async fn cells(
         &self,
         ctx: &Context<'_>,
@@ -225,9 +226,7 @@ impl CellQuery {
         let page: Page = options.page.into();
 
         let mut query = Entity::find();
-        if let Some(data_group) = options.data_group_id {
-            query = query.filter(Entity::get_data_group_column().eq(data_group));
-        }
+        query = query.filter(Entity::get_data_group_column().eq(options.data_group_id));
         query = Entity::add_ordering(query, options.ordering);
         query = Entity::add_filters(query, options.filters);
         if let Some(id_culture) = options.id.id_culture {
@@ -265,9 +264,7 @@ impl CellQuery {
         let page: Page = options.page.into();
 
         let mut query = Entity::find();
-        if let Some(data_group) = options.data_group_id {
-            query = query.filter(Entity::get_data_group_column().eq(data_group));
-        }
+        query = query.filter(Entity::get_data_group_column().eq(options.data_group_id));
         query = Entity::add_ordering(query, options.ordering);
         query = Entity::add_filters(query, options.filters);
         query = query.filter(

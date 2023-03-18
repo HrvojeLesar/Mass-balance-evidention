@@ -33,6 +33,8 @@ pub enum AuthError {
     MissingStateOrAuthCode,
     #[error("Missing email in response")]
     MissingEmailInResponse,
+    #[error("InvalidSession")]
+    InvalidSession,
     #[error("User with supplied email not found.")]
     UserNotFound,
     #[error("Unauthorized access.")]
@@ -50,6 +52,7 @@ impl ResponseError for AuthError {
             AuthError::InvalidPkceVerifier => StatusCode::BAD_REQUEST,
             AuthError::MissingStateOrAuthCode => StatusCode::BAD_REQUEST,
             AuthError::UserNotFound => StatusCode::BAD_REQUEST,
+            AuthError::InvalidSession => StatusCode::BAD_REQUEST,
             AuthError::SessionGetError(..) | AuthError::Unauthorized => StatusCode::UNAUTHORIZED,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
@@ -67,7 +70,8 @@ impl ResponseError for AuthError {
                 AuthError::SessionGetError(..) | AuthError::Unauthorized => "Unauthorized.",
                 AuthError::InvalidPkceVerifier
                 | AuthError::MissingStateOrAuthCode
-                | AuthError::UserNotFound => "Bad request.",
+                | AuthError::UserNotFound
+                | AuthError::InvalidSession => "Bad request.",
                 AuthError::MissingEmailInResponse => {
                     "Login service didn't return an e-mail address."
                 }
