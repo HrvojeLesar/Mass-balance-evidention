@@ -13,9 +13,11 @@ use crate::SeaOrmPool;
 
 use super::{
     graphql_schema::{
-        DeleteOptions, FetchOptions, Filter, OrderingOptions, Pagination, QueryResults,
+        DataGroupAccessGuard, DeleteOptions, FetchOptions, Filter, OrderingOptions, Pagination,
+        QueryResults, UpdateDeleteGuard,
     },
-    GetDataGroupColumnTrait, QueryDatabase, QueryResultsHelperType, RowsDeleted,
+    GetDataGroupColumnTrait, GetEntityDataGroupId, GetEntityId, QueryDatabase,
+    QueryResultsHelperType, RowsDeleted,
 };
 
 use anyhow::{anyhow, Result};
@@ -343,7 +345,7 @@ impl QueryDatabase for Entity {
             }
             // .filter(Column::DGroup.eq(ids.d_group))
         }
-        query = query.filter(Column::DGroup.eq(fetch_options.data_group_id));
+        query = query.filter(Column::DGroup.eq(fetch_options.d_group));
         query
     }
 
@@ -409,7 +411,7 @@ impl QueryDatabase for Entity {
                 page: None,
                 ordering: None,
                 filters: None,
-                data_group_id: res.d_group,
+                d_group: res.d_group,
             },
         )
         .await?
@@ -450,7 +452,7 @@ impl QueryDatabase for Entity {
                 page: None,
                 ordering: None,
                 filters: None,
-                data_group_id: res.d_group,
+                d_group: res.d_group,
             },
         )
         .await?
@@ -468,6 +470,7 @@ pub struct DispatchNoteArticleQuery;
 
 #[Object]
 impl DispatchNoteArticleQuery {
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn dispatch_note_articles(
         &self,
         ctx: &Context<'_>,
@@ -483,6 +486,7 @@ pub struct DispatchNoteArticleMutation;
 
 #[Object]
 impl DispatchNoteArticleMutation {
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn insert_dispatch_note_article(
         &self,
         ctx: &Context<'_>,
@@ -492,6 +496,7 @@ impl DispatchNoteArticleMutation {
         Entity::insert_entity(db, options).await
     }
 
+    #[graphql(guard = "UpdateDeleteGuard::<Entity>::new(options.id)")]
     async fn update_dispatch_note_article(
         &self,
         ctx: &Context<'_>,
@@ -501,6 +506,7 @@ impl DispatchNoteArticleMutation {
         Entity::update_entity(db, options).await
     }
 
+    #[graphql(guard = "UpdateDeleteGuard::<Entity>::new(options.id)")]
     async fn delete_dispatch_note_article(
         &self,
         ctx: &Context<'_>,
@@ -508,5 +514,17 @@ impl DispatchNoteArticleMutation {
     ) -> Result<RowsDeleted> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::delete_entity(db, options).await
+    }
+}
+
+impl GetEntityId<Column> for Entity {
+    fn get_id_column() -> Column {
+        Column::Id
+    }
+}
+
+impl GetEntityDataGroupId for Model {
+    fn get_data_group_id(&self) -> i32 {
+        self.d_group
     }
 }

@@ -15,8 +15,12 @@ use anyhow::Result;
 use crate::SeaOrmPool;
 
 use super::{
-    graphql_schema::{DeleteOptions, FetchOptions, Filter, OrderingOptions, Pagination},
-    GetDataGroupColumnTrait, QueryDatabase, QueryResults, QueryResultsHelperType, RowsDeleted,
+    graphql_schema::{
+        DataGroupAccessGuard, DeleteOptions, FetchOptions, Filter, OrderingOptions, Pagination,
+        UpdateDeleteGuard,
+    },
+    GetDataGroupColumnTrait, GetEntityDataGroupId, GetEntityId, QueryDatabase, QueryResults,
+    QueryResultsHelperType, RowsDeleted,
 };
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, SimpleObject)]
@@ -373,10 +377,11 @@ impl QueryDatabase for Entity {
         if let Some(id) = &fetch_options.id {
             query = query.filter(Column::Id.eq(*id))
         }
-        query = query.filter(Column::DGroup.eq(fetch_options.data_group_id));
+        query = query.filter(Column::DGroup.eq(fetch_options.d_group));
         query
     }
 
+    // WARN: Operation not really used, frontend gets all entries and does filtering, sorting...
     fn add_filter(mut query: Select<Self>, filter: Filter<Self::InputFields>) -> Select<Self> {
         match filter.field {
             Self::InputFields::BuyerName => query.filter(
@@ -494,7 +499,7 @@ impl QueryDatabase for Entity {
                 page: None,
                 ordering: None,
                 filters: None,
-                data_group_id: res.d_group,
+                d_group: res.d_group,
             },
         )
         .await?
@@ -542,7 +547,7 @@ impl QueryDatabase for Entity {
                 page: None,
                 ordering: None,
                 filters: None,
-                data_group_id: res.d_group,
+                d_group: res.d_group,
             },
         )
         .await?
@@ -560,6 +565,7 @@ pub struct EntryQuery;
 
 #[Object]
 impl EntryQuery {
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn entries(
         &self,
         ctx: &Context<'_>,
@@ -569,6 +575,7 @@ impl EntryQuery {
         Entity::fetch(db, options).await
     }
 
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn all_entries(
         &self,
         ctx: &Context<'_>,
@@ -641,18 +648,33 @@ pub struct EntryMutation;
 
 #[Object]
 impl EntryMutation {
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn insert_entry(&self, ctx: &Context<'_>, options: EntryInsertOptions) -> Result<Entry> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::insert_entity(db, options).await
     }
 
+    #[graphql(guard = "UpdateDeleteGuard::<Entity>::new(options.id)")]
     async fn update_entry(&self, ctx: &Context<'_>, options: EntryUpdateOptions) -> Result<Entry> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::update_entity(db, options).await
     }
 
+    #[graphql(guard = "UpdateDeleteGuard::<Entity>::new(options.id)")]
     async fn delete_entry(&self, ctx: &Context<'_>, options: DeleteOptions) -> Result<RowsDeleted> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::delete_entity(db, options).await
+    }
+}
+
+impl GetEntityId<Column> for Entity {
+    fn get_id_column() -> Column {
+        Column::Id
+    }
+}
+
+impl GetEntityDataGroupId for Model {
+    fn get_data_group_id(&self) -> i32 {
+        self.d_group
     }
 }

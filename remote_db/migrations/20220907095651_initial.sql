@@ -4,9 +4,6 @@ CREATE TABLE data_group (
     description TEXT,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
--- INSERT INTO data_group (id, name, description) VALUES (1, 'DEFAULT', 'Row for satisfying NOT NULL constraints on altered tables. Should only be used for default and changed.');
--- Fixes manual data_group insertion
--- SELECT nextval('data_group_id_seq');
 
 CREATE TABLE cell (
     id SERIAL PRIMARY KEY,

@@ -59,6 +59,8 @@ async fn graphql_playground(_session: Session) -> actix_web::Result<HttpResponse
 async fn index(
     schema: web::Data<GQLSchema>,
     req: GraphQLRequest,
+    // TODO: Session must be valid
+    // TODO: Users session must be authorized
     session_data: SessionData,
 ) -> GraphQLResponse {
     let req = req.into_inner();
@@ -177,12 +179,14 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(
+                // TODO: Proper CORS
+                #[cfg(debug_assertions)]
                 Cors::default()
                     .allow_any_origin()
                     .allow_any_header()
                     .allow_any_method()
-                    .max_age(3600)
-                    .send_wildcard(),
+                    .supports_credentials()
+                    .max_age(3600), // .send_wildcard(),
             )
             .wrap(
                 SessionMiddleware::builder(session_store.clone(), session_secret_key.clone())

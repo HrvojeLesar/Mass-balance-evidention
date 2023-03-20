@@ -3,8 +3,8 @@ use async_trait::async_trait;
 
 use sea_orm::{
     ColumnTrait, DatabaseConnection, DatabaseTransaction, DeleteResult, EntityTrait,
-    FromQueryResult, ItemsAndPagesNumber, Order, Paginator, PaginatorTrait, QueryFilter,
-    QueryOrder, Select, SelectModel, TransactionTrait,
+    FromQueryResult, ItemsAndPagesNumber, ModelTrait, Order, Paginator, PaginatorTrait,
+    QueryFilter, QueryOrder, Select, SelectModel, TransactionTrait,
 };
 
 use anyhow::Result;
@@ -279,6 +279,21 @@ where
     if let Some(id) = fetch_options.id {
         query = query.filter(E::get_id_column().eq(id));
     }
-    query = query.filter(E::get_data_group_column().eq(fetch_options.data_group_id));
+    query = query.filter(E::get_data_group_column().eq(fetch_options.d_group));
     query
+}
+
+pub trait GetEntityId<T>
+where
+    Self: EntityTrait,
+    T: ColumnTrait,
+{
+    fn get_id_column() -> T;
+}
+
+pub trait GetEntityDataGroupId
+where
+    Self: ModelTrait,
+{
+    fn get_data_group_id(&self) -> i32;
 }

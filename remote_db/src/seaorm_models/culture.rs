@@ -11,8 +11,12 @@ use crate::SeaOrmPool;
 
 use super::{
     calculate_page_size, common_add_id_and_data_group_filters, common_add_ordering,
-    graphql_schema::{DeleteOptions, FetchOptions, Filter, OrderingOptions},
-    GetDataGroupColumnTrait, Page, PageSize, QueryDatabase, QueryResults, RowsDeleted,
+    graphql_schema::{
+        DataGroupAccessGuard, DeleteOptions, FetchOptions, Filter, OrderingOptions,
+        UpdateDeleteGuard,
+    },
+    GetDataGroupColumnTrait, GetEntityDataGroupId, GetEntityId, Page, PageSize, QueryDatabase,
+    QueryResults, RowsDeleted,
 };
 
 use anyhow::Result;
@@ -205,6 +209,7 @@ pub struct CultureQuery;
 
 #[Object]
 impl CultureQuery {
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn cultures(
         &self,
         ctx: &Context<'_>,
@@ -214,6 +219,7 @@ impl CultureQuery {
         Entity::fetch(db, options).await
     }
 
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn paired_cultures(
         &self,
         ctx: &Context<'_>,
@@ -225,7 +231,7 @@ impl CultureQuery {
         let page: Page = options.page.into();
 
         let mut query = Entity::find();
-        query = query.filter(Entity::get_data_group_column().eq(options.data_group_id));
+        query = query.filter(Entity::get_data_group_column().eq(options.d_group));
         query = Entity::add_ordering(query, options.ordering);
         query = Entity::add_filters(query, options.filters);
         if let Some(id_cell) = options.id.id_cell {
@@ -252,6 +258,7 @@ impl CultureQuery {
         Ok((res, num_items_and_pages, page, page_size).into())
     }
 
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn unpaired_cultures(
         &self,
         ctx: &Context<'_>,
@@ -263,7 +270,7 @@ impl CultureQuery {
         let page: Page = options.page.into();
 
         let mut query = Entity::find();
-        query = query.filter(Entity::get_data_group_column().eq(options.data_group_id));
+        query = query.filter(Entity::get_data_group_column().eq(options.d_group));
         query = Entity::add_ordering(query, options.ordering);
         query = Entity::add_filters(query, options.filters);
         query = query.filter(
@@ -294,6 +301,7 @@ pub struct CultureMutation;
 
 #[Object]
 impl CultureMutation {
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn insert_culture(
         &self,
         ctx: &Context<'_>,
@@ -303,6 +311,7 @@ impl CultureMutation {
         Entity::insert_entity(db, options).await
     }
 
+    #[graphql(guard = "UpdateDeleteGuard::<Entity>::new(options.id)")]
     async fn update_culture(
         &self,
         ctx: &Context<'_>,
@@ -312,6 +321,7 @@ impl CultureMutation {
         Entity::update_entity(db, options).await
     }
 
+    #[graphql(guard = "UpdateDeleteGuard::<Entity>::new(options.id)")]
     async fn delete_culture(
         &self,
         ctx: &Context<'_>,
@@ -319,5 +329,17 @@ impl CultureMutation {
     ) -> Result<RowsDeleted> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::delete_entity(db, options).await
+    }
+}
+
+impl GetEntityId<Column> for Entity {
+    fn get_id_column() -> Column {
+        Column::Id
+    }
+}
+
+impl GetEntityDataGroupId for Model {
+    fn get_data_group_id(&self) -> i32 {
+        self.d_group
     }
 }

@@ -13,8 +13,12 @@ use crate::SeaOrmPool;
 
 use super::{
     calculate_page_size, common_add_id_and_data_group_filters, common_add_ordering,
-    graphql_schema::{DataGroupGuard, DeleteOptions, FetchOptions, Filter, OrderingOptions},
-    GetDataGroupColumnTrait, Page, PageSize, QueryDatabase, QueryResults, RowsDeleted,
+    graphql_schema::{
+        DataGroupAccessGuard, DeleteOptions, FetchOptions, Filter, OrderingOptions,
+        UpdateDeleteGuard,
+    },
+    GetDataGroupColumnTrait, GetEntityDataGroupId, GetEntityId, Page, PageSize, QueryDatabase,
+    QueryResults, RowsDeleted,
 };
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, SimpleObject)]
@@ -205,7 +209,7 @@ pub struct CellQuery;
 
 #[Object]
 impl CellQuery {
-    #[graphql(guard = "DataGroupGuard::new(options.data_group_id)")]
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn cells(
         &self,
         ctx: &Context<'_>,
@@ -215,6 +219,7 @@ impl CellQuery {
         Entity::fetch(db, options).await
     }
 
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn paired_cells(
         &self,
         ctx: &Context<'_>,
@@ -226,7 +231,7 @@ impl CellQuery {
         let page: Page = options.page.into();
 
         let mut query = Entity::find();
-        query = query.filter(Entity::get_data_group_column().eq(options.data_group_id));
+        query = query.filter(Entity::get_data_group_column().eq(options.d_group));
         query = Entity::add_ordering(query, options.ordering);
         query = Entity::add_filters(query, options.filters);
         if let Some(id_culture) = options.id.id_culture {
@@ -253,6 +258,7 @@ impl CellQuery {
         Ok((res, num_items_and_pages, page, page_size).into())
     }
 
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn unpaired_cells(
         &self,
         ctx: &Context<'_>,
@@ -264,7 +270,7 @@ impl CellQuery {
         let page: Page = options.page.into();
 
         let mut query = Entity::find();
-        query = query.filter(Entity::get_data_group_column().eq(options.data_group_id));
+        query = query.filter(Entity::get_data_group_column().eq(options.d_group));
         query = Entity::add_ordering(query, options.ordering);
         query = Entity::add_filters(query, options.filters);
         query = query.filter(
@@ -297,18 +303,33 @@ pub struct CellMutation;
 
 #[Object]
 impl CellMutation {
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn insert_cell(&self, ctx: &Context<'_>, options: CellInsertOptions) -> Result<Model> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::insert_entity(db, options).await
     }
 
+    #[graphql(guard = "UpdateDeleteGuard::<Entity>::new(options.id)")]
     async fn update_cell(&self, ctx: &Context<'_>, options: CellUpdateOptions) -> Result<Model> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::update_entity(db, options).await
     }
 
+    #[graphql(guard = "UpdateDeleteGuard::<Entity>::new(options.id)")]
     async fn delete_cell(&self, ctx: &Context<'_>, options: DeleteOptions) -> Result<RowsDeleted> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::delete_entity(db, options).await
+    }
+}
+
+impl GetEntityId<Column> for Entity {
+    fn get_id_column() -> Column {
+        Column::Id
+    }
+}
+
+impl GetEntityDataGroupId for Model {
+    fn get_data_group_id(&self) -> i32 {
+        self.d_group
     }
 }

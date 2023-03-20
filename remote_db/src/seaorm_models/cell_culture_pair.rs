@@ -12,8 +12,12 @@ use serde::{Deserialize, Serialize};
 use crate::SeaOrmPool;
 
 use super::{
-    graphql_schema::{DeleteOptions, FetchOptions, Filter, OrderingOptions, Pagination},
-    GetDataGroupColumnTrait, QueryDatabase, QueryResults, QueryResultsHelperType, RowsDeleted,
+    graphql_schema::{
+        DataGroupAccessGuard, DeleteOptions, FetchOptions, Filter, OrderingOptions, Pagination,
+        UpdateDeleteGuard,
+    },
+    GetDataGroupColumnTrait, GetEntityDataGroupId, GetEntityId, QueryDatabase, QueryResults,
+    QueryResultsHelperType, RowsDeleted,
 };
 
 use anyhow::{anyhow, Result};
@@ -294,7 +298,7 @@ impl QueryDatabase for Entity {
                 .filter(Column::IdCulture.eq(ids.id_culture))
                 .filter(Column::DGroup.eq(ids.d_group))
         }
-        query = query.filter(Column::DGroup.eq(fetch_options.data_group_id));
+        query = query.filter(Column::DGroup.eq(fetch_options.d_group));
         query
     }
 
@@ -363,7 +367,7 @@ impl QueryDatabase for Entity {
                 page: None,
                 ordering: None,
                 filters: None,
-                data_group_id: res.d_group,
+                d_group: res.d_group,
             },
         )
         .await?
@@ -402,7 +406,7 @@ impl QueryDatabase for Entity {
                 page: None,
                 ordering: None,
                 filters: None,
-                data_group_id: res.d_group,
+                d_group: res.d_group,
             },
         )
         .await?
@@ -420,6 +424,7 @@ pub struct CellCulturePairQuery;
 
 #[Object]
 impl CellCulturePairQuery {
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn cell_culture_pairs(
         &self,
         ctx: &Context<'_>,
@@ -429,6 +434,7 @@ impl CellCulturePairQuery {
         Entity::fetch(db, options).await
     }
 
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn all_cell_culture_pairs(
         &self,
         ctx: &Context<'_>,
@@ -490,6 +496,7 @@ pub struct CellCulturePairMutation;
 
 #[Object]
 impl CellCulturePairMutation {
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn insert_cell_culture_pair(
         &self,
         ctx: &Context<'_>,
@@ -499,6 +506,7 @@ impl CellCulturePairMutation {
         Entity::insert_entity(db, options).await
     }
 
+    #[graphql(guard = "UpdateDeleteGuard::<Entity>::new(options.id)")]
     async fn update_cell_culture_pair(
         &self,
         ctx: &Context<'_>,
@@ -508,6 +516,7 @@ impl CellCulturePairMutation {
         Entity::update_entity(db, options).await
     }
 
+    #[graphql(guard = "UpdateDeleteGuard::<Entity>::new(options.id)")]
     async fn delete_cell_culture_pair(
         &self,
         ctx: &Context<'_>,
@@ -515,5 +524,17 @@ impl CellCulturePairMutation {
     ) -> Result<RowsDeleted> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::delete_entity(db, options).await
+    }
+}
+
+impl GetEntityId<Column> for Entity {
+    fn get_id_column() -> Column {
+        Column::Id
+    }
+}
+
+impl GetEntityDataGroupId for Model {
+    fn get_data_group_id(&self) -> i32 {
+        self.d_group
     }
 }

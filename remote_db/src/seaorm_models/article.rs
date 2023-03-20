@@ -11,8 +11,11 @@ use crate::SeaOrmPool;
 
 use super::{
     common_add_id_and_data_group_filters, common_add_ordering,
-    graphql_schema::{DeleteOptions, FetchOptions, Filter, OrderingOptions, QueryResults},
-    GetDataGroupColumnTrait, QueryDatabase, RowsDeleted,
+    graphql_schema::{
+        DataGroupAccessGuard, DeleteOptions, FetchOptions, Filter, OrderingOptions, QueryResults,
+        UpdateDeleteGuard,
+    },
+    GetDataGroupColumnTrait, GetEntityDataGroupId, GetEntityId, QueryDatabase, RowsDeleted,
 };
 
 use anyhow::Result;
@@ -199,6 +202,7 @@ pub struct ArticleQuery;
 
 #[Object]
 impl ArticleQuery {
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn articles(
         &self,
         ctx: &Context<'_>,
@@ -214,6 +218,7 @@ pub struct ArticleMutation;
 
 #[Object]
 impl ArticleMutation {
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn insert_article(
         &self,
         ctx: &Context<'_>,
@@ -223,6 +228,7 @@ impl ArticleMutation {
         Entity::insert_entity(db, options).await
     }
 
+    #[graphql(guard = "UpdateDeleteGuard::<Entity>::new(options.id)")]
     async fn update_article(
         &self,
         ctx: &Context<'_>,
@@ -232,6 +238,7 @@ impl ArticleMutation {
         Entity::update_entity(db, options).await
     }
 
+    #[graphql(guard = "UpdateDeleteGuard::<Entity>::new(options.id)")]
     async fn delete_article(
         &self,
         ctx: &Context<'_>,
@@ -239,5 +246,17 @@ impl ArticleMutation {
     ) -> Result<RowsDeleted> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::delete_entity(db, options).await
+    }
+}
+
+impl GetEntityId<Column> for Entity {
+    fn get_id_column() -> Column {
+        Column::Id
+    }
+}
+
+impl GetEntityDataGroupId for Model {
+    fn get_data_group_id(&self) -> i32 {
+        self.d_group
     }
 }

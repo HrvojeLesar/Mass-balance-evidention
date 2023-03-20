@@ -13,8 +13,12 @@ use crate::SeaOrmPool;
 
 use super::{
     common_add_id_and_data_group_filters, common_add_ordering,
-    graphql_schema::{DeleteOptions, FetchOptions, Filter, OrderingOptions},
-    GetDataGroupColumnTrait, QueryDatabase, QueryResults, RowsDeleted,
+    graphql_schema::{
+        DataGroupAccessGuard, DeleteOptions, FetchOptions, Filter, OrderingOptions,
+        UpdateDeleteGuard,
+    },
+    GetDataGroupColumnTrait, GetEntityDataGroupId, GetEntityId, QueryDatabase, QueryResults,
+    RowsDeleted,
 };
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, SimpleObject)]
@@ -212,6 +216,7 @@ pub struct BuyerQuery;
 
 #[Object]
 impl BuyerQuery {
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn buyers(
         &self,
         ctx: &Context<'_>,
@@ -227,18 +232,33 @@ pub struct BuyerMutation;
 
 #[Object]
 impl BuyerMutation {
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn insert_buyer(&self, ctx: &Context<'_>, options: BuyerInsertOptions) -> Result<Model> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::insert_entity(db, options).await
     }
 
+    #[graphql(guard = "UpdateDeleteGuard::<Entity>::new(options.id)")]
     async fn update_buyer(&self, ctx: &Context<'_>, options: BuyerUpdateOptions) -> Result<Model> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::update_entity(db, options).await
     }
 
+    #[graphql(guard = "UpdateDeleteGuard::<Entity>::new(options.id)")]
     async fn delete_buyer(&self, ctx: &Context<'_>, options: DeleteOptions) -> Result<RowsDeleted> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::delete_entity(db, options).await
+    }
+}
+
+impl GetEntityId<Column> for Entity {
+    fn get_id_column() -> Column {
+        Column::Id
+    }
+}
+
+impl GetEntityDataGroupId for Model {
+    fn get_data_group_id(&self) -> i32 {
+        self.d_group
     }
 }

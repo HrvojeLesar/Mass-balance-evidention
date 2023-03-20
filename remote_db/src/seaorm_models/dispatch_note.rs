@@ -10,8 +10,12 @@ use crate::SeaOrmPool;
 
 use super::{
     common_add_id_and_data_group_filters, common_add_ordering,
-    graphql_schema::{DeleteOptions, FetchOptions, Filter, OrderingOptions},
-    GetDataGroupColumnTrait, QueryDatabase, QueryResults, RowsDeleted,
+    graphql_schema::{
+        DataGroupAccessGuard, DeleteOptions, FetchOptions, Filter, OrderingOptions,
+        UpdateDeleteGuard,
+    },
+    GetDataGroupColumnTrait, GetEntityDataGroupId, GetEntityId, QueryDatabase, QueryResults,
+    RowsDeleted,
 };
 
 use anyhow::{anyhow, Result};
@@ -300,6 +304,7 @@ pub struct DispatchNoteQuery;
 
 #[Object]
 impl DispatchNoteQuery {
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn dispatch_notes(
         &self,
         ctx: &Context<'_>,
@@ -319,6 +324,7 @@ pub struct DispatchNoteMutation;
 
 #[Object]
 impl DispatchNoteMutation {
+    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
     async fn insert_dispatch_note(
         &self,
         ctx: &Context<'_>,
@@ -328,6 +334,7 @@ impl DispatchNoteMutation {
         Entity::insert_entity(db, options).await
     }
 
+    #[graphql(guard = "UpdateDeleteGuard::<Entity>::new(options.id)")]
     async fn update_dispatch_note(
         &self,
         ctx: &Context<'_>,
@@ -337,6 +344,7 @@ impl DispatchNoteMutation {
         Entity::update_entity(db, options).await
     }
 
+    #[graphql(guard = "UpdateDeleteGuard::<Entity>::new(options.id)")]
     async fn delete_dispatch_note(
         &self,
         ctx: &Context<'_>,
@@ -344,5 +352,17 @@ impl DispatchNoteMutation {
     ) -> Result<RowsDeleted> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::delete_entity(db, options).await
+    }
+}
+
+impl GetEntityId<Column> for Entity {
+    fn get_id_column() -> Column {
+        Column::Id
+    }
+}
+
+impl GetEntityDataGroupId for Model {
+    fn get_data_group_id(&self) -> i32 {
+        self.d_group
     }
 }

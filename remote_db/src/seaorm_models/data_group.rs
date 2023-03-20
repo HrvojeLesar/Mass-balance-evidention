@@ -3,15 +3,21 @@ use async_trait::async_trait;
 use sea_orm::{
     entity::prelude::*,
     sea_query::{Expr, Func},
-    ActiveValue, DatabaseTransaction, DeleteResult, TransactionTrait,
+    ActiveValue, DatabaseTransaction, DeleteResult, JoinType, QueryOrder, QuerySelect,
+    TransactionTrait,
 };
 use serde::{Deserialize, Serialize};
 
-use crate::SeaOrmPool;
+use crate::{
+    auth::SessionData,
+    http_response_errors::AuthError,
+    user_models::{mbe_group, mbe_group_members},
+    SeaOrmPool,
+};
 
 use super::{
     common_add_id_and_data_group_filters, common_add_ordering,
-    graphql_schema::{DeleteOptions, FetchOptions, Filter, OrderingOptions},
+    graphql_schema::{DataGroupAccessGuard, DeleteOptions, FetchOptions, Filter, OrderingOptions},
     GetDataGroupColumnTrait, QueryDatabase, QueryResults, RowsDeleted,
 };
 use anyhow::Result;
@@ -252,23 +258,24 @@ pub struct DataGroupQuery;
 
 #[Object]
 impl DataGroupQuery {
-    async fn data_groups(
-        &self,
-        ctx: &Context<'_>,
-        // TODO: Change to new type
-        options: FetchOptions<DataGroupFields>,
-    ) -> Result<Vec<Model>> {
-        // TODO: change to only fetch data groups user has access to
+    async fn data_groups(&self, ctx: &Context<'_>) -> Result<Vec<Model>> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
-        let mut query = Entity::get_query();
 
-        query = Entity::add_id_and_data_group_filters(query, &options);
-        query = Entity::add_ordering(query, options.ordering);
-        query = Entity::add_filters(query, options.filters);
+        let session_data = ctx
+            .data::<SessionData>()
+            // WARN: Throwing away other errors
+            .map_err(|_e| AuthError::Unauthorized)?;
 
         let transaction = db.begin().await?;
 
-        let res = query
+        let res = Entity::find()
+            .inner_join(mbe_group::Entity)
+            .join(
+                JoinType::InnerJoin,
+                mbe_group_members::Relation::MbeGroup.def().rev(),
+            )
+            .filter(mbe_group_members::Column::IdMbeUser.eq(session_data.user_id))
+            .order_by_asc(Column::Id)
             .into_model::<<Entity as QueryDatabase>::FetchModel>()
             .all(&transaction)
             .await?;
@@ -293,6 +300,8 @@ impl DataGroupMutation {
         Entity::insert_entity(db, options).await
     }
 
+    // TODO: Update accordingy for group use
+    #[graphql(guard = "DataGroupAccessGuard::new(options.id)")]
     async fn update_data_group(
         &self,
         ctx: &Context<'_>,
@@ -302,6 +311,8 @@ impl DataGroupMutation {
         Entity::update_entity(db, options).await
     }
 
+    // TODO: Update accordingy for group use
+    #[graphql(guard = "DataGroupAccessGuard::new(options.id)")]
     async fn delete_data_group(
         &self,
         ctx: &Context<'_>,

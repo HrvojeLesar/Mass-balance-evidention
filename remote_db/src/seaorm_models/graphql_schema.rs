@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use async_graphql::{
     Context, Enum, Guard, InputObject, InputType, MergedObject, OutputType, SimpleObject,
 };
@@ -26,7 +28,7 @@ use super::{
         DispatchNoteArticleQuery,
     },
     entry::{EntryFields, EntryMutation, EntryQuery},
-    QueryResultsTrait,
+    GetEntityDataGroupId, GetEntityId, QueryResultsTrait,
 };
 
 #[derive(Enum, Clone, Copy, PartialEq, Eq)]
@@ -208,21 +210,21 @@ where
     pub page: Option<u64>,
     pub ordering: Option<OrderingOptions<O>>,
     pub filters: Option<Vec<Filter<T, V>>>,
-    pub data_group_id: i32,
+    pub d_group: i32,
 }
 
-pub struct DataGroupGuard {
+pub struct DataGroupAccessGuard {
     data_group_id: i32,
 }
 
-impl DataGroupGuard {
+impl DataGroupAccessGuard {
     pub fn new(data_group_id: i32) -> Self {
         Self { data_group_id }
     }
 }
 
 #[async_trait]
-impl Guard for DataGroupGuard {
+impl Guard for DataGroupAccessGuard {
     async fn check(&self, ctx: &Context<'_>) -> Result<(), async_graphql::Error> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         let session_data = ctx.data::<SessionData>()?;
@@ -247,5 +249,53 @@ impl Guard for DataGroupGuard {
         } else {
             Err(AuthError::Unauthorized.into())
         }
+    }
+}
+
+pub struct UpdateDeleteGuard<T>
+where
+    T: EntityTrait + GetEntityId<<T as EntityTrait>::Column>,
+    <T as EntityTrait>::Model: GetEntityDataGroupId,
+{
+    id: i32,
+    phantom: PhantomData<T>,
+}
+
+impl<T> UpdateDeleteGuard<T>
+where
+    T: EntityTrait + GetEntityId<<T as EntityTrait>::Column>,
+    <T as EntityTrait>::Model: GetEntityDataGroupId,
+{
+    pub fn new(entity_id: i32) -> Self {
+        Self {
+            id: entity_id,
+            phantom: PhantomData,
+        }
+    }
+}
+
+#[async_trait]
+impl<T> Guard for UpdateDeleteGuard<T>
+where
+    T: EntityTrait + GetEntityId<<T as EntityTrait>::Column>,
+    <T as EntityTrait>::Model: GetEntityDataGroupId,
+{
+    async fn check(&self, ctx: &Context<'_>) -> Result<(), async_graphql::Error> {
+        let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
+
+        let transaction = db.begin().await?;
+
+        let d_group = <T as EntityTrait>::find()
+            .filter(<T as GetEntityId<<T as EntityTrait>::Column>>::get_id_column().eq(self.id))
+            .one(&transaction)
+            .await?
+            .ok_or(AuthError::Unauthorized)?
+            .get_data_group_id();
+
+        transaction.commit().await?;
+
+        DataGroupAccessGuard::new(d_group).check(ctx).await?;
+
+        Ok(())
     }
 }
