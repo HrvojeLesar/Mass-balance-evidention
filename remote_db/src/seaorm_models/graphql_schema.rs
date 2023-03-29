@@ -7,7 +7,13 @@ use async_trait::async_trait;
 use sea_orm::{ColumnTrait, EntityTrait, Order, QueryFilter, TransactionTrait};
 
 use crate::{
-    auth::SessionData, http_response_errors::AuthError, user_models::mbe_group_members, SeaOrmPool,
+    auth::SessionData,
+    http_response_errors::AuthError,
+    user_models::{
+        mbe_group::{MbeGroupMutation, MbeGroupQuery},
+        mbe_group_members::{self, MbeGroupMembersMutation, MbeGroupMembersQuery},
+    },
+    SeaOrmPool,
 };
 
 use super::{
@@ -72,6 +78,8 @@ pub struct QueryRoot(
     ArticleQuery,
     DispatchNoteQuery,
     DispatchNoteArticleQuery,
+    MbeGroupQuery,
+    MbeGroupMembersQuery,
 );
 
 #[derive(MergedObject, Default)]
@@ -85,6 +93,8 @@ pub struct MutationRoot(
     ArticleMutation,
     DispatchNoteMutation,
     DispatchNoteArticleMutation,
+    MbeGroupMutation,
+    MbeGroupMembersMutation,
 );
 
 #[derive(SimpleObject, Debug)]
@@ -298,4 +308,10 @@ where
 
         Ok(())
     }
+}
+
+pub fn extract_session<'a>(ctx: &Context<'a>) -> Result<&'a SessionData, AuthError> {
+    ctx.data::<SessionData>()
+        // WARN: Throwing away other errors
+        .map_err(|_e| AuthError::Unauthorized)
 }

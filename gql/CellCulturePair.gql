@@ -1,5 +1,4 @@
-# WARN: For some reason graphql-codegen fails if id field is set in CellCultureParts fragment
-# so its manually added to everywhere needed
+# WARN: Graphql codegen is too dumb to make types from fragments
 
 query GetCellCulturesPairs($options: CellCultureFetchOptions!) {
     cellCulturePairs(options: $options) {
@@ -9,7 +8,28 @@ query GetCellCulturesPairs($options: CellCultureFetchOptions!) {
         totalPages
         results {
             id
-            ...CellCultureParts
+            createdAt
+            cell {
+                id
+                name
+                description
+                createdAt
+                dGroup
+            }
+            culture {
+                id
+                name
+                description
+                createdAt
+                dGroup
+            }
+            dGroup {
+                id
+                name
+                description
+                createdAt
+                idMbeGroup
+            }
         }
     }
 }
@@ -19,7 +39,28 @@ query GetAllCellCulturePairs($options: CellCultureFetchOptions!) {
         total
         results {
             id
-            ...CellCultureParts
+            createdAt
+            cell {
+                id
+                name
+                description
+                createdAt
+                dGroup
+            }
+            culture {
+                id
+                name
+                description
+                createdAt
+                dGroup
+            }
+            dGroup {
+                id
+                name
+                description
+                createdAt
+                idMbeGroup
+            }
         }
     }
 }
@@ -27,55 +68,61 @@ query GetAllCellCulturePairs($options: CellCultureFetchOptions!) {
 mutation InsertCellCulturePair($insertOptions: CellCulturePairIds!) {
     insertCellCulturePair(options: $insertOptions) {
         id
-        ...CellCultureParts
+        createdAt
+        cell {
+            id
+            name
+            description
+            createdAt
+            dGroup
+        }
+        culture {
+            id
+            name
+            description
+            createdAt
+            dGroup
+        }
+        dGroup {
+            id
+            name
+            description
+            createdAt
+            idMbeGroup
+        }
     }
 }
 
 mutation UpdateCellCulturePair($updateOptions: CellCulturePairUpdateOptions!) {
     updateCellCulturePair(options: $updateOptions) {
         id
-        ...CellCultureParts
+        createdAt
+        cell {
+            id
+            name
+            description
+            createdAt
+            dGroup
+        }
+        culture {
+            id
+            name
+            description
+            createdAt
+            dGroup
+        }
+        dGroup {
+            id
+            name
+            description
+            createdAt
+            idMbeGroup
+        }
     }
 }
 
 mutation DeleteCellCulturePair($deleteOptions: DeleteOptions!) {
     deleteCellCulturePair(options: $deleteOptions) {
         numRows
-    }
-}
-
-fragment DataGroupParts on DataGroup {
-    id
-    name
-    description
-    createdAt
-}
-
-fragment CellParts on Cell {
-    id
-    name
-    description
-    createdAt
-    dGroup
-}
-
-fragment CultureParts on Culture {
-    id
-    name
-    description
-    createdAt
-    dGroup
-}
-
-fragment CellCultureParts on CellCulturePair {
-    cell {
-        ...CellParts
-    }
-    culture {
-        ...CultureParts
-    }
-    createdAt
-    dGroup {
-        ...DataGroupParts
     }
 }

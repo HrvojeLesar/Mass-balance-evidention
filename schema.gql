@@ -22,7 +22,7 @@ input ArticleFetchOptions {
 	page: Int
 	ordering: ArticleOrderingOptions
 	filters: [ArticleFilterOptions!]
-	dataGroupId: Int
+	dGroup: Int!
 }
 
 enum ArticleFields {
@@ -77,7 +77,7 @@ input BuyerFetchOptions {
 	page: Int
 	ordering: BuyerOrderingOptions
 	filters: [BuyerFilterOptions!]
-	dataGroupId: Int
+	dGroup: Int!
 }
 
 enum BuyerFields {
@@ -133,7 +133,7 @@ input CellCultureFetchOptions {
 	page: Int
 	ordering: CellCultureOrderingOptions
 	filters: [CellCultureFilterOptions!]
-	dataGroupId: Int
+	dGroup: Int!
 }
 
 input CellCultureFilterOptions {
@@ -187,7 +187,7 @@ input CellFetchOptions {
 	page: Int
 	ordering: CellOrderingOptions
 	filters: [CellFilterOptions!]
-	dataGroupId: Int
+	dGroup: Int!
 }
 
 enum CellFields {
@@ -225,7 +225,7 @@ input CellParityFetchOptions {
 	page: Int
 	ordering: CellOrderingOptions
 	filters: [CellFilterOptions!]
-	dataGroupId: Int
+	dGroup: Int!
 }
 
 type CellResult {
@@ -265,7 +265,7 @@ input CultureFetchOptions {
 	page: Int
 	ordering: CultureOrderingOptions
 	filters: [CultureFilterOptions!]
-	dataGroupId: Int
+	dGroup: Int!
 }
 
 enum CultureFields {
@@ -303,7 +303,7 @@ input CultureParityFetchOptions {
 	page: Int
 	ordering: CultureOrderingOptions
 	filters: [CultureFilterOptions!]
-	dataGroupId: Int
+	dGroup: Int!
 }
 
 type CultureResult {
@@ -325,36 +325,13 @@ type DataGroup {
 	name: String!
 	description: String
 	createdAt: DateTime!
-}
-
-input DataGroupFetchOptions {
-	id: Int
-	pageSize: Int
-	page: Int
-	ordering: DataGroupOrderingOptions
-	filters: [DataGroupFilterOptions!]
-	dataGroupId: Int
-}
-
-enum DataGroupFields {
-	ID
-	NAME
-	DESCRIPTION
-}
-
-input DataGroupFilterOptions {
-	field: DataGroupFields!
-	value: String!
+	idMbeGroup: Int!
 }
 
 input DataGroupInsertOptions {
+	idMbeGroup: Int!
 	name: String!
 	description: String
-}
-
-input DataGroupOrderingOptions {
-	order: Ordering!
-	orderBy: DataGroupFields!
 }
 
 input DataGroupUpdateOptions {
@@ -399,7 +376,7 @@ input DispatchNoteArticleFetchOptions {
 	page: Int
 	ordering: DispatchNoteArticleOrderingOptions
 	filters: [DispatchNoteArticleFilterOptions!]
-	dataGroupId: Int
+	dGroup: Int!
 }
 
 enum DispatchNoteArticleFields {
@@ -454,7 +431,7 @@ input DispatchNoteFetchOptions {
 	page: Int
 	ordering: DispatchNoteOrderingOptions
 	filters: [DispatchNoteFilterOptions!]
-	dataGroupId: Int
+	dGroup: Int!
 }
 
 enum DispatchNoteFields {
@@ -523,7 +500,7 @@ input EntryFetchOptions {
 	page: Int
 	ordering: EntryOrderingOptions
 	filters: [EntryFilterOptions!]
-	dataGroupId: Int
+	dGroup: Int!
 }
 
 enum EntryFields {
@@ -580,6 +557,38 @@ input EntryUpdateOptions {
 
 
 
+type MbeGroup {
+	id: Int!
+	name: String!
+	owner: Int!
+	createdAt: DateTime!
+}
+
+input MbeGroupInsertOptions {
+	name: String!
+}
+
+type MbeGroupMembers {
+	idMbeUser: Int!
+	idMbeGroup: Int!
+}
+
+type MbeGroupMembersFlattened {
+	idUser: Int!
+	email: String!
+	idGroup: Int!
+	groupName: String!
+}
+
+input MbeGroupMembersOptions {
+	idMbeGroup: Int!
+	memberEmail: String!
+}
+
+input MbeGroupMembersQueryOptions {
+	idMbeGroup: Int!
+}
+
 type MutationRoot {
 	insertBuyer(options: BuyerInsertOptions!): Buyer!
 	updateBuyer(options: BuyerUpdateOptions!): Buyer!
@@ -608,6 +617,9 @@ type MutationRoot {
 	insertDispatchNoteArticle(options: DispatchNoteArticleInsertOptions!): DispatchNoteArticle!
 	updateDispatchNoteArticle(options: DispatchNoteArticleUpdateOptions!): DispatchNoteArticle!
 	deleteDispatchNoteArticle(options: DeleteOptions!): RowsDeleted!
+	insertMbeGroup(options: MbeGroupInsertOptions!): MbeGroup!
+	insertGroupMember(options: MbeGroupMembersOptions!): MbeGroupMembers!
+	removeGroupMember(options: MbeGroupMembersOptions!): RowsDeleted!
 }
 
 """
@@ -639,7 +651,7 @@ type QueryRoot {
 	cultures(options: CultureFetchOptions!): CultureResult!
 	pairedCultures(options: CultureParityFetchOptions!): CultureResult!
 	unpairedCultures(options: CultureParityFetchOptions!): CultureResult!
-	dataGroups(options: DataGroupFetchOptions!): [DataGroup!]!
+	dataGroups: [DataGroup!]!
 	cellCulturePairs(options: CellCultureFetchOptions!): CellCulturePairResult!
 	allCellCulturePairs(options: CellCultureFetchOptions!): AllCellCulturePairs!
 	entries(options: EntryFetchOptions!): EntryResult!
@@ -647,6 +659,8 @@ type QueryRoot {
 	articles(options: ArticleFetchOptions!): ArticleResults!
 	dispatchNotes(options: DispatchNoteFetchOptions!): DispatchNoteResults!
 	dispatchNoteArticles(options: DispatchNoteArticleFetchOptions!): DispatchNoteArticleResults!
+	mbeGroups: [MbeGroup!]!
+	mbeGroupMembers(options: MbeGroupMembersQueryOptions!): [MbeGroupMembersFlattened!]!
 }
 
 type RowsDeleted {

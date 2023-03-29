@@ -9,15 +9,15 @@ use sea_orm::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    auth::SessionData,
-    http_response_errors::AuthError,
     user_models::{mbe_group, mbe_group_members},
     SeaOrmPool,
 };
 
 use super::{
     common_add_id_and_data_group_filters, common_add_ordering,
-    graphql_schema::{DataGroupAccessGuard, DeleteOptions, FetchOptions, Filter, OrderingOptions},
+    graphql_schema::{
+        extract_session, DataGroupAccessGuard, DeleteOptions, FetchOptions, Filter, OrderingOptions,
+    },
     GetDataGroupColumnTrait, QueryDatabase, QueryResults, RowsDeleted,
 };
 use anyhow::Result;
@@ -160,6 +160,7 @@ pub struct DataGroupUpdateOptions {
 
 #[derive(InputObject, Serialize, Deserialize)]
 pub struct DataGroupInsertOptions {
+    pub id_mbe_group: i32,
     pub name: String,
     pub description: Option<String>,
 }
@@ -224,6 +225,7 @@ impl QueryDatabase for Entity {
         let model = ActiveModel {
             name: ActiveValue::Set(options.name),
             description: ActiveValue::Set(options.description),
+            id_mbe_group: ActiveValue::Set(options.id_mbe_group),
             ..Default::default()
         };
         let transaction = db.begin().await?;
@@ -261,10 +263,7 @@ impl DataGroupQuery {
     async fn data_groups(&self, ctx: &Context<'_>) -> Result<Vec<Model>> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
 
-        let session_data = ctx
-            .data::<SessionData>()
-            // WARN: Throwing away other errors
-            .map_err(|_e| AuthError::Unauthorized)?;
+        let session_data = extract_session(ctx)?;
 
         let transaction = db.begin().await?;
 

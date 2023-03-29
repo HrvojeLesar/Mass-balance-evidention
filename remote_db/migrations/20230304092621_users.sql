@@ -20,3 +20,4 @@ CREATE TABLE mbe_group_members(
 );
 
 ALTER TABLE data_group ADD COLUMN id_mbe_group INT REFERENCES mbe_group(id) NOT NULL;
+-- ALTER TABLE weight_type ADD COLUMN id_mbe_group INT REFERENCES mbe_groupd(id) NOT NULL;

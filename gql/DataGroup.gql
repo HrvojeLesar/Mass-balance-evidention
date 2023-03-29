@@ -1,17 +1,20 @@
-query GetDataGroups($options: DataGroupFetchOptions!) {
-    dataGroups(options: $options) {
+query GetDataGroups {
+    dataGroups {
+        idMbeGroup
         ...DataGroupParts
     }
 }
 
 mutation InsertDataGroup($insertOptions: DataGroupInsertOptions!) {
     insertDataGroup(options: $insertOptions) {
+        idMbeGroup
         ...DataGroupParts
     }
 }
 
 mutation UpdateDataGroup($updateOptions: DataGroupUpdateOptions!) {
     updateDataGroup(options: $updateOptions) {
+        idMbeGroup
         ...DataGroupParts
     }
 }

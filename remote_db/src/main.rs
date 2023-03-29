@@ -69,10 +69,7 @@ async fn index(
 }
 
 #[get("/schema")]
-async fn get_schema(
-    schema: web::Data<GQLSchema>,
-    _session_data: SessionData,
-) -> Result<String, AuthError> {
+async fn get_schema(schema: web::Data<GQLSchema>) -> Result<String, AuthError> {
     Ok(schema.sdl())
 }
 
