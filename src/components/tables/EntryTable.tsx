@@ -56,7 +56,7 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
         {
             options: {
                 id: undefined,
-                dataGroupId: dataGroupContextValue.selectedGroup,
+                dGroup: dataGroupContextValue.selectedGroup ?? -1,
             },
         },
         {

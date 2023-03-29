@@ -55,7 +55,7 @@ export default function CellCulturePairTable({
         {
             options: {
                 id: undefined,
-                dataGroupId: dataGroupContextValue.selectedGroup,
+                dGroup: dataGroupContextValue.selectedGroup ?? -1,
             },
         },
         {

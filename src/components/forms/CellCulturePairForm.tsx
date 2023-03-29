@@ -220,7 +220,7 @@ export default function CellCulturePairForm({
                               },
                           ]
                         : undefined,
-                dataGroupId: dataGroupContextValue.selectedGroup,
+                dGroup: dataGroupContextValue.selectedGroup ?? -1,
             },
         },
         {
@@ -260,7 +260,7 @@ export default function CellCulturePairForm({
                               },
                           ]
                         : undefined,
-                dataGroupId: dataGroupContextValue.selectedGroup,
+                dGroup: dataGroupContextValue.selectedGroup ?? -1,
             },
         },
         {

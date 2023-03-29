@@ -63,7 +63,7 @@ export default function ArticleTable({ isInsertable, isEditable }: TableProps) {
                               };
                           })
                         : undefined,
-                dataGroupId: dataGroupContextValue.selectedGroup,
+                dGroup: dataGroupContextValue.selectedGroup ?? -1,
             },
         },
         {

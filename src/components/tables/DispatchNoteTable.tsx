@@ -102,7 +102,7 @@ export default function DispatchNoteTable({
                               };
                           })
                         : undefined,
-                dataGroupId: dataGroupContextValue.selectedGroup,
+                dGroup: dataGroupContextValue.selectedGroup ?? -1,
             },
         },
         {

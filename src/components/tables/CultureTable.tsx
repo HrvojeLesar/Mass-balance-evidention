@@ -63,7 +63,7 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
                               };
                           })
                         : undefined,
-                dataGroupId: dataGroupContextValue.selectedGroup,
+                dGroup: dataGroupContextValue.selectedGroup ?? -1,
             },
         },
         {

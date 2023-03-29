@@ -190,7 +190,7 @@ export default function DispatchNoteArticleForm({
                                   },
                               ]
                             : undefined,
-                    dataGroupId: dataGroupContextValue.selectedGroup,
+                    dGroup: dataGroupContextValue.selectedGroup ?? -1,
                 },
             },
             {

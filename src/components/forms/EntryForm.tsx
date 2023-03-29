@@ -260,7 +260,7 @@ export default function EntryForm({
                                   },
                               ]
                             : undefined,
-                    dataGroupId: dataGroupContextValue.selectedGroup,
+                    dGroup: dataGroupContextValue.selectedGroup ?? -1,
                 },
             },
             {
@@ -297,7 +297,7 @@ export default function EntryForm({
                                   },
                               ]
                             : undefined,
-                    dataGroupId: dataGroupContextValue.selectedGroup,
+                    dGroup: dataGroupContextValue.selectedGroup ?? -1,
                 },
             },
             {
@@ -331,7 +331,7 @@ export default function EntryForm({
                               },
                           ]
                         : undefined,
-                dataGroupId: dataGroupContextValue.selectedGroup,
+                dGroup: dataGroupContextValue.selectedGroup ?? -1,
             },
         },
         {
