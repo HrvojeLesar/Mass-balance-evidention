@@ -9,6 +9,9 @@ type DeleteModalProps = {
     deleteFn: () => void;
     isLoading: boolean;
     errorMsg: ReactNode | string | undefined;
+    deleteConfirmText?: string;
+    cancelText?: string;
+    confirmText?: string;
 };
 
 export default function DeleteModal({
@@ -17,6 +20,9 @@ export default function DeleteModal({
     onHide,
     isLoading,
     deleteFn,
+    deleteConfirmText,
+    cancelText,
+    confirmText,
 }: DeleteModalProps) {
     const { t } = useTranslation();
 
@@ -34,14 +40,17 @@ export default function DeleteModal({
             title={<Title order={4}>{title}</Title>}
             size="auto"
         >
-            <Text>{t("deleteModal.deleteConfirmText").toString()}</Text>
+            <Text>
+                {deleteConfirmText ??
+                    t("deleteModal.deleteConfirmText").toString()}
+            </Text>
             <Divider my="sm" />
             <Flex justify="end" gap="sm">
                 <Button color="gray" onClick={onHide} disabled={isLoading}>
-                    {t("deleteModal.cancelButton").toString()}
+                    {cancelText ?? t("deleteModal.cancelButton").toString()}
                 </Button>
                 <Button color="red" onClick={deleteFn} disabled={isLoading}>
-                    {t("deleteModal.confirmButton").toString()}
+                    {confirmText ?? t("deleteModal.confirmButton").toString()}
                 </Button>
             </Flex>
         </Modal>

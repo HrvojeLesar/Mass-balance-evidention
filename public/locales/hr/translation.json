@@ -86,7 +86,12 @@
         "dispatchNote": "Pregled otpremnnica",
         "dispatchNoteInsertable": "Dodavanje artikla u otpremnicu",
         "dispatchNoteArticle": "Pregled otpremnnice",
-        "dispatchNoteArticleEdit": "Uređivanje otpremnice"
+        "dispatchNoteArticleEdit": "Uređivanje otpremnice",
+        "mbeUserInsert": "Dodavanje novog korisnika",
+        "newMbeGroup": "Nova groupa",
+        "newMbeGroupMember": "Dodavanje korisnika u grupu",
+        "mbeGroupMemberDelete": "Potvrda brisanja člana grupe",
+        "membersDisplay": "Članovi grupe"
     },
     "deleteModal": {
         "deleteConfirmText": "Jeste li sigurni da želite obrisati odabrani red?",
@@ -168,5 +173,19 @@
     "measureType": {
         "name": "Mjerna jedinica",
         "quantity": "Količina"
+    },
+    "newMbeGroup": {
+        "name": "Naziv nove groupe"
+    },
+    "mbeGroupMember": {
+        "email": "E-mail",
+        "group": "Grupa"
+    },
+    "mbeGroupMemberDeletion": {
+        "confirmationText": "Jeste li sigurni da želite izbaciti odabranog korisnika iz grupe ?",
+        "confirmButtonText": "Potvrdi"
+    },
+    "membersDisplay": {
+        "email": "E-mail"
     }
 }

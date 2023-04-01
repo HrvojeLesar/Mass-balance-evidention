@@ -132,7 +132,7 @@ export default function DataGroupForm({
                         rules={{ required: t("dataGroup.errors.name") }}
                         render={({ field: { onChange } }) => (
                             <Select
-                                label={"RENAME ME"}
+                                label={t("mbeGroupMember.group")}
                                 value={
                                     mbeGroupContextValue.selectedGroup
                                         ? mbeGroupContextValue.selectedGroup.toString()

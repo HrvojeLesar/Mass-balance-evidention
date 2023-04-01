@@ -86,7 +86,12 @@
         "dispatchNote": "Dispatch notes review",
         "dispatchNoteInsertable": "Dispatch note insertion",
         "dispatchNoteArticle": "Dispatch note review",
-        "dispatchNoteArticleEdit": "Edit dispatch note"
+        "dispatchNoteArticleEdit": "Edit dispatch note",
+        "mbeUserInsert": "Add new user",
+        "newMbeGroup": "New group",
+        "newMbeGroupMember": "Add a user to group",
+        "mbeGroupMemberDelete": "Group member deletion confirmation",
+        "membersDisplay": "Group members"
     },
     "deleteModal": {
         "deleteConfirmText": "Are you sure you want to delete the selected row?",
@@ -168,5 +173,19 @@
     "measureType": {
         "name": "Unit",
         "quantity": "Quantity"
+    },
+    "newMbeGroup": {
+        "name": "New group name"
+    },
+    "mbeGroupMember": {
+        "email": "E-mail",
+        "group": "Group"
+    },
+    "mbeGroupMemberDeletion": {
+        "confirmationText": "Are you sure you want to remove the selected member from the group ?",
+        "confirmButtonText": "Confirm"
+    },
+    "membersDisplay": {
+        "email": "E-mail"
     }
 }

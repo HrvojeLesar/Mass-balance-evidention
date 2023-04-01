@@ -23,7 +23,7 @@ function Member({ position, email, openModal }: MemberProps) {
                     <Text fz="md" fw={700}>{`${position}.`}</Text>
                     <div>
                         <Text fz="xs" c="dimmed">
-                            Email
+                            {t("membersDisplay.email")}
                         </Text>
                         <Text fz="sm">{email}</Text>
                     </div>
@@ -91,7 +91,6 @@ export default function MembersDisplay({ idMbeGroup }: MemberDisplayProps) {
         [remove, idMbeGroup]
     );
 
-    // TODO: Make delete modal more generic, accept optional button customization and message
     return (
         <>
             <DeleteModal
@@ -105,6 +104,8 @@ export default function MembersDisplay({ idMbeGroup }: MemberDisplayProps) {
                         removeMember(selectedEmail);
                     }
                 }}
+                deleteConfirmText={t("mbeGroupMemberDeletion.confirmationText")}
+                confirmText={t("mbeGroupMemberDeletion.confirmButtonText")}
             />
             {members.length > 0 ? (
                 members.map((member, idx) => {

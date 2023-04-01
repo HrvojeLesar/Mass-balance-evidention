@@ -69,8 +69,8 @@ export default function MbeGroupForm({
                         {...register("name", {
                             required: t("dataGroup.errors.name"),
                         })}
-                        label={"Group name - CHANGE ME"}
-                        placeholder={"Group name - CHANGE ME"}
+                        label={t("newMbeGroup.name")}
+                        placeholder={t("newMbeGroup.name")}
                         autoComplete="off"
                         withAsterisk
                         error={
