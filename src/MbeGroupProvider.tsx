@@ -6,17 +6,20 @@ import {
     useMemo,
     useState,
 } from "react";
-import { DataGroup, useGetDataGroupsQuery } from "./generated/graphql";
+import {
+    MbeGroup,
+    useGetMbeGroupsQuery,
+} from "./generated/graphql";
 
-type DataGroupContextType = {
-    groups: DataGroup[] | undefined;
+type MbeGroupContextType = {
+    groups: MbeGroup[] | undefined;
     isLoading: boolean | undefined;
     selectGroup: ((id: number) => void) | undefined;
     selectedGroup: number | undefined;
     refetch: (() => void) | undefined;
 };
 
-const initialContext: DataGroupContextType = {
+const initialContext: MbeGroupContextType = {
     groups: undefined,
     isLoading: undefined,
     selectedGroup: undefined,
@@ -24,21 +27,19 @@ const initialContext: DataGroupContextType = {
     refetch: undefined,
 };
 
-export const DataGroupContext =
-    createContext<DataGroupContextType>(initialContext);
+export const MbeGroupContext =
+    createContext<MbeGroupContextType>(initialContext);
 
-type DataGroupProviderProps = {
+type MbeGroupProviderProps = {
     children?: ReactNode;
 };
 
-const SELECTED_DATA_GROUP_ID = "selectedDataGroupId";
+const SELECTED_MBE_GROUP_ID = "selectedMbeGroupId";
 
-export default function DataGroupProvider({
-    children,
-}: DataGroupProviderProps) {
-    const { data, isLoading, refetch } = useGetDataGroupsQuery(
+export default function MbeGroupProvider({ children }: MbeGroupProviderProps) {
+    const { data, isLoading, refetch } = useGetMbeGroupsQuery(
         { options: {} as never },
-        { queryKey: ["getDataGroups"], keepPreviousData: true }
+        { queryKey: ["getMbeGroups"], keepPreviousData: true }
     );
 
     const [selectedGroup, setSelectedGroup] = useState<number | undefined>(
@@ -47,27 +48,27 @@ export default function DataGroupProvider({
 
     const groups = useMemo(() => {
         return data !== undefined
-            ? [...data.dataGroups].sort((a, b) => a.id - b.id)
+            ? [...data.mbeGroups].sort((a, b) => a.id - b.id)
             : undefined;
     }, [data]);
 
     const selectGroup = useCallback((id: number) => {
-        localStorage.setItem(SELECTED_DATA_GROUP_ID, id.toString());
+        localStorage.setItem(SELECTED_MBE_GROUP_ID, id.toString());
         setSelectedGroup(id);
     }, []);
 
     const initialGroupId = useMemo(() => {
-        const dgId = localStorage.getItem(SELECTED_DATA_GROUP_ID);
+        const dgId = localStorage.getItem(SELECTED_MBE_GROUP_ID);
         if (dgId !== null) {
             const id = Number(dgId);
             return isNaN(id) ? undefined : id;
         } else {
-            localStorage.removeItem(SELECTED_DATA_GROUP_ID);
+            localStorage.removeItem(SELECTED_MBE_GROUP_ID);
             return undefined;
         }
     }, []);
 
-    const value: DataGroupContextType = useMemo(
+    const value: MbeGroupContextType = useMemo(
         () => ({
             isLoading,
             groups,
@@ -79,7 +80,7 @@ export default function DataGroupProvider({
     );
 
     useEffect(() => {
-        const storedId = localStorage.getItem(SELECTED_DATA_GROUP_ID);
+        const storedId = localStorage.getItem(SELECTED_MBE_GROUP_ID);
         if (
             initialGroupId === undefined &&
             value.selectedGroup === undefined &&
@@ -88,7 +89,7 @@ export default function DataGroupProvider({
         ) {
             const id = value.groups[0].id;
             setSelectedGroup(id);
-            localStorage.setItem(SELECTED_DATA_GROUP_ID, id.toString());
+            localStorage.setItem(SELECTED_MBE_GROUP_ID, id.toString());
         } else if (
             storedId !== null &&
             value.selectedGroup !== undefined &&
@@ -103,20 +104,20 @@ export default function DataGroupProvider({
         ) {
             const id = value.groups[0].id;
             setSelectedGroup(id);
-            localStorage.setItem(SELECTED_DATA_GROUP_ID, id.toString());
+            localStorage.setItem(SELECTED_MBE_GROUP_ID, id.toString());
         } else if (
             storedId !== null &&
             value.groups !== undefined &&
             value.groups.length === 0
         ) {
             setSelectedGroup(undefined);
-            localStorage.removeItem(SELECTED_DATA_GROUP_ID);
+            localStorage.removeItem(SELECTED_MBE_GROUP_ID);
         }
     }, [initialGroupId, value.selectedGroup, value.groups]);
 
     return (
-        <DataGroupContext.Provider value={value}>
+        <MbeGroupContext.Provider value={value}>
             {children}
-        </DataGroupContext.Provider>
+        </MbeGroupContext.Provider>
     );
 }

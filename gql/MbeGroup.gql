@@ -1,0 +1,26 @@
+query GetMbeGroups {
+    mbeGroups {
+        id
+        name
+        owner
+        createdAt
+    }
+}
+
+query GetGroupMembers($options: MbeGroupMembersQueryOptions!) {
+    mbeGroupMembers(options: $options) {
+        idUser
+        email
+        idGroup
+        groupName
+    }
+}
+
+mutation InsertMbeGroup($options: MbeGroupInsertOptions!) {
+    insertMbeGroup(options: $options) {
+        id
+        name
+        owner
+        createdAt
+    }
+}

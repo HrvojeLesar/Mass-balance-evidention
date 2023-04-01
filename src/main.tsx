@@ -19,6 +19,9 @@ import ArticleView from "./views/ArticleView";
 import DispatchNoteView from "./views/DispatchNoteView";
 import DispatchNoteArticleView from "./views/DispatchNoteArticleView";
 import OptionsView from "./views/OptionsView";
+import Login from "./components/Login";
+import LoginCallback from "./components/LoginCallback";
+import MbeGroupProvider from "./MbeGroupProvider";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +45,8 @@ declare global {
 }
 
 const router = createBrowserRouter([
+    { path: "/login", element: <Login /> },
+    { path: "/login-callback", element: <LoginCallback /> },
     {
         element: <AppNavbar children={<Outlet />} />,
         children: [
@@ -80,9 +85,11 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
         <QueryClientProvider client={queryClient}>
-            <DataGroupProvider>
-                <RouterProvider router={router} />
-            </DataGroupProvider>
+            <MbeGroupProvider>
+                <DataGroupProvider>
+                    <RouterProvider router={router} />
+                </DataGroupProvider>
+            </MbeGroupProvider>
         </QueryClientProvider>
     </React.StrictMode>
 );

@@ -1252,6 +1252,25 @@ export type CellCulturePartsFragment = { __typename?: 'CellCulturePair', created
 
 export type EntryPartsFragment = { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number } | null, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup?: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } | null };
 
+export type GetMbeGroupsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetMbeGroupsQuery = { __typename?: 'QueryRoot', mbeGroups: Array<{ __typename?: 'MbeGroup', id: number, name: string, owner: number, createdAt: any }> };
+
+export type GetGroupMembersQueryVariables = Exact<{
+  options: MbeGroupMembersQueryOptions;
+}>;
+
+
+export type GetGroupMembersQuery = { __typename?: 'QueryRoot', mbeGroupMembers: Array<{ __typename?: 'MbeGroupMembersFlattened', idUser: number, email: string, idGroup: number, groupName: string }> };
+
+export type InsertMbeGroupMutationVariables = Exact<{
+  options: MbeGroupInsertOptions;
+}>;
+
+
+export type InsertMbeGroupMutation = { __typename?: 'MutationRoot', insertMbeGroup: { __typename?: 'MbeGroup', id: number, name: string, owner: number, createdAt: any } };
+
 export const ArticlePartsFragmentDoc = `
     fragment ArticleParts on Article {
   id
@@ -2272,5 +2291,68 @@ export const useDeleteEntryMutation = <
     useMutation<DeleteEntryMutation, TError, DeleteEntryMutationVariables, TContext>(
       ['DeleteEntry'],
       (variables?: DeleteEntryMutationVariables) => fetcher<DeleteEntryMutation, DeleteEntryMutationVariables>(DeleteEntryDocument, variables)(),
+      options
+    );
+export const GetMbeGroupsDocument = `
+    query GetMbeGroups {
+  mbeGroups {
+    id
+    name
+    owner
+    createdAt
+  }
+}
+    `;
+export const useGetMbeGroupsQuery = <
+      TData = GetMbeGroupsQuery,
+      TError = unknown
+    >(
+      variables?: GetMbeGroupsQueryVariables,
+      options?: UseQueryOptions<GetMbeGroupsQuery, TError, TData>
+    ) =>
+    useQuery<GetMbeGroupsQuery, TError, TData>(
+      variables === undefined ? ['GetMbeGroups'] : ['GetMbeGroups', variables],
+      fetcher<GetMbeGroupsQuery, GetMbeGroupsQueryVariables>(GetMbeGroupsDocument, variables),
+      options
+    );
+export const GetGroupMembersDocument = `
+    query GetGroupMembers($options: MbeGroupMembersQueryOptions!) {
+  mbeGroupMembers(options: $options) {
+    idUser
+    email
+    idGroup
+    groupName
+  }
+}
+    `;
+export const useGetGroupMembersQuery = <
+      TData = GetGroupMembersQuery,
+      TError = unknown
+    >(
+      variables: GetGroupMembersQueryVariables,
+      options?: UseQueryOptions<GetGroupMembersQuery, TError, TData>
+    ) =>
+    useQuery<GetGroupMembersQuery, TError, TData>(
+      ['GetGroupMembers', variables],
+      fetcher<GetGroupMembersQuery, GetGroupMembersQueryVariables>(GetGroupMembersDocument, variables),
+      options
+    );
+export const InsertMbeGroupDocument = `
+    mutation InsertMbeGroup($options: MbeGroupInsertOptions!) {
+  insertMbeGroup(options: $options) {
+    id
+    name
+    owner
+    createdAt
+  }
+}
+    `;
+export const useInsertMbeGroupMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<InsertMbeGroupMutation, TError, InsertMbeGroupMutationVariables, TContext>) =>
+    useMutation<InsertMbeGroupMutation, TError, InsertMbeGroupMutationVariables, TContext>(
+      ['InsertMbeGroup'],
+      (variables?: InsertMbeGroupMutationVariables) => fetcher<InsertMbeGroupMutation, InsertMbeGroupMutationVariables>(InsertMbeGroupDocument, variables)(),
       options
     );

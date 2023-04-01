@@ -1,6 +1,6 @@
-import { Grid, TextInput } from "@mantine/core";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Grid, Select, TextInput } from "@mantine/core";
+import { useContext, useEffect, useMemo } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
     DataGroup,
@@ -8,6 +8,7 @@ import {
     useInsertDataGroupMutation,
     useUpdateDataGroupMutation,
 } from "../../generated/graphql";
+import { MbeGroupContext } from "../../MbeGroupProvider";
 import BaseForm from "./BaseForm";
 
 type DataGroupFormProps = {
@@ -22,18 +23,31 @@ export default function DataGroupForm({
     onUpdateSuccess,
 }: DataGroupFormProps) {
     const { t } = useTranslation();
+    const dataGroupContextValue = useContext(MbeGroupContext);
     const {
         register,
         handleSubmit,
         reset,
+        control,
         formState: { errors },
     } = useForm<DataGroupInsertOptions>({
         mode: "onChange",
         defaultValues: {
             name: edit?.name ?? "",
             description: edit?.description ?? "",
+            idMbeGroup: edit?.idMbeGroup ?? dataGroupContextValue.selectedGroup,
         },
     });
+
+    const isGroupsEmpty = useMemo(
+        () => dataGroupContextValue.groups?.length === 0,
+        [dataGroupContextValue]
+    );
+
+    // WARN: Inefficient, calls reset on every group change
+    useEffect(() => {
+        reset({ idMbeGroup: dataGroupContextValue.selectedGroup });
+    }, [dataGroupContextValue]);
 
     useEffect(() => {
         reset({ name: edit?.name ?? "", description: edit?.description });
@@ -88,7 +102,7 @@ export default function DataGroupForm({
                         autoComplete="off"
                         withAsterisk
                         error={
-                            errors.name ? t("culture.errors.name") : undefined
+                            errors.name ? t("dataGroup.errors.name") : undefined
                         }
                         spellCheck={false}
                     />
@@ -102,6 +116,63 @@ export default function DataGroupForm({
                         placeholder={t("dataGroup.description")}
                         autoComplete="off"
                         spellCheck={false}
+                    />
+                </Grid.Col>
+            </Grid>
+            <Grid mb="sm">
+                <Grid.Col>
+                    <Controller
+                        name="idMbeGroup"
+                        control={control}
+                        rules={{ required: t("dataGroup.errors.name") }}
+                        render={({ field: { onChange } }) => (
+                            <Select
+                                label={"RENAME ME"}
+                                value={
+                                    dataGroupContextValue.selectedGroup
+                                        ? dataGroupContextValue.selectedGroup.toString()
+                                        : undefined
+                                }
+                                disabled={
+                                    dataGroupContextValue.isLoading ||
+                                    isGroupsEmpty
+                                }
+                                onChange={(val) => {
+                                    if (
+                                        dataGroupContextValue.selectGroup !==
+                                        undefined
+                                    ) {
+                                        dataGroupContextValue.selectGroup(
+                                            Number(val)
+                                        );
+                                        onChange(Number(val));
+                                    }
+                                }}
+                                data={
+                                    dataGroupContextValue.isLoading
+                                        ? [
+                                              {
+                                                  value: "loading",
+                                                  label: t(
+                                                      "loading"
+                                                  ).toString(),
+                                              },
+                                          ]
+                                        : dataGroupContextValue.groups?.map(
+                                              (group) => ({
+                                                  value: group.id.toString(),
+                                                  label: group.name,
+                                              })
+                                          ) ?? []
+                                }
+                                withAsterisk
+                                error={
+                                    errors.idMbeGroup
+                                        ? t("dataGroup.errors.name")
+                                        : undefined
+                                }
+                            />
+                        )}
                     />
                 </Grid.Col>
             </Grid>
