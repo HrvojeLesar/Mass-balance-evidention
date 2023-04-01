@@ -1,0 +1,7 @@
+mutation InsertUser($options: MbeUserInsertOptions!) {
+  insertMbeUser(options: $options) {
+    id
+    email
+    createdAt
+  }
+}

@@ -3,25 +3,19 @@ import { useContext, useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
-    DataGroup,
-    DataGroupInsertOptions,
-    useInsertDataGroupMutation,
-    useUpdateDataGroupMutation,
+    MbeGroupMembersOptions,
+    useInsertMbeGroupMemberMutation,
 } from "../../generated/graphql";
 import { MbeGroupContext } from "../../MbeGroupProvider";
 import BaseForm from "./BaseForm";
 
-type DataGroupFormProps = {
-    edit?: DataGroup;
+type MbeGroupMemberFormProps = {
     onInsertSuccess?: () => void;
-    onUpdateSuccess?: () => void;
 };
 
-export default function DataGroupForm({
-    edit,
+export default function MbeGroupMemberForm({
     onInsertSuccess,
-    onUpdateSuccess,
-}: DataGroupFormProps) {
+}: MbeGroupMemberFormProps) {
     const { t } = useTranslation();
     const mbeGroupContextValue = useContext(MbeGroupContext);
     const {
@@ -30,12 +24,11 @@ export default function DataGroupForm({
         reset,
         control,
         formState: { errors },
-    } = useForm<DataGroupInsertOptions>({
+    } = useForm<MbeGroupMembersOptions>({
         mode: "onChange",
         defaultValues: {
-            name: edit?.name ?? "",
-            description: edit?.description ?? "",
-            idMbeGroup: edit?.idMbeGroup ?? mbeGroupContextValue.selectedGroup,
+            idMbeGroup: undefined,
+            memberEmail: "",
         },
     });
 
@@ -49,11 +42,7 @@ export default function DataGroupForm({
         reset({ idMbeGroup: mbeGroupContextValue.selectedGroup });
     }, [mbeGroupContextValue]);
 
-    useEffect(() => {
-        reset({ name: edit?.name ?? "", description: edit?.description });
-    }, [edit, reset]);
-
-    const insert = useInsertDataGroupMutation({
+    const insert = useInsertMbeGroupMemberMutation({
         onSuccess: (_data, _variables, _context) => {
             reset();
             if (onInsertSuccess) {
@@ -62,64 +51,32 @@ export default function DataGroupForm({
         },
     });
 
-    const update = useUpdateDataGroupMutation({
-        onSuccess: (_data, _variables, _context) => {
-            // WARN: causes flickering input text on save
-            reset();
-            if (onUpdateSuccess) {
-                onUpdateSuccess();
-            }
-        },
-    });
-
     return (
         <BaseForm
             submitDisabled={insert.isLoading}
-            onSubmit={
-                edit
-                    ? handleSubmit((data) => {
-                          // TODO: Update mbe group (backend doesn't support this currently)
-                          update.mutate({
-                              updateOptions: {
-                                  id: edit.id,
-                                  name: data.name,
-                                  description: data.description,
-                              },
-                          });
-                      })
-                    : handleSubmit((data) => {
-                          insert.mutate({
-                              insertOptions: {
-                                  ...data,
-                              },
-                          });
-                      })
-            }
+            onSubmit={handleSubmit((data) => {
+                insert.mutate({
+                    options: {
+                        ...data,
+                    },
+                });
+            })}
         >
             <Grid mb="sm">
                 <Grid.Col>
                     <TextInput
-                        {...register("name", {
+                        {...register("memberEmail", {
                             required: t("dataGroup.errors.name"),
                         })}
-                        label={t("dataGroup.name")}
-                        placeholder={t("dataGroup.name")}
+                        label={"E-mail"}
+                        placeholder={"E-mail"}
                         autoComplete="off"
                         withAsterisk
                         error={
-                            errors.name ? t("dataGroup.errors.name") : undefined
+                            errors.memberEmail
+                                ? t("dataGroup.errors.name")
+                                : undefined
                         }
-                        spellCheck={false}
-                    />
-                </Grid.Col>
-            </Grid>
-            <Grid mb="sm">
-                <Grid.Col>
-                    <TextInput
-                        {...register("description", {})}
-                        label={t("dataGroup.description")}
-                        placeholder={t("dataGroup.description")}
-                        autoComplete="off"
                         spellCheck={false}
                     />
                 </Grid.Col>

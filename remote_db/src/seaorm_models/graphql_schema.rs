@@ -11,7 +11,7 @@ use crate::{
     http_response_errors::AuthError,
     user_models::{
         mbe_group::{MbeGroupMutation, MbeGroupQuery},
-        mbe_group_members::{self, MbeGroupMembersMutation, MbeGroupMembersQuery},
+        mbe_group_members::{self, MbeGroupMembersMutation, MbeGroupMembersQuery}, mbe_user::MbeUserMutation,
     },
     SeaOrmPool,
 };
@@ -95,6 +95,7 @@ pub struct MutationRoot(
     DispatchNoteArticleMutation,
     MbeGroupMutation,
     MbeGroupMembersMutation,
+    MbeUserMutation
 );
 
 #[derive(SimpleObject, Debug)]

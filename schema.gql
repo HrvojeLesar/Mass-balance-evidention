@@ -589,6 +589,16 @@ input MbeGroupMembersQueryOptions {
 	idMbeGroup: Int!
 }
 
+type MbeUser {
+	id: Int!
+	email: String!
+	createdAt: DateTime!
+}
+
+input MbeUserInsertOptions {
+	email: String!
+}
+
 type MutationRoot {
 	insertBuyer(options: BuyerInsertOptions!): Buyer!
 	updateBuyer(options: BuyerUpdateOptions!): Buyer!
@@ -620,6 +630,7 @@ type MutationRoot {
 	insertMbeGroup(options: MbeGroupInsertOptions!): MbeGroup!
 	insertGroupMember(options: MbeGroupMembersOptions!): MbeGroupMembers!
 	removeGroupMember(options: MbeGroupMembersOptions!): RowsDeleted!
+	insertMbeUser(options: MbeUserInsertOptions!): MbeUser!
 }
 
 """

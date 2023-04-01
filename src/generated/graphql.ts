@@ -647,6 +647,17 @@ export type MbeGroupMembersQueryOptions = {
   idMbeGroup: Scalars['Int'];
 };
 
+export type MbeUser = {
+  __typename?: 'MbeUser';
+  createdAt: Scalars['DateTime'];
+  email: Scalars['String'];
+  id: Scalars['Int'];
+};
+
+export type MbeUserInsertOptions = {
+  email: Scalars['String'];
+};
+
 export type MutationRoot = {
   __typename?: 'MutationRoot';
   deleteArticle: RowsDeleted;
@@ -669,6 +680,7 @@ export type MutationRoot = {
   insertEntry: Entry;
   insertGroupMember: MbeGroupMembers;
   insertMbeGroup: MbeGroup;
+  insertMbeUser: MbeUser;
   removeGroupMember: RowsDeleted;
   updateArticle: Article;
   updateBuyer: Buyer;
@@ -779,6 +791,11 @@ export type MutationRootInsertGroupMemberArgs = {
 
 export type MutationRootInsertMbeGroupArgs = {
   options: MbeGroupInsertOptions;
+};
+
+
+export type MutationRootInsertMbeUserArgs = {
+  options: MbeUserInsertOptions;
 };
 
 
@@ -1270,6 +1287,27 @@ export type InsertMbeGroupMutationVariables = Exact<{
 
 
 export type InsertMbeGroupMutation = { __typename?: 'MutationRoot', insertMbeGroup: { __typename?: 'MbeGroup', id: number, name: string, owner: number, createdAt: any } };
+
+export type InsertMbeGroupMemberMutationVariables = Exact<{
+  options: MbeGroupMembersOptions;
+}>;
+
+
+export type InsertMbeGroupMemberMutation = { __typename?: 'MutationRoot', insertGroupMember: { __typename?: 'MbeGroupMembers', idMbeUser: number, idMbeGroup: number } };
+
+export type RemoveMbeGroupMemberMutationVariables = Exact<{
+  options: MbeGroupMembersOptions;
+}>;
+
+
+export type RemoveMbeGroupMemberMutation = { __typename?: 'MutationRoot', removeGroupMember: { __typename?: 'RowsDeleted', numRows: number } };
+
+export type InsertUserMutationVariables = Exact<{
+  options: MbeUserInsertOptions;
+}>;
+
+
+export type InsertUserMutation = { __typename?: 'MutationRoot', insertMbeUser: { __typename?: 'MbeUser', id: number, email: string, createdAt: any } };
 
 export const ArticlePartsFragmentDoc = `
     fragment ArticleParts on Article {
@@ -2354,5 +2392,56 @@ export const useInsertMbeGroupMutation = <
     useMutation<InsertMbeGroupMutation, TError, InsertMbeGroupMutationVariables, TContext>(
       ['InsertMbeGroup'],
       (variables?: InsertMbeGroupMutationVariables) => fetcher<InsertMbeGroupMutation, InsertMbeGroupMutationVariables>(InsertMbeGroupDocument, variables)(),
+      options
+    );
+export const InsertMbeGroupMemberDocument = `
+    mutation InsertMbeGroupMember($options: MbeGroupMembersOptions!) {
+  insertGroupMember(options: $options) {
+    idMbeUser
+    idMbeGroup
+  }
+}
+    `;
+export const useInsertMbeGroupMemberMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<InsertMbeGroupMemberMutation, TError, InsertMbeGroupMemberMutationVariables, TContext>) =>
+    useMutation<InsertMbeGroupMemberMutation, TError, InsertMbeGroupMemberMutationVariables, TContext>(
+      ['InsertMbeGroupMember'],
+      (variables?: InsertMbeGroupMemberMutationVariables) => fetcher<InsertMbeGroupMemberMutation, InsertMbeGroupMemberMutationVariables>(InsertMbeGroupMemberDocument, variables)(),
+      options
+    );
+export const RemoveMbeGroupMemberDocument = `
+    mutation RemoveMbeGroupMember($options: MbeGroupMembersOptions!) {
+  removeGroupMember(options: $options) {
+    numRows
+  }
+}
+    `;
+export const useRemoveMbeGroupMemberMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<RemoveMbeGroupMemberMutation, TError, RemoveMbeGroupMemberMutationVariables, TContext>) =>
+    useMutation<RemoveMbeGroupMemberMutation, TError, RemoveMbeGroupMemberMutationVariables, TContext>(
+      ['RemoveMbeGroupMember'],
+      (variables?: RemoveMbeGroupMemberMutationVariables) => fetcher<RemoveMbeGroupMemberMutation, RemoveMbeGroupMemberMutationVariables>(RemoveMbeGroupMemberDocument, variables)(),
+      options
+    );
+export const InsertUserDocument = `
+    mutation InsertUser($options: MbeUserInsertOptions!) {
+  insertMbeUser(options: $options) {
+    id
+    email
+    createdAt
+  }
+}
+    `;
+export const useInsertUserMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<InsertUserMutation, TError, InsertUserMutationVariables, TContext>) =>
+    useMutation<InsertUserMutation, TError, InsertUserMutationVariables, TContext>(
+      ['InsertUser'],
+      (variables?: InsertUserMutationVariables) => fetcher<InsertUserMutation, InsertUserMutationVariables>(InsertUserDocument, variables)(),
       options
     );

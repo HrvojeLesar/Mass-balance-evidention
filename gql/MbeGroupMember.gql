@@ -1,0 +1,12 @@
+mutation InsertMbeGroupMember($options: MbeGroupMembersOptions!) {
+    insertGroupMember(options: $options) {
+        idMbeUser
+        idMbeGroup
+    }
+}
+
+mutation RemoveMbeGroupMember($options: MbeGroupMembersOptions!) {
+    removeGroupMember(options: $options) {
+        numRows
+    }
+}

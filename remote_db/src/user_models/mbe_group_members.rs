@@ -137,7 +137,7 @@ impl MbeGroupMembersMutation {
         let transaction = db.begin().await?;
 
         let mbe_user = match super::mbe_user::Entity::find()
-            .filter(super::mbe_user::Column::Email.eq(options.member_email))
+            .filter(super::mbe_user::Column::Email.eq(options.member_email.to_lowercase()))
             .one(&transaction)
             .await?
         {
@@ -193,7 +193,7 @@ impl MbeGroupMembersMutation {
         let transaction = db.begin().await?;
 
         let mbe_user = match super::mbe_user::Entity::find()
-            .filter(super::mbe_user::Column::Email.eq(options.member_email))
+            .filter(super::mbe_user::Column::Email.eq(options.member_email.to_lowercase()))
             .one(&transaction)
             .await?
         {
