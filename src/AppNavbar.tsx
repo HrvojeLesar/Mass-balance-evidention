@@ -15,7 +15,7 @@ import {
     Divider,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { FaCog } from "react-icons/fa";
@@ -194,146 +194,159 @@ export default function AppNavbar({ children }: AppNavbarProps) {
 
     const active = location.pathname;
 
-    const handleOnClick = (event: React.MouseEvent, link: string) => {
-        event.preventDefault();
-        close();
-        navigate(link);
-    };
+    const handleOnClick = useCallback(
+        (event: React.MouseEvent, link: string) => {
+            event.preventDefault();
+            close();
+            navigate(link);
+        },
+        [close, navigate]
+    );
 
-    const generateLabelLink = (link: NavigationLink) => {
-        return (
-            <a
-                key={link.label}
-                href={link.link}
-                title={link.label}
-                className={cx(classes.link, {
-                    [classes.linkActive]: active === link.link,
-                })}
-                onClick={(event) => {
-                    handleOnClick(event, link.link);
-                }}
-            >
-                {link.label}
-            </a>
-        );
-    };
+    const generateLabelLink = useCallback(
+        (link: NavigationLink) => {
+            return (
+                <a
+                    key={link.label}
+                    href={link.link}
+                    title={link.label}
+                    className={cx(classes.link, {
+                        [classes.linkActive]: active === link.link,
+                    })}
+                    onClick={(event) => {
+                        handleOnClick(event, link.link);
+                    }}
+                >
+                    {link.label}
+                </a>
+            );
+        },
+        [active, classes.linkActive, classes.link, cx, handleOnClick]
+    );
 
-    const generateIconLink = (link: NavigationLink) => {
-        return (
-            <React.Fragment key={link.label}>
-                <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
-                    <ActionIcon
-                        title={link.label}
-                        color={active === link.link ? "blue" : "gray"}
-                        variant="outline"
-                        onClick={(event) => {
-                            handleOnClick(event, link.link);
-                        }}
-                    >
-                        <FaCog />
-                    </ActionIcon>
-                </MediaQuery>
-                <MediaQuery largerThan="sm" styles={{ display: "none" }}>
-                    <a
-                        href={link.link}
-                        title={link.label}
-                        className={cx(classes.link, {
-                            [classes.linkActive]: active === link.link,
-                        })}
-                        onClick={(event) => {
-                            handleOnClick(event, link.link);
-                        }}
-                    >
-                        <Flex gap="sm" align="center">
+    const generateIconLink = useCallback(
+        (link: NavigationLink) => {
+            return (
+                <React.Fragment key={link.label}>
+                    <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
+                        <ActionIcon
+                            title={link.label}
+                            color={active === link.link ? "blue" : "gray"}
+                            variant="outline"
+                            onClick={(event) => {
+                                handleOnClick(event, link.link);
+                            }}
+                        >
                             <FaCog />
-                            <Text>{link.label}</Text>
-                        </Flex>
-                    </a>
-                </MediaQuery>
-            </React.Fragment>
-        );
-    };
-
-    const generateMultiNavigationButton = (multi: MultiNavigationButton) => {
-        const isAnyMultiActive = () => {
-            return multi.links.find(
-                (navigationLink) => active === navigationLink.link
-            ) !== undefined
-                ? true
-                : false;
-        };
-        return (
-            <React.Fragment key={multi.key}>
-                <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
-                    <Menu shadow="md" width={200}>
-                        <Menu.Target>
-                            <ActionIcon
-                                title={t("navigation.options").toString()}
-                                color={isAnyMultiActive() ? "blue" : "gray"}
-                                variant="outline"
-                            >
+                        </ActionIcon>
+                    </MediaQuery>
+                    <MediaQuery largerThan="sm" styles={{ display: "none" }}>
+                        <a
+                            href={link.link}
+                            title={link.label}
+                            className={cx(classes.link, {
+                                [classes.linkActive]: active === link.link,
+                            })}
+                            onClick={(event) => {
+                                handleOnClick(event, link.link);
+                            }}
+                        >
+                            <Flex gap="sm" align="center">
                                 <FaCog />
-                            </ActionIcon>
-                        </Menu.Target>
+                                <Text>{link.label}</Text>
+                            </Flex>
+                        </a>
+                    </MediaQuery>
+                </React.Fragment>
+            );
+        },
+        [active, classes.linkActive, classes.link, cx, handleOnClick]
+    );
 
-                        <Menu.Dropdown>
+    const generateMultiNavigationButton = useCallback(
+        (multi: MultiNavigationButton) => {
+            const isAnyMultiActive = () => {
+                return multi.links.find(
+                    (navigationLink) => active === navigationLink.link
+                ) !== undefined
+                    ? true
+                    : false;
+            };
+            return (
+                <React.Fragment key={multi.key}>
+                    <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
+                        <Menu shadow="md" width={200}>
+                            <Menu.Target>
+                                <ActionIcon
+                                    title={t("navigation.options").toString()}
+                                    color={isAnyMultiActive() ? "blue" : "gray"}
+                                    variant="outline"
+                                >
+                                    <FaCog />
+                                </ActionIcon>
+                            </Menu.Target>
+
+                            <Menu.Dropdown>
+                                {multi.links.map((navigationLink) => {
+                                    return (
+                                        <Menu.Item
+                                            key={navigationLink.link}
+                                            className={cx(classes.link, {
+                                                [classes.linkActive]:
+                                                    active ===
+                                                    navigationLink.link,
+                                            })}
+                                            onClick={(e) => {
+                                                handleOnClick(
+                                                    e,
+                                                    navigationLink.link
+                                                );
+                                            }}
+                                        >
+                                            {navigationLink.label}
+                                        </Menu.Item>
+                                    );
+                                })}
+                            </Menu.Dropdown>
+                        </Menu>
+                    </MediaQuery>
+                    <MediaQuery largerThan="sm" styles={{ display: "none" }}>
+                        <div>
+                            <Divider
+                                label="Options - CHANGE ME"
+                                labelPosition="center"
+                            />
                             {multi.links.map((navigationLink) => {
                                 return (
-                                    <Menu.Item
+                                    <a
                                         key={navigationLink.link}
+                                        href={navigationLink.link}
+                                        title={navigationLink.label}
                                         className={cx(classes.link, {
                                             [classes.linkActive]:
                                                 active === navigationLink.link,
                                         })}
-                                        onClick={(e) => {
+                                        onClick={(event) => {
                                             handleOnClick(
-                                                e,
+                                                event,
                                                 navigationLink.link
                                             );
                                         }}
                                     >
-                                        {navigationLink.label}
-                                    </Menu.Item>
+                                        <Flex gap="sm" align="center">
+                                            {navigationLink.icon ?? <></>}
+                                            <Text>{navigationLink.label}</Text>
+                                        </Flex>
+                                    </a>
                                 );
                             })}
-                        </Menu.Dropdown>
-                    </Menu>
-                </MediaQuery>
-                <MediaQuery largerThan="sm" styles={{ display: "none" }}>
-                    <div>
-                        <Divider
-                            label="Options - CHANGE ME"
-                            labelPosition="center"
-                        />
-                        {multi.links.map((navigationLink) => {
-                            return (
-                                <a
-                                    key={navigationLink.link}
-                                    href={navigationLink.link}
-                                    title={navigationLink.label}
-                                    className={cx(classes.link, {
-                                        [classes.linkActive]:
-                                            active === navigationLink.link,
-                                    })}
-                                    onClick={(event) => {
-                                        handleOnClick(
-                                            event,
-                                            navigationLink.link
-                                        );
-                                    }}
-                                >
-                                    <Flex gap="sm" align="center">
-                                        {navigationLink.icon ?? <></>}
-                                        <Text>{navigationLink.label}</Text>
-                                    </Flex>
-                                </a>
-                            );
-                        })}
-                    </div>
-                </MediaQuery>
-            </React.Fragment>
-        );
-    };
+                        </div>
+                    </MediaQuery>
+                </React.Fragment>
+            );
+        },
+        [active, classes.link, classes.linkActive, cx, handleOnClick, t]
+    );
 
     const navbarItems = useMemo(() => {
         return links.map((link) => {
@@ -344,6 +357,8 @@ export default function AppNavbar({ children }: AppNavbarProps) {
                     return generateIconLink(link);
                 case NavigationLinkType.Multi:
                     return generateMultiNavigationButton(link);
+                default:
+                    return <></>;
             }
         });
     }, [

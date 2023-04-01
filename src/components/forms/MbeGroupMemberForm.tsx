@@ -40,7 +40,7 @@ export default function MbeGroupMemberForm({
     // WARN: Inefficient, calls reset on every group change
     useEffect(() => {
         reset({ idMbeGroup: mbeGroupContextValue.selectedGroup });
-    }, [mbeGroupContextValue]);
+    }, [mbeGroupContextValue, reset]);
 
     const insert = useInsertMbeGroupMemberMutation({
         onSuccess: (_data, _variables, _context) => {

@@ -47,7 +47,7 @@ export default function DataGroupForm({
     // WARN: Inefficient, calls reset on every group change
     useEffect(() => {
         reset({ idMbeGroup: mbeGroupContextValue.selectedGroup });
-    }, [mbeGroupContextValue]);
+    }, [mbeGroupContextValue, reset]);
 
     useEffect(() => {
         reset({ name: edit?.name ?? "", description: edit?.description });
