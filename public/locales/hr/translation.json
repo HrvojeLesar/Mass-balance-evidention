@@ -61,7 +61,9 @@
         "insertOther": "Unos čestica, kultura, kupaca",
         "article": "Unos artikala",
         "dispatchNote": "Otpremnice",
-        "options": "Postavke"
+        "dataGroupOptions": "Postavke grupacija podataka",
+        "groupOptions": "Postavke grupa",
+        "logout": "Logout"
     },
     "titles": {
         "entry": "Pregled zapisa",
@@ -91,7 +93,8 @@
         "newMbeGroup": "Nova groupa",
         "newMbeGroupMember": "Dodavanje korisnika u grupu",
         "mbeGroupMemberDelete": "Potvrda brisanja člana grupe",
-        "membersDisplay": "Članovi grupe"
+        "membersDisplay": "Članovi grupe",
+        "mbeGroupSelection": "Odabir grupe"
     },
     "deleteModal": {
         "deleteConfirmText": "Jeste li sigurni da želite obrisati odabrani red?",

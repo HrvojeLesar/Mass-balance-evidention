@@ -61,7 +61,9 @@
         "insertOther": "Cell, culture, buyer insertion",
         "article": "Article insertion",
         "dispatchNote": "Dispatch notes",
-        "options": "Options"
+        "dataGroupOptions": "Data group options",
+        "groupOptions": "Group options",
+        "logout": "Logout"
     },
     "titles": {
         "entry": "Entry review",
@@ -91,7 +93,8 @@
         "newMbeGroup": "New group",
         "newMbeGroupMember": "Add a user to group",
         "mbeGroupMemberDelete": "Group member deletion confirmation",
-        "membersDisplay": "Group members"
+        "membersDisplay": "Group members",
+        "mbeGroupSelection": "Group selection"
     },
     "deleteModal": {
         "deleteConfirmText": "Are you sure you want to delete the selected row?",

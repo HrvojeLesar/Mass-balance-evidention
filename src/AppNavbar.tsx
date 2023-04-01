@@ -11,9 +11,11 @@ import {
     ActionIcon,
     MediaQuery,
     Flex,
+    Menu,
+    Divider,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import React from "react";
+import React, { useMemo } from "react";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { FaCog } from "react-icons/fa";
@@ -113,12 +115,20 @@ const useStyles = createStyles((theme) => ({
 enum NavigationLinkType {
     LabelLink,
     IconLink,
+    Multi,
 }
 
 type NavigationLink = {
     link: string;
     label: string;
-    type?: NavigationLinkType;
+    icon?: JSX.Element;
+    type: NavigationLinkType.LabelLink | NavigationLinkType.IconLink;
+};
+
+type MultiNavigationButton = {
+    key: string;
+    links: NavigationLink[];
+    type: NavigationLinkType.Multi;
 };
 
 export default function AppNavbar({ children }: AppNavbarProps) {
@@ -129,30 +139,58 @@ export default function AppNavbar({ children }: AppNavbarProps) {
     const [opened, { toggle, close }] = useDisclosure(false);
     const { classes, cx } = useStyles();
 
-    const links: NavigationLink[] = [
-        { link: "/", label: t("navigation.root").toString() },
-        {
-            link: "/insert-entry",
-            label: t("navigation.insertEntry").toString(),
-        },
-        {
-            link: "/insert-cell-culture-buyer",
-            label: t("navigation.insertOther").toString(),
-        },
-        {
-            link: "/article",
-            label: t("navigation.article").toString(),
-        },
-        {
-            link: "/dispatch-note",
-            label: t("navigation.dispatchNote").toString(),
-        },
-        {
-            link: "/options",
-            label: t("navigation.options").toString(),
-            type: NavigationLinkType.IconLink,
-        },
-    ];
+    const links: (NavigationLink | MultiNavigationButton)[] = useMemo(() => {
+        return [
+            {
+                link: "/",
+                label: t("navigation.root").toString(),
+                type: NavigationLinkType.LabelLink,
+            },
+            {
+                link: "/insert-entry",
+                label: t("navigation.insertEntry").toString(),
+                type: NavigationLinkType.LabelLink,
+            },
+            {
+                link: "/insert-cell-culture-buyer",
+                label: t("navigation.insertOther").toString(),
+                type: NavigationLinkType.LabelLink,
+            },
+            {
+                link: "/article",
+                label: t("navigation.article").toString(),
+                type: NavigationLinkType.LabelLink,
+            },
+            {
+                link: "/dispatch-note",
+                label: t("navigation.dispatchNote").toString(),
+                type: NavigationLinkType.LabelLink,
+            },
+            {
+                key: "/options",
+                links: [
+                    {
+                        link: "/options-data-groups",
+                        label: t("navigation.dataGroupOptions").toString(),
+                        icon: <FaCog />,
+                        type: NavigationLinkType.IconLink,
+                    },
+                    {
+                        link: "/options-mbe-groups",
+                        label: t("navigation.groupOptions").toString(),
+                        icon: <FaCog />,
+                        type: NavigationLinkType.IconLink,
+                    },
+                    {
+                        link: "/logout",
+                        label: t("navigation.logout").toString(),
+                        type: NavigationLinkType.IconLink,
+                    },
+                ],
+                type: NavigationLinkType.Multi,
+            },
+        ];
+    }, [t]);
 
     const active = location.pathname;
 
@@ -216,16 +254,104 @@ export default function AppNavbar({ children }: AppNavbarProps) {
         );
     };
 
-    const items = links.map((link) => {
-        switch (link.type) {
-            case NavigationLinkType.LabelLink:
-                return generateLabelLink(link);
-            case NavigationLinkType.IconLink:
-                return generateIconLink(link);
-            default:
-                return generateLabelLink(link);
-        }
-    });
+    const generateMultiNavigationButton = (multi: MultiNavigationButton) => {
+        const isAnyMultiActive = () => {
+            return multi.links.find(
+                (navigationLink) => active === navigationLink.link
+            ) !== undefined
+                ? true
+                : false;
+        };
+        return (
+            <React.Fragment key={multi.key}>
+                <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
+                    <Menu shadow="md" width={200}>
+                        <Menu.Target>
+                            <ActionIcon
+                                title={t("navigation.options").toString()}
+                                color={isAnyMultiActive() ? "blue" : "gray"}
+                                variant="outline"
+                            >
+                                <FaCog />
+                            </ActionIcon>
+                        </Menu.Target>
+
+                        <Menu.Dropdown>
+                            {multi.links.map((navigationLink) => {
+                                return (
+                                    <Menu.Item
+                                        key={navigationLink.link}
+                                        className={cx(classes.link, {
+                                            [classes.linkActive]:
+                                                active === navigationLink.link,
+                                        })}
+                                        onClick={(e) => {
+                                            handleOnClick(
+                                                e,
+                                                navigationLink.link
+                                            );
+                                        }}
+                                    >
+                                        {navigationLink.label}
+                                    </Menu.Item>
+                                );
+                            })}
+                        </Menu.Dropdown>
+                    </Menu>
+                </MediaQuery>
+                <MediaQuery largerThan="sm" styles={{ display: "none" }}>
+                    <div>
+                        <Divider
+                            label="Options - CHANGE ME"
+                            labelPosition="center"
+                        />
+                        {multi.links.map((navigationLink) => {
+                            return (
+                                <a
+                                    key={navigationLink.link}
+                                    href={navigationLink.link}
+                                    title={navigationLink.label}
+                                    className={cx(classes.link, {
+                                        [classes.linkActive]:
+                                            active === navigationLink.link,
+                                    })}
+                                    onClick={(event) => {
+                                        handleOnClick(
+                                            event,
+                                            navigationLink.link
+                                        );
+                                    }}
+                                >
+                                    <Flex gap="sm" align="center">
+                                        {navigationLink.icon ?? <></>}
+                                        <Text>{navigationLink.label}</Text>
+                                    </Flex>
+                                </a>
+                            );
+                        })}
+                    </div>
+                </MediaQuery>
+            </React.Fragment>
+        );
+    };
+
+    const navbarItems = useMemo(() => {
+        return links.map((link) => {
+            switch (link.type) {
+                case NavigationLinkType.LabelLink:
+                    return generateLabelLink(link);
+                case NavigationLinkType.IconLink:
+                    return generateIconLink(link);
+                case NavigationLinkType.Multi:
+                    return generateMultiNavigationButton(link);
+            }
+        });
+    }, [
+        links,
+        generateLabelLink,
+        generateIconLink,
+        generateMultiNavigationButton,
+    ]);
 
     return (
         <>
@@ -251,7 +377,7 @@ export default function AppNavbar({ children }: AppNavbarProps) {
                                 </Text>
                             </Flex>
                             <Group spacing={5} className={classes.links}>
-                                {items}
+                                {navbarItems}
                             </Group>
 
                             <Burger
@@ -272,7 +398,7 @@ export default function AppNavbar({ children }: AppNavbarProps) {
                                         withBorder
                                         style={styles}
                                     >
-                                        {items}
+                                        {navbarItems}
                                     </Paper>
                                 )}
                             </Transition>

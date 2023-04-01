@@ -22,6 +22,7 @@ import OptionsView from "./views/OptionsView";
 import Login from "./components/Login";
 import LoginCallback from "./components/LoginCallback";
 import MbeGroupProvider from "./MbeGroupProvider";
+import MbeGroupView from "./views/MbeGroupView";
 
 const queryClient = new QueryClient();
 
@@ -77,7 +78,8 @@ const router = createBrowserRouter([
                 },
                 element: <DispatchNoteArticleView />,
             },
-            { path: "/options", element: <OptionsView /> },
+            { path: "/options-data-groups", element: <OptionsView /> },
+            { path: "/options-mbe-groups", element: <MbeGroupView /> },
         ],
     },
 ]);

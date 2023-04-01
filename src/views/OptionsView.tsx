@@ -10,13 +10,15 @@ import { DataGroupContext } from "../DataGroupProvider";
 
 export default function OptionsView() {
     const { t } = useTranslation();
-    const value = useContext(DataGroupContext);
+    const dataGroupContextValue = useContext(DataGroupContext);
 
     const [editToggleValue, editToggle] = useToggle();
 
     const editValue = useMemo(() => {
-        return value.groups?.find((group) => group.id === value.selectedGroup);
-    }, [value]);
+        return dataGroupContextValue.groups?.find(
+            (group) => group.id === dataGroupContextValue.selectedGroup
+        );
+    }, [dataGroupContextValue]);
 
     return (
         <>
@@ -50,8 +52,8 @@ export default function OptionsView() {
                                 <DataGroupForm
                                     edit={editValue}
                                     onUpdateSuccess={() => {
-                                        if (value.refetch) {
-                                            value.refetch();
+                                        if (dataGroupContextValue.refetch) {
+                                            dataGroupContextValue.refetch();
                                         }
                                     }}
                                 />
@@ -69,8 +71,8 @@ export default function OptionsView() {
                         <Divider my="xs" />
                         <DataGroupForm
                             onInsertSuccess={() => {
-                                if (value.refetch) {
-                                    value.refetch();
+                                if (dataGroupContextValue.refetch) {
+                                    dataGroupContextValue.refetch();
                                 }
                             }}
                         />
