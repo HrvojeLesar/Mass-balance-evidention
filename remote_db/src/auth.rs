@@ -1,4 +1,4 @@
-use std::{env, future::Future, pin::Pin};
+use std::{env, error::Error, future::Future, pin::Pin};
 
 use actix_session::{Session, SessionExt};
 use actix_web::{get, http::header::LOCATION, web::Query, FromRequest, HttpResponse};
@@ -12,8 +12,10 @@ use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, TransactionTrait};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    http_response_errors::AuthError, redis_csrf_cache::RedisConnectionManagerExt,
-    user_models::mbe_user, SeaOrmPool,
+    http_response_errors::{AuthCallbackError, AuthError},
+    redis_csrf_cache::RedisConnectionManagerExt,
+    user_models::mbe_user,
+    SeaOrmPool,
 };
 
 const GOOGLE_AUTH_ENDPOINT: &str = "https://accounts.google.com/o/oauth2/v2/auth";
@@ -70,8 +72,8 @@ impl FromRequest for SessionData {
     }
 }
 
-trait ExtractEmail {
-    fn get_email(self) -> Result<String, AuthError>;
+trait ExtractEmail<E: Error> {
+    fn get_email(self) -> Result<String, E>;
 }
 
 #[derive(Deserialize, Debug)]
@@ -79,9 +81,9 @@ struct UserInfo {
     email: Option<String>,
 }
 
-impl ExtractEmail for UserInfo {
-    fn get_email(self) -> Result<String, AuthError> {
-        self.email.ok_or(AuthError::MissingEmailInResponse)
+impl ExtractEmail<AuthCallbackError> for UserInfo {
+    fn get_email(self) -> Result<String, AuthCallbackError> {
+        self.email.ok_or(AuthCallbackError::MissingEmailInResponse)
     }
 }
 
@@ -92,11 +94,11 @@ struct MicrosoftUserInfo {
     mail: Option<String>,
 }
 
-impl ExtractEmail for MicrosoftUserInfo {
-    fn get_email(self) -> Result<String, AuthError> {
+impl ExtractEmail<AuthCallbackError> for MicrosoftUserInfo {
+    fn get_email(self) -> Result<String, AuthCallbackError> {
         match self.user_principal_name {
             Some(email) => Ok(email),
-            None => self.mail.ok_or(AuthError::MissingEmailInResponse),
+            None => self.mail.ok_or(AuthCallbackError::MissingEmailInResponse),
         }
     }
 }
@@ -328,16 +330,14 @@ macro_rules! callback_route {(
             client: $client,
             db_pool: SeaOrmPool,
             session: Session,
-        ) -> Result<HttpResponse, AuthError> {
+        ) -> Result<HttpResponse, AuthCallbackError> {
             if let Some(error_param) = params.error {
                 match error_param.as_ref() {
                     "access_denied" => return Ok(HttpResponse::TemporaryRedirect()
-                           // TODO: change to env variable
-                           .insert_header((LOCATION, "http://localhost:1420/login"))
+                           .insert_header((LOCATION, env::var("CALLBACK_URL").expect("CALLBACK_URL env variable to have been checked")))
                            .finish()),
                     _ => return Ok(HttpResponse::TemporaryRedirect()
-                           // TODO: change to env variable
-                           .insert_header((LOCATION, "http://localhost:1420/login"))
+                           .insert_header((LOCATION, env::var("CALLBACK_URL").expect("CALLBACK_URL env variable to have been checked")))
                            .finish())
                 }
             }
@@ -351,7 +351,7 @@ macro_rules! callback_route {(
                 {
                     Ok(num_keys_deleted) => {
                         if num_keys_deleted == 0 {
-                            return Err(AuthError::InvalidPkceVerifier);
+                            return Err(AuthCallbackError::InvalidPkceVerifier);
                         }
                     }
                     Err(e) => error!("Redis key deletion failed: {}", e),
@@ -359,7 +359,7 @@ macro_rules! callback_route {(
 
                 let pkce_verifier = match pkce_verifier {
                     Some(pv) => pv,
-                    None => Err(AuthError::InvalidPkceVerifier)?,
+                    None => Err(AuthCallbackError::InvalidPkceVerifier)?,
                 };
 
                 let token = client
@@ -396,15 +396,14 @@ macro_rules! callback_route {(
                         panic!("Change location header to env var");
 
                         Ok(HttpResponse::TemporaryRedirect()
-                           // TODO: change to env variable
-                           .insert_header((LOCATION, "http://localhost:1420/login-callback"))
+                           .insert_header((LOCATION, env::var("CALLBACK_URL").expect("CALLBACK_URL env variable to have been checked")))
                            .finish())
                         // Ok(HttpResponse::Ok().finish())
                     }
-                    None => Err(AuthError::UserNotFound),
+                    None => Err(AuthCallbackError::UserNotFound),
                 }
             } else {
-                Err(AuthError::MissingStateOrAuthCode)?
+                Err(AuthCallbackError::MissingStateOrAuthCode)?
             }
         }
     };

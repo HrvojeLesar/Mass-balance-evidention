@@ -28,7 +28,9 @@ use dotenvy::dotenv;
 use http_response_errors::AuthError;
 
 use redis_csrf_cache::create_redis_connection_manager;
-use sea_orm::{ConnectOptions, DatabaseConnection};
+use sea_orm::{
+    ColumnTrait, ConnectOptions, DatabaseConnection, EntityTrait, QueryFilter, TransactionTrait,
+};
 use seaorm_models::graphql_schema::{MutationRoot, QueryRoot};
 
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
@@ -42,7 +44,6 @@ mod redis_csrf_cache;
 mod seaorm_models;
 mod user_models;
 
-pub type DatabasePool = Data<Pool<Postgres>>;
 pub type GQLSchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
 pub type SeaOrmPool = Data<DatabaseConnection>;
 
@@ -73,27 +74,47 @@ async fn get_schema(schema: web::Data<GQLSchema>) -> Result<String, AuthError> {
     Ok(schema.sdl())
 }
 
+#[get("/me")]
+async fn me(
+    // TODO: Session must be valid
+    // TODO: Users session must be authorized
+    session_data: SessionData,
+    db_pool: SeaOrmPool,
+) -> Result<HttpResponse, AuthError> {
+    session_data.user_id;
+
+    let transaction = db_pool.begin().await?;
+
+    let user = crate::user_models::mbe_user::Entity::find()
+        .filter(crate::user_models::mbe_user::Column::Id.eq(session_data.user_id))
+        .one(&transaction)
+        .await?
+        .ok_or(AuthError::Unauthorized)?;
+
+    transaction.commit().await?;
+
+    Ok(HttpResponse::Ok().json(user))
+}
+
 #[cfg(debug_assertions)]
-fn build_schema(pool: Data<Pool<Postgres>>, sea_orm_pool: SeaOrmPool) -> GQLSchema {
+fn build_schema(sea_orm_pool: SeaOrmPool) -> GQLSchema {
     Schema::build(
         QueryRoot::default(),
         MutationRoot::default(),
         EmptySubscription,
     )
-    .data(pool)
     .data(sea_orm_pool)
     .extension(async_graphql::extensions::Logger)
     .finish()
 }
 
 #[cfg(not(debug_assertions))]
-fn build_schema(pool: Data<Pool<Postgres>>) -> GQLSchema {
+fn build_schema(sea_orm_pool: SeaOrmPool) -> GQLSchema {
     Schema::build(
         QueryRoot::default(),
         MutationRoot::default(),
         EmptySubscription,
     )
-    .data(pool)
     .data(sea_orm_pool)
     .extension(async_graphql::extensions::Logger)
     .disable_introspection()
@@ -123,6 +144,8 @@ fn check_env_variables() {
     oauth_client_env_check!("MICROSOFT");
     oauth_client_env_check!("GITHUB");
     oauth_client_env_check!("FACEBOOK");
+    env::var("LOGIN_URL").expect("LOGIN_URL env variable to be present");
+    env::var("CALLBACK_URL").expect("CALLBACK_URL env variable to be present");
 }
 
 #[actix_web::main]
@@ -151,8 +174,9 @@ async fn main() -> std::io::Result<()> {
             .expect("Database connection"),
     );
 
-    let schema = build_schema(pool.clone(), sea_orm_pool.clone());
+    let schema = build_schema(sea_orm_pool.clone());
 
+    // TODO: do status checks (redis::cmd("PING")...)
     let redis_csrf_cache = create_redis_connection_manager().await;
 
     let oauth_client_google = OAuthClientGoogle::new();
@@ -192,8 +216,7 @@ async fn main() -> std::io::Result<()> {
                             .session_ttl_extension_policy(TtlExtensionPolicy::OnStateChanges)
                             .session_ttl(actix_web::cookie::time::Duration::seconds(MONTH)),
                     )
-                    // WARN: potentially dangerous
-                    .cookie_http_only(false)
+                    .cookie_http_only(true)
                     .cookie_content_security(CookieContentSecurity::Signed)
                     .build(),
             )
@@ -218,6 +241,7 @@ async fn main() -> std::io::Result<()> {
             .service(graphql_playground)
             .service(index)
             .service(get_schema)
+            .service(me)
     })
     .bind("127.0.0.1:8000")?
     .run()

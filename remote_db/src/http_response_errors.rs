@@ -1,4 +1,6 @@
-use actix_web::{HttpResponse, ResponseError};
+use std::env;
+
+use actix_web::{http::header, HttpResponse, ResponseError};
 use log::error;
 use oauth2::{basic::BasicErrorResponseType, RequestTokenError, StandardErrorResponse};
 use redis::RedisError;
@@ -77,5 +79,67 @@ impl ResponseError for AuthError {
                 }
             },
         })
+    }
+}
+
+#[derive(Error, Debug)]
+pub enum AuthCallbackError {
+    #[error(transparent)]
+    RedisError(#[from] RedisError),
+
+    #[error(transparent)]
+    RequestTokenError(
+        #[from]
+        RequestTokenError<
+            oauth2::reqwest::Error<reqwest::Error>,
+            StandardErrorResponse<BasicErrorResponseType>,
+        >,
+    ),
+    #[error(transparent)]
+    ReqwestError(#[from] reqwest::Error),
+    #[error(transparent)]
+    SeaOrmDbError(#[from] sea_orm::DbErr),
+    #[error(transparent)]
+    SessionInsertError(#[from] actix_session::SessionInsertError),
+    #[error("Invalid pkce verifier")]
+    InvalidPkceVerifier,
+    #[error("Missing state or auth code")]
+    MissingStateOrAuthCode,
+    #[error("Missing email in response")]
+    MissingEmailInResponse,
+    #[error("User with supplied email not found.")]
+    UserNotFound,
+}
+
+impl ResponseError for AuthCallbackError {
+    fn status_code(&self) -> StatusCode {
+        match self {
+            _ => StatusCode::TEMPORARY_REDIRECT,
+        }
+    }
+    fn error_response(&self) -> HttpResponse {
+        error!("{:#?}", self);
+        HttpResponse::build(self.status_code())
+            .insert_header((
+                header::LOCATION,
+                format!(
+                    // TODO: change to env variable
+                    "{}?error={}",
+                    env::var("CALLBACK_URL")
+                        .expect("CALLBACK_URL env variable to have been checked"),
+                    match self {
+                        AuthCallbackError::RedisError(..)
+                        | AuthCallbackError::RequestTokenError(..)
+                        | AuthCallbackError::ReqwestError(..)
+                        | AuthCallbackError::SeaOrmDbError(..)
+                        | AuthCallbackError::SessionInsertError(..) => "login_service_down",
+                        AuthCallbackError::InvalidPkceVerifier => "invalid_pkce_verifier",
+                        AuthCallbackError::MissingStateOrAuthCode
+                        | AuthCallbackError::MissingEmailInResponse => "bad_request",
+                        AuthCallbackError::UserNotFound => "user_not_found",
+                    }
+                ),
+            ))
+            .finish()
     }
 }
