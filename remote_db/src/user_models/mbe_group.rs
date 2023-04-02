@@ -84,6 +84,7 @@ impl MbeGroupQuery {
                     "mbe_group"."created_at" 
                 FROM "mbe_group"
                 INNER JOIN "mbe_group_members" ON "mbe_group"."id" = "mbe_group_members"."id_mbe_group"
+                WHERE "mbe_group_members"."id_mbe_user" = $1
                 ORDER BY id
                 "#,
                 [session_data.user_id.into()],
