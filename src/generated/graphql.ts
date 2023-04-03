@@ -1205,21 +1205,21 @@ export type GetDispatchNotesArticlesQueryVariables = Exact<{
 }>;
 
 
-export type GetDispatchNotesArticlesQuery = { __typename?: 'QueryRoot', dispatchNoteArticles: { __typename?: 'DispatchNoteArticleResults', page: number, pageSize: number, totalItems: number, totalPages: number, results: Array<{ __typename?: 'DispatchNoteArticle', id: number, weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } }> } };
+export type GetDispatchNotesArticlesQuery = { __typename?: 'QueryRoot', dispatchNoteArticles: { __typename?: 'DispatchNoteArticleResults', page: number, pageSize: number, totalItems: number, totalPages: number, results: Array<{ __typename?: 'DispatchNoteArticle', id: number, weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any, idMbeGroup: number } }> } };
 
 export type InsertDispatchNoteArticleMutationVariables = Exact<{
   insertOptions: DispatchNoteArticleInsertOptions;
 }>;
 
 
-export type InsertDispatchNoteArticleMutation = { __typename?: 'MutationRoot', insertDispatchNoteArticle: { __typename?: 'DispatchNoteArticle', id: number, weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } } };
+export type InsertDispatchNoteArticleMutation = { __typename?: 'MutationRoot', insertDispatchNoteArticle: { __typename?: 'DispatchNoteArticle', id: number, weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any, idMbeGroup: number } } };
 
 export type UpdateDispatchNoteArticleMutationVariables = Exact<{
   updateOptions: DispatchNoteArticleUpdateOptions;
 }>;
 
 
-export type UpdateDispatchNoteArticleMutation = { __typename?: 'MutationRoot', updateDispatchNoteArticle: { __typename?: 'DispatchNoteArticle', id: number, weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } } };
+export type UpdateDispatchNoteArticleMutation = { __typename?: 'MutationRoot', updateDispatchNoteArticle: { __typename?: 'DispatchNoteArticle', id: number, weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any, idMbeGroup: number } } };
 
 export type DeleteDispatchNoteArticleMutationVariables = Exact<{
   deleteOptions: DeleteOptions;
@@ -1228,7 +1228,7 @@ export type DeleteDispatchNoteArticleMutationVariables = Exact<{
 
 export type DeleteDispatchNoteArticleMutation = { __typename?: 'MutationRoot', deleteDispatchNoteArticle: { __typename?: 'RowsDeleted', numRows: number } };
 
-export type DispatchNoteArticlePartsFragment = { __typename?: 'DispatchNoteArticle', id: number, weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } };
+export type DispatchNoteArticlePartsFragment = { __typename?: 'DispatchNoteArticle', id: number, weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any, idMbeGroup: number } };
 
 export type GetEntriesQueryVariables = Exact<{
   options: EntryFetchOptions;
@@ -1354,6 +1354,7 @@ export const DispatchNoteArticlePartsFragmentDoc = `
     name
     description
     createdAt
+    idMbeGroup
   }
 }
     `;

@@ -57,5 +57,6 @@ fragment DispatchNoteArticleParts on DispatchNoteArticle {
         name
         description
         createdAt
+        idMbeGroup
     }
 }

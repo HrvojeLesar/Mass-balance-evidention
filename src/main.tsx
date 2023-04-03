@@ -23,6 +23,8 @@ import Login from "./components/Login";
 import LoginCallback from "./components/LoginCallback";
 import MbeGroupProvider from "./MbeGroupProvider";
 import MbeGroupView from "./views/MbeGroupView";
+import NotFound from "./components/NotFound";
+import AuthContextProvider from "./AuthProvider";
 
 const queryClient = new QueryClient();
 
@@ -46,10 +48,38 @@ declare global {
 }
 
 const router = createBrowserRouter([
-    { path: "/login", element: <Login /> },
-    { path: "/login-callback", element: <LoginCallback /> },
+    { path: "/*", element: <NotFound /> },
     {
-        element: <AppNavbar children={<Outlet />} />,
+        path: "/login",
+        element: (
+            <AuthContextProvider>
+                <Login />
+            </AuthContextProvider>
+        ),
+    },
+    {
+        path: "/login-callback",
+        element: (
+            <AuthContextProvider>
+                <LoginCallback />
+            </AuthContextProvider>
+        ),
+    },
+    {
+        // TODO: Have AuthProvider or some other element that wraps and checks for valid authorization
+        element: (
+            <AuthContextProvider>
+                <AppNavbar
+                    children={
+                        <MbeGroupProvider>
+                            <DataGroupProvider>
+                                <Outlet />
+                            </DataGroupProvider>
+                        </MbeGroupProvider>
+                    }
+                />
+            </AuthContextProvider>
+        ),
         children: [
             { path: "/", element: <EntryView /> },
             { path: "/insert-entry", element: <InsertEntryView /> },
@@ -87,11 +117,7 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
         <QueryClientProvider client={queryClient}>
-            <MbeGroupProvider>
-                <DataGroupProvider>
-                    <RouterProvider router={router} />
-                </DataGroupProvider>
-            </MbeGroupProvider>
+            <RouterProvider router={router} />
         </QueryClientProvider>
     </React.StrictMode>
 );

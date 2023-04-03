@@ -79,7 +79,7 @@ export default function DispatchNoteArticleTable({
                                   };
                               })
                             : undefined,
-                    dataGroupId: dataGroupContextValue.selectedGroup,
+                    dGroup: dataGroupContextValue.selectedGroup ?? -1,
                 },
             },
             {
@@ -102,6 +102,7 @@ export default function DispatchNoteArticleTable({
         {
             options: {
                 id: dispatchNoteId,
+                dGroup: dataGroupContextValue.selectedGroup ?? -1,
             },
         },
         {

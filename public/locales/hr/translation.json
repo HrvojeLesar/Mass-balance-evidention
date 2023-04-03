@@ -61,9 +61,10 @@
         "insertOther": "Unos čestica, kultura, kupaca",
         "article": "Unos artikala",
         "dispatchNote": "Otpremnice",
+        "options": "Postavke",
         "dataGroupOptions": "Postavke grupacija podataka",
         "groupOptions": "Postavke grupa",
-        "logout": "Logout"
+        "logout": "Odjava"
     },
     "titles": {
         "entry": "Pregled zapisa",
