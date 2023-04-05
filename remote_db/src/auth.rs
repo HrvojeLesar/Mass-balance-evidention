@@ -1,4 +1,4 @@
-use std::{env, error::Error, future::Future, pin::Pin};
+use std::{borrow::Cow, env, error::Error, future::Future, pin::Pin};
 
 use actix_session::{Session, SessionExt};
 use actix_web::{get, http::header::LOCATION, web::Query, FromRequest, HttpResponse};
@@ -13,32 +13,38 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     http_response_errors::{AuthCallbackError, AuthError},
+    load_env_var,
     redis_csrf_cache::RedisConnectionManagerExt,
     user_models::mbe_user,
     SeaOrmPool,
 };
 
-const GOOGLE_AUTH_ENDPOINT: &str = "https://accounts.google.com/o/oauth2/v2/auth";
-const GOOGLE_TOKEN_ENDPOINT: &str = "https://oauth2.googleapis.com/token";
-const GOOGLE_USER_INFO_ENDPOINT: &str = "https://openidconnect.googleapis.com/v1/userinfo";
-
-const MICROSOFT_AUTH_ENDPOINT: &str =
-    "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize";
-const MICROSOFT_TOKEN_ENDPOINT: &str =
-    "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
-const MICROSOFT_USER_INFO_ENDPOINT: &str = "https://graph.microsoft.com/v1.0/me";
-
-const GITHUB_AUTH_ENDPOINT: &str = "https://github.com/login/oauth/authorize";
-const GITHUB_TOKEN_ENDPOINT: &str = "https://github.com/login/oauth/access_token";
-const GITHUB_USER_INFO_ENDPOINT: &str = "https://api.github.com/user";
-
-const FACEBOOK_AUTH_ENDPOINT: &str = "https://www.facebook.com/v16.0/dialog/oauth";
-const FACEBOOK_TOKEN_ENDPOINT: &str = "https://graph.facebook.com/v16.0/oauth/access_token";
-const FACEBOOK_USER_INFO_ENDPOINT: &str = "https://graph.facebook.com/v16.0/me?fields=email,name";
-
 const CSRF_CACHE_EXPIRY: usize = 60 * 5;
 
 pub const SESSION_DATA_KEY: &str = "SESSION_DATA";
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum Platform {
+    #[default]
+    Tauri,
+    Web,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct LoginRedirectUriParams {
+    #[serde(default)]
+    platform: Platform,
+}
+
+impl Platform {
+    fn as_str<'a>(&'a self) -> &'a str {
+        match self {
+            Platform::Tauri => "tauri",
+            Platform::Web => "web",
+        }
+    }
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SessionData {
@@ -148,6 +154,15 @@ pub struct AuthCallbackParams {
     code: Option<String>,
     state: Option<String>,
     error: Option<String>,
+    #[serde(default)]
+    platform: Platform,
+}
+
+fn gen_redirect_url(
+    redirect_url: String,
+    platform: &str,
+) -> Result<RedirectUrl, oauth2::url::ParseError> {
+    RedirectUrl::new(format!("{}?platform={}", redirect_url, platform))
 }
 
 macro_rules! impl_oauth_client {
@@ -156,8 +171,8 @@ macro_rules! impl_oauth_client {
         $name:ident($type:ty),
         $client_id_env:literal,
         $client_secret_env:literal,
-        $auth_endpoint:expr,
-        $token_url_endpoint:expr,
+        $auth_endpoint:literal,
+        $token_url_endpoint:literal,
         $redirect_uri:literal
         ) => {
 
@@ -169,20 +184,17 @@ macro_rules! impl_oauth_client {
                 $name(
                     BasicClient::new(
                         ClientId::new(
-                            env::var($client_id_env)
-                                .expect(concat!($client_id_env, " env variable to be present")),
+                            load_env_var!($client_id_env)
                         ),
-                        Some(ClientSecret::new(env::var($client_secret_env).expect(
-                            concat!($client_secret_env, " env variable to be present",),
-                        ))),
-                        AuthUrl::new($auth_endpoint.to_string()).expect("A valid auth url"),
+                        Some(ClientSecret::new(load_env_var!($client_secret_env))),
+                        AuthUrl::new(load_env_var!($auth_endpoint)).expect("A valid auth url"),
                         Some(
-                            TokenUrl::new($token_url_endpoint.to_string())
+                            TokenUrl::new(load_env_var!($token_url_endpoint))
                                 .expect("A valid token url"),
                         ),
                     )
                     .set_redirect_uri(
-                        RedirectUrl::new($redirect_uri.to_string()).expect("A valid redirect url"),
+                        RedirectUrl::new(load_env_var!($redirect_uri)).expect("A valid redirect url"),
                     ),
                 )
             }
@@ -215,9 +227,9 @@ impl_oauth_client![
     OAuthClientGoogle(BasicClient),
     "OAUTH_CLIENT_ID_GOOGLE",
     "OAUTH_CLIENT_SECRET_GOOGLE",
-    GOOGLE_AUTH_ENDPOINT,
-    GOOGLE_TOKEN_ENDPOINT,
-    "http://localhost:8000/callback-google"
+    "GOOGLE_AUTH_ENDPOINT",
+    "GOOGLE_TOKEN_ENDPOINT",
+    "GOOGLE_REDIRECT_URL"
 ];
 
 impl_oauth_client![
@@ -225,9 +237,9 @@ impl_oauth_client![
     OAuthClientMicrosoft(BasicClient),
     "OAUTH_CLIENT_ID_MICROSOFT",
     "OAUTH_CLIENT_SECRET_MICROSOFT",
-    MICROSOFT_AUTH_ENDPOINT,
-    MICROSOFT_TOKEN_ENDPOINT,
-    "http://localhost:8000/callback-ms"
+    "MICROSOFT_AUTH_ENDPOINT",
+    "MICROSOFT_TOKEN_ENDPOINT",
+    "MICROSOFT_REDIRECT_URL"
 ];
 
 impl_oauth_client![
@@ -235,9 +247,9 @@ impl_oauth_client![
     OAuthClientGithub(BasicClient),
     "OAUTH_CLIENT_ID_GITHUB",
     "OAUTH_CLIENT_SECRET_GITHUB",
-    GITHUB_AUTH_ENDPOINT,
-    GITHUB_TOKEN_ENDPOINT,
-    "http://localhost:8000/callback-gh"
+    "GITHUB_AUTH_ENDPOINT",
+    "GITHUB_TOKEN_ENDPOINT",
+    "GITHUB_REDIRECT_URL"
 ];
 
 impl_oauth_client![
@@ -245,23 +257,27 @@ impl_oauth_client![
     OAuthClientFacebook(BasicClient),
     "OAUTH_CLIENT_ID_FACEBOOK",
     "OAUTH_CLIENT_SECRET_FACEBOOK",
-    FACEBOOK_AUTH_ENDPOINT,
-    FACEBOOK_TOKEN_ENDPOINT,
-    "http://localhost:8000/callback-fb"
+    "FACEBOOK_AUTH_ENDPOINT",
+    "FACEBOOK_TOKEN_ENDPOINT",
+    "FACEBOOK_REDIRECT_URL"
 ];
 
 macro_rules! login_route {(
         $(#[$attr:meta])*
         $name:ident,
         $type:ty,
+        $redirect_url:literal,
         $($scope:literal),+
         ) => {
         $(#[$attr])*
         pub async fn $name(
             RedisConnectionManagerExt(mut redis_cache): RedisConnectionManagerExt,
+            Query(params): Query<LoginRedirectUriParams>,
             client: $type,
         ) -> Result<HttpResponse, AuthError> {
             let (pkce_challange, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
+
+            let redirect_url = gen_redirect_url(load_env_var!($redirect_url), params.platform.as_str()).unwrap();
 
             let (url, csrf_token) = client
                 .0
@@ -270,6 +286,7 @@ macro_rules! login_route {(
                 $(
                     .add_scope(Scope::new($scope.to_string()))
                 )+
+                .set_redirect_uri(Cow::Borrowed(&redirect_url))
                 .url();
 
             redis_cache
@@ -280,7 +297,7 @@ macro_rules! login_route {(
                 ))
                 .await?;
 
-            Ok(HttpResponse::TemporaryRedirect()
+            Ok(HttpResponse::SeeOther()
                 .insert_header((LOCATION, url.to_string()))
                 .finish())
         }
@@ -291,6 +308,7 @@ login_route![
     #[get("/login-google")]
     login_google,
     OAuthClientGoogle,
+    "GOOGLE_REDIRECT_URL",
     "email"
 ];
 
@@ -298,6 +316,7 @@ login_route![
     #[get("/login-ms")]
     login_microsoft,
     OAuthClientMicrosoft,
+    "MICROSOFT_REDIRECT_URL",
     "User.Read"
 ];
 
@@ -305,6 +324,7 @@ login_route![
     #[get("/login-gh")]
     login_github,
     OAuthClientGithub,
+    "GITHUB_REDIRECT_URL",
     "user:email"
 ];
 
@@ -312,6 +332,7 @@ login_route![
     #[get("/login-fb")]
     login_facebook,
     OAuthClientFacebook,
+    "FACEBOOK_REDIRECT_URL",
     "email"
 ];
 
@@ -319,7 +340,8 @@ macro_rules! callback_route {(
         $(#[$attr:meta])*
         $name:ident,
         $client:ty,
-        $endpoint:expr,
+        $endpoint:literal,
+        $redirect_url:literal,
         $user_info_type:ty
         ) => {
         $(#[$attr])*
@@ -331,13 +353,18 @@ macro_rules! callback_route {(
             db_pool: SeaOrmPool,
             session: Session,
         ) -> Result<HttpResponse, AuthCallbackError> {
+            let callback_url = match params.platform {
+                Platform::Tauri => load_env_var!("TAURI_CALLBACK_URL"),
+                Platform::Web => load_env_var!("CALLBACK_URL"),
+            };
+
             if let Some(error_param) = params.error {
                 match error_param.as_ref() {
-                    "access_denied" => return Ok(HttpResponse::TemporaryRedirect()
-                           .insert_header((LOCATION, env::var("CALLBACK_URL").expect("CALLBACK_URL env variable to have been checked")))
+                    "access_denied" => return Ok(HttpResponse::SeeOther()
+                           .insert_header((LOCATION, callback_url))
                            .finish()),
-                    _ => return Ok(HttpResponse::TemporaryRedirect()
-                           .insert_header((LOCATION, env::var("CALLBACK_URL").expect("CALLBACK_URL env variable to have been checked")))
+                    _ => return Ok(HttpResponse::SeeOther()
+                           .insert_header((LOCATION, callback_url))
                            .finish())
                 }
             }
@@ -362,16 +389,19 @@ macro_rules! callback_route {(
                     None => Err(AuthCallbackError::InvalidPkceVerifier)?,
                 };
 
+                let redirect_url = gen_redirect_url(load_env_var!($redirect_url), params.platform.as_str()).unwrap();
+
                 let token = client
                     .0
                     .exchange_code(AuthorizationCode::new(auth_code))
                     .set_pkce_verifier(PkceCodeVerifier::new(pkce_verifier))
+                    .set_redirect_uri(Cow::Borrowed(&redirect_url))
                     .request_async(oauth2::reqwest::async_http_client)
                     .await?;
 
                 let response = reqwest_client
                     .0
-                    .get($endpoint)
+                    .get(load_env_var!($endpoint))
                     .bearer_auth(token.access_token().secret())
                     .send()
                     .await?
@@ -392,13 +422,9 @@ macro_rules! callback_route {(
                         session.renew();
                         session.insert(SESSION_DATA_KEY, SessionData::new(user.id))?;
 
-                        #[cfg(not(debug_assertions))]
-                        panic!("Change location header to env var");
-
-                        Ok(HttpResponse::TemporaryRedirect()
-                           .insert_header((LOCATION, env::var("CALLBACK_URL").expect("CALLBACK_URL env variable to have been checked")))
+                        Ok(HttpResponse::SeeOther()
+                           .insert_header((LOCATION, callback_url))
                            .finish())
-                        // Ok(HttpResponse::Ok().finish())
                     }
                     None => Err(AuthCallbackError::UserNotFound),
                 }
@@ -413,7 +439,8 @@ callback_route![
     #[get("/callback-google")]
     login_callback_google,
     OAuthClientGoogle,
-    GOOGLE_USER_INFO_ENDPOINT,
+    "GOOGLE_USER_INFO_ENDPOINT",
+    "GOOGLE_REDIRECT_URL",
     UserInfo
 ];
 
@@ -421,7 +448,8 @@ callback_route![
     #[get("/callback-ms")]
     login_callback_microsoft,
     OAuthClientMicrosoft,
-    MICROSOFT_USER_INFO_ENDPOINT,
+    "MICROSOFT_USER_INFO_ENDPOINT",
+    "MICROSOFT_REDIRECT_URL",
     MicrosoftUserInfo
 ];
 
@@ -429,7 +457,8 @@ callback_route![
     #[get("/callback-gh")]
     login_callback_github,
     OAuthClientGithub,
-    GITHUB_USER_INFO_ENDPOINT,
+    "GITHUB_USER_INFO_ENDPOINT",
+    "GITHUB_REDIRECT_URL",
     UserInfo
 ];
 
@@ -437,6 +466,7 @@ callback_route![
     #[get("/callback-fb")]
     login_callback_facebook,
     OAuthClientFacebook,
-    FACEBOOK_USER_INFO_ENDPOINT,
+    "FACEBOOK_USER_INFO_ENDPOINT",
+    "FACEBOOK_REDIRECT_URL",
     UserInfo
 ];

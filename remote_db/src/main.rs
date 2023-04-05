@@ -28,12 +28,11 @@ use dotenvy::dotenv;
 use http_response_errors::AuthError;
 
 use redis_csrf_cache::create_redis_connection_manager;
+use reqwest::header::LOCATION;
 use sea_orm::{
     ColumnTrait, ConnectOptions, DatabaseConnection, EntityTrait, QueryFilter, TransactionTrait,
 };
 use seaorm_models::graphql_schema::{MutationRoot, QueryRoot};
-
-use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 
 use crate::auth::SessionData;
 
@@ -81,8 +80,6 @@ async fn me(
     session_data: SessionData,
     db_pool: SeaOrmPool,
 ) -> Result<HttpResponse, AuthError> {
-    session_data.user_id;
-
     let transaction = db_pool.begin().await?;
 
     let user = crate::user_models::mbe_user::Entity::find()
@@ -94,6 +91,17 @@ async fn me(
     transaction.commit().await?;
 
     Ok(HttpResponse::Ok().json(user))
+}
+
+#[get("/logout")]
+async fn logout(session: Session) -> Result<HttpResponse, AuthError> {
+    session.purge();
+    Ok(HttpResponse::SeeOther()
+        .insert_header((
+            LOCATION,
+            env::var("LOGIN_URL").expect("LOGIN_URL env variable to have been checked"),
+        ))
+        .finish())
 }
 
 #[cfg(debug_assertions)]
@@ -136,33 +144,61 @@ macro_rules! oauth_client_env_check {
     };
 }
 
-fn check_env_variables() {
-    env::var("REDIS_CONNECTION").expect("REDIS_CONNECTION env variable to be present");
-    env::var("DATABASE_URL").expect("DATABASE_URL env variable to be present");
-    env::var("SESSION_SECRET_KEY").expect("SESSION_SECRET_KEY env variable to be present");
+#[macro_export]
+macro_rules! load_env_var {
+    ($name:literal) => {
+        env::var($name).expect(concat!($name, " environment variable must be set"))
+    };
+}
+
+fn load_env() {
+    dotenv().ok();
+    dotenvy::from_filename(".env.endpoints").ok();
+
+    #[cfg(debug_assertions)]
+    dotenvy::from_filename(".env.dev").ok();
+
+    #[cfg(not(debug_assertions))]
+    dotenvy::from_filename(".env.production").ok();
+
+    // .env
+    load_env_var!("DATABASE_URL");
+    load_env_var!("REDIS_CONNECTION");
     oauth_client_env_check!("GOOGLE");
     oauth_client_env_check!("MICROSOFT");
     oauth_client_env_check!("GITHUB");
     oauth_client_env_check!("FACEBOOK");
-    env::var("LOGIN_URL").expect("LOGIN_URL env variable to be present");
-    env::var("CALLBACK_URL").expect("CALLBACK_URL env variable to be present");
+    load_env_var!("SESSION_SECRET_KEY");
+
+    // .env.endpoints
+    load_env_var!("GOOGLE_AUTH_ENDPOINT");
+    load_env_var!("GOOGLE_TOKEN_ENDPOINT");
+    load_env_var!("GOOGLE_USER_INFO_ENDPOINT");
+    load_env_var!("MICROSOFT_AUTH_ENDPOINT");
+    load_env_var!("MICROSOFT_TOKEN_ENDPOINT");
+    load_env_var!("MICROSOFT_USER_INFO_ENDPOINT");
+    load_env_var!("GITHUB_AUTH_ENDPOINT");
+    load_env_var!("GITHUB_TOKEN_ENDPOINT");
+    load_env_var!("GITHUB_USER_INFO_ENDPOINT");
+    load_env_var!("FACEBOOK_AUTH_ENDPOINT");
+    load_env_var!("FACEBOOK_TOKEN_ENDPOINT");
+    load_env_var!("FACEBOOK_USER_INFO_ENDPOINT");
+
+    // .env.dev | .env.prod
+    load_env_var!("LOGIN_URL");
+    load_env_var!("CALLBACK_URL");
+    load_env_var!("TAURI_CALLBACK_URL");
+    load_env_var!("GOOGLE_REDIRECT_URL");
+    load_env_var!("MICROSOFT_REDIRECT_URL");
+    load_env_var!("GITHUB_REDIRECT_URL");
+    load_env_var!("FACEBOOK_REDIRECT_URL");
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    dotenv().ok();
-    check_env_variables();
+    load_env();
 
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
-
-    // TODO: remove this
-    let pool = Data::new(
-        PgPoolOptions::new()
-            .max_connections(5)
-            .connect(&env::var("DATABASE_URL").expect("DATABASE_URL must be set"))
-            .await
-            .unwrap(),
-    );
 
     let mut seaorm_connection_options =
         ConnectOptions::new(env::var("DATABASE_URL").expect("DATABASE_URL must be set"));
@@ -224,7 +260,6 @@ async fn main() -> std::io::Result<()> {
             .app_data(Data::new(schema.clone()))
             .app_data(sea_orm_pool.clone())
             .app_data(redis_csrf_cache.clone())
-            .app_data(pool.clone())
             .app_data(oauth_client_google.clone())
             .app_data(oauth_client_microsoft.clone())
             .app_data(oauth_client_github.clone())
@@ -242,6 +277,7 @@ async fn main() -> std::io::Result<()> {
             .service(index)
             .service(get_schema)
             .service(me)
+            .service(logout)
     })
     .bind("127.0.0.1:8000")?
     .run()

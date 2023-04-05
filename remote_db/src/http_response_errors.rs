@@ -113,9 +113,7 @@ pub enum AuthCallbackError {
 
 impl ResponseError for AuthCallbackError {
     fn status_code(&self) -> StatusCode {
-        match self {
-            _ => StatusCode::TEMPORARY_REDIRECT,
-        }
+        StatusCode::TEMPORARY_REDIRECT
     }
     fn error_response(&self) -> HttpResponse {
         error!("{:#?}", self);
