@@ -24,7 +24,7 @@ export default function Login() {
                 <Flex direction="column" gap="sm">
                     <Button
                         component="a"
-                        href="http://localhost:8000/login-google"
+                        href={import.meta.env.VITE_LOGIN_GOOGLE}
                         leftIcon={<FcGoogle />}
                         variant="default"
                         color="gray"
@@ -33,7 +33,7 @@ export default function Login() {
                     </Button>
                     <Button
                         component="a"
-                        href="http://localhost:8000/login-ms"
+                        href={import.meta.env.VITE_LOGIN_MICROSOFT}
                         leftIcon={<FaMicrosoft />}
                         variant="default"
                         color="gray"
@@ -42,7 +42,7 @@ export default function Login() {
                     </Button>
                     <Button
                         component="a"
-                        href="http://localhost:8000/login-gh"
+                        href={import.meta.env.VITE_LOGIN_GITHUB}
                         leftIcon={<FaGithub />}
                         sx={(theme) => ({
                             backgroundColor:
@@ -62,7 +62,7 @@ export default function Login() {
                     </Button>
                     <Button
                         component="a"
-                        href="http://localhost:8000/login-fb"
+                        href={import.meta.env.VITE_LOGIN_FACEBOOK}
                         leftIcon={<FaFacebook />}
                         sx={(theme) => ({
                             backgroundColor: "#4267B2",

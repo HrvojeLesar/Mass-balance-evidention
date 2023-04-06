@@ -50,6 +50,12 @@ declare global {
 const router = createBrowserRouter([
     { path: "/*", element: <NotFound /> },
     {
+        path: "/logout",
+        loader: () => {
+            return redirect(import.meta.env.VITE_LOGOUT_URL);
+        },
+    },
+    {
         path: "/login",
         element: (
             <AuthContextProvider>
