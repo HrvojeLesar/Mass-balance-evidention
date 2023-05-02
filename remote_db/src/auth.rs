@@ -26,8 +26,8 @@ pub const SESSION_DATA_KEY: &str = "SESSION_DATA";
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum Platform {
-    #[default]
     Tauri,
+    #[default]
     Web,
 }
 
