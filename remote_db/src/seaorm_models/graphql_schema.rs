@@ -35,6 +35,7 @@ use super::{
         DispatchNoteArticleQuery,
     },
     entry::{EntryFields, EntryMutation, EntryQuery},
+    weight_type::WeightTypeFields,
     GetEntityDataGroupId, GetEntityId, QueryResultsTrait,
 };
 
@@ -115,6 +116,7 @@ pub struct MutationRoot(
     name = "DispatchNoteArticleResults",
     params(super::dispatch_note_article::DispatchNoteArticle)
 ))]
+#[graphql(concrete(name = "WeightTypeResults", params(super::weight_type::Model)))]
 pub struct QueryResults<T: OutputType> {
     pub results: Vec<T>,
     #[graphql(flatten)]
@@ -149,6 +151,7 @@ pub struct DeleteOptions<T: InputType = i32> {
     name = "DispatchNoteArticleOrderingOptions",
     params(DispatchNoteArticleFields)
 ))]
+#[graphql(concrete(name = "WeightTypeOrderingOptions", params(WeightTypeFields)))]
 pub struct OrderingOptions<T: InputType> {
     pub order: Ordering,
     pub order_by: T,
@@ -174,6 +177,7 @@ pub struct OrderingOptions<T: InputType> {
     name = "DispatchNoteArticleFilterOptions",
     params(DispatchNoteArticleFields)
 ))]
+#[graphql(concrete(name = "WeightTypeFilterOptions", params(WeightTypeFields)))]
 pub struct Filter<T: InputType, V: InputType = String> {
     pub field: T,
     // TODO: Make value something that implements some kind of trait
@@ -208,6 +212,7 @@ type OptionalI = Option<i32>;
     name = "DispatchNoteArticleFetchOptions",
     params(DispatchNoteArticleFields, OptionalDispatchNoteArticleIds)
 ))]
+#[graphql(concrete(name = "WeightTypeFetchOptions", params(WeightTypeFields)))]
 pub struct FetchOptions<T, I = Option<i32>, V = String, O = T>
 where
     T: InputType,
@@ -239,28 +244,33 @@ impl DataGroupAccessGuard {
 impl Guard for DataGroupAccessGuard {
     async fn check(&self, ctx: &Context<'_>) -> Result<(), async_graphql::Error> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
-        let session_data = ctx.data::<SessionData>()?;
+        // let session_data = ctx.data::<SessionData>()?;
         let transaction = db.begin().await?;
 
-        let data_group = data_group::Entity::find()
+        let id_mbe_group = data_group::Entity::find()
             .filter(data_group::Column::Id.eq(self.data_group_id))
             .one(&transaction)
             .await?
-            .ok_or(AuthError::Unauthorized)?;
-
-        let is_group_member = mbe_group_members::Entity::find()
-            .filter(mbe_group_members::Column::IdMbeUser.eq(session_data.user_id))
-            .filter(mbe_group_members::Column::IdMbeGroup.eq(data_group.id_mbe_group))
-            .one(&transaction)
-            .await?;
+            .ok_or(AuthError::Unauthorized)?
+            .id_mbe_group;
 
         transaction.commit().await?;
 
-        if is_group_member.is_some() {
-            Ok(())
-        } else {
-            Err(AuthError::Unauthorized.into())
-        }
+        MbeGroupAccessGuard::new(id_mbe_group).check(ctx).await?;
+
+        // let is_group_member = mbe_group_members::Entity::find()
+        //     .filter(mbe_group_members::Column::IdMbeUser.eq(session_data.user_id))
+        //     .filter(mbe_group_members::Column::IdMbeGroup.eq(id_mbe_group))
+        //     .one(&transaction)
+        //     .await?;
+
+        // if is_group_member.is_some() {
+        //     Ok(())
+        // } else {
+        //     Err(AuthError::Unauthorized.into())
+        // }
+
+        Ok(())
     }
 }
 
@@ -316,4 +326,37 @@ pub fn extract_session<'a>(ctx: &Context<'a>) -> Result<&'a SessionData, AuthErr
     ctx.data::<SessionData>()
         // WARN: Throwing away other errors
         .map_err(|_e| AuthError::Unauthorized)
+}
+
+pub struct MbeGroupAccessGuard {
+    id_mbe_group: i32,
+}
+
+impl MbeGroupAccessGuard {
+    pub fn new(id_mbe_group: i32) -> Self {
+        Self { id_mbe_group }
+    }
+}
+
+#[async_trait]
+impl Guard for MbeGroupAccessGuard {
+    async fn check(&self, ctx: &Context<'_>) -> Result<(), async_graphql::Error> {
+        let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
+        let session_data = ctx.data::<SessionData>()?;
+        let transaction = db.begin().await?;
+
+        let is_group_member = mbe_group_members::Entity::find()
+            .filter(mbe_group_members::Column::IdMbeUser.eq(session_data.user_id))
+            .filter(mbe_group_members::Column::IdMbeGroup.eq(self.id_mbe_group))
+            .one(&transaction)
+            .await?;
+
+        transaction.commit().await?;
+
+        if is_group_member.is_some() {
+            Ok(())
+        } else {
+            Err(AuthError::Unauthorized.into())
+        }
+    }
 }
