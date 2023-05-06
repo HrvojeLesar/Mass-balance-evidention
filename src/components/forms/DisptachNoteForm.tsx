@@ -1,5 +1,5 @@
 import { Grid, NumberInput } from "@mantine/core";
-import { DatePicker } from "@mantine/dates";
+import { DateInput, DatePicker, DatePickerInput } from "@mantine/dates";
 import moment from "moment";
 import { useContext } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -139,15 +139,12 @@ export default function DispatchNoteForm({
                                     ? new Date(value)
                                     : value;
                             return (
-                                <DatePicker
-                                    // dropdownType="modal"
-                                    inputFormat="DD.MM.YYYY"
-                                    allowFreeInput
+                                <DateInput
+                                    valueFormat="DD.MM.YYYY"
                                     locale={i18n.language}
                                     value={date}
                                     label={t("dispatchNote.issuingDate")}
                                     placeholder={t("dispatchNote.issuingDate")}
-                                    autoComplete="off"
                                     onChange={onChange}
                                     spellCheck={false}
                                 />

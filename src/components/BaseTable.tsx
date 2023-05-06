@@ -8,7 +8,7 @@ import {
     Table as MantineTable,
     TextInput,
 } from "@mantine/core";
-import { DatePicker, DateRangePicker } from "@mantine/dates";
+import { DateInput, DatePicker, DatePickerInput } from "@mantine/dates";
 import { useDebouncedState } from "@mantine/hooks";
 import { Column, flexRender, Table } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
@@ -151,12 +151,9 @@ function DateFilter<T>({ column }: FilterProps<T>) {
             />
             {!isRangePicker ? (
                 <>
-                    <DatePicker
-                        // dropdownType="modal"
-                        inputFormat="DD.MM.YYYY"
-                        allowFreeInput
+                    <DateInput
+                        valueFormat="DD.MM.YYYY"
                         locale={i18n.language}
-                        withinPortal
                         placeholder={column.columnDef.header?.toString()}
                         onChange={(date) => {
                             setFilterValue((old) => ({
@@ -165,7 +162,6 @@ function DateFilter<T>({ column }: FilterProps<T>) {
                             }));
                         }}
                         rightSectionWidth={50}
-                        autoComplete="off"
                         spellCheck={false}
                     />
                     <Select
@@ -185,11 +181,10 @@ function DateFilter<T>({ column }: FilterProps<T>) {
                     />
                 </>
             ) : (
-                <DateRangePicker
-                    // dropdownType="modal"
-                    inputFormat="DD.MM.YYYY"
+                <DatePickerInput
+                    type="range"
+                    valueFormat="DD.MM.YYYY"
                     locale={i18n.language}
-                    withinPortal
                     placeholder={column.columnDef.header?.toString()}
                     onChange={(date) => {
                         if (date[0] === null && date[1] === null) {
@@ -207,7 +202,6 @@ function DateFilter<T>({ column }: FilterProps<T>) {
                             }));
                         }
                     }}
-                    autoComplete="off"
                     spellCheck={false}
                 />
             )}
@@ -253,7 +247,7 @@ function NumberFilter<T>({ column }: FilterProps<T>) {
                 onChange={(val) => {
                     setFilterValue((old) => ({
                         ...old,
-                        value: val ?? null,
+                        value: val === "" ? null : val
                     }));
                 }}
                 placeholder={column.columnDef.header?.toString()}
@@ -331,8 +325,8 @@ export default function BaseTable<T>({
                                     onClick={
                                         header.column.getCanSort()
                                             ? () => {
-                                                  header.column.toggleSorting();
-                                              }
+                                                header.column.toggleSorting();
+                                            }
                                             : undefined
                                     }
                                     style={
@@ -352,36 +346,36 @@ export default function BaseTable<T>({
                                                     )}
                                                 </div>
                                                 {header.column.getCanSort() ===
-                                                false
+                                                    false
                                                     ? null
                                                     : {
-                                                          asc: (
-                                                              <IoMdArrowDropup
-                                                                  className={
-                                                                      classes.iconAlignment
-                                                                  }
-                                                                  size={28}
-                                                              />
-                                                          ),
-                                                          desc: (
-                                                              <IoMdArrowDropdown
-                                                                  className={
-                                                                      classes.iconAlignment
-                                                                  }
-                                                                  size={28}
-                                                              />
-                                                          ),
-                                                      }[
-                                                          header.column.getIsSorted() as string
-                                                      ] ?? (
-                                                          <IoMdArrowDropup
-                                                              className={
-                                                                  classes.iconAlignment
-                                                              }
-                                                              size={28}
-                                                              color="gray"
-                                                          />
-                                                      )}
+                                                        asc: (
+                                                            <IoMdArrowDropup
+                                                                className={
+                                                                    classes.iconAlignment
+                                                                }
+                                                                size={28}
+                                                            />
+                                                        ),
+                                                        desc: (
+                                                            <IoMdArrowDropdown
+                                                                className={
+                                                                    classes.iconAlignment
+                                                                }
+                                                                size={28}
+                                                            />
+                                                        ),
+                                                    }[
+                                                    header.column.getIsSorted() as string
+                                                    ] ?? (
+                                                        <IoMdArrowDropup
+                                                            className={
+                                                                classes.iconAlignment
+                                                            }
+                                                            size={28}
+                                                            color="gray"
+                                                        />
+                                                    )}
                                             </Flex>
                                             {header.column.getCanFilter() && (
                                                 <Filter
@@ -436,8 +430,8 @@ export default function BaseTable<T>({
                                                 flexRender(
                                                     cell.column.columnDef
                                                         .aggregatedCell ??
-                                                        cell.column.columnDef
-                                                            .cell,
+                                                    cell.column.columnDef
+                                                        .cell,
                                                     cell.getContext()
                                                 )
                                             ) : cell.getIsPlaceholder() ? null : (

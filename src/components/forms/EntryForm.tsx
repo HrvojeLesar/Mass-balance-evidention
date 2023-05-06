@@ -35,7 +35,7 @@ import {
 import moment from "moment";
 import { DataGroupContext } from "../../DataGroupProvider";
 import { Grid, Input, NumberInput, useMantineTheme } from "@mantine/core";
-import { DatePicker } from "@mantine/dates";
+import { DateInput } from "@mantine/dates";
 
 type FormInput = {
     cell: SelectOption<Cell> | undefined;
@@ -75,21 +75,21 @@ export default function EntryForm({
         defaultValues: {
             cell: edit
                 ? {
-                      value: edit.cell,
-                      label: edit.cell.name ?? undefined,
-                  }
+                    value: edit.cell,
+                    label: edit.cell.name ?? undefined,
+                }
                 : undefined,
             culture: edit
                 ? {
-                      value: edit?.culture ?? undefined,
-                      label: edit?.culture?.name ?? undefined,
-                  }
+                    value: edit?.culture ?? undefined,
+                    label: edit?.culture?.name ?? undefined,
+                }
                 : undefined,
             buyer: edit
                 ? {
-                      value: edit?.buyer ?? undefined,
-                      label: edit?.buyer?.name ?? undefined,
-                  }
+                    value: edit?.buyer ?? undefined,
+                    label: edit?.buyer?.name ?? undefined,
+                }
                 : undefined,
             date: edit
                 ? moment(edit.date as Date).format("YYYY-MM-DD")
@@ -175,9 +175,9 @@ export default function EntryForm({
             edit === undefined
                 ? undefined
                 : ({
-                      value: edit?.cell,
-                      label: edit?.cell?.name ?? "",
-                  } as SelectOption<Cell>),
+                    value: edit?.cell,
+                    label: edit?.cell?.name ?? "",
+                } as SelectOption<Cell>),
         page: 1,
         pages: {},
         limit: LIMIT,
@@ -192,9 +192,9 @@ export default function EntryForm({
             edit === undefined
                 ? undefined
                 : ({
-                      value: edit?.culture,
-                      label: edit?.culture?.name ?? "",
-                  } as SelectOption<Culture>),
+                    value: edit?.culture,
+                    label: edit?.culture?.name ?? "",
+                } as SelectOption<Culture>),
         page: 1,
         pages: {},
         limit: LIMIT,
@@ -209,9 +209,9 @@ export default function EntryForm({
             edit === undefined
                 ? undefined
                 : ({
-                      value: edit?.buyer,
-                      label: edit?.buyer?.name ?? "",
-                  } as SelectOption<Buyer>),
+                    value: edit?.buyer,
+                    label: edit?.buyer?.name ?? "",
+                } as SelectOption<Buyer>),
         page: 1,
         pages: {},
         limit: LIMIT,
@@ -254,11 +254,11 @@ export default function EntryForm({
                     filters:
                         cellSelectState.filter !== ""
                             ? [
-                                  {
-                                      value: cellSelectState.filter,
-                                      field: CellFields.Name,
-                                  },
-                              ]
+                                {
+                                    value: cellSelectState.filter,
+                                    field: CellFields.Name,
+                                },
+                            ]
                             : undefined,
                     dGroup: dataGroupContextValue.selectedGroup ?? -1,
                 },
@@ -291,11 +291,11 @@ export default function EntryForm({
                     filters:
                         cultureSelectState.filter !== ""
                             ? [
-                                  {
-                                      value: cultureSelectState.filter,
-                                      field: CultureFields.Name,
-                                  },
-                              ]
+                                {
+                                    value: cultureSelectState.filter,
+                                    field: CultureFields.Name,
+                                },
+                            ]
                             : undefined,
                     dGroup: dataGroupContextValue.selectedGroup ?? -1,
                 },
@@ -325,11 +325,11 @@ export default function EntryForm({
                 filters:
                     buyerSelectState.filter !== ""
                         ? [
-                              {
-                                  value: buyerSelectState.filter,
-                                  field: BuyerFields.Name,
-                              },
-                          ]
+                            {
+                                value: buyerSelectState.filter,
+                                field: BuyerFields.Name,
+                            },
+                        ]
                         : undefined,
                 dGroup: dataGroupContextValue.selectedGroup ?? -1,
             },
@@ -464,15 +464,15 @@ export default function EntryForm({
                                     }}
                                     onMenuScrollToBottom={
                                         cultureSelectState.page <
-                                        cultureSelectState.maxPage
+                                            cultureSelectState.maxPage
                                             ? () => {
-                                                  setCultureSelectState(
-                                                      (old) => ({
-                                                          ...old,
-                                                          page: old.page + 1,
-                                                      })
-                                                  );
-                                              }
+                                                setCultureSelectState(
+                                                    (old) => ({
+                                                        ...old,
+                                                        page: old.page + 1,
+                                                    })
+                                                );
+                                            }
                                             : undefined
                                     }
                                     onInputChange={(value, actionMeta) => {
@@ -543,13 +543,13 @@ export default function EntryForm({
                                     }}
                                     onMenuScrollToBottom={
                                         cellSelectState.page <
-                                        cellSelectState.maxPage
+                                            cellSelectState.maxPage
                                             ? () => {
-                                                  setCellSelectState((old) => ({
-                                                      ...old,
-                                                      page: old.page + 1,
-                                                  }));
-                                              }
+                                                setCellSelectState((old) => ({
+                                                    ...old,
+                                                    page: old.page + 1,
+                                                }));
+                                            }
                                             : undefined
                                     }
                                     onInputChange={(value, actionMeta) => {
@@ -635,15 +635,15 @@ export default function EntryForm({
                                     }}
                                     onMenuScrollToBottom={
                                         buyerSelectState.page <
-                                        buyerSelectState.maxPage
+                                            buyerSelectState.maxPage
                                             ? () => {
-                                                  setBuyerSelectState(
-                                                      (old) => ({
-                                                          ...old,
-                                                          page: old.page + 1,
-                                                      })
-                                                  );
-                                              }
+                                                setBuyerSelectState(
+                                                    (old) => ({
+                                                        ...old,
+                                                        page: old.page + 1,
+                                                    })
+                                                );
+                                            }
                                             : undefined
                                     }
                                     onInputChange={(value, actionMeta) => {
@@ -681,10 +681,8 @@ export default function EntryForm({
                                     ? new Date(value)
                                     : value;
                             return (
-                                <DatePicker
-                                    inputFormat="DD.MM.YYYY"
-                                    // dropdownType="modal"
-                                    allowFreeInput
+                                <DateInput
+                                    valueFormat="DD.MM.YYYY"
                                     locale={i18n.language}
                                     value={date}
                                     label={t("entry.date")}
