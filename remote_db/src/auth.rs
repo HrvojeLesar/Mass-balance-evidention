@@ -38,7 +38,7 @@ pub struct LoginRedirectUriParams {
 }
 
 impl Platform {
-    fn as_str<'a>(&'a self) -> &'a str {
+    fn as_str(&self) -> &str {
         match self {
             Platform::Tauri => "tauri",
             Platform::Web => "web",

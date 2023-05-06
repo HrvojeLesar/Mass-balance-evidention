@@ -25,7 +25,7 @@ pub mod dispatch_note;
 pub mod dispatch_note_article;
 pub mod entry;
 pub mod graphql_schema;
-pub mod weight_types;
+pub mod weight_type;
 
 const MAX_PAGE_SIZE: u64 = 100;
 const DEFAULT_PAGE_SIZE: u64 = 10;

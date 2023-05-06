@@ -36,7 +36,6 @@ use seaorm_models::graphql_schema::{MutationRoot, QueryRoot};
 
 use crate::auth::SessionData;
 
-// mod models;
 mod auth;
 mod http_response_errors;
 mod redis_csrf_cache;

@@ -136,6 +136,7 @@ impl From<DataGroupFields> for Column {
     }
 }
 
+#[allow(clippy::derivable_impls)]
 impl Default for Column {
     fn default() -> Self {
         Column::Id
