@@ -29,10 +29,10 @@ pub struct Model {
     pub id: i32,
     pub id_dispatch_note: i32,
     pub id_article: i32,
-    pub weight_type: Option<String>,
     pub quantity: f64,
     pub created_at: DateTimeWithTimeZone,
     pub d_group: i32,
+    pub weight_type: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -62,13 +62,13 @@ pub enum Relation {
     )]
     DispatchNote,
     #[sea_orm(
-        belongs_to = "super::weight_types::Entity",
+        belongs_to = "super::weight_type::Entity",
         from = "Column::WeightType",
-        to = "super::weight_types::Column::Id",
+        to = "super::weight_type::Column::Id",
         on_update = "NoAction",
         on_delete = "NoAction"
     )]
-    WeightTypes,
+    WeightType,
 }
 
 impl Related<super::article::Entity> for Entity {
@@ -89,9 +89,9 @@ impl Related<super::dispatch_note::Entity> for Entity {
     }
 }
 
-impl Related<super::weight_types::Entity> for Entity {
+impl Related<super::weight_type::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::WeightTypes.def()
+        Relation::WeightType.def()
     }
 }
 
@@ -105,6 +105,7 @@ pub enum DispatchNoteArticleFields {
     Quantity,
 }
 
+#[allow(clippy::derivable_impls)]
 impl Default for Column {
     fn default() -> Self {
         Column::IdArticle
@@ -124,14 +125,13 @@ impl GetDataGroupColumnTrait<Column> for Entity {
 pub struct DispatchNoteArticleIds {
     pub id_dispatch_note: Option<i32>,
     pub id_article: Option<i32>,
-    // pub d_group: Option<i32>,
 }
 
 #[derive(InputObject)]
 pub struct DispatchNoteArticleInsertOptions {
     pub id_dispatch_note: i32,
     pub id_article: i32,
-    pub weight_type: Option<String>,
+    pub weight_type: i32,
     pub quantity: f64,
     pub d_group: i32,
 }
@@ -141,7 +141,7 @@ pub struct DispatchNoteArticleUpdateOptions {
     pub id: i32,
     pub id_dispatch_note: Option<i32>,
     pub id_article: Option<i32>,
-    pub weight_type: Option<String>,
+    pub weight_type: Option<i32>,
     pub quantity: Option<f64>,
 }
 
@@ -156,7 +156,6 @@ pub struct DispatchNoteArticleFlattened {
     pub id: i32,
 
     pub id_dispatch_note: i32,
-    pub weight_type: Option<String>,
     pub quantity: f64,
     pub created_at: DateTimeWithTimeZone,
     pub d_group: i32,
@@ -178,6 +177,11 @@ pub struct DispatchNoteArticleFlattened {
     pub description_d_group: Option<String>,
     pub created_at_d_group: DateTimeWithTimeZone,
     pub id_mbe_group: i32,
+
+    pub id_weight_type: i32,
+    pub unit_short: String,
+    pub unit: String,
+    pub created_at_weight_type: DateTimeWithTimeZone,
 }
 
 #[derive(Debug, SimpleObject)]
@@ -185,7 +189,7 @@ pub struct DispatchNoteArticle {
     pub id: i32,
     pub dispatch_note: super::dispatch_note::Model,
     pub article: super::article::Model,
-    pub weight_type: Option<String>,
+    pub weight_type: super::weight_type::Model,
     pub quantity: f64,
     pub created_at: DateTimeWithTimeZone,
     pub d_group: super::data_group::Model,
@@ -202,7 +206,6 @@ impl From<QueryResultsHelperType<DispatchNoteArticleFlattened>>
                 .map(|flat| DispatchNoteArticle {
                     id: flat.id,
                     quantity: flat.quantity,
-                    weight_type: flat.weight_type,
                     created_at: flat.created_at,
                     dispatch_note: super::dispatch_note::Model {
                         id: flat.id_dispatch_note,
@@ -218,6 +221,12 @@ impl From<QueryResultsHelperType<DispatchNoteArticleFlattened>>
                         description: flat.description_article,
                         created_at: flat.created_at_article,
                         d_group: flat.d_group_article,
+                    },
+                    weight_type: super::weight_type::Model {
+                        id: flat.id_weight_type,
+                        unit_short: flat.unit_short,
+                        unit: flat.unit,
+                        created_at: flat.created_at_weight_type,
                     },
                     d_group: super::data_group::Model {
                         id: flat.id_d_group,
@@ -263,6 +272,7 @@ impl QueryDatabase for Entity {
             .inner_join(super::article::Entity)
             .inner_join(super::dispatch_note::Entity)
             .inner_join(super::data_group::Entity)
+            .inner_join(super::weight_type::Entity)
             .column_as(super::article::Column::Id, "id_article")
             .column_as(super::article::Column::Name, "name_article")
             .column_as(super::article::Column::Description, "description_article")
@@ -297,6 +307,13 @@ impl QueryDatabase for Entity {
             )
             .column_as(super::data_group::Column::CreatedAt, "created_at_d_group")
             .column_as(super::data_group::Column::IdMbeGroup, "id_mbe_group")
+            .column_as(super::weight_type::Column::Id, "id_weight_type")
+            .column_as(super::weight_type::Column::UnitShort, "unit_short")
+            .column_as(super::weight_type::Column::Unit, "unit")
+            .column_as(
+                super::weight_type::Column::CreatedAt,
+                "created_at_weight_type",
+            )
     }
 
     async fn delete_query(
@@ -389,7 +406,7 @@ impl QueryDatabase for Entity {
                 .map_or(ActiveValue::NotSet, ActiveValue::Set),
             weight_type: options
                 .weight_type
-                .map_or(ActiveValue::NotSet, |val| ActiveValue::Set(Some(val))),
+                .map_or(ActiveValue::NotSet, ActiveValue::Set),
             quantity: options
                 .quantity
                 .map_or(ActiveValue::NotSet, ActiveValue::Set),
@@ -405,7 +422,6 @@ impl QueryDatabase for Entity {
                 id: Some(DispatchNoteArticleIds {
                     id_dispatch_note: Some(res.id_dispatch_note),
                     id_article: Some(res.id_article),
-                    // d_group: res.d_group,
                 }),
                 page_size: None,
                 page: None,

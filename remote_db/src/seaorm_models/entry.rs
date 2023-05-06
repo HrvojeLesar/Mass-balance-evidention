@@ -29,12 +29,12 @@ pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
     pub weight: Option<f64>,
-    pub weight_type: Option<String>,
     pub date: Date,
     pub created_at: DateTimeWithTimeZone,
     pub id_buyer: i32,
     pub id_cell_culture_pair: i32,
     pub d_group: i32,
+    pub weight_type: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -64,13 +64,13 @@ pub enum Relation {
     )]
     DataGroup,
     #[sea_orm(
-        belongs_to = "super::weight_types::Entity",
+        belongs_to = "super::weight_type::Entity",
         from = "Column::WeightType",
-        to = "super::weight_types::Column::Id",
+        to = "super::weight_type::Column::Id",
         on_update = "NoAction",
         on_delete = "NoAction"
     )]
-    WeightTypes,
+    WeightType,
 }
 
 impl Related<super::buyer::Entity> for Entity {
@@ -91,14 +91,15 @@ impl Related<super::data_group::Entity> for Entity {
     }
 }
 
-impl Related<super::weight_types::Entity> for Entity {
+impl Related<super::weight_type::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::WeightTypes.def()
+        Relation::WeightType.def()
     }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
 
+#[allow(clippy::derivable_impls)]
 impl Default for Column {
     fn default() -> Self {
         Self::Id
@@ -109,11 +110,10 @@ impl Default for Column {
 pub struct EntryInsertOptions {
     pub date: DateTimeWithTimeZone,
     pub weight: Option<f64>,
-    pub weight_type: Option<String>,
+    pub weight_type: i32,
     pub id_buyer: i32,
     pub id_cell: i32,
     pub id_culture: i32,
-    // pub id_cell_culture_pair: i32,
     pub d_group: i32,
 }
 
@@ -127,7 +127,7 @@ pub struct PairIds {
 pub struct EntryUpdateOptions {
     pub id: i32,
     pub weight: Option<f64>,
-    pub weight_type: Option<String>,
+    pub weight_type: Option<i32>,
     pub date: Option<DateTimeWithTimeZone>,
     pub id_buyer: Option<i32>,
     pub pair_ids: Option<PairIds>,
@@ -152,7 +152,6 @@ pub enum EntryFields {
 pub struct EntryFlattened {
     pub id: i32,
     pub weight: Option<f64>,
-    pub weight_type: Option<String>,
     pub date: Date,
     pub created_at: DateTimeWithTimeZone,
     pub d_group: i32,
@@ -181,20 +180,25 @@ pub struct EntryFlattened {
     pub description_d_group: Option<String>,
     pub created_at_d_group: DateTimeWithTimeZone,
     pub id_mbe_group: i32,
+
+    pub id_weight_type: i32,
+    pub unit_short: String,
+    pub unit: String,
+    pub created_at_weight_type: DateTimeWithTimeZone,
 }
 
 #[derive(Debug, SimpleObject)]
 pub struct Entry {
     pub id: i32,
     pub weight: Option<f64>,
-    pub weight_type: Option<String>,
     pub date: Date,
     pub created_at: DateTimeWithTimeZone,
 
-    pub buyer: Option<super::buyer::Model>,
+    pub buyer: super::buyer::Model,
     pub cell: super::cell::Model,
     pub culture: super::culture::Model,
-    pub d_group: Option<super::data_group::Model>,
+    pub weight_type: super::weight_type::Model,
+    pub d_group: super::data_group::Model,
 }
 
 #[derive(Debug, SimpleObject)]
@@ -212,17 +216,16 @@ impl From<QueryResultsHelperType<EntryFlattened>> for QueryResults<Entry> {
                 .map(|flat| Entry {
                     id: flat.id,
                     weight: flat.weight,
-                    weight_type: flat.weight_type,
                     date: flat.date,
                     created_at: flat.created_at,
-                    buyer: Some(super::buyer::Model {
+                    buyer: super::buyer::Model {
                         id: flat.id_buyer,
                         name: flat.name_buyer,
                         address: flat.address_buyer,
                         contact: flat.contact_buyer,
                         created_at: flat.created_at_buyer,
                         d_group: flat.d_group_buyer,
-                    }),
+                    },
                     cell: super::cell::Model {
                         id: flat.id_cell,
                         name: flat.name_cell,
@@ -237,13 +240,19 @@ impl From<QueryResultsHelperType<EntryFlattened>> for QueryResults<Entry> {
                         created_at: flat.created_at_culture,
                         d_group: flat.d_group_culture,
                     },
-                    d_group: Some(super::data_group::Model {
+                    weight_type: super::weight_type::Model {
+                        id: flat.id_weight_type,
+                        unit_short: flat.unit_short,
+                        unit: flat.unit,
+                        created_at: flat.created_at_weight_type,
+                    },
+                    d_group: super::data_group::Model {
                         id: flat.id_d_group,
                         name: flat.name_d_group,
                         description: flat.description_d_group,
                         created_at: flat.created_at_d_group,
                         id_mbe_group: flat.id_mbe_group,
-                    }),
+                    },
                 })
                 .collect(),
             pagination: Pagination {
@@ -298,6 +307,7 @@ impl QueryDatabase for Entity {
                 JoinType::InnerJoin,
                 super::cell_culture_pair::Relation::Cell.def(),
             )
+            .inner_join(super::weight_type::Entity)
             .column_as(super::buyer::Column::Id, "id_buyer")
             .column_as(super::buyer::Column::Name, "name_buyer")
             .column_as(super::buyer::Column::Address, "address_buyer")
@@ -322,6 +332,13 @@ impl QueryDatabase for Entity {
             )
             .column_as(super::data_group::Column::CreatedAt, "created_at_d_group")
             .column_as(super::data_group::Column::IdMbeGroup, "id_mbe_group")
+            .column_as(super::weight_type::Column::Id, "id_weight_type")
+            .column_as(super::weight_type::Column::UnitShort, "unit_short")
+            .column_as(super::weight_type::Column::Unit, "unit")
+            .column_as(
+                super::weight_type::Column::CreatedAt,
+                "created_at_weight_type",
+            )
     }
 
     async fn delete_query(
@@ -477,7 +494,7 @@ impl QueryDatabase for Entity {
                 .map_or(ActiveValue::NotSet, |val| ActiveValue::Set(Some(val))),
             weight_type: options
                 .weight_type
-                .map_or(ActiveValue::NotSet, |val| ActiveValue::Set(Some(val))),
+                .map_or(ActiveValue::NotSet, ActiveValue::Set),
             date: options.date.map_or(ActiveValue::NotSet, |val| {
                 ActiveValue::Set(val.date_naive())
             }),
@@ -605,17 +622,16 @@ impl EntryQuery {
                 .map(|flat| Entry {
                     id: flat.id,
                     weight: flat.weight,
-                    weight_type: flat.weight_type,
                     date: flat.date,
                     created_at: flat.created_at,
-                    buyer: Some(super::buyer::Model {
+                    buyer: super::buyer::Model {
                         id: flat.id_buyer,
                         name: flat.name_buyer,
                         address: flat.address_buyer,
                         contact: flat.contact_buyer,
                         created_at: flat.created_at_buyer,
                         d_group: flat.d_group_buyer,
-                    }),
+                    },
                     cell: super::cell::Model {
                         id: flat.id_cell,
                         name: flat.name_cell,
@@ -630,13 +646,19 @@ impl EntryQuery {
                         created_at: flat.created_at_culture,
                         d_group: flat.d_group_culture,
                     },
-                    d_group: Some(super::data_group::Model {
+                    weight_type: super::weight_type::Model {
+                        id: flat.id_weight_type,
+                        unit_short: flat.unit_short,
+                        unit: flat.unit,
+                        created_at: flat.created_at_weight_type,
+                    },
+                    d_group: super::data_group::Model {
                         id: flat.id_d_group,
                         name: flat.name_d_group,
                         description: flat.description_d_group,
                         created_at: flat.created_at_d_group,
                         id_mbe_group: flat.id,
-                    }),
+                    },
                 })
                 .collect(),
         })
