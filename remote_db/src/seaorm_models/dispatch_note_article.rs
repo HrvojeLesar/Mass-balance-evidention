@@ -16,7 +16,7 @@ use super::{
         DataGroupAccessGuard, DeleteOptions, FetchOptions, Filter, OrderingOptions, Pagination,
         QueryResults, UpdateDeleteGuard,
     },
-    GetDataGroupColumnTrait, GetEntityDataGroupId, GetEntityId, QueryDatabase,
+    GetEntityDataGroupColumnTrait, GetEntityDataGroupId, GetEntityId, QueryDatabase,
     QueryResultsHelperType, RowsDeleted,
 };
 
@@ -108,16 +108,13 @@ pub enum DispatchNoteArticleFields {
 #[allow(clippy::derivable_impls)]
 impl Default for Column {
     fn default() -> Self {
-        Column::IdArticle
+        Column::Id
     }
 }
 
-impl GetDataGroupColumnTrait<Column> for Entity {
+impl GetEntityDataGroupColumnTrait<Column> for Entity {
     fn get_data_group_column() -> Column {
         Column::DGroup
-    }
-    fn get_id_column() -> Column {
-        Column::IdArticle
     }
 }
 

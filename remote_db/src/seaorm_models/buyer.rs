@@ -17,7 +17,7 @@ use super::{
         DataGroupAccessGuard, DeleteOptions, FetchOptions, Filter, OrderingOptions,
         UpdateDeleteGuard,
     },
-    GetDataGroupColumnTrait, GetEntityDataGroupId, GetEntityId, QueryDatabase, QueryResults,
+    GetEntityDataGroupColumnTrait, GetEntityDataGroupId, GetEntityId, QueryDatabase, QueryResults,
     RowsDeleted,
 };
 
@@ -91,12 +91,9 @@ impl Default for Column {
     }
 }
 
-impl GetDataGroupColumnTrait<Column> for Entity {
+impl GetEntityDataGroupColumnTrait<Column> for Entity {
     fn get_data_group_column() -> Column {
         Column::DGroup
-    }
-    fn get_id_column() -> Column {
-        Column::Id
     }
 }
 

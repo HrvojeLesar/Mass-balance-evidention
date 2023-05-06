@@ -91,7 +91,7 @@ where
 #[async_trait]
 pub trait QueryDatabase
 where
-    Self: EntityTrait + GetDataGroupColumnTrait<<Self as EntityTrait>::Column>,
+    Self: EntityTrait,
     <Self as EntityTrait>::Model: Sync,
     <Self as EntityTrait>::Column: Default,
     Filter<Self::InputFields, Self::FilterValueType>: InputType,
@@ -221,15 +221,6 @@ pub trait QueryResultsTrait<T> {
     fn get_results(&self) -> &[T];
 }
 
-pub trait GetDataGroupColumnTrait<T>
-where
-    Self: EntityTrait,
-    T: ColumnTrait,
-{
-    fn get_data_group_column() -> T;
-    fn get_id_column() -> T;
-}
-
 fn calculate_page_size(page_size: Option<u64>) -> u64 {
     let page_size = page_size.unwrap_or(DEFAULT_PAGE_SIZE);
     if page_size < MAX_PAGE_SIZE {
@@ -270,7 +261,9 @@ pub fn common_add_id_and_data_group_filters<E, T, V>(
     fetch_options: &FetchOptions<T, Option<i32>, V>,
 ) -> Select<E>
 where
-    E: EntityTrait + GetDataGroupColumnTrait<<E as EntityTrait>::Column>,
+    E: EntityTrait
+        + GetEntityId<<E as EntityTrait>::Column>
+        + GetEntityDataGroupColumnTrait<<E as EntityTrait>::Column>,
     T: InputType,
     V: InputType,
     OrderingOptions<T>: InputType,
@@ -289,6 +282,14 @@ where
     T: ColumnTrait,
 {
     fn get_id_column() -> T;
+}
+
+pub trait GetEntityDataGroupColumnTrait<T>
+where
+    Self: EntityTrait,
+    T: ColumnTrait,
+{
+    fn get_data_group_column() -> T;
 }
 
 pub trait GetEntityDataGroupId

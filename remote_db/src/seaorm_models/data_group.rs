@@ -18,7 +18,7 @@ use super::{
     graphql_schema::{
         extract_session, DataGroupAccessGuard, DeleteOptions, FetchOptions, Filter, OrderingOptions,
     },
-    GetDataGroupColumnTrait, QueryDatabase, QueryResults, RowsDeleted,
+    GetEntityDataGroupColumnTrait, GetEntityId, QueryDatabase, QueryResults, RowsDeleted,
 };
 use anyhow::Result;
 
@@ -143,11 +143,8 @@ impl Default for Column {
     }
 }
 
-impl GetDataGroupColumnTrait<Column> for Entity {
+impl GetEntityDataGroupColumnTrait<Column> for Entity {
     fn get_data_group_column() -> Column {
-        Column::Id
-    }
-    fn get_id_column() -> Column {
         Column::Id
     }
 }
@@ -320,5 +317,11 @@ impl DataGroupMutation {
     ) -> Result<RowsDeleted> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::delete_entity(db, options).await
+    }
+}
+
+impl GetEntityId<Column> for Entity {
+    fn get_id_column() -> Column {
+        Column::Id
     }
 }
