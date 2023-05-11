@@ -1,8 +1,6 @@
 use anyhow::Result;
 use async_graphql::{Context, InputObject, Object, SimpleObject};
-use sea_orm::{
-    entity::prelude::*, ActiveValue, DbBackend, QuerySelect, Statement, TransactionTrait,
-};
+use sea_orm::{entity::prelude::*, ActiveValue, DbBackend, Statement, TransactionTrait};
 use serde::{Deserialize, Serialize};
 
 use crate::{seaorm_models::graphql_schema::extract_session, SeaOrmPool};

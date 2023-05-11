@@ -35,7 +35,7 @@ use super::{
         DispatchNoteArticleQuery,
     },
     entry::{EntryFields, EntryMutation, EntryQuery},
-    weight_type::WeightTypeFields,
+    weight_type::{WeightTypeDeleteOptions, WeightTypeFields, WeightTypeMutation, WeightTypeQuery},
     GetEntityDataGroupId, GetEntityId, QueryResultsTrait,
 };
 
@@ -82,6 +82,7 @@ pub struct QueryRoot(
     DispatchNoteArticleQuery,
     MbeGroupQuery,
     MbeGroupMembersQuery,
+    WeightTypeQuery,
 );
 
 #[derive(MergedObject, Default)]
@@ -98,6 +99,7 @@ pub struct MutationRoot(
     MbeGroupMutation,
     MbeGroupMembersMutation,
     MbeUserMutation,
+    WeightTypeMutation,
 );
 
 #[derive(SimpleObject, Debug)]
@@ -134,6 +136,7 @@ where
 
 #[derive(InputObject)]
 #[graphql(concrete(name = "DeleteOptions", params()))]
+#[graphql(concrete(name = "DeleteOptionsWeightType", params(WeightTypeDeleteOptions)))]
 pub struct DeleteOptions<T: InputType = i32> {
     pub id: T,
 }
@@ -212,7 +215,6 @@ type OptionalI = Option<i32>;
     name = "DispatchNoteArticleFetchOptions",
     params(DispatchNoteArticleFields, OptionalDispatchNoteArticleIds)
 ))]
-#[graphql(concrete(name = "WeightTypeFetchOptions", params(WeightTypeFields)))]
 pub struct FetchOptions<T, I = Option<i32>, V = String, O = T>
 where
     T: InputType,
@@ -228,6 +230,24 @@ where
     pub ordering: Option<OrderingOptions<O>>,
     pub filters: Option<Vec<Filter<T, V>>>,
     pub d_group: i32,
+}
+
+#[derive(InputObject)]
+#[graphql(concrete(name = "WeightTypeFetchOptions", params(WeightTypeFields)))]
+pub struct WeightTypeFetchOptions<T, V = String, O = T>
+where
+    T: InputType,
+    O: InputType,
+    V: InputType,
+    Filter<T, V>: InputType,
+    OrderingOptions<O>: InputType,
+{
+    pub id: Option<i32>,
+    pub page_size: Option<u64>,
+    pub page: Option<u64>,
+    pub ordering: Option<OrderingOptions<O>>,
+    pub filters: Option<Vec<Filter<T, V>>>,
+    pub mbe_group_id: i32,
 }
 
 pub struct DataGroupAccessGuard {

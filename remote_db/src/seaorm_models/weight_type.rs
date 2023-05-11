@@ -9,17 +9,17 @@ use sea_orm::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    seaorm_models::graphql_schema::{extract_session, DataGroupAccessGuard},
-    user_models::mbe_groups_weight_types,
+    seaorm_models::graphql_schema::extract_session, user_models::mbe_groups_weight_types,
     SeaOrmPool,
 };
 
 use super::{
-    common_add_id_and_data_group_filters, common_add_ordering,
+    calculate_page_size, common_add_ordering,
     graphql_schema::{
         DeleteOptions, FetchOptions, Filter, MbeGroupAccessGuard, OrderingOptions, QueryResults,
+        WeightTypeFetchOptions,
     },
-    GetEntityDataGroupColumnTrait, QueryDatabase,
+    Page, PageSize, QueryDatabase, QueryResultsHelperType, RowsDeleted,
 };
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, SimpleObject)]
@@ -105,6 +105,32 @@ pub struct WeightTypeUpdateOptions {
     pub id: i32,
     pub unit_short: Option<String>,
     pub unit: Option<String>,
+    pub mbe_group: i32,
+}
+
+#[derive(InputObject)]
+pub struct WeightTypeDeleteOptions {
+    id: i32,
+    mbe_group: i32,
+}
+
+// #[derive(InputObject)]
+// pub struct WeightTypeDeleteOptionsExt {
+//     id: i32,
+//     mbe_group: i32,
+//     id_created_by: i32,
+// }
+
+impl Entity {
+    fn add_id_filter(
+        mut query: Select<Self>,
+        fetch_options: &WeightTypeFetchOptions<WeightTypeFields>,
+    ) -> Select<Self> {
+        if let Some(id) = fetch_options.id {
+            query = query.filter(Column::Id.eq(id));
+        }
+        query
+    }
 }
 
 #[async_trait]
@@ -121,17 +147,48 @@ impl QueryDatabase for Entity {
 
     type InputFields = WeightTypeFields;
 
-    type DeleteOptionsType = i32;
+    type DeleteOptionsType = WeightTypeDeleteOptions;
 
     type FetchIdType = Option<i32>;
 
     type FilterValueType = String;
 
+    async fn fetch(
+        _db: &DatabaseConnection,
+        _fetch_options: FetchOptions<Self::InputFields, Self::FetchIdType, Self::FilterValueType>,
+    ) -> Result<Self::QueryResultType>
+    where
+        Self::QueryResultType: From<QueryResultsHelperType<Self::FetchModel>>,
+    {
+        unimplemented!(
+            "Function should not be used.
+             Trait is too limited to express needed arguments for
+             fetching proper weight_types using this function.
+             Manual implementation done in graphql fetch function."
+        )
+    }
+
     async fn delete_query(
         transaction: &DatabaseTransaction,
         options: DeleteOptions<Self::DeleteOptionsType>,
     ) -> Result<DeleteResult> {
-        Ok(Self::delete_by_id(options.id).exec(transaction).await?)
+        // TODO: user with proper permissions should be able to delete the weight type not only the
+        // owner (user that created the type)
+        // TODO: below
+        // unimplemented!("Implement proper permissions for deletion when it comes to mbe groups")
+        let model = ActiveModel {
+            id: ActiveValue::Set(options.id.id),
+            ..Default::default()
+        };
+
+        let join_table_model = mbe_groups_weight_types::ActiveModel {
+            id_mbe_group: ActiveValue::Set(options.id.mbe_group),
+            id_weight_type: ActiveValue::Set(options.id.id),
+            ..Default::default()
+        };
+
+        join_table_model.delete(transaction).await?;
+        Ok(model.delete(transaction).await?)
     }
 
     fn add_ordering(
@@ -217,14 +274,36 @@ pub struct WeightTypeQuery;
 
 #[Object]
 impl WeightTypeQuery {
-    #[graphql(guard = "DataGroupAccessGuard::new(options.d_group)")]
+    #[graphql(guard = "MbeGroupAccessGuard::new(options.mbe_group_id)")]
     async fn weight_types(
         &self,
         ctx: &Context<'_>,
-        options: FetchOptions<WeightTypeFields>,
+        options: WeightTypeFetchOptions<WeightTypeFields>,
     ) -> Result<QueryResults<Model>> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
-        Entity::fetch(db, options).await
+
+        let page_size = PageSize(calculate_page_size(options.page_size));
+        let page: Page = options.page.into();
+
+        let mut query = Entity::get_query()
+            .inner_join(crate::user_models::mbe_groups_weight_types::Entity)
+            .filter(
+                crate::user_models::mbe_groups_weight_types::Column::IdMbeGroup
+                    .eq(options.mbe_group_id),
+            );
+
+        query = Entity::add_id_filter(query, &options);
+        query = Entity::add_ordering(query, options.ordering);
+        query = Entity::add_filters(query, options.filters);
+
+        let transaction = db.begin().await?;
+
+        let paginator = Entity::paginate_query(query, &transaction, page_size);
+        let res = paginator.fetch_page(page.index).await?;
+        let num_items_and_pages = paginator.num_items_and_pages().await?;
+
+        transaction.commit().await?;
+        Ok((res, num_items_and_pages, page, page_size).into())
     }
 }
 
@@ -249,5 +328,25 @@ impl WeightTypeMutation {
             },
         )
         .await
+    }
+
+    #[graphql(guard = "MbeGroupAccessGuard::new(options.mbe_group)")]
+    async fn update_weight_types(
+        &self,
+        ctx: &Context<'_>,
+        options: WeightTypeUpdateOptions,
+    ) -> Result<Model> {
+        let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
+        Entity::update_entity(db, options).await
+    }
+
+    #[graphql(guard = "MbeGroupAccessGuard::new(options.id.mbe_group)")]
+    async fn delete_weight_types(
+        &self,
+        ctx: &Context<'_>,
+        options: DeleteOptions<WeightTypeDeleteOptions>,
+    ) -> Result<RowsDeleted> {
+        let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
+        Entity::delete_entity(db, options).await
     }
 }
