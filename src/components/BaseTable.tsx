@@ -8,7 +8,7 @@ import {
     Table as MantineTable,
     TextInput,
 } from "@mantine/core";
-import { DateInput, DatePicker, DatePickerInput } from "@mantine/dates";
+import { DateInput, DatePickerInput } from "@mantine/dates";
 import { useDebouncedState } from "@mantine/hooks";
 import { Column, flexRender, Table } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
