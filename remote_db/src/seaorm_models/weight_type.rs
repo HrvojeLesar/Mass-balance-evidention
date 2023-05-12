@@ -89,7 +89,6 @@ impl Default for Column {
 
 #[derive(InputObject)]
 pub struct WeightTypeInsertOptions {
-    pub id: i32,
     pub unit_short: String,
     pub unit: String,
     pub mbe_group: i32,

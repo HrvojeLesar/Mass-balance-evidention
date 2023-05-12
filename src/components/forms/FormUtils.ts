@@ -1,7 +1,7 @@
 import { MantineTheme } from "@mantine/core";
 import { Dispatch, SetStateAction } from "react";
 import { ActionMeta, MultiValue, SingleValue } from "react-select";
-import { Article, Buyer, Cell, Culture, Exact } from "../../generated/graphql";
+import { Article, Buyer, Cell, Culture, Exact, WeightType } from "../../generated/graphql";
 
 export const DEBOUNCE_TIME = 350;
 
@@ -51,6 +51,27 @@ export const makeOptions = <T extends Cell | Culture | Buyer | Article>(
                 options.push({
                     value: res,
                     label: res.name ?? "",
+                });
+            });
+        }
+    }
+    return options;
+};
+
+// WARN: very dirty way of doing this
+// TODO: REMOVE THIS garbage
+export const makeOptionsDirty = <T extends WeightType>(
+    currentPage: number,
+    pages: Record<number, T[]>
+) => {
+    const options: SelectOption<T>[] = [];
+    for (let i = 0; i <= currentPage; i++) {
+        const results: T[] | undefined = pages[i];
+        if (results) {
+            results.forEach((res) => {
+                options.push({
+                    value: res,
+                    label: `${res.unit} (${res.unitShort})`
                 });
             });
         }
