@@ -351,6 +351,10 @@ input DeleteOptions {
 	id: Int!
 }
 
+input DeleteOptionsWeightType {
+	id: WeightTypeDeleteOptions!
+}
+
 type DispatchNote {
 	id: Int!
 	noteType: Int
@@ -364,7 +368,7 @@ type DispatchNoteArticle {
 	id: Int!
 	dispatchNote: DispatchNote!
 	article: Article!
-	weightType: String
+	weightType: WeightType!
 	quantity: Float!
 	createdAt: DateTime!
 	dGroup: DataGroup!
@@ -399,7 +403,7 @@ input DispatchNoteArticleIds {
 input DispatchNoteArticleInsertOptions {
 	idDispatchNote: Int!
 	idArticle: Int!
-	weightType: String
+	weightType: Int!
 	quantity: Float!
 	dGroup: Int!
 }
@@ -421,7 +425,7 @@ input DispatchNoteArticleUpdateOptions {
 	id: Int!
 	idDispatchNote: Int
 	idArticle: Int
-	weightType: String
+	weightType: Int
 	quantity: Float
 }
 
@@ -485,13 +489,13 @@ input DispatchNoteUpdateOptions {
 type Entry {
 	id: Int!
 	weight: Float
-	weightType: String
 	date: NaiveDate!
 	createdAt: DateTime!
-	buyer: Buyer
+	buyer: Buyer!
 	cell: Cell!
 	culture: Culture!
-	dGroup: DataGroup
+	weightType: WeightType!
+	dGroup: DataGroup!
 }
 
 input EntryFetchOptions {
@@ -524,7 +528,7 @@ input EntryFilterOptions {
 input EntryInsertOptions {
 	date: DateTime!
 	weight: Float
-	weightType: String
+	weightType: Int!
 	idBuyer: Int!
 	idCell: Int!
 	idCulture: Int!
@@ -547,7 +551,7 @@ type EntryResult {
 input EntryUpdateOptions {
 	id: Int!
 	weight: Float
-	weightType: String
+	weightType: Int
 	date: DateTime
 	idBuyer: Int
 	pairIds: PairIds
@@ -631,6 +635,9 @@ type MutationRoot {
 	insertGroupMember(options: MbeGroupMembersOptions!): MbeGroupMembers!
 	removeGroupMember(options: MbeGroupMembersOptions!): RowsDeleted!
 	insertMbeUser(options: MbeUserInsertOptions!): MbeUser!
+	insertWeightTypes(options: WeightTypeInsertOptions!): WeightType!
+	updateWeightTypes(options: WeightTypeUpdateOptions!): WeightType!
+	deleteWeightTypes(options: DeleteOptionsWeightType!): RowsDeleted!
 }
 
 """
@@ -672,12 +679,71 @@ type QueryRoot {
 	dispatchNoteArticles(options: DispatchNoteArticleFetchOptions!): DispatchNoteArticleResults!
 	mbeGroups: [MbeGroup!]!
 	mbeGroupMembers(options: MbeGroupMembersQueryOptions!): [MbeGroupMembersFlattened!]!
+	weightTypes(options: WeightTypeFetchOptions!): WeightTypeResults!
 }
 
 type RowsDeleted {
 	numRows: Int!
 }
 
+
+type WeightType {
+	id: Int!
+	unitShort: String!
+	unit: String!
+	createdAt: DateTime!
+}
+
+input WeightTypeDeleteOptions {
+	id: Int!
+	mbeGroup: Int!
+}
+
+input WeightTypeFetchOptions {
+	id: Int
+	pageSize: Int
+	page: Int
+	ordering: WeightTypeOrderingOptions
+	filters: [WeightTypeFilterOptions!]
+	mbeGroupId: Int!
+}
+
+enum WeightTypeFields {
+	ID
+	UNIT_SHORT
+	UNIT
+}
+
+input WeightTypeFilterOptions {
+	field: WeightTypeFields!
+	value: String!
+}
+
+input WeightTypeInsertOptions {
+	unitShort: String!
+	unit: String!
+	mbeGroup: Int!
+}
+
+input WeightTypeOrderingOptions {
+	order: Ordering!
+	orderBy: WeightTypeFields!
+}
+
+type WeightTypeResults {
+	results: [WeightType!]!
+	page: Int!
+	pageSize: Int!
+	totalItems: Int!
+	totalPages: Int!
+}
+
+input WeightTypeUpdateOptions {
+	id: Int!
+	unitShort: String
+	unit: String
+	mbeGroup: Int!
+}
 
 schema {
 	query: QueryRoot

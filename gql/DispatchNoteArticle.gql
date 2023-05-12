@@ -32,6 +32,13 @@ mutation DeleteDispatchNoteArticle($deleteOptions: DeleteOptions!) {
     }
 }
 
+fragment WeightTypeParts on WeightType {
+    id
+    unitShort
+    unit
+    createdAt
+}
+
 fragment DispatchNoteArticleParts on DispatchNoteArticle {
     id
     dispatchNote {
@@ -49,7 +56,9 @@ fragment DispatchNoteArticleParts on DispatchNoteArticle {
         dGroup
         createdAt
     }
-    weightType
+    weightType {
+            ...WeightTypeParts
+        }
     quantity
     createdAt
     dGroup {

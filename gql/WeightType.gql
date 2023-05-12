@@ -1,0 +1,36 @@
+query GetWeightTypes($options: WeightTypeFetchOptions!) {
+    weightTypes(options: $options) {
+        page
+        pageSize
+        totalItems
+        totalPages
+        results {
+            ...WeightTypeParts
+        }
+    }
+}
+
+mutation InsertWeightType($options: WeightTypeInsertOptions!) {
+    insertWeightTypes(options: $options) {
+        ...WeightTypeParts
+    }
+}
+
+mutation UpdateWeightTypes($options: WeightTypeUpdateOptions!) {
+    updateWeightTypes(options: $options) {
+        ...WeightTypeParts
+    }
+}
+
+mutation DeleteWeightTypes($options: DeleteOptionsWeightType!) {
+    deleteWeightTypes(options: $options) {
+        numRows
+    }
+}
+
+fragment WeightTypeParts on WeightType {
+    id
+    unitShort
+    unit
+    createdAt
+}

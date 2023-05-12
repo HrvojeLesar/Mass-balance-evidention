@@ -403,6 +403,10 @@ export type DeleteOptions = {
   id: Scalars['Int'];
 };
 
+export type DeleteOptionsWeightType = {
+  id: WeightTypeDeleteOptions;
+};
+
 export type DispatchNote = {
   __typename?: 'DispatchNote';
   createdAt: Scalars['DateTime'];
@@ -421,7 +425,7 @@ export type DispatchNoteArticle = {
   dispatchNote: DispatchNote;
   id: Scalars['Int'];
   quantity: Scalars['Float'];
-  weightType?: Maybe<Scalars['String']>;
+  weightType: WeightType;
 };
 
 export type DispatchNoteArticleFetchOptions = {
@@ -455,7 +459,7 @@ export type DispatchNoteArticleInsertOptions = {
   idArticle: Scalars['Int'];
   idDispatchNote: Scalars['Int'];
   quantity: Scalars['Float'];
-  weightType?: InputMaybe<Scalars['String']>;
+  weightType: Scalars['Int'];
 };
 
 export type DispatchNoteArticleOrderingOptions = {
@@ -477,7 +481,7 @@ export type DispatchNoteArticleUpdateOptions = {
   idArticle?: InputMaybe<Scalars['Int']>;
   idDispatchNote?: InputMaybe<Scalars['Int']>;
   quantity?: InputMaybe<Scalars['Float']>;
-  weightType?: InputMaybe<Scalars['String']>;
+  weightType?: InputMaybe<Scalars['Int']>;
 };
 
 export type DispatchNoteFetchOptions = {
@@ -540,15 +544,15 @@ export type DispatchNoteUpdateOptions = {
 
 export type Entry = {
   __typename?: 'Entry';
-  buyer?: Maybe<Buyer>;
+  buyer: Buyer;
   cell: Cell;
   createdAt: Scalars['DateTime'];
   culture: Culture;
-  dGroup?: Maybe<DataGroup>;
+  dGroup: DataGroup;
   date: Scalars['NaiveDate'];
   id: Scalars['Int'];
   weight?: Maybe<Scalars['Float']>;
-  weightType?: Maybe<Scalars['String']>;
+  weightType: WeightType;
 };
 
 export type EntryFetchOptions = {
@@ -585,7 +589,7 @@ export type EntryInsertOptions = {
   idCell: Scalars['Int'];
   idCulture: Scalars['Int'];
   weight?: InputMaybe<Scalars['Float']>;
-  weightType?: InputMaybe<Scalars['String']>;
+  weightType: Scalars['Int'];
 };
 
 export type EntryOrderingOptions = {
@@ -609,7 +613,7 @@ export type EntryUpdateOptions = {
   idBuyer?: InputMaybe<Scalars['Int']>;
   pairIds?: InputMaybe<PairIds>;
   weight?: InputMaybe<Scalars['Float']>;
-  weightType?: InputMaybe<Scalars['String']>;
+  weightType?: InputMaybe<Scalars['Int']>;
 };
 
 export type MbeGroup = {
@@ -669,6 +673,7 @@ export type MutationRoot = {
   deleteDispatchNote: RowsDeleted;
   deleteDispatchNoteArticle: RowsDeleted;
   deleteEntry: RowsDeleted;
+  deleteWeightTypes: RowsDeleted;
   insertArticle: Article;
   insertBuyer: Buyer;
   insertCell: Cell;
@@ -681,6 +686,7 @@ export type MutationRoot = {
   insertGroupMember: MbeGroupMembers;
   insertMbeGroup: MbeGroup;
   insertMbeUser: MbeUser;
+  insertWeightTypes: WeightType;
   removeGroupMember: RowsDeleted;
   updateArticle: Article;
   updateBuyer: Buyer;
@@ -691,6 +697,7 @@ export type MutationRoot = {
   updateDispatchNote: DispatchNote;
   updateDispatchNoteArticle: DispatchNoteArticle;
   updateEntry: Entry;
+  updateWeightTypes: WeightType;
 };
 
 
@@ -736,6 +743,11 @@ export type MutationRootDeleteDispatchNoteArticleArgs = {
 
 export type MutationRootDeleteEntryArgs = {
   options: DeleteOptions;
+};
+
+
+export type MutationRootDeleteWeightTypesArgs = {
+  options: DeleteOptionsWeightType;
 };
 
 
@@ -799,6 +811,11 @@ export type MutationRootInsertMbeUserArgs = {
 };
 
 
+export type MutationRootInsertWeightTypesArgs = {
+  options: WeightTypeInsertOptions;
+};
+
+
 export type MutationRootRemoveGroupMemberArgs = {
   options: MbeGroupMembersOptions;
 };
@@ -848,6 +865,11 @@ export type MutationRootUpdateEntryArgs = {
   options: EntryUpdateOptions;
 };
 
+
+export type MutationRootUpdateWeightTypesArgs = {
+  options: WeightTypeUpdateOptions;
+};
+
 export enum Ordering {
   Asc = 'ASC',
   Desc = 'DESC'
@@ -877,6 +899,7 @@ export type QueryRoot = {
   pairedCultures: CultureResult;
   unpairedCells: CellResult;
   unpairedCultures: CultureResult;
+  weightTypes: WeightTypeResults;
 };
 
 
@@ -954,9 +977,74 @@ export type QueryRootUnpairedCulturesArgs = {
   options: CultureParityFetchOptions;
 };
 
+
+export type QueryRootWeightTypesArgs = {
+  options: WeightTypeFetchOptions;
+};
+
 export type RowsDeleted = {
   __typename?: 'RowsDeleted';
   numRows: Scalars['Int'];
+};
+
+export type WeightType = {
+  __typename?: 'WeightType';
+  createdAt: Scalars['DateTime'];
+  id: Scalars['Int'];
+  unit: Scalars['String'];
+  unitShort: Scalars['String'];
+};
+
+export type WeightTypeDeleteOptions = {
+  id: Scalars['Int'];
+  mbeGroup: Scalars['Int'];
+};
+
+export type WeightTypeFetchOptions = {
+  filters?: InputMaybe<Array<WeightTypeFilterOptions>>;
+  id?: InputMaybe<Scalars['Int']>;
+  mbeGroupId: Scalars['Int'];
+  ordering?: InputMaybe<WeightTypeOrderingOptions>;
+  page?: InputMaybe<Scalars['Int']>;
+  pageSize?: InputMaybe<Scalars['Int']>;
+};
+
+export enum WeightTypeFields {
+  Id = 'ID',
+  Unit = 'UNIT',
+  UnitShort = 'UNIT_SHORT'
+}
+
+export type WeightTypeFilterOptions = {
+  field: WeightTypeFields;
+  value: Scalars['String'];
+};
+
+export type WeightTypeInsertOptions = {
+  mbeGroup: Scalars['Int'];
+  unit: Scalars['String'];
+  unitShort: Scalars['String'];
+};
+
+export type WeightTypeOrderingOptions = {
+  order: Ordering;
+  orderBy: WeightTypeFields;
+};
+
+export type WeightTypeResults = {
+  __typename?: 'WeightTypeResults';
+  page: Scalars['Int'];
+  pageSize: Scalars['Int'];
+  results: Array<WeightType>;
+  totalItems: Scalars['Int'];
+  totalPages: Scalars['Int'];
+};
+
+export type WeightTypeUpdateOptions = {
+  id: Scalars['Int'];
+  mbeGroup: Scalars['Int'];
+  unit?: InputMaybe<Scalars['String']>;
+  unitShort?: InputMaybe<Scalars['String']>;
 };
 
 export type GetArticlesQueryVariables = Exact<{
@@ -1205,21 +1293,21 @@ export type GetDispatchNotesArticlesQueryVariables = Exact<{
 }>;
 
 
-export type GetDispatchNotesArticlesQuery = { __typename?: 'QueryRoot', dispatchNoteArticles: { __typename?: 'DispatchNoteArticleResults', page: number, pageSize: number, totalItems: number, totalPages: number, results: Array<{ __typename?: 'DispatchNoteArticle', id: number, weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any, idMbeGroup: number } }> } };
+export type GetDispatchNotesArticlesQuery = { __typename?: 'QueryRoot', dispatchNoteArticles: { __typename?: 'DispatchNoteArticleResults', page: number, pageSize: number, totalItems: number, totalPages: number, results: Array<{ __typename?: 'DispatchNoteArticle', id: number, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, weightType: { __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any, idMbeGroup: number } }> } };
 
 export type InsertDispatchNoteArticleMutationVariables = Exact<{
   insertOptions: DispatchNoteArticleInsertOptions;
 }>;
 
 
-export type InsertDispatchNoteArticleMutation = { __typename?: 'MutationRoot', insertDispatchNoteArticle: { __typename?: 'DispatchNoteArticle', id: number, weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any, idMbeGroup: number } } };
+export type InsertDispatchNoteArticleMutation = { __typename?: 'MutationRoot', insertDispatchNoteArticle: { __typename?: 'DispatchNoteArticle', id: number, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, weightType: { __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any, idMbeGroup: number } } };
 
 export type UpdateDispatchNoteArticleMutationVariables = Exact<{
   updateOptions: DispatchNoteArticleUpdateOptions;
 }>;
 
 
-export type UpdateDispatchNoteArticleMutation = { __typename?: 'MutationRoot', updateDispatchNoteArticle: { __typename?: 'DispatchNoteArticle', id: number, weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any, idMbeGroup: number } } };
+export type UpdateDispatchNoteArticleMutation = { __typename?: 'MutationRoot', updateDispatchNoteArticle: { __typename?: 'DispatchNoteArticle', id: number, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, weightType: { __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any, idMbeGroup: number } } };
 
 export type DeleteDispatchNoteArticleMutationVariables = Exact<{
   deleteOptions: DeleteOptions;
@@ -1228,35 +1316,37 @@ export type DeleteDispatchNoteArticleMutationVariables = Exact<{
 
 export type DeleteDispatchNoteArticleMutation = { __typename?: 'MutationRoot', deleteDispatchNoteArticle: { __typename?: 'RowsDeleted', numRows: number } };
 
-export type DispatchNoteArticlePartsFragment = { __typename?: 'DispatchNoteArticle', id: number, weightType?: string | null, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any, idMbeGroup: number } };
+export type WeightTypePartsFragment = { __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any };
+
+export type DispatchNoteArticlePartsFragment = { __typename?: 'DispatchNoteArticle', id: number, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, weightType: { __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any, idMbeGroup: number } };
 
 export type GetEntriesQueryVariables = Exact<{
   options: EntryFetchOptions;
 }>;
 
 
-export type GetEntriesQuery = { __typename?: 'QueryRoot', entries: { __typename?: 'EntryResult', page: number, pageSize: number, totalItems: number, totalPages: number, results: Array<{ __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number } | null, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup?: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } | null }> } };
+export type GetEntriesQuery = { __typename?: 'QueryRoot', entries: { __typename?: 'EntryResult', page: number, pageSize: number, totalItems: number, totalPages: number, results: Array<{ __typename?: 'Entry', id: number, weight?: number | null, date: any, createdAt: any, weightType: { __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any }, buyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number }, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } }> } };
 
 export type GetAllEntriesQueryVariables = Exact<{
   options: EntryFetchOptions;
 }>;
 
 
-export type GetAllEntriesQuery = { __typename?: 'QueryRoot', allEntries: { __typename?: 'AllEntires', total: number, results: Array<{ __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number } | null, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup?: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } | null }> } };
+export type GetAllEntriesQuery = { __typename?: 'QueryRoot', allEntries: { __typename?: 'AllEntires', total: number, results: Array<{ __typename?: 'Entry', id: number, weight?: number | null, date: any, createdAt: any, weightType: { __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any }, buyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number }, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } }> } };
 
 export type InsertEntryMutationVariables = Exact<{
   insertOptions: EntryInsertOptions;
 }>;
 
 
-export type InsertEntryMutation = { __typename?: 'MutationRoot', insertEntry: { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number } | null, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup?: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } | null } };
+export type InsertEntryMutation = { __typename?: 'MutationRoot', insertEntry: { __typename?: 'Entry', id: number, weight?: number | null, date: any, createdAt: any, weightType: { __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any }, buyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number }, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } } };
 
 export type UpdateEntryMutationVariables = Exact<{
   updateOptions: EntryUpdateOptions;
 }>;
 
 
-export type UpdateEntryMutation = { __typename?: 'MutationRoot', updateEntry: { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number } | null, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup?: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } | null } };
+export type UpdateEntryMutation = { __typename?: 'MutationRoot', updateEntry: { __typename?: 'Entry', id: number, weight?: number | null, date: any, createdAt: any, weightType: { __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any }, buyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number }, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } } };
 
 export type DeleteEntryMutationVariables = Exact<{
   deleteOptions: DeleteOptions;
@@ -1267,7 +1357,7 @@ export type DeleteEntryMutation = { __typename?: 'MutationRoot', deleteEntry: { 
 
 export type CellCulturePartsFragment = { __typename?: 'CellCulturePair', createdAt: any, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } };
 
-export type EntryPartsFragment = { __typename?: 'Entry', id: number, weight?: number | null, weightType?: string | null, date: any, createdAt: any, buyer?: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number } | null, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup?: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } | null };
+export type EntryPartsFragment = { __typename?: 'Entry', id: number, weight?: number | null, date: any, createdAt: any, weightType: { __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any }, buyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number }, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } };
 
 export type GetMbeGroupsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1309,6 +1399,34 @@ export type InsertUserMutationVariables = Exact<{
 
 export type InsertUserMutation = { __typename?: 'MutationRoot', insertMbeUser: { __typename?: 'MbeUser', id: number, email: string, createdAt: any } };
 
+export type GetWeightTypesQueryVariables = Exact<{
+  options: WeightTypeFetchOptions;
+}>;
+
+
+export type GetWeightTypesQuery = { __typename?: 'QueryRoot', weightTypes: { __typename?: 'WeightTypeResults', page: number, pageSize: number, totalItems: number, totalPages: number, results: Array<{ __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any }> } };
+
+export type InsertWeightTypeMutationVariables = Exact<{
+  options: WeightTypeInsertOptions;
+}>;
+
+
+export type InsertWeightTypeMutation = { __typename?: 'MutationRoot', insertWeightTypes: { __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any } };
+
+export type UpdateWeightTypesMutationVariables = Exact<{
+  options: WeightTypeUpdateOptions;
+}>;
+
+
+export type UpdateWeightTypesMutation = { __typename?: 'MutationRoot', updateWeightTypes: { __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any } };
+
+export type DeleteWeightTypesMutationVariables = Exact<{
+  options: DeleteOptionsWeightType;
+}>;
+
+
+export type DeleteWeightTypesMutation = { __typename?: 'MutationRoot', deleteWeightTypes: { __typename?: 'RowsDeleted', numRows: number } };
+
 export const ArticlePartsFragmentDoc = `
     fragment ArticleParts on Article {
   id
@@ -1326,6 +1444,14 @@ export const DispatchNotePartsFragmentDoc = `
   issuingDate
   createdAt
   dGroup
+}
+    `;
+export const WeightTypePartsFragmentDoc = `
+    fragment WeightTypeParts on WeightType {
+  id
+  unitShort
+  unit
+  createdAt
 }
     `;
 export const DispatchNoteArticlePartsFragmentDoc = `
@@ -1346,7 +1472,9 @@ export const DispatchNoteArticlePartsFragmentDoc = `
     dGroup
     createdAt
   }
-  weightType
+  weightType {
+    ...WeightTypeParts
+  }
   quantity
   createdAt
   dGroup {
@@ -1412,7 +1540,9 @@ export const EntryPartsFragmentDoc = `
     fragment EntryParts on Entry {
   id
   weight
-  weightType
+  weightType {
+    ...WeightTypeParts
+  }
   date
   createdAt
   buyer {
@@ -2160,7 +2290,8 @@ export const GetDispatchNotesArticlesDocument = `
     }
   }
 }
-    ${DispatchNoteArticlePartsFragmentDoc}`;
+    ${DispatchNoteArticlePartsFragmentDoc}
+${WeightTypePartsFragmentDoc}`;
 export const useGetDispatchNotesArticlesQuery = <
       TData = GetDispatchNotesArticlesQuery,
       TError = unknown
@@ -2179,7 +2310,8 @@ export const InsertDispatchNoteArticleDocument = `
     ...DispatchNoteArticleParts
   }
 }
-    ${DispatchNoteArticlePartsFragmentDoc}`;
+    ${DispatchNoteArticlePartsFragmentDoc}
+${WeightTypePartsFragmentDoc}`;
 export const useInsertDispatchNoteArticleMutation = <
       TError = unknown,
       TContext = unknown
@@ -2195,7 +2327,8 @@ export const UpdateDispatchNoteArticleDocument = `
     ...DispatchNoteArticleParts
   }
 }
-    ${DispatchNoteArticlePartsFragmentDoc}`;
+    ${DispatchNoteArticlePartsFragmentDoc}
+${WeightTypePartsFragmentDoc}`;
 export const useUpdateDispatchNoteArticleMutation = <
       TError = unknown,
       TContext = unknown
@@ -2234,6 +2367,7 @@ export const GetEntriesDocument = `
   }
 }
     ${EntryPartsFragmentDoc}
+${WeightTypePartsFragmentDoc}
 ${BuyerPartsFragmentDoc}
 ${CellPartsFragmentDoc}
 ${CulturePartsFragmentDoc}
@@ -2260,6 +2394,7 @@ export const GetAllEntriesDocument = `
   }
 }
     ${EntryPartsFragmentDoc}
+${WeightTypePartsFragmentDoc}
 ${BuyerPartsFragmentDoc}
 ${CellPartsFragmentDoc}
 ${CulturePartsFragmentDoc}
@@ -2283,6 +2418,7 @@ export const InsertEntryDocument = `
   }
 }
     ${EntryPartsFragmentDoc}
+${WeightTypePartsFragmentDoc}
 ${BuyerPartsFragmentDoc}
 ${CellPartsFragmentDoc}
 ${CulturePartsFragmentDoc}
@@ -2303,6 +2439,7 @@ export const UpdateEntryDocument = `
   }
 }
     ${EntryPartsFragmentDoc}
+${WeightTypePartsFragmentDoc}
 ${BuyerPartsFragmentDoc}
 ${CellPartsFragmentDoc}
 ${CulturePartsFragmentDoc}
@@ -2444,5 +2581,78 @@ export const useInsertUserMutation = <
     useMutation<InsertUserMutation, TError, InsertUserMutationVariables, TContext>(
       ['InsertUser'],
       (variables?: InsertUserMutationVariables) => fetcher<InsertUserMutation, InsertUserMutationVariables>(InsertUserDocument, variables)(),
+      options
+    );
+export const GetWeightTypesDocument = `
+    query GetWeightTypes($options: WeightTypeFetchOptions!) {
+  weightTypes(options: $options) {
+    page
+    pageSize
+    totalItems
+    totalPages
+    results {
+      ...WeightTypeParts
+    }
+  }
+}
+    ${WeightTypePartsFragmentDoc}`;
+export const useGetWeightTypesQuery = <
+      TData = GetWeightTypesQuery,
+      TError = unknown
+    >(
+      variables: GetWeightTypesQueryVariables,
+      options?: UseQueryOptions<GetWeightTypesQuery, TError, TData>
+    ) =>
+    useQuery<GetWeightTypesQuery, TError, TData>(
+      ['GetWeightTypes', variables],
+      fetcher<GetWeightTypesQuery, GetWeightTypesQueryVariables>(GetWeightTypesDocument, variables),
+      options
+    );
+export const InsertWeightTypeDocument = `
+    mutation InsertWeightType($options: WeightTypeInsertOptions!) {
+  insertWeightTypes(options: $options) {
+    ...WeightTypeParts
+  }
+}
+    ${WeightTypePartsFragmentDoc}`;
+export const useInsertWeightTypeMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<InsertWeightTypeMutation, TError, InsertWeightTypeMutationVariables, TContext>) =>
+    useMutation<InsertWeightTypeMutation, TError, InsertWeightTypeMutationVariables, TContext>(
+      ['InsertWeightType'],
+      (variables?: InsertWeightTypeMutationVariables) => fetcher<InsertWeightTypeMutation, InsertWeightTypeMutationVariables>(InsertWeightTypeDocument, variables)(),
+      options
+    );
+export const UpdateWeightTypesDocument = `
+    mutation UpdateWeightTypes($options: WeightTypeUpdateOptions!) {
+  updateWeightTypes(options: $options) {
+    ...WeightTypeParts
+  }
+}
+    ${WeightTypePartsFragmentDoc}`;
+export const useUpdateWeightTypesMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<UpdateWeightTypesMutation, TError, UpdateWeightTypesMutationVariables, TContext>) =>
+    useMutation<UpdateWeightTypesMutation, TError, UpdateWeightTypesMutationVariables, TContext>(
+      ['UpdateWeightTypes'],
+      (variables?: UpdateWeightTypesMutationVariables) => fetcher<UpdateWeightTypesMutation, UpdateWeightTypesMutationVariables>(UpdateWeightTypesDocument, variables)(),
+      options
+    );
+export const DeleteWeightTypesDocument = `
+    mutation DeleteWeightTypes($options: DeleteOptionsWeightType!) {
+  deleteWeightTypes(options: $options) {
+    numRows
+  }
+}
+    `;
+export const useDeleteWeightTypesMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<DeleteWeightTypesMutation, TError, DeleteWeightTypesMutationVariables, TContext>) =>
+    useMutation<DeleteWeightTypesMutation, TError, DeleteWeightTypesMutationVariables, TContext>(
+      ['DeleteWeightTypes'],
+      (variables?: DeleteWeightTypesMutationVariables) => fetcher<DeleteWeightTypesMutation, DeleteWeightTypesMutationVariables>(DeleteWeightTypesDocument, variables)(),
       options
     );
