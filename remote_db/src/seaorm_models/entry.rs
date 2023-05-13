@@ -34,7 +34,6 @@ pub struct Model {
     pub id_buyer: i32,
     pub id_cell_culture_pair: i32,
     pub d_group: i32,
-    pub weight_type: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -63,14 +62,6 @@ pub enum Relation {
         on_delete = "NoAction"
     )]
     DataGroup,
-    #[sea_orm(
-        belongs_to = "super::weight_type::Entity",
-        from = "Column::WeightType",
-        to = "super::weight_type::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
-    )]
-    WeightType,
 }
 
 impl Related<super::buyer::Entity> for Entity {
@@ -91,12 +82,6 @@ impl Related<super::data_group::Entity> for Entity {
     }
 }
 
-impl Related<super::weight_type::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::WeightType.def()
-    }
-}
-
 impl ActiveModelBehavior for ActiveModel {}
 
 #[allow(clippy::derivable_impls)]
@@ -110,7 +95,6 @@ impl Default for Column {
 pub struct EntryInsertOptions {
     pub date: DateTimeWithTimeZone,
     pub weight: Option<f64>,
-    pub weight_type: i32,
     pub id_buyer: i32,
     pub id_cell: i32,
     pub id_culture: i32,
@@ -127,7 +111,6 @@ pub struct PairIds {
 pub struct EntryUpdateOptions {
     pub id: i32,
     pub weight: Option<f64>,
-    pub weight_type: Option<i32>,
     pub date: Option<DateTimeWithTimeZone>,
     pub id_buyer: Option<i32>,
     pub pair_ids: Option<PairIds>,
@@ -181,10 +164,10 @@ pub struct EntryFlattened {
     pub created_at_d_group: DateTimeWithTimeZone,
     pub id_mbe_group: i32,
 
-    pub id_weight_type: i32,
-    pub unit_short: String,
-    pub unit: String,
-    pub created_at_weight_type: DateTimeWithTimeZone,
+    // pub id_weight_type: i32,
+    // pub unit_short: String,
+    // pub unit: String,
+    // pub created_at_weight_type: DateTimeWithTimeZone,
 }
 
 #[derive(Debug, SimpleObject)]
@@ -197,7 +180,7 @@ pub struct Entry {
     pub buyer: super::buyer::Model,
     pub cell: super::cell::Model,
     pub culture: super::culture::Model,
-    pub weight_type: super::weight_type::Model,
+    // pub weight_type: super::weight_type::Model,
     pub d_group: super::data_group::Model,
 }
 
@@ -240,12 +223,12 @@ impl From<QueryResultsHelperType<EntryFlattened>> for QueryResults<Entry> {
                         created_at: flat.created_at_culture,
                         d_group: flat.d_group_culture,
                     },
-                    weight_type: super::weight_type::Model {
-                        id: flat.id_weight_type,
-                        unit_short: flat.unit_short,
-                        unit: flat.unit,
-                        created_at: flat.created_at_weight_type,
-                    },
+                    // weight_type: super::weight_type::Model {
+                    //     id: flat.id_weight_type,
+                    //     unit_short: flat.unit_short,
+                    //     unit: flat.unit,
+                    //     created_at: flat.created_at_weight_type,
+                    // },
                     d_group: super::data_group::Model {
                         id: flat.id_d_group,
                         name: flat.name_d_group,
@@ -304,7 +287,6 @@ impl QueryDatabase for Entity {
                 JoinType::InnerJoin,
                 super::cell_culture_pair::Relation::Cell.def(),
             )
-            .inner_join(super::weight_type::Entity)
             .column_as(super::buyer::Column::Id, "id_buyer")
             .column_as(super::buyer::Column::Name, "name_buyer")
             .column_as(super::buyer::Column::Address, "address_buyer")
@@ -329,13 +311,6 @@ impl QueryDatabase for Entity {
             )
             .column_as(super::data_group::Column::CreatedAt, "created_at_d_group")
             .column_as(super::data_group::Column::IdMbeGroup, "id_mbe_group")
-            .column_as(super::weight_type::Column::Id, "id_weight_type")
-            .column_as(super::weight_type::Column::UnitShort, "unit_short")
-            .column_as(super::weight_type::Column::Unit, "unit")
-            .column_as(
-                super::weight_type::Column::CreatedAt,
-                "created_at_weight_type",
-            )
     }
 
     async fn delete_query(
@@ -489,9 +464,9 @@ impl QueryDatabase for Entity {
             weight: options
                 .weight
                 .map_or(ActiveValue::NotSet, |val| ActiveValue::Set(Some(val))),
-            weight_type: options
-                .weight_type
-                .map_or(ActiveValue::NotSet, ActiveValue::Set),
+            // weight_type: options
+            //     .weight_type
+            //     .map_or(ActiveValue::NotSet, ActiveValue::Set),
             date: options.date.map_or(ActiveValue::NotSet, |val| {
                 ActiveValue::Set(val.date_naive())
             }),
@@ -541,7 +516,7 @@ impl QueryDatabase for Entity {
         let model = ActiveModel {
             date: ActiveValue::Set(options.date.date_naive()),
             weight: ActiveValue::Set(options.weight),
-            weight_type: ActiveValue::Set(options.weight_type),
+            // weight_type: ActiveValue::Set(options.weight_type),
             id_buyer: ActiveValue::Set(options.id_buyer),
             id_cell_culture_pair: ActiveValue::Set(cell_culture_pair.id),
             d_group: ActiveValue::Set(options.d_group),
@@ -643,12 +618,12 @@ impl EntryQuery {
                         created_at: flat.created_at_culture,
                         d_group: flat.d_group_culture,
                     },
-                    weight_type: super::weight_type::Model {
-                        id: flat.id_weight_type,
-                        unit_short: flat.unit_short,
-                        unit: flat.unit,
-                        created_at: flat.created_at_weight_type,
-                    },
+                    // weight_type: super::weight_type::Model {
+                    //     id: flat.id_weight_type,
+                    //     unit_short: flat.unit_short,
+                    //     unit: flat.unit,
+                    //     created_at: flat.created_at_weight_type,
+                    // },
                     d_group: super::data_group::Model {
                         id: flat.id_d_group,
                         name: flat.name_d_group,

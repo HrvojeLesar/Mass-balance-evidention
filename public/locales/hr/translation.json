@@ -176,6 +176,7 @@
     },
     "measureType": {
         "name": "Mjerna jedinica",
+        "nameShort": "Oznaka",
         "quantity": "Količina"
     },
     "newMbeGroup": {

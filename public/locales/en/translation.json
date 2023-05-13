@@ -176,6 +176,7 @@
     },
     "measureType": {
         "name": "Unit",
+        "nameShort": "Unit symbol",
         "quantity": "Quantity"
     },
     "newMbeGroup": {

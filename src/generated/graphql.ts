@@ -552,7 +552,6 @@ export type Entry = {
   date: Scalars['NaiveDate'];
   id: Scalars['Int'];
   weight?: Maybe<Scalars['Float']>;
-  weightType: WeightType;
 };
 
 export type EntryFetchOptions = {
@@ -589,7 +588,6 @@ export type EntryInsertOptions = {
   idCell: Scalars['Int'];
   idCulture: Scalars['Int'];
   weight?: InputMaybe<Scalars['Float']>;
-  weightType: Scalars['Int'];
 };
 
 export type EntryOrderingOptions = {
@@ -613,7 +611,6 @@ export type EntryUpdateOptions = {
   idBuyer?: InputMaybe<Scalars['Int']>;
   pairIds?: InputMaybe<PairIds>;
   weight?: InputMaybe<Scalars['Float']>;
-  weightType?: InputMaybe<Scalars['Int']>;
 };
 
 export type MbeGroup = {
@@ -1325,28 +1322,28 @@ export type GetEntriesQueryVariables = Exact<{
 }>;
 
 
-export type GetEntriesQuery = { __typename?: 'QueryRoot', entries: { __typename?: 'EntryResult', page: number, pageSize: number, totalItems: number, totalPages: number, results: Array<{ __typename?: 'Entry', id: number, weight?: number | null, date: any, createdAt: any, weightType: { __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any }, buyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number }, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } }> } };
+export type GetEntriesQuery = { __typename?: 'QueryRoot', entries: { __typename?: 'EntryResult', page: number, pageSize: number, totalItems: number, totalPages: number, results: Array<{ __typename?: 'Entry', id: number, weight?: number | null, date: any, createdAt: any, buyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number }, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } }> } };
 
 export type GetAllEntriesQueryVariables = Exact<{
   options: EntryFetchOptions;
 }>;
 
 
-export type GetAllEntriesQuery = { __typename?: 'QueryRoot', allEntries: { __typename?: 'AllEntires', total: number, results: Array<{ __typename?: 'Entry', id: number, weight?: number | null, date: any, createdAt: any, weightType: { __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any }, buyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number }, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } }> } };
+export type GetAllEntriesQuery = { __typename?: 'QueryRoot', allEntries: { __typename?: 'AllEntires', total: number, results: Array<{ __typename?: 'Entry', id: number, weight?: number | null, date: any, createdAt: any, buyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number }, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } }> } };
 
 export type InsertEntryMutationVariables = Exact<{
   insertOptions: EntryInsertOptions;
 }>;
 
 
-export type InsertEntryMutation = { __typename?: 'MutationRoot', insertEntry: { __typename?: 'Entry', id: number, weight?: number | null, date: any, createdAt: any, weightType: { __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any }, buyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number }, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } } };
+export type InsertEntryMutation = { __typename?: 'MutationRoot', insertEntry: { __typename?: 'Entry', id: number, weight?: number | null, date: any, createdAt: any, buyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number }, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } } };
 
 export type UpdateEntryMutationVariables = Exact<{
   updateOptions: EntryUpdateOptions;
 }>;
 
 
-export type UpdateEntryMutation = { __typename?: 'MutationRoot', updateEntry: { __typename?: 'Entry', id: number, weight?: number | null, date: any, createdAt: any, weightType: { __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any }, buyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number }, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } } };
+export type UpdateEntryMutation = { __typename?: 'MutationRoot', updateEntry: { __typename?: 'Entry', id: number, weight?: number | null, date: any, createdAt: any, buyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number }, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } } };
 
 export type DeleteEntryMutationVariables = Exact<{
   deleteOptions: DeleteOptions;
@@ -1357,7 +1354,7 @@ export type DeleteEntryMutation = { __typename?: 'MutationRoot', deleteEntry: { 
 
 export type CellCulturePartsFragment = { __typename?: 'CellCulturePair', createdAt: any, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any } };
 
-export type EntryPartsFragment = { __typename?: 'Entry', id: number, weight?: number | null, date: any, createdAt: any, weightType: { __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any }, buyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number }, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } };
+export type EntryPartsFragment = { __typename?: 'Entry', id: number, weight?: number | null, date: any, createdAt: any, buyer: { __typename?: 'Buyer', id: number, name?: string | null, address?: string | null, contact?: string | null, createdAt: any, dGroup: number }, cell: { __typename?: 'Cell', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, culture: { __typename?: 'Culture', id: number, name: string, description?: string | null, createdAt: any, dGroup: number }, dGroup: { __typename?: 'DataGroup', idMbeGroup: number, id: number, name: string, description?: string | null, createdAt: any } };
 
 export type GetMbeGroupsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1540,9 +1537,6 @@ export const EntryPartsFragmentDoc = `
     fragment EntryParts on Entry {
   id
   weight
-  weightType {
-    ...WeightTypeParts
-  }
   date
   createdAt
   buyer {
@@ -2367,7 +2361,6 @@ export const GetEntriesDocument = `
   }
 }
     ${EntryPartsFragmentDoc}
-${WeightTypePartsFragmentDoc}
 ${BuyerPartsFragmentDoc}
 ${CellPartsFragmentDoc}
 ${CulturePartsFragmentDoc}
@@ -2394,7 +2387,6 @@ export const GetAllEntriesDocument = `
   }
 }
     ${EntryPartsFragmentDoc}
-${WeightTypePartsFragmentDoc}
 ${BuyerPartsFragmentDoc}
 ${CellPartsFragmentDoc}
 ${CulturePartsFragmentDoc}
@@ -2418,7 +2410,6 @@ export const InsertEntryDocument = `
   }
 }
     ${EntryPartsFragmentDoc}
-${WeightTypePartsFragmentDoc}
 ${BuyerPartsFragmentDoc}
 ${CellPartsFragmentDoc}
 ${CulturePartsFragmentDoc}
@@ -2439,7 +2430,6 @@ export const UpdateEntryDocument = `
   }
 }
     ${EntryPartsFragmentDoc}
-${WeightTypePartsFragmentDoc}
 ${BuyerPartsFragmentDoc}
 ${CellPartsFragmentDoc}
 ${CulturePartsFragmentDoc}

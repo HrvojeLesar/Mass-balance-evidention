@@ -92,9 +92,6 @@ fragment WeightTypeParts on WeightType {
 fragment EntryParts on Entry {
     id
     weight
-    weightType {
-        ...WeightTypeParts
-    }
     date
     createdAt
     buyer {

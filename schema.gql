@@ -494,7 +494,6 @@ type Entry {
 	buyer: Buyer!
 	cell: Cell!
 	culture: Culture!
-	weightType: WeightType!
 	dGroup: DataGroup!
 }
 
@@ -528,7 +527,6 @@ input EntryFilterOptions {
 input EntryInsertOptions {
 	date: DateTime!
 	weight: Float
-	weightType: Int!
 	idBuyer: Int!
 	idCell: Int!
 	idCulture: Int!
@@ -551,7 +549,6 @@ type EntryResult {
 input EntryUpdateOptions {
 	id: Int!
 	weight: Float
-	weightType: Int
 	date: DateTime
 	idBuyer: Int
 	pairIds: PairIds
