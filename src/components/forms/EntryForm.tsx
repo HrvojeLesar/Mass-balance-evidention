@@ -17,11 +17,8 @@ import {
     useGetBuyersQuery,
     useGetPairedCellsQuery,
     useGetPairedCulturesQuery,
-    useGetWeightTypesQuery,
     useInsertEntryMutation,
     useUpdateEntryMutation,
-    WeightType,
-    WeightTypeFields,
 } from "../../generated/graphql";
 import BaseForm from "./BaseForm";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -30,7 +27,6 @@ import {
     DEBOUNCE_TIME,
     FormProps,
     makeOptions,
-    makeOptionsDirty,
     onChange,
     SelectOption,
     SelectState,
@@ -47,7 +43,6 @@ type FormInput = {
     weight: number | null;
     buyer: SelectOption<Buyer> | undefined;
     date: Date | string | null;
-    weightType: SelectOption<WeightType> | undefined;
 };
 
 const LIMIT = 10;
@@ -100,12 +95,6 @@ export default function EntryForm({
                 ? moment(edit.date as Date).format("YYYY-MM-DD")
                 : undefined,
             weight: edit ? edit.weight : undefined,
-            weightType: edit
-                ? {
-                      value: edit.weightType,
-                      label: edit.weightType.unitShort,
-                  }
-                : undefined,
         },
     });
 
@@ -129,7 +118,12 @@ export default function EntryForm({
 
     const onInsertSubmit = useCallback(
         (data: FormInput) => {
-            if (data.cell && data.culture && data.buyer && data.date && data.weightType) {
+            if (
+                data.cell &&
+                data.culture &&
+                data.buyer &&
+                data.date
+            ) {
                 insert.mutate({
                     insertOptions: {
                         idCell: data.cell.value.id,
@@ -139,7 +133,6 @@ export default function EntryForm({
                         weight: Number(data.weight),
                         idBuyer: data.buyer.value.id,
                         dGroup: dataGroupContextValue.selectedGroup ?? 1,
-                        weightType: data.weightType.value.id
                     },
                 });
             } else {
@@ -154,7 +147,13 @@ export default function EntryForm({
 
     const onUpdateSubmit = useCallback(
         (data: FormInput) => {
-            if (data.cell && data.culture && data.buyer && data.date && edit && data.weightType) {
+            if (
+                data.cell &&
+                data.culture &&
+                data.buyer &&
+                data.date &&
+                edit 
+            ) {
                 update.mutate({
                     updateOptions: {
                         id: edit?.id,
@@ -166,7 +165,6 @@ export default function EntryForm({
                         date: new Date(moment(data.date).format("YYYY-MM-DD")),
                         weight: Number(data.weight),
                         idBuyer: data.buyer.value.id,
-                        weightType: data.weightType.value.id
                     },
                 });
             } else {
@@ -228,30 +226,30 @@ export default function EntryForm({
         maxPage: 1,
     });
 
-    const [weightTypeSelectState, setWeightTypeSelectState] = useState<
-        SelectState<WeightType>
-    >({
-        selected:
-            edit === undefined
-                ? undefined
-                : ({
-                      value: edit?.weightType,
-                      label: edit?.weightType?.unitShort ?? "",
-                  } as SelectOption<WeightType>),
-        page: 1,
-        pages: {},
-        limit: LIMIT,
-        filter: "",
-        maxPage: 1,
-    });
+    // const [weightTypeSelectState, setWeightTypeSelectState] = useState<
+    //     SelectState<WeightType>
+    // >({
+    //     selected:
+    //         edit === undefined
+    //             ? undefined
+    //             : ({
+    //                   value: edit?.weightType,
+    //                   label: edit?.weightType?.unitShort ?? "",
+    //               } as SelectOption<WeightType>),
+    //     page: 1,
+    //     pages: {},
+    //     limit: LIMIT,
+    //     filter: "",
+    //     maxPage: 1,
+    // });
 
     const [debouncedCellInputValue, setDebouncedCellInputValue] = useState("");
     const [debouncedCultureInputValue, setDebouncedCultureInputValue] =
         useState("");
     const [debouncedBuyerInputValue, setDebouncedBuyerInputValue] =
         useState("");
-    const [debouncedWeightTypeInputValue, setDebouncedWeightTypeInputValue] =
-        useState("");
+    // const [debouncedWeightTypeInputValue, setDebouncedWeightTypeInputValue] =
+    //     useState("");
 
     const cellOptions = useMemo(() => {
         return makeOptions(cellSelectState.page, cellSelectState.pages);
@@ -265,12 +263,12 @@ export default function EntryForm({
         return makeOptions(buyerSelectState.page, buyerSelectState.pages);
     }, [buyerSelectState.page, buyerSelectState.pages]);
 
-    const weightTypeOptions = useMemo(() => {
-        return makeOptionsDirty(
-            weightTypeSelectState.page,
-            weightTypeSelectState.pages
-        );
-    }, [weightTypeSelectState.page, weightTypeSelectState.pages]);
+    // const weightTypeOptions = useMemo(() => {
+    //     return makeOptionsDirty(
+    //         weightTypeSelectState.page,
+    //         weightTypeSelectState.pages
+    //     );
+    // }, [weightTypeSelectState.page, weightTypeSelectState.pages]);
 
     const { data: cellData, isFetching: isFetchingCells } =
         useGetPairedCellsQuery(
@@ -379,38 +377,38 @@ export default function EntryForm({
         }
     );
 
-    const { data: weightTypeData, isFetching: isFetchingWeightTypes } =
-        useGetWeightTypesQuery(
-            {
-                options: {
-                    id: undefined,
-                    pageSize: weightTypeSelectState.limit,
-                    page: weightTypeSelectState.page,
-                    ordering: {
-                        order: Ordering.Asc,
-                        orderBy: WeightTypeFields.Id,
-                    },
-                    filters:
-                        weightTypeSelectState.filter !== ""
-                            ? [
-                                  {
-                                      value: weightTypeSelectState.filter,
-                                      field: WeightTypeFields.UnitShort,
-                                  },
-                              ]
-                            : undefined,
-                    mbeGroupId: 1,
-                },
-            },
-            {
-                queryKey: [
-                    "getWeightTypesForm",
-                    weightTypeSelectState.limit,
-                    weightTypeSelectState.page,
-                ],
-                keepPreviousData: true,
-            }
-        );
+    // const { data: weightTypeData, isFetching: isFetchingWeightTypes } =
+    //     useGetWeightTypesQuery(
+    //         {
+    //             options: {
+    //                 id: undefined,
+    //                 pageSize: weightTypeSelectState.limit,
+    //                 page: weightTypeSelectState.page,
+    //                 ordering: {
+    //                     order: Ordering.Asc,
+    //                     orderBy: WeightTypeFields.Id,
+    //                 },
+    //                 filters:
+    //                     weightTypeSelectState.filter !== ""
+    //                         ? [
+    //                               {
+    //                                   value: weightTypeSelectState.filter,
+    //                                   field: WeightTypeFields.UnitShort,
+    //                               },
+    //                           ]
+    //                         : undefined,
+    //                 mbeGroupId: 1,
+    //             },
+    //         },
+    //         {
+    //             queryKey: [
+    //                 "getWeightTypesForm",
+    //                 weightTypeSelectState.limit,
+    //                 weightTypeSelectState.page,
+    //             ],
+    //             keepPreviousData: true,
+    //         }
+    //     );
 
     useEffect(() => {
         if (cellData) {
@@ -452,19 +450,19 @@ export default function EntryForm({
         }
     }, [buyerData, setBuyerSelectState]);
 
-    useEffect(() => {
-        if (weightTypeData) {
-            setWeightTypeSelectState((old) => ({
-                ...old,
-                maxPage: weightTypeData.weightTypes.totalPages,
-                pages: {
-                    ...old.pages,
-                    [weightTypeData.weightTypes.page]:
-                        weightTypeData.weightTypes.results,
-                },
-            }));
-        }
-    }, [weightTypeData, setWeightTypeSelectState]);
+    // useEffect(() => {
+    //     if (weightTypeData) {
+    //         setWeightTypeSelectState((old) => ({
+    //             ...old,
+    //             maxPage: weightTypeData.weightTypes.totalPages,
+    //             pages: {
+    //                 ...old.pages,
+    //                 [weightTypeData.weightTypes.page]:
+    //                     weightTypeData.weightTypes.results,
+    //             },
+    //         }));
+    //     }
+    // }, [weightTypeData, setWeightTypeSelectState]);
 
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -505,18 +503,18 @@ export default function EntryForm({
         };
     }, [debouncedBuyerInputValue]);
 
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            setWeightTypeSelectState((old) => ({
-                ...old,
-                page: 1,
-                filter: debouncedWeightTypeInputValue.trim(),
-            }));
-        }, DEBOUNCE_TIME);
-        return () => {
-            clearTimeout(timeout);
-        };
-    }, [debouncedWeightTypeInputValue]);
+    // useEffect(() => {
+    //     const timeout = setTimeout(() => {
+    //         setWeightTypeSelectState((old) => ({
+    //             ...old,
+    //             page: 1,
+    //             filter: debouncedWeightTypeInputValue.trim(),
+    //         }));
+    //     }, DEBOUNCE_TIME);
+    //     return () => {
+    //         clearTimeout(timeout);
+    //     };
+    // }, [debouncedWeightTypeInputValue]);
 
     return (
         <BaseForm
@@ -767,79 +765,6 @@ export default function EntryForm({
                 </Grid.Col>
                 <Grid.Col sm={12} md={6} lg={6}>
                     <Controller
-                        name="weightType"
-                        control={control}
-                        rules={{ required: "weightType" }}
-                        render={() => (
-                            <Input.Wrapper
-                                label={"weightType"}
-                                withAsterisk
-                                error={
-                                    errors.weightType ? "weightType" : undefined
-                                }
-                            >
-                                <Select
-                                    placeholder={"weightType"}
-                                    loadingMessage={() => t("loading")}
-                                    noOptionsMessage={() => t("noOptions")}
-                                    styles={selectStyle(
-                                        errors.weightType,
-                                        theme
-                                    )}
-                                    isMulti={false}
-                                    value={weightTypeSelectState.selected}
-                                    options={weightTypeOptions}
-                                    onMenuClose={() => {
-                                        setWeightTypeSelectState((old) => ({
-                                            ...old,
-                                            page: 1,
-                                        }));
-                                    }}
-                                    onMenuScrollToBottom={
-                                        weightTypeSelectState.page <
-                                        weightTypeSelectState.maxPage
-                                            ? () => {
-                                                  setWeightTypeSelectState(
-                                                      (old) => ({
-                                                          ...old,
-                                                          page: old.page + 1,
-                                                      })
-                                                  );
-                                              }
-                                            : undefined
-                                    }
-                                    onInputChange={(value, actionMeta) => {
-                                        if (
-                                            actionMeta.action === "input-change"
-                                        ) {
-                                            setDebouncedWeightTypeInputValue(
-                                                value
-                                            );
-                                        }
-                                    }}
-                                    onChange={(value, actionMeta) => {
-                                        onChange(
-                                            value,
-                                            actionMeta,
-                                            setWeightTypeSelectState
-                                        );
-                                        setValue(
-                                            "weightType",
-                                            value ?? undefined,
-                                            {
-                                                shouldValidate: true,
-                                            }
-                                        );
-                                    }}
-                                    isLoading={isFetchingWeightTypes}
-                                    isClearable
-                                />
-                            </Input.Wrapper>
-                        )}
-                    />
-                </Grid.Col>
-                <Grid.Col sm={12} md={6} lg={6}>
-                    <Controller
                         name="date"
                         control={control}
                         rules={{ required: t("date.errors.name") }}
@@ -850,6 +775,7 @@ export default function EntryForm({
                                     : value;
                             return (
                                 <DateInput
+                                    allowDeselect
                                     valueFormat="DD.MM.YYYY"
                                     locale={i18n.language}
                                     value={date}
