@@ -140,6 +140,7 @@ export default function DispatchNoteForm({
                                     : value;
                             return (
                                 <DateInput
+                                    allowDeselect
                                     valueFormat="DD.MM.YYYY"
                                     locale={i18n.language}
                                     value={date}

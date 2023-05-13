@@ -1,26 +1,52 @@
-import { useForm } from "react-hook-form";
+import { Grid, Select, TextInput } from "@mantine/core";
+import { useContext, useEffect, useMemo } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { WeightTypeInsertOptions } from "../../generated/graphql";
+import {
+    useInsertWeightTypeMutation,
+    WeightType,
+    WeightTypeInsertOptions,
+} from "../../generated/graphql";
+import { MbeGroupContext } from "../../MbeGroupProvider";
+import BaseForm from "./BaseForm";
 
 type WeightTypeFormProps = {
+    edit?: WeightType;
     onInsertSuccess?: () => void;
+    onUpdateSuccess?: () => void;
 };
 
-export default function WeightTypeForm({ onInsertSuccess }: WeightTypeFormProps) {
+export default function WeightTypeForm({
+    edit,
+    onInsertSuccess,
+}: WeightTypeFormProps) {
     const { t } = useTranslation();
+    const mbeGroupContextValue = useContext(MbeGroupContext);
     const {
         register,
         handleSubmit,
         reset,
+        control,
         formState: { errors },
     } = useForm<WeightTypeInsertOptions>({
         mode: "onChange",
         defaultValues: {
-
+            unit: edit?.unit,
+            unitShort: edit?.unitShort,
         },
     });
 
-    const insert = useInsertUserMutation({
+    const isGroupsEmpty = useMemo(
+        () => mbeGroupContextValue.groups?.length === 0,
+        [mbeGroupContextValue]
+    );
+
+    // WARN: Inefficient, calls reset on every group change
+    useEffect(() => {
+        reset({ mbeGroup: mbeGroupContextValue.selectedGroup });
+    }, [mbeGroupContextValue, reset]);
+
+    const insert = useInsertWeightTypeMutation({
         onSuccess: (_data, _variables, _context) => {
             reset();
             if (onInsertSuccess) {
@@ -41,21 +67,89 @@ export default function WeightTypeForm({ onInsertSuccess }: WeightTypeFormProps)
             })}
         >
             <Grid mb="sm">
-                <Grid.Col>
+                <Grid.Col sm={12} md={6} lg={6}>
                     <TextInput
-                        {...register("email", {
-                            required: t("dataGroup.errors.name"),
+                        {...register("unit", {
+                            required: t("weight.errors.name"),
                         })}
-                        label={"E-mail"}
-                        placeholder={"E-mail"}
+                        label={t("measureType.name")}
+                        placeholder={t("measureType.name")}
                         autoComplete="off"
                         withAsterisk
                         error={
-                            errors.email
-                                ? t("dataGroup.errors.name")
-                                : undefined
+                            errors.unit ? t("weight.errors.name") : undefined
                         }
                         spellCheck={false}
+                    />
+                </Grid.Col>
+                <Grid.Col sm={12} md={6} lg={6}>
+                    <TextInput
+                        {...register("unitShort", {
+                            required: t("dataGroup.errors.name"),
+                        })}
+                        label={t("measureType.nameShort")}
+                        placeholder={t("measureType.nameShort")}
+                        autoComplete="off"
+                        withAsterisk
+                        error={
+                            errors.unit ? t("weight.errors.name") : undefined
+                        }
+                        spellCheck={false}
+                    />
+                </Grid.Col>
+                <Grid.Col>
+                    <Controller
+                        name="mbeGroup"
+                        control={control}
+                        rules={{ required: t("dataGroup.errors.name") }}
+                        render={({ field: { onChange } }) => (
+                            <Select
+                                label={t("mbeGroupMember.group")}
+                                value={
+                                    mbeGroupContextValue.selectedGroup
+                                        ? mbeGroupContextValue.selectedGroup.toString()
+                                        : undefined
+                                }
+                                disabled={
+                                    mbeGroupContextValue.isLoading ||
+                                    isGroupsEmpty
+                                }
+                                onChange={(val) => {
+                                    if (
+                                        mbeGroupContextValue.selectGroup !==
+                                        undefined
+                                    ) {
+                                        mbeGroupContextValue.selectGroup(
+                                            Number(val)
+                                        );
+                                        onChange(Number(val));
+                                    }
+                                }}
+                                data={
+                                    mbeGroupContextValue.isLoading
+                                        ? [
+                                            {
+                                                value: "loading",
+                                                label: t(
+                                                    "loading"
+                                                ).toString(),
+                                            },
+                                        ]
+                                        : mbeGroupContextValue.groups?.map(
+                                            (group) => ({
+                                                value: group.id.toString(),
+                                                label: group.name,
+                                            })
+                                        ) ?? []
+                                }
+                                withAsterisk
+                                error={
+                                    errors.mbeGroup
+                                        ? t("dataGroup.errors.name")
+                                        : undefined
+                                }
+                            />
+                        )}
                     />
                 </Grid.Col>
             </Grid>

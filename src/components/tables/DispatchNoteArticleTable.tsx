@@ -26,6 +26,11 @@ import DispatchNoteArticleForm from "../forms/DispatchNoteArticleForm";
 import DispatchNoteForm from "../forms/DisptachNoteForm";
 import { FaEdit } from "react-icons/fa";
 import { useToggle } from "@mantine/hooks";
+import {
+    ColumnFilterType,
+    Comparators,
+    NumberFilterValues,
+} from "../BaseTable";
 
 type T = DispatchNoteArticle;
 type TFields = DispatchNoteArticleFields;
@@ -126,14 +131,36 @@ export default function DispatchNoteArticleTable({
             },
             {
                 accessorKey: "weightType",
-                cell: (info) => info.getValue(),
+                accessorFn: (row) =>
+                    `${row.weightType.unit} (${row.weightType.unitShort})`,
                 header: t("measureType.name").toString(),
-                id: "weight_type",
             },
             {
                 accessorKey: "quantity",
                 cell: (info) => info.getValue(),
                 header: t("measureType.quantity").toString(),
+                enableColumnFilter: true,
+                meta: { type: ColumnFilterType.Number },
+                filterFn: (row, columnId, filterValue: NumberFilterValues) => {
+                    if (filterValue.value === null) {
+                        return true;
+                    }
+                    let number = row.getValue<number>(columnId);
+                    switch (filterValue.comparator) {
+                        case Comparators.Eq:
+                            return number === filterValue.value;
+                        case Comparators.Ne:
+                            return number !== filterValue.value;
+                        case Comparators.Gt:
+                            return number > filterValue.value;
+                        case Comparators.Gte:
+                            return number >= filterValue.value;
+                        case Comparators.Lt:
+                            return number < filterValue.value;
+                        case Comparators.Lte:
+                            return number <= filterValue.value;
+                    }
+                },
             },
         ];
         if (isEditable) {

@@ -11,8 +11,11 @@ import {
     Ordering,
     UpdateDispatchNoteArticleMutation,
     useGetArticlesQuery,
+    useGetWeightTypesQuery,
     useInsertDispatchNoteArticleMutation,
     useUpdateDispatchNoteArticleMutation,
+    WeightType,
+    WeightTypeFields,
 } from "../../generated/graphql";
 import BaseForm from "./BaseForm";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -21,6 +24,7 @@ import {
     DEBOUNCE_TIME,
     FormProps,
     makeOptions,
+    makeOptionsDirty,
     onChange,
     SelectOption,
     SelectState,
@@ -37,7 +41,7 @@ import {
 
 type FormInput = {
     article: SelectOption<Article> | undefined;
-    measureType: string;
+    measureType: SelectOption<WeightType> | undefined;
     quantity: number;
 };
 
@@ -80,8 +84,13 @@ export default function DispatchNoteArticleForm({
                   }
                 : undefined,
             // WARN: Missing proper undefined handling on weightType
-            measureType: edit ? edit.weightType ?? "" : undefined,
             quantity: edit ? edit.quantity : undefined,
+            measureType: edit
+                ? {
+                      value: edit.weightType,
+                      label: edit.weightType.unitShort,
+                  }
+                : undefined,
         },
     });
 
@@ -111,7 +120,7 @@ export default function DispatchNoteArticleForm({
                         quantity: data.quantity,
                         idArticle: data.article.value.id,
                         idDispatchNote: dispatchNoteId,
-                        weightType: data.measureType,
+                        weightType: data.measureType.value.id,
                         dGroup: dataGroupContextValue.selectedGroup ?? 1,
                     },
                 });
@@ -134,7 +143,7 @@ export default function DispatchNoteArticleForm({
                         idDispatchNote: dispatchNoteId,
                         idArticle: data.article.value.id,
                         quantity: data.quantity,
-                        weightType: data.measureType,
+                        weightType: data.measureType.value.id,
                     },
                 });
             } else {
@@ -163,12 +172,37 @@ export default function DispatchNoteArticleForm({
         maxPage: 1,
     });
 
+    const [weightTypeSelectState, setWeightTypeSelectState] = useState<
+        SelectState<WeightType>
+    >({
+        selected:
+            edit === undefined
+                ? undefined
+                : ({
+                      value: edit?.weightType,
+                      label: edit?.weightType?.unitShort ?? "",
+                  } as SelectOption<WeightType>),
+        page: 1,
+        pages: {},
+        limit: LIMIT,
+        filter: "",
+        maxPage: 1,
+    });
+
     const [debouncedArticleInputValue, setDebouncedArticleInputValue] =
+        useState("");
+    const [debouncedWeightTypeInputValue, setDebouncedWeightTypeInputValue] =
         useState("");
 
     const articleOptions = useMemo(() => {
         return makeOptions(articleSelectState.page, articleSelectState.pages);
     }, [articleSelectState.page, articleSelectState.pages]);
+    const weightTypeOptions = useMemo(() => {
+        return makeOptionsDirty(
+            weightTypeSelectState.page,
+            weightTypeSelectState.pages
+        );
+    }, [weightTypeSelectState.page, weightTypeSelectState.pages]);
 
     const { data: articleData, isFetching: isFetchingArticles } =
         useGetArticlesQuery(
@@ -203,8 +237,46 @@ export default function DispatchNoteArticleForm({
             }
         );
 
+    const { data: weightTypeData, isFetching: isFetchingWeightTypes } =
+        useGetWeightTypesQuery(
+            {
+                options: {
+                    id: undefined,
+                    pageSize: weightTypeSelectState.limit,
+                    page: weightTypeSelectState.page,
+                    ordering: {
+                        order: Ordering.Asc,
+                        orderBy: WeightTypeFields.Id,
+                    },
+                    filters:
+                        weightTypeSelectState.filter !== ""
+                            ? [
+                                  {
+                                      value: weightTypeSelectState.filter,
+                                      field: WeightTypeFields.UnitShort,
+                                  },
+                              ]
+                            : undefined,
+                    mbeGroupId: 1,
+                },
+            },
+            {
+                queryKey: [
+                    "getWeightTypesDNAForm",
+                    weightTypeSelectState.limit,
+                    weightTypeSelectState.page,
+                ],
+                keepPreviousData: true,
+            }
+        );
+
     const resetSelects = useCallback(() => {
         setArticleSelectState((old) => ({
+            ...old,
+            filter: "",
+            selected: null,
+        }));
+        setWeightTypeSelectState((old) => ({
             ...old,
             filter: "",
             selected: null,
@@ -225,6 +297,20 @@ export default function DispatchNoteArticleForm({
     }, [articleData, setArticleSelectState]);
 
     useEffect(() => {
+        if (weightTypeData) {
+            setWeightTypeSelectState((old) => ({
+                ...old,
+                maxPage: weightTypeData.weightTypes.totalPages,
+                pages: {
+                    ...old.pages,
+                    [weightTypeData.weightTypes.page]:
+                        weightTypeData.weightTypes.results,
+                },
+            }));
+        }
+    }, [weightTypeData, setWeightTypeSelectState]);
+
+    useEffect(() => {
         const timeout = setTimeout(() => {
             setArticleSelectState((old) => ({
                 ...old,
@@ -236,6 +322,19 @@ export default function DispatchNoteArticleForm({
             clearTimeout(timeout);
         };
     }, [debouncedArticleInputValue]);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setWeightTypeSelectState((old) => ({
+                ...old,
+                page: 1,
+                filter: debouncedWeightTypeInputValue.trim(),
+            }));
+        }, DEBOUNCE_TIME);
+        return () => {
+            clearTimeout(timeout);
+        };
+    }, [debouncedWeightTypeInputValue]);
 
     return (
         <BaseForm
@@ -350,20 +449,78 @@ export default function DispatchNoteArticleForm({
                     />
                 </Grid.Col>
                 <Grid.Col sm={12} md={6} lg={6}>
-                    <TextInput
-                        {...register("measureType", {
-                            required: t("weight.errors.name"),
-                        })}
-                        label={t("measureType.name")}
-                        placeholder={t("measureType.name")}
-                        autoComplete="off"
-                        spellCheck={false}
-                        withAsterisk
-                        error={
-                            errors.quantity
-                                ? t("weight.errors.name")
-                                : undefined
-                        }
+                    <Controller
+                        name="measureType"
+                        control={control}
+                        rules={{ required: t("weight.errors.name") }}
+                        render={() => (
+                            <Input.Wrapper
+                                label={t("measureType.name")}
+                                withAsterisk
+                                error={
+                                    errors.measureType
+                                        ? t("weight.errors.name")
+                                        : undefined
+                                }
+                            >
+                                <Select
+                                    placeholder={t("measureType.name")}
+                                    loadingMessage={() => t("loading")}
+                                    noOptionsMessage={() => t("noOptions")}
+                                    styles={selectStyle(
+                                        errors.measureType,
+                                        theme
+                                    )}
+                                    isMulti={false}
+                                    value={weightTypeSelectState.selected}
+                                    options={weightTypeOptions}
+                                    onMenuClose={() => {
+                                        setWeightTypeSelectState((old) => ({
+                                            ...old,
+                                            page: 1,
+                                        }));
+                                    }}
+                                    onMenuScrollToBottom={
+                                        weightTypeSelectState.page <
+                                        weightTypeSelectState.maxPage
+                                            ? () => {
+                                                  setWeightTypeSelectState(
+                                                      (old) => ({
+                                                          ...old,
+                                                          page: old.page + 1,
+                                                      })
+                                                  );
+                                              }
+                                            : undefined
+                                    }
+                                    onInputChange={(value, actionMeta) => {
+                                        if (
+                                            actionMeta.action === "input-change"
+                                        ) {
+                                            setDebouncedWeightTypeInputValue(
+                                                value
+                                            );
+                                        }
+                                    }}
+                                    onChange={(value, actionMeta) => {
+                                        onChange(
+                                            value,
+                                            actionMeta,
+                                            setWeightTypeSelectState
+                                        );
+                                        setValue(
+                                            "measureType",
+                                            value ?? undefined,
+                                            {
+                                                shouldValidate: true,
+                                            }
+                                        );
+                                    }}
+                                    isLoading={isFetchingWeightTypes}
+                                    isClearable
+                                />
+                            </Input.Wrapper>
+                        )}
                     />
                 </Grid.Col>
             </Grid>
