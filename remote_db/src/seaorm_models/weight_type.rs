@@ -37,8 +37,6 @@ pub struct Model {
 pub enum Relation {
     #[sea_orm(has_many = "super::dispatch_note_article::Entity")]
     DispatchNoteArticle,
-    #[sea_orm(has_many = "super::entry::Entity")]
-    Entry,
     #[sea_orm(has_many = "crate::user_models::mbe_groups_weight_types::Entity")]
     MbeGroupsWeightTypes,
 }
@@ -46,12 +44,6 @@ pub enum Relation {
 impl Related<super::dispatch_note_article::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::DispatchNoteArticle.def()
-    }
-}
-
-impl Related<super::entry::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Entry.def()
     }
 }
 
