@@ -123,6 +123,7 @@ type NavigationLink = {
     label: string;
     icon?: JSX.Element;
     type: NavigationLinkType.LabelLink | NavigationLinkType.IconLink;
+    hasSubRoutes?: boolean;
 };
 
 type MultiNavigationButton = {
@@ -165,6 +166,12 @@ export default function AppNavbar({ children }: AppNavbarProps) {
                 link: "/dispatch-note",
                 label: t("navigation.dispatchNote").toString(),
                 type: NavigationLinkType.LabelLink,
+                hasSubRoutes: true,
+            },
+            {
+                link: "/weights",
+                label: "weights",
+                type: NavigationLinkType.LabelLink,
             },
             {
                 key: "/options",
@@ -194,6 +201,10 @@ export default function AppNavbar({ children }: AppNavbarProps) {
 
     const active = location.pathname;
 
+    const isActive = useCallback((link: NavigationLink) => {
+        return link.hasSubRoutes ? active.includes(link.link) : active === link.link;
+    }, [active]);
+
     const handleOnClick = useCallback(
         (event: React.MouseEvent, link: string) => {
             event.preventDefault();
@@ -211,7 +222,7 @@ export default function AppNavbar({ children }: AppNavbarProps) {
                     href={link.link}
                     title={link.label}
                     className={cx(classes.link, {
-                        [classes.linkActive]: active === link.link,
+                        [classes.linkActive]: isActive(link),
                     })}
                     onClick={(event) => {
                         handleOnClick(event, link.link);
@@ -221,7 +232,7 @@ export default function AppNavbar({ children }: AppNavbarProps) {
                 </a>
             );
         },
-        [active, classes.linkActive, classes.link, cx, handleOnClick]
+        [classes.linkActive, classes.link, cx, handleOnClick]
     );
 
     const generateIconLink = useCallback(
@@ -231,7 +242,7 @@ export default function AppNavbar({ children }: AppNavbarProps) {
                     <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
                         <ActionIcon
                             title={link.label}
-                            color={active === link.link ? "blue" : "gray"}
+                            color={isActive(link) ? "blue" : "gray"}
                             variant="outline"
                             onClick={(event) => {
                                 handleOnClick(event, link.link);
@@ -245,7 +256,7 @@ export default function AppNavbar({ children }: AppNavbarProps) {
                             href={link.link}
                             title={link.label}
                             className={cx(classes.link, {
-                                [classes.linkActive]: active === link.link,
+                                [classes.linkActive]: isActive(link),
                             })}
                             onClick={(event) => {
                                 handleOnClick(event, link.link);
@@ -260,7 +271,7 @@ export default function AppNavbar({ children }: AppNavbarProps) {
                 </React.Fragment>
             );
         },
-        [active, classes.linkActive, classes.link, cx, handleOnClick]
+        [classes.linkActive, classes.link, cx, handleOnClick]
     );
 
     const generateMultiNavigationButton = useCallback(
