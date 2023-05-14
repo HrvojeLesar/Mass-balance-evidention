@@ -59,6 +59,7 @@
         "root": "Entry review",
         "insertEntry": "Entry insertion",
         "insertOther": "Cell, culture, buyer insertion",
+        "articleMeasureTypes": "Article, measurement unit insertion",
         "article": "Article insertion",
         "dispatchNote": "Dispatch notes",
         "options": "Options",
@@ -95,7 +96,9 @@
         "newMbeGroupMember": "Add a user to group",
         "mbeGroupMemberDelete": "Group member deletion confirmation",
         "membersDisplay": "Group members",
-        "mbeGroupSelection": "Group selection"
+        "mbeGroupSelection": "Group selection",
+        "measureType": "Measurement unit preview",
+        "measureTypeInsertable": "New measurement unit"
     },
     "deleteModal": {
         "deleteConfirmText": "Are you sure you want to delete the selected row?",

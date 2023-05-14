@@ -159,7 +159,7 @@ export default function AppNavbar({ children }: AppNavbarProps) {
             },
             {
                 link: "/article",
-                label: t("navigation.article").toString(),
+                label: t("navigation.articleMeasureTypes").toString(),
                 type: NavigationLinkType.LabelLink,
             },
             {
@@ -167,11 +167,6 @@ export default function AppNavbar({ children }: AppNavbarProps) {
                 label: t("navigation.dispatchNote").toString(),
                 type: NavigationLinkType.LabelLink,
                 hasSubRoutes: true,
-            },
-            {
-                link: "/weights",
-                label: "weights",
-                type: NavigationLinkType.LabelLink,
             },
             {
                 key: "/options",

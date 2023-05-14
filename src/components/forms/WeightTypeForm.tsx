@@ -4,6 +4,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
     useInsertWeightTypeMutation,
+    useUpdateWeightTypesMutation,
     WeightType,
     WeightTypeInsertOptions,
 } from "../../generated/graphql";
@@ -19,6 +20,7 @@ type WeightTypeFormProps = {
 export default function WeightTypeForm({
     edit,
     onInsertSuccess,
+    onUpdateSuccess,
 }: WeightTypeFormProps) {
     const { t } = useTranslation();
     const mbeGroupContextValue = useContext(MbeGroupContext);
@@ -55,16 +57,36 @@ export default function WeightTypeForm({
         },
     });
 
+    const update = useUpdateWeightTypesMutation({
+        onSuccess: (_data, _variables, _context) => {
+            reset();
+            if (onUpdateSuccess) {
+                onUpdateSuccess();
+            }
+        },
+    });
+
     return (
         <BaseForm
             submitDisabled={insert.isLoading}
-            onSubmit={handleSubmit((data) => {
-                insert.mutate({
-                    options: {
-                        ...data,
-                    },
-                });
-            })}
+            onSubmit={
+                edit
+                    ? handleSubmit((data) =>
+                          update.mutate({
+                              options: {
+                                  ...data,
+                                  id: edit.id,
+                              },
+                          })
+                      )
+                    : handleSubmit((data) => {
+                          insert.mutate({
+                              options: {
+                                  ...data,
+                              },
+                          });
+                      })
+            }
         >
             <Grid mb="sm">
                 <Grid.Col sm={12} md={6} lg={6}>
@@ -128,19 +150,19 @@ export default function WeightTypeForm({
                                 data={
                                     mbeGroupContextValue.isLoading
                                         ? [
-                                            {
-                                                value: "loading",
-                                                label: t(
-                                                    "loading"
-                                                ).toString(),
-                                            },
-                                        ]
+                                              {
+                                                  value: "loading",
+                                                  label: t(
+                                                      "loading"
+                                                  ).toString(),
+                                              },
+                                          ]
                                         : mbeGroupContextValue.groups?.map(
-                                            (group) => ({
-                                                value: group.id.toString(),
-                                                label: group.name,
-                                            })
-                                        ) ?? []
+                                              (group) => ({
+                                                  value: group.id.toString(),
+                                                  label: group.name,
+                                              })
+                                          ) ?? []
                                 }
                                 withAsterisk
                                 error={

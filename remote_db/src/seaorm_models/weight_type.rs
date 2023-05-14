@@ -225,7 +225,7 @@ impl QueryDatabase for Entity {
 
         let transaction = db.begin().await?;
 
-        let res = model.insert(&transaction).await?;
+        let res = model.update(&transaction).await?;
 
         transaction.commit().await?;
 

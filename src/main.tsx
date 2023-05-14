@@ -15,7 +15,6 @@ import AppNavbar from "./AppNavbar";
 import EntryView from "./views/EntryView";
 import InsertEntryView from "./views/InsertEntryView";
 import CellCultureBuyerView from "./views/CellCultureBuyerView";
-import ArticleView from "./views/ArticleView";
 import DispatchNoteView from "./views/DispatchNoteView";
 import DispatchNoteArticleView from "./views/DispatchNoteArticleView";
 import OptionsView from "./views/OptionsView";
@@ -25,6 +24,7 @@ import MbeGroupProvider from "./MbeGroupProvider";
 import MbeGroupView from "./views/MbeGroupView";
 import NotFound from "./components/NotFound";
 import AuthContextProvider from "./AuthProvider";
+import ArticleMeasureTypeView from "./views/ArticleMeasureTypeView";
 
 const queryClient = new QueryClient();
 
@@ -93,7 +93,7 @@ const router = createBrowserRouter([
                 path: "insert-cell-culture-buyer",
                 element: <CellCultureBuyerView />,
             },
-            { path: "/article", element: <ArticleView /> },
+            { path: "/article", element: <ArticleMeasureTypeView /> },
             { path: "/dispatch-note", element: <DispatchNoteView /> },
             {
                 path: "/dispatch-note/:dispatchNoteId",

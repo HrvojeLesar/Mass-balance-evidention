@@ -59,7 +59,7 @@
         "root": "Pregled zapisa",
         "insertEntry": "Unos zapisa",
         "insertOther": "Unos čestica, kultura, kupaca",
-        "article": "Unos artikala",
+        "articleMeasureTypes": "Unos artikala, mjernih jedinica",
         "dispatchNote": "Otpremnice",
         "options": "Postavke",
         "dataGroupOptions": "Postavke grupacija podataka",
@@ -95,7 +95,9 @@
         "newMbeGroupMember": "Dodavanje korisnika u grupu",
         "mbeGroupMemberDelete": "Potvrda brisanja člana grupe",
         "membersDisplay": "Članovi grupe",
-        "mbeGroupSelection": "Odabir grupe"
+        "mbeGroupSelection": "Odabir grupe",
+        "measureType": "Pregled mjernih jedinica",
+        "measureTypeInsertable": "Unos mjerne jedinice"
     },
     "deleteModal": {
         "deleteConfirmText": "Jeste li sigurni da želite obrisati odabrani red?",

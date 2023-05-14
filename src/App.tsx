@@ -1,6 +1,6 @@
 import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import AppNavbar from "./AppNavbar";
-import ArticleView from "./views/ArticleView";
+import ArticleMeasureTypeView from "./views/ArticleMeasureTypeView";
 import CellCultureBuyerView from "./views/CellCultureBuyerView";
 import DispatchNoteArticleView from "./views/DispatchNoteArticleView";
 import DispatchNoteView from "./views/DispatchNoteView";
@@ -19,7 +19,7 @@ export default function App() {
                         path="/insert-cell-culture-buyer"
                         element={<CellCultureBuyerView />}
                     />
-                    <Route path="/article" element={<ArticleView />} />
+                    <Route path="/article" element={<ArticleMeasureTypeView />} />
                     <Route
                         path="/dispatch-note"
                         element={<DispatchNoteView />}

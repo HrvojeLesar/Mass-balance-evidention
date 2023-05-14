@@ -7,8 +7,6 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     Ordering,
-    useGetArticlesQuery,
-    useDeleteArticleMutation,
     WeightType,
     WeightTypeFields,
     useGetWeightTypesQuery,
@@ -23,7 +21,6 @@ import DeleteModal from "../DeleteModal";
 import { DataGroupContext } from "../../DataGroupProvider";
 import CardUtil from "../util/CardUtil";
 import { Divider, Title } from "@mantine/core";
-import ArticleForm from "../forms/ArticleForm";
 import { MbeGroupContext } from "../../MbeGroupProvider";
 import WeightTypeForm from "../forms/WeightTypeForm";
 
@@ -192,10 +189,10 @@ export default function WeightTypeTable({
             />
             {isInsertable ? (
                 <Title order={4}>
-                    {t("titles.articleInsertable").toString()}
+                    {t("titles.measureTypeInsertable").toString()}
                 </Title>
             ) : (
-                <Title>{t("titles.article").toString()}</Title>
+                <Title>{t("titles.measureType").toString()}</Title>
             )}
             <Divider my="sm" />
             {isInsertable && (
