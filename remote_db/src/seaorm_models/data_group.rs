@@ -227,9 +227,15 @@ impl QueryDatabase for Entity {
             ..Default::default()
         };
         let transaction = db.begin().await?;
-        let res = Entity::insert(model)
-            .exec_with_returning(&transaction)
-            .await?;
+
+        let res = model.insert(&transaction).await?;
+        super::dispatch_note_ident_tracker::ActiveModel {
+            id_data_group: ActiveValue::Set(res.id),
+            ..Default::default()
+        }
+        .insert(&transaction)
+        .await?;
+
         transaction.commit().await?;
         Ok(res)
     }

@@ -2,7 +2,8 @@ use async_graphql::{Context, Enum, InputObject, Object, SimpleObject};
 use async_trait::async_trait;
 use log::error;
 use sea_orm::{
-    entity::prelude::*, ActiveValue, DatabaseTransaction, DeleteResult, TransactionTrait,
+    entity::prelude::*, sea_query::Expr, ActiveValue, DatabaseTransaction, DeleteResult,
+    TransactionTrait,
 };
 use serde::{Deserialize, Serialize};
 
@@ -292,7 +293,23 @@ impl QueryDatabase for Entity {
         let res = Entity::insert(model)
             .exec_with_returning(&transaction)
             .await?;
+
+        // WARN: As of time of writing seaorm does not support update queries as `SET c = c + 1`
+        // with update function
+        super::dispatch_note_ident_tracker::Entity::update_many()
+            .col_expr(
+                super::dispatch_note_ident_tracker::Column::Identifier,
+                Expr::add(
+                    super::dispatch_note_ident_tracker::Column::Identifier.into_expr(),
+                    1,
+                ),
+            )
+            .filter(super::dispatch_note_ident_tracker::Column::IdDataGroup.eq(options.d_group))
+            .exec(&transaction)
+            .await?;
+
         transaction.commit().await?;
+
         Ok(res)
     }
 }

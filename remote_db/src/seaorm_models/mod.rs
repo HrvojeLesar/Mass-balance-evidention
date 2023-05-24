@@ -23,6 +23,7 @@ pub mod culture;
 pub mod data_group;
 pub mod dispatch_note;
 pub mod dispatch_note_article;
+pub mod dispatch_note_ident_tracker;
 pub mod entry;
 pub mod graphql_schema;
 pub mod weight_type;

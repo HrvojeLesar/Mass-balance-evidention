@@ -34,6 +34,9 @@ use super::{
         DispatchNoteArticleFields, DispatchNoteArticleIds, DispatchNoteArticleMutation,
         DispatchNoteArticleQuery,
     },
+    dispatch_note_ident_tracker::{
+        DispatchNoteIdentTrackerMutation, DispatchNoteIdentTrackerQuery,
+    },
     entry::{EntryFields, EntryMutation, EntryQuery},
     weight_type::{WeightTypeDeleteOptions, WeightTypeFields, WeightTypeMutation, WeightTypeQuery},
     GetEntityDataGroupId, GetEntityId, QueryResultsTrait,
@@ -83,6 +86,7 @@ pub struct QueryRoot(
     MbeGroupQuery,
     MbeGroupMembersQuery,
     WeightTypeQuery,
+    DispatchNoteIdentTrackerQuery,
 );
 
 #[derive(MergedObject, Default)]
@@ -100,6 +104,7 @@ pub struct MutationRoot(
     MbeGroupMembersMutation,
     MbeUserMutation,
     WeightTypeMutation,
+    DispatchNoteIdentTrackerMutation,
 );
 
 #[derive(SimpleObject, Debug)]
