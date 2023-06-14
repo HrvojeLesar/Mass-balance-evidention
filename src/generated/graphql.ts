@@ -514,6 +514,15 @@ export type DispatchNoteFilterValue = {
   value: Scalars['String'];
 };
 
+export type DispatchNoteIdentFetchOptions = {
+  idDataGroup: Scalars['Int'];
+};
+
+export type DispatchNoteIdentUpdateOptions = {
+  idDataGroup: Scalars['Int'];
+  identifier: Scalars['Int'];
+};
+
 export type DispatchNoteInsertOptions = {
   dGroup: Scalars['Int'];
   issuingDate?: InputMaybe<Scalars['DateTime']>;
@@ -659,6 +668,13 @@ export type MbeUserInsertOptions = {
   email: Scalars['String'];
 };
 
+export type Model = {
+  __typename?: 'Model';
+  createdAt: Scalars['DateTime'];
+  idDataGroup: Scalars['Int'];
+  identifier: Scalars['Int'];
+};
+
 export type MutationRoot = {
   __typename?: 'MutationRoot';
   deleteArticle: RowsDeleted;
@@ -693,6 +709,7 @@ export type MutationRoot = {
   updateDataGroup: DataGroup;
   updateDispatchNote: DispatchNote;
   updateDispatchNoteArticle: DispatchNoteArticle;
+  updateDispatchNoteIdent: Model;
   updateEntry: Entry;
   updateWeightTypes: WeightType;
 };
@@ -858,6 +875,11 @@ export type MutationRootUpdateDispatchNoteArticleArgs = {
 };
 
 
+export type MutationRootUpdateDispatchNoteIdentArgs = {
+  options: DispatchNoteIdentUpdateOptions;
+};
+
+
 export type MutationRootUpdateEntryArgs = {
   options: EntryUpdateOptions;
 };
@@ -888,6 +910,7 @@ export type QueryRoot = {
   cultures: CultureResult;
   dataGroups: Array<DataGroup>;
   dispatchNoteArticles: DispatchNoteArticleResults;
+  dispatchNoteIdent: Model;
   dispatchNotes: DispatchNoteResults;
   entries: EntryResult;
   mbeGroupMembers: Array<MbeGroupMembersFlattened>;
@@ -937,6 +960,11 @@ export type QueryRootCulturesArgs = {
 
 export type QueryRootDispatchNoteArticlesArgs = {
   options: DispatchNoteArticleFetchOptions;
+};
+
+
+export type QueryRootDispatchNoteIdentArgs = {
+  options: DispatchNoteIdentFetchOptions;
 };
 
 
@@ -1316,6 +1344,20 @@ export type DeleteDispatchNoteArticleMutation = { __typename?: 'MutationRoot', d
 export type WeightTypePartsFragment = { __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any };
 
 export type DispatchNoteArticlePartsFragment = { __typename?: 'DispatchNoteArticle', id: number, quantity: number, createdAt: any, dispatchNote: { __typename?: 'DispatchNote', id: number, noteType?: number | null, numericalIdentifier?: number | null, issuingDate?: any | null, dGroup: number, createdAt: any }, article: { __typename?: 'Article', id: number, name: string, description?: string | null, dGroup: number, createdAt: any }, weightType: { __typename?: 'WeightType', id: number, unitShort: string, unit: string, createdAt: any }, dGroup: { __typename?: 'DataGroup', id: number, name: string, description?: string | null, createdAt: any, idMbeGroup: number } };
+
+export type GetDispatchNoteIdentTrackerQueryVariables = Exact<{
+  options: DispatchNoteIdentFetchOptions;
+}>;
+
+
+export type GetDispatchNoteIdentTrackerQuery = { __typename?: 'QueryRoot', dispatchNoteIdent: { __typename?: 'Model', idDataGroup: number, identifier: number, createdAt: any } };
+
+export type UpdateDispatchNoteIdentTrackerMutationVariables = Exact<{
+  updateOptions: DispatchNoteIdentUpdateOptions;
+}>;
+
+
+export type UpdateDispatchNoteIdentTrackerMutation = { __typename?: 'MutationRoot', updateDispatchNoteIdent: { __typename?: 'Model', idDataGroup: number, identifier: number, createdAt: any } };
 
 export type GetEntriesQueryVariables = Exact<{
   options: EntryFetchOptions;
@@ -2346,6 +2388,45 @@ export const useDeleteDispatchNoteArticleMutation = <
     useMutation<DeleteDispatchNoteArticleMutation, TError, DeleteDispatchNoteArticleMutationVariables, TContext>(
       ['DeleteDispatchNoteArticle'],
       (variables?: DeleteDispatchNoteArticleMutationVariables) => fetcher<DeleteDispatchNoteArticleMutation, DeleteDispatchNoteArticleMutationVariables>(DeleteDispatchNoteArticleDocument, variables)(),
+      options
+    );
+export const GetDispatchNoteIdentTrackerDocument = `
+    query getDispatchNoteIdentTracker($options: DispatchNoteIdentFetchOptions!) {
+  dispatchNoteIdent(options: $options) {
+    idDataGroup
+    identifier
+    createdAt
+  }
+}
+    `;
+export const useGetDispatchNoteIdentTrackerQuery = <
+      TData = GetDispatchNoteIdentTrackerQuery,
+      TError = unknown
+    >(
+      variables: GetDispatchNoteIdentTrackerQueryVariables,
+      options?: UseQueryOptions<GetDispatchNoteIdentTrackerQuery, TError, TData>
+    ) =>
+    useQuery<GetDispatchNoteIdentTrackerQuery, TError, TData>(
+      ['getDispatchNoteIdentTracker', variables],
+      fetcher<GetDispatchNoteIdentTrackerQuery, GetDispatchNoteIdentTrackerQueryVariables>(GetDispatchNoteIdentTrackerDocument, variables),
+      options
+    );
+export const UpdateDispatchNoteIdentTrackerDocument = `
+    mutation updateDispatchNoteIdentTracker($updateOptions: DispatchNoteIdentUpdateOptions!) {
+  updateDispatchNoteIdent(options: $updateOptions) {
+    idDataGroup
+    identifier
+    createdAt
+  }
+}
+    `;
+export const useUpdateDispatchNoteIdentTrackerMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<UpdateDispatchNoteIdentTrackerMutation, TError, UpdateDispatchNoteIdentTrackerMutationVariables, TContext>) =>
+    useMutation<UpdateDispatchNoteIdentTrackerMutation, TError, UpdateDispatchNoteIdentTrackerMutationVariables, TContext>(
+      ['updateDispatchNoteIdentTracker'],
+      (variables?: UpdateDispatchNoteIdentTrackerMutationVariables) => fetcher<UpdateDispatchNoteIdentTrackerMutation, UpdateDispatchNoteIdentTrackerMutationVariables>(UpdateDispatchNoteIdentTrackerDocument, variables)(),
       options
     );
 export const GetEntriesDocument = `

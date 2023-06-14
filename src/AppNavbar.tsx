@@ -196,9 +196,14 @@ export default function AppNavbar({ children }: AppNavbarProps) {
 
     const active = location.pathname;
 
-    const isActive = useCallback((link: NavigationLink) => {
-        return link.hasSubRoutes ? active.includes(link.link) : active === link.link;
-    }, [active]);
+    const isActive = useCallback(
+        (link: NavigationLink) => {
+            return link.hasSubRoutes
+                ? active.includes(link.link)
+                : active === link.link;
+        },
+        [active]
+    );
 
     const handleOnClick = useCallback(
         (event: React.MouseEvent, link: string) => {
@@ -227,7 +232,7 @@ export default function AppNavbar({ children }: AppNavbarProps) {
                 </a>
             );
         },
-        [classes.linkActive, classes.link, cx, handleOnClick]
+        [isActive, classes.linkActive, classes.link, cx, handleOnClick]
     );
 
     const generateIconLink = useCallback(
@@ -266,7 +271,7 @@ export default function AppNavbar({ children }: AppNavbarProps) {
                 </React.Fragment>
             );
         },
-        [classes.linkActive, classes.link, cx, handleOnClick]
+        [isActive, classes.linkActive, classes.link, cx, handleOnClick]
     );
 
     const generateMultiNavigationButton = useCallback(

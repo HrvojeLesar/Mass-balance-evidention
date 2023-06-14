@@ -1,0 +1,15 @@
+query getDispatchNoteIdentTracker($options: DispatchNoteIdentFetchOptions!) {
+    dispatchNoteIdent(options: $options) {
+        idDataGroup
+        identifier
+        createdAt
+    }
+}
+
+mutation updateDispatchNoteIdentTracker($updateOptions: DispatchNoteIdentUpdateOptions!) {
+    updateDispatchNoteIdent(options: $updateOptions) {
+        idDataGroup
+        identifier
+        createdAt
+    }
+}

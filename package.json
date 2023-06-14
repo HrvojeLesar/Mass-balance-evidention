@@ -11,12 +11,12 @@
         "graphql-codegen": "graphql-codegen --config codegen.ts"
     },
     "dependencies": {
-        "@emotion/react": "^11.10.5",
-        "@mantine/core": "^5.10.3",
-        "@mantine/dates": "^5.10.3",
-        "@mantine/hooks": "^5.10.3",
-        "@mantine/modals": "^5.10.3",
-        "@mantine/notifications": "^5.10.3",
+        "@emotion/react": "^11.11.0",
+        "@mantine/core": "^6.0.11",
+        "@mantine/dates": "^6.0.11",
+        "@mantine/hooks": "^6.0.11",
+        "@mantine/modals": "^6.0.11",
+        "@mantine/notifications": "^6.0.11",
         "@tanstack/react-query": "^4.3.4",
         "@tanstack/react-table": "^8.5.13",
         "@tauri-apps/api": "^1.0.2",

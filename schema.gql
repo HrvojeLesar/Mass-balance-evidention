@@ -459,6 +459,15 @@ input DispatchNoteFilterValue {
 	comparator: Comparator
 }
 
+input DispatchNoteIdentFetchOptions {
+	idDataGroup: Int!
+}
+
+input DispatchNoteIdentUpdateOptions {
+	idDataGroup: Int!
+	identifier: Int!
+}
+
 input DispatchNoteInsertOptions {
 	noteType: Int
 	numericalIdentifier: Int
@@ -600,6 +609,12 @@ input MbeUserInsertOptions {
 	email: String!
 }
 
+type Model {
+	idDataGroup: Int!
+	identifier: Int!
+	createdAt: DateTime!
+}
+
 type MutationRoot {
 	insertBuyer(options: BuyerInsertOptions!): Buyer!
 	updateBuyer(options: BuyerUpdateOptions!): Buyer!
@@ -635,6 +650,7 @@ type MutationRoot {
 	insertWeightTypes(options: WeightTypeInsertOptions!): WeightType!
 	updateWeightTypes(options: WeightTypeUpdateOptions!): WeightType!
 	deleteWeightTypes(options: DeleteOptionsWeightType!): RowsDeleted!
+	updateDispatchNoteIdent(options: DispatchNoteIdentUpdateOptions!): Model!
 }
 
 """
@@ -677,6 +693,7 @@ type QueryRoot {
 	mbeGroups: [MbeGroup!]!
 	mbeGroupMembers(options: MbeGroupMembersQueryOptions!): [MbeGroupMembersFlattened!]!
 	weightTypes(options: WeightTypeFetchOptions!): WeightTypeResults!
+	dispatchNoteIdent(options: DispatchNoteIdentFetchOptions!): Model!
 }
 
 type RowsDeleted {

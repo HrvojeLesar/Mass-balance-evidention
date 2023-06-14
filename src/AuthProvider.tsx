@@ -8,11 +8,11 @@ type Me = {
     email: string;
 };
 
-type AuthContext = {
+type AuthContextT = {
     authorized: boolean;
 };
 
-export const AuthContext = createContext<AuthContext>({
+export const AuthContext = createContext<AuthContextT>({
     authorized: false,
 });
 
@@ -55,7 +55,7 @@ export default function AuthContextProvider({
         ) {
             navigate("/login");
         }
-    }, [location, navigate, isAuthorized]);
+    }, [isLoading, location, navigate, isAuthorized]);
 
     return (
         <AuthContext.Provider
