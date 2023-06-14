@@ -130,7 +130,7 @@ export default function DispatchNoteArticleTable({
                 header: t("article.name").toString(),
             },
             {
-                accessorKey: "weightType",
+                accessorKey: "weight_type",
                 accessorFn: (row) =>
                     `${row.weightType.unit} (${row.weightType.unitShort})`,
                 header: t("measureType.name").toString(),
