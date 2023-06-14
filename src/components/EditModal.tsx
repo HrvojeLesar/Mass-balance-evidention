@@ -1,4 +1,4 @@
-import { Modal, Title } from "@mantine/core";
+import { Modal, Text } from "@mantine/core";
 import { ReactNode } from "react";
 
 type EditModalProps = {
@@ -19,7 +19,7 @@ export default function EditModal({
             opened={show}
             onClose={onHide}
             centered
-            title={<Title order={4}>{title}</Title>}
+            title={<Text fz="lg" fw={700}>{title}</Text>}
             size="auto"
         >
             {children}

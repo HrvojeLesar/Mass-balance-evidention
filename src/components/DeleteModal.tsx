@@ -37,7 +37,7 @@ export default function DeleteModal({
             centered
             closeOnClickOutside={isLoading ? false : true}
             closeOnEscape={isLoading ? false : true}
-            title={<Title order={4}>{title}</Title>}
+            title={<Text fz="lg" fw={700}>{title}</Text>}
             size="auto"
         >
             <Text>
