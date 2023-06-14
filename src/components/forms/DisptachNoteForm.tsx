@@ -120,7 +120,7 @@ export default function DispatchNoteForm({
     });
 
     useEffect(() => {
-        if (data === undefined) {
+        if (data === undefined || edit) {
             return;
         } else {
             setIdentValue(data?.dispatchNoteIdent.identifier);
@@ -203,83 +203,94 @@ export default function DispatchNoteForm({
                                         align="center"
                                     >
                                         {t("dispatchNote.numericalIdentifier")}
-                                        <HoverCard withArrow>
-                                            <HoverCard.Target>
-                                                <div>
-                                                    <FaEdit
-                                                        className={
-                                                            classes.faEditIconPointer
-                                                        }
-                                                    />
-                                                </div>
-                                            </HoverCard.Target>
-                                            <HoverCard.Dropdown
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                }}
-                                            >
-                                                <Title order={5}>Naslov</Title>
-                                                <Divider my="xs" />
-                                                <Grid>
-                                                    <Grid.Col>
-                                                        <NumberInput
-                                                            value={
-                                                                identValue ?? 0
+                                        {edit === undefined ? (
+                                            <HoverCard withArrow>
+                                                <HoverCard.Target>
+                                                    <div>
+                                                        <FaEdit
+                                                            className={
+                                                                classes.faEditIconPointer
                                                             }
-                                                            onChange={(val) => {
-                                                                setIdentValue(
-                                                                    val
-                                                                );
-                                                            }}
-                                                            label="Postavi identifikator na..."
                                                         />
-                                                    </Grid.Col>
-                                                    <Grid.Col>
-                                                        <Flex justify="space-between">
-                                                            <Button
-                                                                disabled={
-                                                                    !isIdentNumber()
+                                                    </div>
+                                                </HoverCard.Target>
+                                                <HoverCard.Dropdown
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                    }}
+                                                >
+                                                    <Title order={5}>
+                                                        Naslov
+                                                    </Title>
+                                                    <Divider my="xs" />
+                                                    <Grid>
+                                                        <Grid.Col>
+                                                            <NumberInput
+                                                                value={
+                                                                    identValue ??
+                                                                    0
                                                                 }
-                                                                onClick={() => {
-                                                                    if (
-                                                                        isIdentNumber()
-                                                                    ) {
-                                                                        const identifier =
-                                                                            identValue as number;
-                                                                        updateIdent.mutate(
-                                                                            {
-                                                                                updateOptions:
-                                                                                    {
-                                                                                        identifier:
-                                                                                            identifier,
-                                                                                        idDataGroup:
-                                                                                            dataGroupContextValue.selectedGroup ??
-                                                                                            1,
-                                                                                    },
-                                                                            }
-                                                                        );
-                                                                    }
-                                                                }}
-                                                            >
-                                                                Postavi
-                                                            </Button>
-                                                            <Button
-                                                                onClick={() => {
+                                                                onChange={(
+                                                                    val
+                                                                ) => {
                                                                     setIdentValue(
-                                                                        data
-                                                                            ?.dispatchNoteIdent
-                                                                            .identifier
+                                                                        val
                                                                     );
                                                                 }}
-                                                            >
-                                                                Reset
-                                                            </Button>
-                                                        </Flex>
-                                                    </Grid.Col>
-                                                </Grid>
-                                            </HoverCard.Dropdown>
-                                        </HoverCard>
+                                                                label="Postavi identifikator na..."
+                                                            />
+                                                        </Grid.Col>
+                                                        <Grid.Col>
+                                                            <Flex justify="space-between">
+                                                                <Button
+                                                                    color="teal"
+                                                                    disabled={
+                                                                        !isIdentNumber()
+                                                                    }
+                                                                    onClick={() => {
+                                                                        if (
+                                                                            isIdentNumber()
+                                                                        ) {
+                                                                            const identifier =
+                                                                                identValue as number;
+                                                                            updateIdent.mutate(
+                                                                                {
+                                                                                    updateOptions:
+                                                                                        {
+                                                                                            identifier:
+                                                                                                identifier,
+                                                                                            idDataGroup:
+                                                                                                dataGroupContextValue.selectedGroup ??
+                                                                                                1,
+                                                                                        },
+                                                                                }
+                                                                            );
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    Postavi
+                                                                </Button>
+                                                                <Button
+                                                                    color="red"
+                                                                    onClick={() => {
+                                                                        setIdentValue(
+                                                                            data
+                                                                                ?.dispatchNoteIdent
+                                                                                .identifier
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    Reset
+                                                                </Button>
+                                                            </Flex>
+                                                        </Grid.Col>
+                                                    </Grid>
+                                                </HoverCard.Dropdown>
+                                            </HoverCard>
+                                        ) : (
+                                            <></>
+                                        )}
                                     </Flex>
                                 }
                                 placeholder={t(

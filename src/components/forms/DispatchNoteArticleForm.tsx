@@ -72,7 +72,6 @@ export default function DispatchNoteArticleForm({
         handleSubmit,
         setValue,
         reset,
-        register,
         formState: { errors },
     } = useForm<FormInput>({
         mode: "onSubmit",
@@ -429,7 +428,7 @@ export default function DispatchNoteArticleForm({
                                 decimalSeparator={
                                     i18n.language === "hr" ? "," : "."
                                 }
-                                value={value ? value : undefined}
+                                value={value ? value : ""}
                                 onChange={onChange}
                                 placeholder={t(
                                     "measureType.quantity"
