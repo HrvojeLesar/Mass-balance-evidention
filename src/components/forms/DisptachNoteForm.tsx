@@ -1,16 +1,14 @@
 import {
-    ActionIcon,
     Button,
     createStyles,
     Divider,
     Flex,
     Grid,
     HoverCard,
-    Modal,
     NumberInput,
     Title,
 } from "@mantine/core";
-import { DateInput, DatePicker, DatePickerInput } from "@mantine/dates";
+import { DateInput } from "@mantine/dates";
 import moment from "moment";
 import { useCallback, useContext, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -32,7 +30,7 @@ import BaseForm from "./BaseForm";
 import { FormProps } from "./FormUtils";
 import { useEffect } from "react";
 
-const useStyles = createStyles((theme) => ({
+const useStyles = createStyles((_theme) => ({
     faEditIconPointer: {
         "&": {
             fill: "red",
@@ -59,21 +57,20 @@ export default function DispatchNoteForm({
     const { t, i18n } = useTranslation();
     const dataGroupContextValue = useContext(DataGroupContext);
 
-    const { data, refetch, isInitialLoading } =
-        useGetDispatchNoteIdentTrackerQuery(
-            {
-                options: {
-                    idDataGroup: dataGroupContextValue.selectedGroup ?? -1,
-                },
+    const { data, refetch } = useGetDispatchNoteIdentTrackerQuery(
+        {
+            options: {
+                idDataGroup: dataGroupContextValue.selectedGroup ?? -1,
             },
-            {
-                queryKey: [
-                    "getDispatchNoteIdentTracker",
-                    dataGroupContextValue.selectedGroup ?? -1,
-                ],
-                keepPreviousData: true,
-            }
-        );
+        },
+        {
+            queryKey: [
+                "getDispatchNoteIdentTracker",
+                dataGroupContextValue.selectedGroup ?? -1,
+            ],
+            keepPreviousData: true,
+        }
+    );
 
     const [identValue, setIdentValue] = useState<number | "" | undefined>(
         data?.dispatchNoteIdent.identifier
@@ -221,7 +218,9 @@ export default function DispatchNoteForm({
                                                     }}
                                                 >
                                                     <Title order={5}>
-                                                        Naslov
+                                                        {t(
+                                                            "dispatchNote.setIdentifierTitle"
+                                                        )}
                                                     </Title>
                                                     <Divider my="xs" />
                                                     <Grid>
@@ -238,7 +237,9 @@ export default function DispatchNoteForm({
                                                                         val
                                                                     );
                                                                 }}
-                                                                label="Postavi identifikator na..."
+                                                                label={t(
+                                                                    "dispatchNote.setIdentifierLabel"
+                                                                )}
                                                             />
                                                         </Grid.Col>
                                                         <Grid.Col>
@@ -269,7 +270,9 @@ export default function DispatchNoteForm({
                                                                         }
                                                                     }}
                                                                 >
-                                                                    Postavi
+                                                                    {t(
+                                                                        "dispatchNote.setButton"
+                                                                    )}
                                                                 </Button>
                                                                 <Button
                                                                     color="red"
@@ -281,7 +284,9 @@ export default function DispatchNoteForm({
                                                                         );
                                                                     }}
                                                                 >
-                                                                    Reset
+                                                                    {t(
+                                                                        "dispatchNote.resetButton"
+                                                                    )}
                                                                 </Button>
                                                             </Flex>
                                                         </Grid.Col>

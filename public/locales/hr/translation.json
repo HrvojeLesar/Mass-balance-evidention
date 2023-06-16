@@ -174,7 +174,11 @@
     "dispatchNote": {
         "noteType": "Tip",
         "numericalIdentifier": "Identifikator",
-        "issuingDate": "Datum"
+        "issuingDate": "Datum",
+        "setIdentifierTitle": "Postavljanje identifikatora",
+        "setIdentifierLabel": "Postavljanje identifikatora na vrijednost",
+        "setButton": "Postavi",
+        "resetButton": "Reset"
     },
     "measureType": {
         "name": "Mjerna jedinica",

@@ -175,7 +175,11 @@
     "dispatchNote": {
         "noteType": "Type",
         "numericalIdentifier": "Identifier",
-        "issuingDate": "Issuing date"
+        "issuingDate": "Issuing date",
+        "setIdentifierTitle": "Set identifier",
+        "setIdentifierLabel": "Set identifier to value",
+        "setButton": "Set",
+        "resetButton": "Reset"
     },
     "measureType": {
         "name": "Unit",
