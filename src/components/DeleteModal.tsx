@@ -39,6 +39,13 @@ export default function DeleteModal({
             closeOnEscape={isLoading ? false : true}
             title={<Text fz="lg" fw={700}>{title}</Text>}
             size="auto"
+            // WARN: TEMP fix for modals not being center aligned
+            styles={{
+                inner: {
+                    paddingLeft: "0px !important",
+                    paddingRight: "0px !important"
+                }
+            }}
         >
             <Text>
                 {deleteConfirmText ??
