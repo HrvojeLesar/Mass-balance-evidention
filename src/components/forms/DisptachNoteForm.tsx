@@ -123,7 +123,7 @@ export default function DispatchNoteForm({
             setIdentValue(data?.dispatchNoteIdent.identifier);
             setValue("numericalIdentifier", data?.dispatchNoteIdent.identifier);
         }
-    }, [data, setValue]);
+    }, [data, setValue, edit]);
 
     const isIdentNumber = useCallback(() => {
         if (identValue === "" || identValue === undefined) {
@@ -180,6 +180,8 @@ export default function DispatchNoteForm({
                                 label={t("dispatchNote.noteType")}
                                 placeholder={t("dispatchNote.noteType")}
                                 autoComplete="off"
+                                precision={10}
+                                removeTrailingZeros
                                 spellCheck={false}
                             />
                         )}
@@ -240,6 +242,8 @@ export default function DispatchNoteForm({
                                                                 label={t(
                                                                     "dispatchNote.setIdentifierLabel"
                                                                 )}
+                                                                precision={10}
+                                                                removeTrailingZeros
                                                             />
                                                         </Grid.Col>
                                                         <Grid.Col>
@@ -301,6 +305,8 @@ export default function DispatchNoteForm({
                                 placeholder={t(
                                     "dispatchNote.numericalIdentifier"
                                 )}
+                                precision={10}
+                                removeTrailingZeros
                                 autoComplete="off"
                                 spellCheck={false}
                             />

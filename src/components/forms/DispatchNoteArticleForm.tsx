@@ -437,7 +437,8 @@ export default function DispatchNoteArticleForm({
                                 label={t("measureType.quantity").toString()}
                                 autoComplete="off"
                                 spellCheck={false}
-                                precision={2}
+                                precision={10}
+                                removeTrailingZeros
                                 step={0.5}
                                 error={
                                     errors.quantity

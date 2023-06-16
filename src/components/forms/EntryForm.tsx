@@ -118,12 +118,7 @@ export default function EntryForm({
 
     const onInsertSubmit = useCallback(
         (data: FormInput) => {
-            if (
-                data.cell &&
-                data.culture &&
-                data.buyer &&
-                data.date
-            ) {
+            if (data.cell && data.culture && data.buyer && data.date) {
                 insert.mutate({
                     insertOptions: {
                         idCell: data.cell.value.id,
@@ -147,13 +142,7 @@ export default function EntryForm({
 
     const onUpdateSubmit = useCallback(
         (data: FormInput) => {
-            if (
-                data.cell &&
-                data.culture &&
-                data.buyer &&
-                data.date &&
-                edit 
-            ) {
+            if (data.cell && data.culture && data.buyer && data.date && edit) {
                 update.mutate({
                     updateOptions: {
                         id: edit?.id,
@@ -693,7 +682,8 @@ export default function EntryForm({
                                         : undefined
                                 }
                                 spellCheck={false}
-                                precision={2}
+                                precision={10}
+                                removeTrailingZeros
                                 step={0.5}
                             />
                         )}

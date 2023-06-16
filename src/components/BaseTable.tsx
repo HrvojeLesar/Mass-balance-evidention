@@ -302,7 +302,8 @@ function NumberFilter<T>({ column }: FilterProps<T>) {
                 placeholder={column.columnDef.header?.toString()}
                 autoComplete="off"
                 spellCheck={false}
-                precision={2}
+                precision={10}
+                removeTrailingZeros
                 step={0.5}
             />
             <NativeSelect
