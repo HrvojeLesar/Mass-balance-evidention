@@ -657,6 +657,11 @@ export type MbeGroupMembersQueryOptions = {
   idMbeGroup: Scalars['Int'];
 };
 
+export type MbeGroupUpdateOptions = {
+  idGroup: Scalars['Int'];
+  name?: InputMaybe<Scalars['String']>;
+};
+
 export type MbeUser = {
   __typename?: 'MbeUser';
   createdAt: Scalars['DateTime'];
@@ -711,6 +716,7 @@ export type MutationRoot = {
   updateDispatchNoteArticle: DispatchNoteArticle;
   updateDispatchNoteIdent: Model;
   updateEntry: Entry;
+  updateMbeGroup: MbeGroup;
   updateWeightTypes: WeightType;
 };
 
@@ -882,6 +888,11 @@ export type MutationRootUpdateDispatchNoteIdentArgs = {
 
 export type MutationRootUpdateEntryArgs = {
   options: EntryUpdateOptions;
+};
+
+
+export type MutationRootUpdateMbeGroupArgs = {
+  options: MbeGroupUpdateOptions;
 };
 
 
@@ -1416,6 +1427,13 @@ export type InsertMbeGroupMutationVariables = Exact<{
 
 
 export type InsertMbeGroupMutation = { __typename?: 'MutationRoot', insertMbeGroup: { __typename?: 'MbeGroup', id: number, name: string, owner: number, createdAt: any } };
+
+export type UpdateMbeGroupMutationVariables = Exact<{
+  options: MbeGroupUpdateOptions;
+}>;
+
+
+export type UpdateMbeGroupMutation = { __typename?: 'MutationRoot', updateMbeGroup: { __typename?: 'MbeGroup', id: number, name: string, owner: number, createdAt: any } };
 
 export type InsertMbeGroupMemberMutationVariables = Exact<{
   options: MbeGroupMembersOptions;
@@ -2601,6 +2619,25 @@ export const useInsertMbeGroupMutation = <
     useMutation<InsertMbeGroupMutation, TError, InsertMbeGroupMutationVariables, TContext>(
       ['InsertMbeGroup'],
       (variables?: InsertMbeGroupMutationVariables) => fetcher<InsertMbeGroupMutation, InsertMbeGroupMutationVariables>(InsertMbeGroupDocument, variables)(),
+      options
+    );
+export const UpdateMbeGroupDocument = `
+    mutation UpdateMbeGroup($options: MbeGroupUpdateOptions!) {
+  updateMbeGroup(options: $options) {
+    id
+    name
+    owner
+    createdAt
+  }
+}
+    `;
+export const useUpdateMbeGroupMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<UpdateMbeGroupMutation, TError, UpdateMbeGroupMutationVariables, TContext>) =>
+    useMutation<UpdateMbeGroupMutation, TError, UpdateMbeGroupMutationVariables, TContext>(
+      ['UpdateMbeGroup'],
+      (variables?: UpdateMbeGroupMutationVariables) => fetcher<UpdateMbeGroupMutation, UpdateMbeGroupMutationVariables>(UpdateMbeGroupDocument, variables)(),
       options
     );
 export const InsertMbeGroupMemberDocument = `

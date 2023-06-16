@@ -24,3 +24,12 @@ mutation InsertMbeGroup($options: MbeGroupInsertOptions!) {
         createdAt
     }
 }
+
+mutation UpdateMbeGroup($options: MbeGroupUpdateOptions!) {
+    updateMbeGroup(options: $options) {
+        id
+        name
+        owner
+        createdAt
+    }
+}

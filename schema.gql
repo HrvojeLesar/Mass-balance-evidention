@@ -599,6 +599,11 @@ input MbeGroupMembersQueryOptions {
 	idMbeGroup: Int!
 }
 
+input MbeGroupUpdateOptions {
+	name: String
+	idGroup: Int!
+}
+
 type MbeUser {
 	id: Int!
 	email: String!
@@ -644,6 +649,7 @@ type MutationRoot {
 	updateDispatchNoteArticle(options: DispatchNoteArticleUpdateOptions!): DispatchNoteArticle!
 	deleteDispatchNoteArticle(options: DeleteOptions!): RowsDeleted!
 	insertMbeGroup(options: MbeGroupInsertOptions!): MbeGroup!
+	updateMbeGroup(options: MbeGroupUpdateOptions!): MbeGroup!
 	insertGroupMember(options: MbeGroupMembersOptions!): MbeGroupMembers!
 	removeGroupMember(options: MbeGroupMembersOptions!): RowsDeleted!
 	insertMbeUser(options: MbeUserInsertOptions!): MbeUser!
