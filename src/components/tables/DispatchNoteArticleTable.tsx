@@ -12,6 +12,7 @@ import {
     useGetDispatchNotesArticlesQuery,
     useDeleteDispatchNoteArticleMutation,
     useGetDispatchNotesQuery,
+    Comparator,
 } from "../../generated/graphql";
 import { usePagination } from "../../hooks/usePagination";
 import DataTable from "../DataTable";
@@ -31,6 +32,7 @@ import {
     Comparators,
     NumberFilterValues,
 } from "../BaseTable";
+import moment from "moment";
 
 type T = DispatchNoteArticle;
 type TFields = DispatchNoteArticleFields;
@@ -78,8 +80,53 @@ export default function DispatchNoteArticleTable({
                     filters:
                         columnFilters.length > 0
                             ? columnFilters.map((filter) => {
+                                  let val;
+                                  if (
+                                      (
+                                          filter.value as {
+                                              comparator: Comparators | null;
+                                          }
+                                      ).comparator
+                                  ) {
+                                      val = filter.value as {
+                                          value: [Date, Date] | Date | number;
+                                          comparator: Comparators | null;
+                                          desc: ColumnFilterType;
+                                      };
+                                  } else {
+                                      val = {
+                                          desc: ColumnFilterType.String,
+                                          value: filter.value as string,
+                                      };
+                                  }
                                   return {
-                                      value: filter.value as string,
+                                      value: {
+                                          value:
+                                              val.desc ===
+                                                  ColumnFilterType.Number ||
+                                              val.desc ===
+                                                  ColumnFilterType.String
+                                                  ? val.value.toString()
+                                                  : val.value instanceof Date
+                                                  ? new Date(
+                                                        moment(
+                                                            val.value
+                                                        ).format("YYYY-MM-DD")
+                                                    ).toJSON()
+                                                  : val.value instanceof Array
+                                                  ? `${new Date(
+                                                        moment(
+                                                            val.value[0]
+                                                        ).format("YYYY-MM-DD")
+                                                    ).toJSON()}, ${new Date(
+                                                        moment(
+                                                            val.value[1]
+                                                        ).format("YYYY-MM-DD")
+                                                    ).toJSON()}`
+                                                  : val.value.toString(),
+                                          comparator:
+                                              val.comparator?.toUpperCase() as Comparator,
+                                      },
                                       field: filter.id.toUpperCase() as TFields,
                                   };
                               })
@@ -128,12 +175,14 @@ export default function DispatchNoteArticleTable({
                 accessorKey: "article.name",
                 cell: (info) => info.getValue(),
                 header: t("article.name").toString(),
+                meta: { type: ColumnFilterType.String },
             },
             {
                 accessorKey: "weight_type",
                 accessorFn: (row) =>
                     `${row.weightType.unit} (${row.weightType.unitShort})`,
                 header: t("measureType.name").toString(),
+                meta: { type: ColumnFilterType.String },
             },
             {
                 accessorKey: "quantity",

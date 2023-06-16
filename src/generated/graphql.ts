@@ -446,7 +446,7 @@ export enum DispatchNoteArticleFields {
 
 export type DispatchNoteArticleFilterOptions = {
   field: DispatchNoteArticleFields;
-  value: Scalars['String'];
+  value: DispatchNoteFilterValue;
 };
 
 export type DispatchNoteArticleIds = {

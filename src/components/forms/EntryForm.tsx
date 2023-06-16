@@ -542,6 +542,7 @@ export default function EntryForm({
                                 }
                             >
                                 <Select
+                                    menuPortalTarget={document.body}
                                     placeholder={t("culture.selectPlaceholder")}
                                     loadingMessage={() => t("loading")}
                                     noOptionsMessage={() => t("noOptions")}
@@ -621,6 +622,7 @@ export default function EntryForm({
                                 }
                             >
                                 <Select
+                                    menuPortalTarget={document.body}
                                     placeholder={t("cell.selectPlaceholder")}
                                     loadingMessage={() => t("loading")}
                                     noOptionsMessage={() => t("noOptions")}
@@ -713,6 +715,7 @@ export default function EntryForm({
                                 }
                             >
                                 <Select
+                                    menuPortalTarget={document.body}
                                     placeholder={t("buyer.selectPlaceholder")}
                                     loadingMessage={() => t("loading")}
                                     noOptionsMessage={() => t("noOptions")}

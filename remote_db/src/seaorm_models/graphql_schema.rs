@@ -183,7 +183,7 @@ pub struct OrderingOptions<T: InputType> {
 // ))]
 #[graphql(concrete(
     name = "DispatchNoteArticleFilterOptions",
-    params(DispatchNoteArticleFields)
+    params(DispatchNoteArticleFields, DispatchNoteFilterValue)
 ))]
 #[graphql(concrete(name = "WeightTypeFilterOptions", params(WeightTypeFields)))]
 pub struct Filter<T: InputType, V: InputType = String> {
@@ -218,7 +218,7 @@ type OptionalI = Option<i32>;
 ))]
 #[graphql(concrete(
     name = "DispatchNoteArticleFetchOptions",
-    params(DispatchNoteArticleFields, OptionalDispatchNoteArticleIds)
+    params(DispatchNoteArticleFields, OptionalDispatchNoteArticleIds, DispatchNoteFilterValue)
 ))]
 pub struct FetchOptions<T, I = Option<i32>, V = String, O = T>
 where

@@ -259,11 +259,14 @@ function NumberFilter<T>({ column }: FilterProps<T>) {
     const { i18n, t } = useTranslation();
     const { classes } = useStyles();
 
-    const [filterValue, setFilterValue] = useState<NumberFilterValues>({
-        value: null,
-        comparator: DEFAULT_COMPARATOR,
-        desc: ColumnFilterType.Number,
-    });
+    const [filterValue, setFilterValue] = useDebouncedState<NumberFilterValues>(
+        {
+            value: null,
+            comparator: DEFAULT_COMPARATOR,
+            desc: ColumnFilterType.Number,
+        },
+        DEBOUNCE_TIME
+    );
 
     useEffect(() => {
         if (filterValue.value === null) {
@@ -291,10 +294,10 @@ function NumberFilter<T>({ column }: FilterProps<T>) {
                 decimalSeparator={i18n.language === "hr" ? "," : "."}
                 value={filterValue.value ? filterValue.value : undefined}
                 onChange={(val) => {
-                    setFilterValue((old) => ({
-                        ...old,
+                    setFilterValue({
+                        ...filterValue,
                         value: val === "" ? null : val,
-                    }));
+                    });
                 }}
                 placeholder={column.columnDef.header?.toString()}
                 autoComplete="off"
@@ -313,10 +316,10 @@ function NumberFilter<T>({ column }: FilterProps<T>) {
                 }}
                 onChange={(compValue) => {
                     if (compValue) {
-                        setFilterValue((old) => ({
-                            ...old,
+                        setFilterValue({
+                            ...filterValue,
                             comparator: compValue.target.value as Comparators,
-                        }));
+                        });
                     }
                 }}
                 data={localize_comparator_select(t)}

@@ -1,7 +1,14 @@
 import { MantineTheme } from "@mantine/core";
 import { Dispatch, SetStateAction } from "react";
 import { ActionMeta, MultiValue, SingleValue } from "react-select";
-import { Article, Buyer, Cell, Culture, Exact, WeightType } from "../../generated/graphql";
+import {
+    Article,
+    Buyer,
+    Cell,
+    Culture,
+    Exact,
+    WeightType,
+} from "../../generated/graphql";
 
 export const DEBOUNCE_TIME = 350;
 
@@ -71,7 +78,7 @@ export const makeOptionsDirty = <T extends WeightType>(
             results.forEach((res) => {
                 options.push({
                     value: res,
-                    label: `${res.unit} (${res.unitShort})`
+                    label: `${res.unit} (${res.unitShort})`,
                 });
             });
         }
@@ -122,6 +129,13 @@ export const selectStyle = (error: any, theme: MantineTheme) => {
             return {
                 ...provided,
                 color: error ? theme.colors.red[5] : theme.colors.gray[5],
+            };
+        },
+        menuPortal: (provided: any) => {
+            return {
+                ...provided,
+                zIndex: 9999,
+                fontFamily: "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji"
             };
         },
     };

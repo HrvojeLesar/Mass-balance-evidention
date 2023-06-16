@@ -120,10 +120,11 @@ pub enum Comparator {
     Lte,
 }
 
-trait DispatchNoteFilterValueTrait {
+pub trait DispatchNoteFilterValueTrait {
     fn get_date(&self) -> Result<Date>;
     fn get_date_range(&self) -> Result<(Date, Date)>;
     fn get_number(&self) -> Result<i32>;
+    fn get_decimal(&self) -> Result<f64>;
 }
 
 impl DispatchNoteFilterValueTrait for String {
@@ -145,14 +146,18 @@ impl DispatchNoteFilterValueTrait for String {
     fn get_number(&self) -> Result<i32> {
         Ok(self.parse()?)
     }
+
+    fn get_decimal(&self) -> Result<f64> {
+        Ok(self.parse()?)
+    }
 }
 
 #[derive(InputObject)]
 pub struct DispatchNoteFilterValue {
     /// Number, date or date range as string
     /// Date range is expected to be in format Date, Date
-    value: String,
-    comparator: Option<Comparator>,
+    pub value: String,
+    pub comparator: Option<Comparator>,
 }
 
 #[async_trait]

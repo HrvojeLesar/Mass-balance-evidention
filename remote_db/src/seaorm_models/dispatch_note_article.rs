@@ -1,6 +1,7 @@
 use async_graphql::{Context, Enum, InputObject, Object, SimpleObject};
 use async_trait::async_trait;
 
+use log::error;
 use sea_orm::{
     entity::prelude::*,
     sea_query::{Expr, Func},
@@ -12,6 +13,7 @@ use serde::{Deserialize, Serialize};
 use crate::SeaOrmPool;
 
 use super::{
+    dispatch_note::{Comparator, DispatchNoteFilterValue, DispatchNoteFilterValueTrait},
     graphql_schema::{
         DataGroupAccessGuard, DeleteOptions, FetchOptions, Filter, OrderingOptions, Pagination,
         QueryResults, UpdateDeleteGuard,
@@ -262,7 +264,7 @@ impl QueryDatabase for Entity {
 
     type FetchIdType = Option<DispatchNoteArticleIds>;
 
-    type FilterValueType = String;
+    type FilterValueType = DispatchNoteFilterValue;
 
     fn get_query() -> Select<Self> {
         Entity::find()
@@ -347,7 +349,7 @@ impl QueryDatabase for Entity {
 
     fn add_id_and_data_group_filters(
         mut query: Select<Self>,
-        fetch_options: &FetchOptions<Self::InputFields, Self::FetchIdType>,
+        fetch_options: &FetchOptions<Self::InputFields, Self::FetchIdType, Self::FilterValueType>,
     ) -> Select<Self> {
         // common_add_id_and_data_group_filters(query, fetch_options)
         if let Some(ids) = &fetch_options.id {
@@ -363,27 +365,58 @@ impl QueryDatabase for Entity {
         query
     }
 
-    fn add_filter(query: Select<Self>, filter: Filter<Self::InputFields>) -> Select<Self> {
+    fn add_filter(
+        mut query: Select<Self>,
+        filter: Filter<Self::InputFields, Self::FilterValueType>,
+    ) -> Select<Self> {
         match filter.field {
             Self::InputFields::ArticleName => query.filter(
                 Expr::expr(Func::lower(Expr::col((
                     super::article::Entity,
                     super::article::Column::Name,
                 ))))
-                .like(format!("%{}%", filter.value.trim().to_lowercase())),
+                .like(format!("%{}%", filter.value.value.trim().to_lowercase())),
             ),
             Self::InputFields::ArticleDescription => query.filter(
                 Expr::expr(Func::lower(Expr::col((
                     super::article::Entity,
                     super::article::Column::Description,
                 ))))
-                .like(format!("%{}%", filter.value.trim().to_lowercase())),
+                .like(format!("%{}%", filter.value.value.trim().to_lowercase())),
             ),
             Self::InputFields::WeightType => query.filter(
-                Expr::expr(Func::lower(Expr::col((Entity, Column::WeightType))))
-                    .like(format!("%{}%", filter.value.trim().to_lowercase())),
+                Expr::expr(Func::lower(Expr::col((
+                    super::weight_type::Entity,
+                    super::weight_type::Column::UnitShort,
+                ))))
+                .like(format!("%{}%", filter.value.value.trim().to_lowercase()))
+                .or(Expr::expr(Func::lower(Expr::col((
+                    super::weight_type::Entity,
+                    super::weight_type::Column::Unit,
+                ))))
+                .like(format!("%{}%", filter.value.value.trim().to_lowercase()))),
             ),
-            _ => query,
+            Self::InputFields::Quantity => {
+                let column = Column::Quantity;
+                let val = match filter.value.value.get_decimal() {
+                    Ok(val) => val,
+                    Err(e) => {
+                        error!("Failed to parse filter value: {:#?}", e);
+                        return query;
+                    }
+                };
+                if let Some(comparator) = filter.value.comparator {
+                    query = match comparator {
+                        Comparator::Eq => query.filter(column.eq(val)),
+                        Comparator::Ne => query.filter(column.ne(val)),
+                        Comparator::Gt => query.filter(column.gt(val)),
+                        Comparator::Gte => query.filter(column.gte(val)),
+                        Comparator::Lt => query.filter(column.lt(val)),
+                        Comparator::Lte => query.filter(column.lte(val)),
+                    };
+                }
+                query
+            }
         }
     }
 
@@ -415,7 +448,11 @@ impl QueryDatabase for Entity {
 
         Ok(Self::fetch(
             db,
-            FetchOptions::<DispatchNoteArticleFields, Option<DispatchNoteArticleIds>> {
+            FetchOptions::<
+                DispatchNoteArticleFields,
+                Option<DispatchNoteArticleIds>,
+                Self::FilterValueType,
+            > {
                 id: Some(DispatchNoteArticleIds {
                     id_dispatch_note: Some(res.id_dispatch_note),
                     id_article: Some(res.id_article),
@@ -455,7 +492,11 @@ impl QueryDatabase for Entity {
         transaction.commit().await?;
         Ok(Self::fetch(
             db,
-            FetchOptions::<DispatchNoteArticleFields, Option<DispatchNoteArticleIds>> {
+            FetchOptions::<
+                DispatchNoteArticleFields,
+                Option<DispatchNoteArticleIds>,
+                Self::FilterValueType,
+            > {
                 id: Some(DispatchNoteArticleIds {
                     id_dispatch_note: Some(res.id_dispatch_note),
                     id_article: Some(res.id_article),
@@ -487,7 +528,11 @@ impl DispatchNoteArticleQuery {
     async fn dispatch_note_articles(
         &self,
         ctx: &Context<'_>,
-        options: FetchOptions<DispatchNoteArticleFields, Option<DispatchNoteArticleIds>>,
+        options: FetchOptions<
+            DispatchNoteArticleFields,
+            Option<DispatchNoteArticleIds>,
+            DispatchNoteFilterValue,
+        >,
     ) -> Result<QueryResults<DispatchNoteArticle>> {
         let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
         Entity::fetch(db, options).await

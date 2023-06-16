@@ -361,6 +361,7 @@ export default function DispatchNoteArticleForm({
                                 }
                             >
                                 <Select
+                                    menuPortalTarget={document.body}
                                     placeholder={t("article.selectPlaceholder")}
                                     loadingMessage={() => t("loading")}
                                     noOptionsMessage={() => t("noOptions")}
@@ -463,6 +464,7 @@ export default function DispatchNoteArticleForm({
                                 }
                             >
                                 <Select
+                                    menuPortalTarget={document.body}
                                     placeholder={t("measureType.name")}
                                     loadingMessage={() => t("loading")}
                                     noOptionsMessage={() => t("noOptions")}
