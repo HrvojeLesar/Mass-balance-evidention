@@ -3,17 +3,16 @@ import {
     Checkbox,
     createStyles,
     Flex,
+    NativeSelect,
     NumberInput,
-    Portal,
-    Select,
     Table as MantineTable,
     TextInput,
 } from "@mantine/core";
-import { DateInput, DatePicker, DatePickerInput } from "@mantine/dates";
+import { DateInput, DatePickerInput } from "@mantine/dates";
 import { useDebouncedState } from "@mantine/hooks";
 import { Column, flexRender, Table } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { TFunction, useTranslation } from "react-i18next";
 
 import {
     IoMdArrowDropup,
@@ -45,6 +44,9 @@ const useStyles = createStyles((theme) => ({
 
     iconAlignment: {
         verticalAlign: "middle",
+    },
+    rightSectionFilterWidth: {
+        width: "40%",
     },
 }));
 
@@ -96,14 +98,38 @@ export enum Comparators {
     Lte = "LTE",
 }
 
-const SELECT_COMPARATOR_DATA = [
-    { value: Comparators.Eq, label: "=" },
-    { value: Comparators.Ne, label: "!=" },
-    { value: Comparators.Gt, label: ">" },
-    { value: Comparators.Gte, label: ">=" },
-    { value: Comparators.Lt, label: "<" },
-    { value: Comparators.Lte, label: "<=" },
-];
+const localize_date_comparator_select = (
+    t: TFunction<"translation", undefined>
+) => {
+    return [
+        { value: Comparators.Eq, label: t("comparator.date_equal") },
+        { value: Comparators.Ne, label: t("comparator.date_not_equal") },
+        { value: Comparators.Gt, label: t("comparator.date_greater_than") },
+        {
+            value: Comparators.Gte,
+            label: t("comparator.date_greater_or_equal_than"),
+        },
+        { value: Comparators.Lt, label: t("comparator.date_less_than") },
+        {
+            value: Comparators.Lte,
+            label: t("comparator.date_less_or_equal_than"),
+        },
+    ];
+};
+
+const localize_comparator_select = (t: TFunction<"translation", undefined>) => {
+    return [
+        { value: Comparators.Eq, label: t("comparator.equal") },
+        { value: Comparators.Ne, label: t("comparator.not_equal") },
+        { value: Comparators.Gt, label: t("comparator.greater_than") },
+        {
+            value: Comparators.Gte,
+            label: t("comparator.greater_or_equal_than"),
+        },
+        { value: Comparators.Lt, label: t("comparator.less_than") },
+        { value: Comparators.Lte, label: t("comparator.less_or_equal_than") },
+    ];
+};
 
 export type DateFilterValues = {
     value: [Date, Date] | Date | null;
@@ -114,7 +140,8 @@ export type DateFilterValues = {
 const DEFAULT_COMPARATOR = Comparators.Eq;
 
 function DateFilter<T>({ column }: FilterProps<T>) {
-    const { i18n } = useTranslation();
+    const { i18n, t } = useTranslation();
+    const { classes } = useStyles();
 
     const [filterValue, setFilterValue] = useState<DateFilterValues>({
         value: null,
@@ -151,8 +178,14 @@ function DateFilter<T>({ column }: FilterProps<T>) {
                 }}
             />
             {!isRangePicker ? (
-                <>
+                <Flex>
                     <DateInput
+                        styles={{
+                            input: {
+                                borderTopRightRadius: 0,
+                                borderBottomRightRadius: 0,
+                            },
+                        }}
                         allowDeselect={true}
                         valueFormat="DD.MM.YYYY"
                         locale={i18n.language}
@@ -163,26 +196,28 @@ function DateFilter<T>({ column }: FilterProps<T>) {
                                 value: date,
                             }));
                         }}
-                        rightSectionWidth={50}
                         spellCheck={false}
                         popoverProps={{ withinPortal: true }}
                     />
-                    <Select
-                        withinPortal
-                        defaultValue={DEFAULT_COMPARATOR}
-                        rightSection={<></>}
-                        rightSectionWidth={0}
-                        onChange={(compValue) => {
-                            if (compValue) {
-                                setFilterValue((old) => ({
-                                    ...old,
-                                    comparator: compValue as Comparators,
-                                }));
-                            }
+                    <NativeSelect
+                        styles={{
+                            input: {
+                                borderTopLeftRadius: 0,
+                                borderBottomLeftRadius: 0,
+                            },
                         }}
-                        data={SELECT_COMPARATOR_DATA}
+                        className={classes.rightSectionFilterWidth}
+                        defaultValue={DEFAULT_COMPARATOR}
+                        onChange={(compValue) => {
+                            setFilterValue((old) => ({
+                                ...old,
+                                comparator: compValue.target
+                                    .value as Comparators,
+                            }));
+                        }}
+                        data={localize_date_comparator_select(t)}
                     />
-                </>
+                </Flex>
             ) : (
                 <DatePickerInput
                     clearable
@@ -221,7 +256,8 @@ export type NumberFilterValues = {
 };
 
 function NumberFilter<T>({ column }: FilterProps<T>) {
-    const { i18n } = useTranslation();
+    const { i18n, t } = useTranslation();
+    const { classes } = useStyles();
 
     const [filterValue, setFilterValue] = useState<NumberFilterValues>({
         value: null,
@@ -241,12 +277,17 @@ function NumberFilter<T>({ column }: FilterProps<T>) {
     return (
         <Flex
             align="center"
-            gap="sm"
             onClick={(e) => {
                 e.stopPropagation();
             }}
         >
             <NumberInput
+                styles={{
+                    input: {
+                        borderTopRightRadius: 0,
+                        borderBottomRightRadius: 0,
+                    },
+                }}
                 decimalSeparator={i18n.language === "hr" ? "," : "."}
                 value={filterValue.value ? filterValue.value : undefined}
                 onChange={(val) => {
@@ -261,20 +302,24 @@ function NumberFilter<T>({ column }: FilterProps<T>) {
                 precision={2}
                 step={0.5}
             />
-            <Select
-                withinPortal
+            <NativeSelect
                 defaultValue={DEFAULT_COMPARATOR}
-                rightSection={<></>}
-                rightSectionWidth={0}
+                className={classes.rightSectionFilterWidth}
+                styles={{
+                    input: {
+                        borderTopLeftRadius: 0,
+                        borderBottomLeftRadius: 0,
+                    },
+                }}
                 onChange={(compValue) => {
                     if (compValue) {
                         setFilterValue((old) => ({
                             ...old,
-                            comparator: compValue as Comparators,
+                            comparator: compValue.target.value as Comparators,
                         }));
                     }
                 }}
-                data={SELECT_COMPARATOR_DATA}
+                data={localize_comparator_select(t)}
             />
         </Flex>
     );

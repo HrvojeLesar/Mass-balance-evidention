@@ -195,5 +195,20 @@
     },
     "membersDisplay": {
         "email": "E-mail"
+    },
+    "comparator": {
+        "date_equal": "Equals",
+        "date_not_equal": "Not Eqals",
+        "date_greater_than": "After",
+        "date_greater_or_equal_than": "After, including",
+        "date_less_than": "Before",
+        "date_less_or_equal_than": "Before, including",
+
+        "equal": "Equals",
+        "not_equal": "Not Equal",
+        "greater_than": "Greater than",
+        "greater_or_equal_than": "Greater or equal than",
+        "less_than": "Less than",
+        "less_or_equal_than": "Less or equal than"
     }
 }

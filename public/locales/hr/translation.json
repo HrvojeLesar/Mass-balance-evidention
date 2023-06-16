@@ -194,5 +194,20 @@
     },
     "membersDisplay": {
         "email": "E-mail"
+    },
+    "comparator": {
+        "date_equal": "Jednak",
+        "date_not_equal": "Različit od",
+        "date_greater_than": "Poslije",
+        "date_greater_or_equal_than": "Poslije, uključujući trenutni",
+        "date_less_than": "Prije",
+        "date_less_or_equal_than": "Prije, uključujući trenutni",
+
+        "equal": "Jednako",
+        "not_equal": "Različito",
+        "greater_than": "Veće od",
+        "greater_or_equal_than": "Veće ili jednako",
+        "less_than": "Manje od",
+        "less_or_equal_than": "Manje ili jednako"
     }
 }
