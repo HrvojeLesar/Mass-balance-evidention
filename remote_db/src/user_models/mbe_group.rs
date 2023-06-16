@@ -1,6 +1,8 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use async_graphql::{Context, InputObject, Object, SimpleObject};
-use sea_orm::{entity::prelude::*, ActiveValue, DbBackend, Statement, TransactionTrait};
+use sea_orm::{
+    entity::prelude::*, sea_query::Expr, ActiveValue, DbBackend, Statement, TransactionTrait,
+};
 use serde::{Deserialize, Serialize};
 
 use crate::{seaorm_models::graphql_schema::extract_session, SeaOrmPool};
@@ -50,6 +52,12 @@ impl ActiveModelBehavior for ActiveModel {}
 #[derive(InputObject)]
 struct MbeGroupInsertOptions {
     name: String,
+}
+
+#[derive(InputObject)]
+struct MbeGroupUpdateOptions {
+    name: Option<String>,
+    id_group: u32,
 }
 
 #[derive(Default)]
@@ -135,5 +143,46 @@ impl MbeGroupMutation {
         transaction.commit().await?;
 
         Ok(res)
+    }
+
+    async fn update_mbe_group(
+        &self,
+        ctx: &Context<'_>,
+        options: MbeGroupUpdateOptions,
+    ) -> Result<Model> {
+        let db = ctx.data::<SeaOrmPool>().expect("Pool must exist");
+        let session_data = extract_session(ctx)?;
+
+        let name = options
+            .name
+            .filter(|name| !name.trim().is_empty())
+            .ok_or_else(|| anyhow!("Invalid name!"))?;
+        let transaction = db.begin().await?;
+        let res = Entity::update_many()
+            .filter(Column::Owner.eq(session_data.user_id))
+            .filter(Column::Id.eq(options.id_group))
+            .col_expr(Column::Name, Expr::value(name))
+            .exec(&transaction)
+            .await?;
+
+        if res.rows_affected == 0 {
+            transaction.rollback().await?;
+            return Err(anyhow!(
+                "Group not found! Only group owner can change the name and find group!"
+            ));
+        } else if res.rows_affected > 1 {
+            transaction.rollback().await?;
+            return Err(anyhow!("Updated more than one field"));
+        } else {
+            let mbe_group = Entity::find()
+                .filter(Column::Owner.eq(session_data.user_id))
+                .filter(Column::Id.eq(options.id_group))
+                .one(&transaction)
+                .await?
+                .ok_or_else(|| anyhow!("Updated mbe group not found"))?;
+            transaction.commit().await?;
+
+            return Ok(mbe_group);
+        }
     }
 }
