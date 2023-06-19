@@ -53,43 +53,44 @@ export default function WeightTypeTable({
         [mbeGroupContextValue]
     );
 
-    const { data, refetch, isInitialLoading } = useGetWeightTypesQuery(
-        {
-            options: {
-                id: undefined,
-                pageSize: pagination.pageSize,
-                page: pagination.pageIndex + 1,
-                ordering: sorting[0]
-                    ? {
-                          order: !sorting[0].desc
-                              ? Ordering.Asc
-                              : Ordering.Desc,
-                          orderBy: sorting[0].id.toUpperCase() as TFields,
-                      }
-                    : undefined,
-                filters:
-                    columnFilters.length > 0
-                        ? columnFilters.map((filter) => {
-                              return {
-                                  value: filter.value as string,
-                                  field: filter.id.toUpperCase() as TFields,
-                              };
-                          })
+    const { data, refetch, isInitialLoading, isFetching } =
+        useGetWeightTypesQuery(
+            {
+                options: {
+                    id: undefined,
+                    pageSize: pagination.pageSize,
+                    page: pagination.pageIndex + 1,
+                    ordering: sorting[0]
+                        ? {
+                              order: !sorting[0].desc
+                                  ? Ordering.Asc
+                                  : Ordering.Desc,
+                              orderBy: sorting[0].id.toUpperCase() as TFields,
+                          }
                         : undefined,
-                mbeGroupId: mbeGroupContextValue.selectedGroup ?? 0,
+                    filters:
+                        columnFilters.length > 0
+                            ? columnFilters.map((filter) => {
+                                  return {
+                                      value: filter.value as string,
+                                      field: filter.id.toUpperCase() as TFields,
+                                  };
+                              })
+                            : undefined,
+                    mbeGroupId: mbeGroupContextValue.selectedGroup ?? 0,
+                },
             },
-        },
-        {
-            queryKey: [
-                "getWeightType",
-                pagination,
-                sorting,
-                columnFilters,
-                dataGroupContextValue,
-            ],
-            keepPreviousData: true,
-        }
-    );
+            {
+                queryKey: [
+                    "getWeightType",
+                    pagination,
+                    sorting,
+                    columnFilters,
+                    dataGroupContextValue,
+                ],
+                keepPreviousData: true,
+            }
+        );
 
     const columns = useMemo<ColumnDef<T>[]>(() => {
         let columns: ColumnDef<T>[] = [
@@ -129,10 +130,6 @@ export default function WeightTypeTable({
         return columns;
     }, [t, isEditable]);
 
-    const total = useMemo<number>(() => {
-        return data?.weightTypes.totalItems ?? -1;
-    }, [data]);
-
     const onSuccess = useCallback(() => {
         refetch();
         if (isModalShown) {
@@ -147,6 +144,10 @@ export default function WeightTypeTable({
             ]);
         }
     }, [data, pagination.pageSize]);
+
+    const totalPages = useMemo<number | undefined>(() => {
+        return data?.weightTypes.totalPages;
+    }, [data?.weightTypes.totalPages, data?.weightTypes]);
 
     const deleteWeightType = useDeleteWeightTypesMutation({
         onSuccess: () => {
@@ -203,11 +204,11 @@ export default function WeightTypeTable({
             )}
             <DataTable
                 columns={columns}
-                data={{ data: tableData, total }}
-                paginationState={{ pagination, setPagination }}
+                data={{ data: tableData }}
+                paginationState={{ pagination, setPagination, totalPages }}
                 sortingState={{ sorting, setSorting }}
                 filterState={{ columnFilters, setColumnFilters }}
-                dataLoadingState={{ isInitialLoading }}
+                dataLoadingState={{ isInitialLoading, isFetching }}
             />
         </CardUtil>
     );

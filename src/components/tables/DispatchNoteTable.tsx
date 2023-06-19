@@ -49,7 +49,7 @@ export default function DispatchNoteTable({
 
     const dataGroupContextValue = useContext(DataGroupContext);
 
-    const { data, refetch, isInitialLoading } = useGetDispatchNotesQuery(
+    const { data, refetch, isInitialLoading, isFetching } = useGetDispatchNotesQuery(
         {
             options: {
                 id: undefined,
@@ -171,10 +171,6 @@ export default function DispatchNoteTable({
         return columns;
     }, [t, isEditable, navigate]);
 
-    const total = useMemo<number>(() => {
-        return data?.dispatchNotes.totalItems ?? -1;
-    }, [data]);
-
     const onSuccess = useCallback(
         (data: InsertDispatchNoteMutation) => {
             navigate(`/dispatch-note/${data.insertDispatchNote.id}`);
@@ -189,6 +185,10 @@ export default function DispatchNoteTable({
             ]);
         }
     }, [data, pagination.pageSize]);
+
+    const totalPages = useMemo<number | undefined>(() => {
+        return data?.dispatchNotes.totalPages;
+    }, [data?.dispatchNotes.totalPages, data?.dispatchNotes]);
 
     const deleteDispatchNote = useDeleteDispatchNoteMutation({
         onSuccess: () => {
@@ -227,11 +227,11 @@ export default function DispatchNoteTable({
             )}
             <DataTable
                 columns={columns}
-                data={{ data: tableData, total }}
-                paginationState={{ pagination, setPagination }}
+                data={{ data: tableData }}
+                paginationState={{ pagination, setPagination, totalPages }}
                 sortingState={{ sorting, setSorting }}
                 filterState={{ columnFilters, setColumnFilters }}
-                dataLoadingState={{ isInitialLoading }}
+                dataLoadingState={{ isInitialLoading, isFetching }}
             />
         </CardUtil>
     );

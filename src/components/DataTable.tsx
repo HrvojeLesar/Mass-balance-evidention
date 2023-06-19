@@ -11,18 +11,19 @@ import {
     SortingState,
     useReactTable,
 } from "@tanstack/react-table";
-import { Dispatch, SetStateAction, useMemo } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo } from "react";
 import { Pagination } from "../hooks/usePagination";
 import BaseTable from "./BaseTable";
 import TablePagination from "./TablePagination";
 
 type SomeTableProps<T> = {
     columns: ColumnDef<T, unknown>[];
-    data: { data: T[]; total?: number };
+    data: { data: T[]; };
     paginationState: {
         pagination: Pagination;
         setPagination: Dispatch<SetStateAction<Pagination>>;
         manual?: boolean;
+        totalPages?: number | undefined;
     };
     sortingState?: {
         sorting: SortingState;
@@ -38,11 +39,10 @@ type SomeTableProps<T> = {
         groupingState: GroupingState;
         setGroupingState: Dispatch<SetStateAction<GroupingState>>;
     };
-    pageCount?: number;
     dataLoadingState?: {
         isInitialLoading?: boolean;
         // isLoading?: boolean;
-        // isFetching?: boolean;
+        isFetching?: boolean;
     };
 };
 
@@ -53,52 +53,12 @@ export default function DataTable<T>({
     sortingState,
     filterState,
     groupingState,
-    pageCount,
     dataLoadingState,
 }: SomeTableProps<T>) {
-    const pageCountMemo = useMemo(() => {
-        if (pageCount) {
-            return pageCount ?? 1;
-        }
-
-        if (paginationState.manual !== false && data && paginationState) {
-            if (data.total !== undefined && data.total !== 0) {
-                return Math.ceil(
-                    data.total / paginationState.pagination.pageSize
-                );
-            } else {
-                return 1;
-            }
-        }
-    }, [data, paginationState, pageCount]);
-
-    // // WARN: can be very slow if pageIndex is huge and database is missing
-    // // loads of pages. E.g. pageIndex is 100, actual first page is 10.
-    // // This will count down from 100 to 10 or until it finds a page with
-    // // more than 0 data.total
-    // useEffect(() => {
-    //     if (
-    //         (paginationState.manual ?? true) &&
-    //         data.total !== undefined &&
-    //         data.total === 0 &&
-    //         paginationState.pagination.pageIndex >= 1
-    //     ) {
-    //         paginationState.setPagination((old) => ({
-    //             ...old,
-    //             pageIndex: old.pageIndex - 1,
-    //         }));
-    //     }
-    // }, [
-    //     paginationState,
-    //     paginationState.manual,
-    //     data,
-    //     paginationState.pagination,
-    // ]);
-
     const table = useReactTable({
         data: data.data,
         columns,
-        pageCount: pageCountMemo,
+        pageCount: paginationState.totalPages,
         getCoreRowModel: getCoreRowModel(),
         state: {
             pagination: paginationState?.pagination,
@@ -130,16 +90,24 @@ export default function DataTable<T>({
         onColumnFiltersChange:
             filterState !== undefined
                 ? (filter) => {
-                      paginationState.setPagination({
-                          ...paginationState.pagination,
-                          pageIndex: 0,
-                      });
-                      if (filterState) {
-                          filterState.setColumnFilters(filter);
-                      }
-                  }
+                    paginationState.setPagination({
+                        ...paginationState.pagination,
+                        pageIndex: 0,
+                    });
+                    if (filterState) {
+                        filterState.setColumnFilters(filter);
+                    }
+                }
                 : undefined,
     });
+
+    useEffect(() => {
+        const currentPage = paginationState.pagination.pageIndex + 1;
+        const totalPages = table.getPageCount();
+        if (totalPages < currentPage && !dataLoadingState?.isFetching) {
+            table.setPageIndex(totalPages - 1);
+        }
+    }, [table, paginationState, dataLoadingState?.isFetching]);
 
     return (
         <>
@@ -148,6 +116,7 @@ export default function DataTable<T>({
                 dataLoadingState={{
                     isInitialLoading:
                         dataLoadingState?.isInitialLoading ?? false,
+                    isFetching: dataLoadingState?.isFetching ?? false,
                 }}
             />
             <TablePagination table={table} />

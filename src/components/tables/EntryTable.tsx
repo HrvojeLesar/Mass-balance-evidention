@@ -52,7 +52,7 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
 
     const dataGroupContextValue = useContext(DataGroupContext);
 
-    const { data, refetch, isInitialLoading } = useGetAllEntriesQuery(
+    const { data, refetch, isInitialLoading, isFetching } = useGetAllEntriesQuery(
         {
             options: {
                 id: undefined,
@@ -288,7 +288,7 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
                 sortingState={{ sorting, setSorting, manual: false }}
                 filterState={{ columnFilters, setColumnFilters, manual: false }}
                 groupingState={{ groupingState, setGroupingState }}
-                dataLoadingState={{ isInitialLoading }}
+                dataLoadingState={{ isInitialLoading, isFetching }}
             />
         </CardUtil>
     );

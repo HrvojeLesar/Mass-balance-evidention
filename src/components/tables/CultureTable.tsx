@@ -40,10 +40,9 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
 
     const dataGroupContextValue = useContext(DataGroupContext);
 
-    const { data, refetch, isInitialLoading } = useGetCulturesQuery(
+    const { data, refetch, isInitialLoading, isFetching } = useGetCulturesQuery(
         {
             options: {
-                id: undefined,
                 pageSize: pagination.pageSize,
                 page: pagination.pageIndex + 1,
                 ordering: sorting[0]
@@ -115,10 +114,6 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
         return columns;
     }, [t, isEditable]);
 
-    const total = useMemo<number>(() => {
-        return data?.cultures.totalItems ?? -1;
-    }, [data]);
-
     const onSuccess = useCallback(() => {
         refetch();
         if (isModalShown) {
@@ -133,6 +128,10 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
             ]);
         }
     }, [data, pagination.pageSize]);
+
+    const totalPages = useMemo<number | undefined>(() => {
+        return data?.cultures.totalPages;
+    }, [data?.cultures.totalPages, data?.cultures]);
 
     const deleteCulture = useDeleteCultureMutation({
         onSuccess: () => {
@@ -183,11 +182,11 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
             )}
             <DataTable
                 columns={columns}
-                data={{ data: tableData, total }}
-                paginationState={{ pagination, setPagination }}
+                data={{ data: tableData }}
+                paginationState={{ pagination, setPagination, totalPages }}
                 sortingState={{ sorting, setSorting }}
                 filterState={{ columnFilters, setColumnFilters }}
-                dataLoadingState={{ isInitialLoading }}
+                dataLoadingState={{ isInitialLoading, isFetching }}
             />
         </CardUtil>
     );

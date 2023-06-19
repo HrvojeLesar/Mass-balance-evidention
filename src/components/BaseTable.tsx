@@ -350,7 +350,7 @@ type BaseTableProps<T> = {
     dataLoadingState: {
         isInitialLoading: boolean;
         // isLoading?: boolean;
-        // isFetching?: boolean;
+        isFetching: boolean;
     };
     table: Table<T>;
 };
@@ -445,7 +445,7 @@ export default function BaseTable<T>({
                     ))}
                 </thead>
                 <tbody>
-                    {dataLoadingState.isInitialLoading === false ? (
+                    {dataLoadingState.isInitialLoading === false || dataLoadingState.isFetching === false ? (
                         table.getRowModel().rows.length > 0 ? (
                             table.getRowModel().rows.map((row) => (
                                 <tr key={row.id}>

@@ -40,7 +40,7 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
 
     const dataGroupContextValue = useContext(DataGroupContext);
 
-    const { data, refetch, isInitialLoading } = useGetCellsQuery(
+    const { data, refetch, isInitialLoading, isFetching } = useGetCellsQuery(
         {
             options: {
                 id: undefined,
@@ -116,10 +116,6 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
         return columns;
     }, [t, isEditable]);
 
-    const total = useMemo<number>(() => {
-        return data?.cells.totalItems ?? -1;
-    }, [data]);
-
     const onSuccess = useCallback(() => {
         refetch();
         if (isModalShown) {
@@ -132,6 +128,10 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
             setTableData([...data.cells.results.slice(0, pagination.pageSize)]);
         }
     }, [data, pagination.pageSize]);
+
+    const totalPages = useMemo<number | undefined>(() => {
+        return data?.cells.totalPages;
+    }, [data?.cells.totalPages, data?.cells]);
 
     const deleteCell = useDeleteCellMutation({
         onSuccess: () => {
@@ -177,11 +177,11 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
             )}
             <DataTable
                 columns={columns}
-                data={{ data: tableData, total }}
-                paginationState={{ pagination, setPagination }}
+                data={{ data: tableData }}
+                paginationState={{ pagination, setPagination, totalPages }}
                 sortingState={{ sorting, setSorting }}
                 filterState={{ columnFilters, setColumnFilters }}
-                dataLoadingState={{ isInitialLoading }}
+                dataLoadingState={{ isInitialLoading, isFetching }}
             />
         </CardUtil>
     );

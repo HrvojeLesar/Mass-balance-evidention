@@ -40,7 +40,7 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
 
     const dataGroupContextValue = useContext(DataGroupContext);
 
-    const { data, refetch, isInitialLoading } = useGetBuyersQuery(
+    const { data, refetch, isInitialLoading, isFetching } = useGetBuyersQuery(
         {
             options: {
                 id: undefined,
@@ -48,20 +48,20 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
                 page: pagination.pageIndex + 1,
                 ordering: sorting[0]
                     ? {
-                          order: !sorting[0].desc
-                              ? Ordering.Asc
-                              : Ordering.Desc,
-                          orderBy: sorting[0].id.toUpperCase() as TFields,
-                      }
+                        order: !sorting[0].desc
+                            ? Ordering.Asc
+                            : Ordering.Desc,
+                        orderBy: sorting[0].id.toUpperCase() as TFields,
+                    }
                     : undefined,
                 filters:
                     columnFilters.length > 0
                         ? columnFilters.map((filter) => {
-                              return {
-                                  value: filter.value as string,
-                                  field: filter.id.toUpperCase() as TFields,
-                              };
-                          })
+                            return {
+                                value: filter.value as string,
+                                field: filter.id.toUpperCase() as TFields,
+                            };
+                        })
                         : undefined,
                 dGroup: dataGroupContextValue.selectedGroup ?? -1,
             },
@@ -120,10 +120,6 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
         return columns;
     }, [t, isEditable]);
 
-    const total = useMemo<number>(() => {
-        return data?.buyers.totalItems ?? -1;
-    }, [data]);
-
     const onSuccess = useCallback(() => {
         refetch();
         if (isModalShown) {
@@ -138,6 +134,10 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
             ]);
         }
     }, [data, pagination.pageSize]);
+
+    const totalPages = useMemo<number | undefined>(() => {
+        return data?.buyers.totalPages;
+    }, [data?.buyers.totalPages, data?.buyers]);
 
     const deleteBuyer = useDeleteBuyerMutation({
         onSuccess: () => {
@@ -185,11 +185,11 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
             )}
             <DataTable
                 columns={columns}
-                data={{ data: tableData, total }}
-                paginationState={{ pagination, setPagination }}
+                data={{ data: tableData }}
+                paginationState={{ pagination, setPagination, totalPages }}
                 sortingState={{ sorting, setSorting }}
                 filterState={{ columnFilters, setColumnFilters }}
-                dataLoadingState={{ isInitialLoading }}
+                dataLoadingState={{ isInitialLoading, isFetching }}
             />
         </CardUtil>
     );

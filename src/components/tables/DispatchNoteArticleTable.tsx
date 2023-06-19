@@ -62,7 +62,7 @@ export default function DispatchNoteArticleTable({
 
     const [editToggleValue, editToggle] = useToggle();
 
-    const { data, refetch, isInitialLoading } =
+    const { data, refetch, isInitialLoading, isFetching } =
         useGetDispatchNotesArticlesQuery(
             {
                 options: {
@@ -236,10 +236,6 @@ export default function DispatchNoteArticleTable({
         return columns;
     }, [t, isEditable]);
 
-    const total = useMemo<number>(() => {
-        return data?.dispatchNoteArticles.totalItems ?? -1;
-    }, [data]);
-
     const onSuccess = useCallback(() => {
         refetch();
         if (isModalShown) {
@@ -257,6 +253,10 @@ export default function DispatchNoteArticleTable({
             ]);
         }
     }, [data, pagination.pageSize]);
+
+    const totalPages = useMemo<number | undefined>(() => {
+        return data?.dispatchNoteArticles.totalPages;
+    }, [data?.dispatchNoteArticles.totalPages, data?.dispatchNoteArticles]);
 
     const deleteDispatchNote = useDeleteDispatchNoteArticleMutation({
         onSuccess: () => {
@@ -344,11 +344,11 @@ export default function DispatchNoteArticleTable({
             )}
             <DataTable
                 columns={columns}
-                data={{ data: tableData, total }}
-                paginationState={{ pagination, setPagination }}
+                data={{ data: tableData }}
+                paginationState={{ pagination, setPagination, totalPages }}
                 sortingState={{ sorting, setSorting }}
                 filterState={{ columnFilters, setColumnFilters }}
-                dataLoadingState={{ isInitialLoading }}
+                dataLoadingState={{ isInitialLoading, isFetching }}
             />
         </CardUtil>
     );

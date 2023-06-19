@@ -40,7 +40,7 @@ export default function ArticleTable({ isInsertable, isEditable }: TableProps) {
 
     const dataGroupContextValue = useContext(DataGroupContext);
 
-    const { data, refetch, isInitialLoading } = useGetArticlesQuery(
+    const { data, refetch, isInitialLoading, isFetching } = useGetArticlesQuery(
         {
             options: {
                 id: undefined,
@@ -115,10 +115,6 @@ export default function ArticleTable({ isInsertable, isEditable }: TableProps) {
         return columns;
     }, [t, isEditable]);
 
-    const total = useMemo<number>(() => {
-        return data?.articles.totalItems ?? -1;
-    }, [data]);
-
     const onSuccess = useCallback(() => {
         refetch();
         if (isModalShown) {
@@ -133,6 +129,10 @@ export default function ArticleTable({ isInsertable, isEditable }: TableProps) {
             ]);
         }
     }, [data, pagination.pageSize]);
+
+    const totalPages = useMemo<number | undefined>(() => {
+        return data?.articles.totalPages;
+    }, [data?.articles.totalPages, data?.articles]);
 
     const deleteArticle = useDeleteArticleMutation({
         onSuccess: () => {
@@ -183,11 +183,11 @@ export default function ArticleTable({ isInsertable, isEditable }: TableProps) {
             )}
             <DataTable
                 columns={columns}
-                data={{ data: tableData, total }}
-                paginationState={{ pagination, setPagination }}
+                data={{ data: tableData }}
+                paginationState={{ pagination, setPagination, totalPages }}
                 sortingState={{ sorting, setSorting }}
                 filterState={{ columnFilters, setColumnFilters }}
-                dataLoadingState={{ isInitialLoading }}
+                dataLoadingState={{ isInitialLoading, isFetching }}
             />
         </CardUtil>
     );

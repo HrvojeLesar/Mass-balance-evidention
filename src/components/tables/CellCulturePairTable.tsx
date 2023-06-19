@@ -51,21 +51,22 @@ export default function CellCulturePairTable({
 
     const dataGroupContextValue = useContext(DataGroupContext);
 
-    const { data, refetch, isInitialLoading } = useGetAllCellCulturePairsQuery(
-        {
-            options: {
-                id: undefined,
-                dGroup: dataGroupContextValue.selectedGroup ?? -1,
+    const { data, refetch, isInitialLoading, isFetching } =
+        useGetAllCellCulturePairsQuery(
+            {
+                options: {
+                    id: undefined,
+                    dGroup: dataGroupContextValue.selectedGroup ?? -1,
+                },
             },
-        },
-        {
-            queryKey: [
-                "getAllCellCulturePairs",
-                dataGroupContextValue.selectedGroup,
-            ],
-            keepPreviousData: true,
-        }
-    );
+            {
+                queryKey: [
+                    "getAllCellCulturePairs",
+                    dataGroupContextValue.selectedGroup,
+                ],
+                keepPreviousData: true,
+            }
+        );
 
     useEffect(() => {
         if (data) {
@@ -210,7 +211,7 @@ export default function CellCulturePairTable({
                 sortingState={{ sorting, setSorting, manual: false }}
                 filterState={{ columnFilters, setColumnFilters, manual: false }}
                 groupingState={{ groupingState, setGroupingState }}
-                dataLoadingState={{ isInitialLoading }}
+                dataLoadingState={{ isInitialLoading, isFetching }}
             />
         </CardUtil>
     );
