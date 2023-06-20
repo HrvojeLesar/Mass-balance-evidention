@@ -36,6 +36,7 @@ import moment from "moment";
 import { DataGroupContext } from "../../DataGroupProvider";
 import { Grid, Input, NumberInput, useMantineTheme } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 
 type FormInput = {
     cell: SelectOption<Cell> | undefined;
@@ -99,6 +100,9 @@ export default function EntryForm({
     });
 
     const insert = useInsertEntryMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (data, variables, context) => {
             // resetSelects();
             reset({ ...getValues(), date: null, weight: null });
@@ -109,6 +113,9 @@ export default function EntryForm({
     });
 
     const update = useUpdateEntryMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (data, variables, context) => {
             if (onUpdateSuccess) {
                 onUpdateSuccess(data, variables, context);

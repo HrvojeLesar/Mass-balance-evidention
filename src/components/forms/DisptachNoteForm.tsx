@@ -29,6 +29,7 @@ import {
 import BaseForm from "./BaseForm";
 import { FormProps } from "./FormUtils";
 import { useEffect } from "react";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 
 const useStyles = createStyles((_theme) => ({
     faEditIconPointer: {
@@ -89,6 +90,9 @@ export default function DispatchNoteForm({
         });
 
     const insert = useInsertDispatchNoteMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (data, variables, context) => {
             reset();
             if (onInsertSuccess) {
@@ -98,6 +102,9 @@ export default function DispatchNoteForm({
     });
 
     const update = useUpdateDispatchNoteMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (data, variables, context) => {
             if (onUpdateSuccess) {
                 onUpdateSuccess(data, variables, context);
@@ -106,6 +113,9 @@ export default function DispatchNoteForm({
     });
 
     const updateIdent = useUpdateDispatchNoteIdentTrackerMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: async () => {
             const res = await refetch();
             setIdentValue(res.data?.dispatchNoteIdent.identifier);

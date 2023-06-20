@@ -22,6 +22,7 @@ import DeleteModal from "../DeleteModal";
 import { DataGroupContext } from "../../DataGroupProvider";
 import CardUtil from "../util/CardUtil";
 import { Divider, Title } from "@mantine/core";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 
 type T = Buyer;
 type TFields = BuyerFields;
@@ -140,6 +141,9 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
     }, [data?.buyers.totalPages, data?.buyers]);
 
     const deleteBuyer = useDeleteBuyerMutation({
+        onError: () => {
+            displayOnErrorNotification(t("notificationMessages.buyerDeleteError"));
+        },
         onSuccess: () => {
             refetch();
             setIsDeleteModalShown(false);

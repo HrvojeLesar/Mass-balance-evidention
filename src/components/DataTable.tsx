@@ -18,7 +18,7 @@ import TablePagination from "./TablePagination";
 
 type SomeTableProps<T> = {
     columns: ColumnDef<T, unknown>[];
-    data: { data: T[]; };
+    data: { data: T[] };
     paginationState: {
         pagination: Pagination;
         setPagination: Dispatch<SetStateAction<Pagination>>;
@@ -102,12 +102,12 @@ export default function DataTable<T>({
     });
 
     useEffect(() => {
-        const currentPage = paginationState.pagination.pageIndex + 1;
+        const currentPage = table.getState().pagination.pageIndex + 1;
         const totalPages = table.getPageCount();
         if (totalPages < currentPage && !dataLoadingState?.isFetching) {
             table.setPageIndex(totalPages - 1);
         }
-    }, [table, paginationState, dataLoadingState?.isFetching]);
+    }, [table, dataLoadingState?.isFetching]);
 
     return (
         <>

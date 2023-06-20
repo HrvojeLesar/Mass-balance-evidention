@@ -9,6 +9,7 @@ import {
     useUpdateDataGroupMutation,
 } from "../../generated/graphql";
 import { MbeGroupContext } from "../../MbeGroupProvider";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 import BaseForm from "./BaseForm";
 
 type DataGroupFormProps = {
@@ -54,6 +55,9 @@ export default function DataGroupForm({
     }, [edit, reset]);
 
     const insert = useInsertDataGroupMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (_data, _variables, _context) => {
             reset();
             if (onInsertSuccess) {
@@ -63,6 +67,9 @@ export default function DataGroupForm({
     });
 
     const update = useUpdateDataGroupMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (_data, _variables, _context) => {
             // WARN: causes flickering input text on save
             reset();

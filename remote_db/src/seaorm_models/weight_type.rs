@@ -172,13 +172,12 @@ impl QueryDatabase for Entity {
             ..Default::default()
         };
 
-        let join_table_model = mbe_groups_weight_types::ActiveModel {
-            id_mbe_group: ActiveValue::Set(options.id.mbe_group),
-            id_weight_type: ActiveValue::Set(options.id.id),
-            ..Default::default()
-        };
+        mbe_groups_weight_types::Entity::delete_many()
+            .filter(mbe_groups_weight_types::Column::IdMbeGroup.eq(options.id.mbe_group))
+            .filter(mbe_groups_weight_types::Column::IdWeightType.eq(options.id.id))
+            .exec(transaction)
+            .await?;
 
-        join_table_model.delete(transaction).await?;
         Ok(model.delete(transaction).await?)
     }
 

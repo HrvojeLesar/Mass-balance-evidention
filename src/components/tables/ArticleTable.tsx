@@ -22,6 +22,7 @@ import { DataGroupContext } from "../../DataGroupProvider";
 import CardUtil from "../util/CardUtil";
 import { Divider, Title } from "@mantine/core";
 import ArticleForm from "../forms/ArticleForm";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 
 type T = Article;
 type TFields = ArticleFields;
@@ -135,6 +136,9 @@ export default function ArticleTable({ isInsertable, isEditable }: TableProps) {
     }, [data?.articles.totalPages, data?.articles]);
 
     const deleteArticle = useDeleteArticleMutation({
+        onError: () => {
+            displayOnErrorNotification(t("notificationMessages.articleDeleteError"));
+        },
         onSuccess: () => {
             refetch();
             setIsDeleteModalShown(false);

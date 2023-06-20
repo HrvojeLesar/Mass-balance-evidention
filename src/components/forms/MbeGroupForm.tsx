@@ -6,6 +6,7 @@ import {
     MbeGroupInsertOptions,
     useInsertMbeGroupMutation,
 } from "../../generated/graphql";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 import BaseForm from "./BaseForm";
 
 type MbeGroupFormProps = {
@@ -33,6 +34,9 @@ export default function MbeGroupForm({
     });
 
     const insert = useInsertMbeGroupMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (_data, _variables, _context) => {
             reset();
             if (onInsertSuccess) {

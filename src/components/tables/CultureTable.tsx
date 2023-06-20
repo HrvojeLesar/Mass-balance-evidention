@@ -21,6 +21,7 @@ import DeleteModal from "../DeleteModal";
 import EditModal from "../EditModal";
 import CultureForm from "../forms/CultureForm";
 import CardUtil from "../util/CardUtil";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 import { TableProps } from "./TableUtils";
 
 type T = Culture;
@@ -134,6 +135,9 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
     }, [data?.cultures.totalPages, data?.cultures]);
 
     const deleteCulture = useDeleteCultureMutation({
+        onError: () => {
+            displayOnErrorNotification(t("notificationMessages.cultureDeleteError"));
+        },
         onSuccess: () => {
             refetch();
             setIsDeleteModalShown(false);

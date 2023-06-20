@@ -23,6 +23,7 @@ import CardUtil from "../util/CardUtil";
 import { Divider, Title } from "@mantine/core";
 import { MbeGroupContext } from "../../MbeGroupProvider";
 import WeightTypeForm from "../forms/WeightTypeForm";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 
 type T = WeightType;
 type TFields = WeightTypeFields;
@@ -150,6 +151,9 @@ export default function WeightTypeTable({
     }, [data?.weightTypes.totalPages, data?.weightTypes]);
 
     const deleteWeightType = useDeleteWeightTypesMutation({
+        onError: () => {
+            displayOnErrorNotification(t("notificationMessages.deleteWeightTypeMutation"));
+        },
         onSuccess: () => {
             refetch();
             setIsDeleteModalShown(false);

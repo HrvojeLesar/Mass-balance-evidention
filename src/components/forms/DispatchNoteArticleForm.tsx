@@ -38,6 +38,7 @@ import {
     TextInput,
     useMantineTheme,
 } from "@mantine/core";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 
 type FormInput = {
     article: SelectOption<Article> | undefined;
@@ -94,6 +95,9 @@ export default function DispatchNoteArticleForm({
     });
 
     const insert = useInsertDispatchNoteArticleMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (data, variables, context) => {
             resetSelects();
             reset();
@@ -104,6 +108,9 @@ export default function DispatchNoteArticleForm({
     });
 
     const update = useUpdateDispatchNoteArticleMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (data, variables, context) => {
             if (onUpdateSuccess) {
                 onUpdateSuccess(data, variables, context);

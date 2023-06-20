@@ -27,6 +27,7 @@ import DeleteModal from "../DeleteModal";
 import EditModal from "../EditModal";
 import EntryForm from "../forms/EntryForm";
 import CardUtil from "../util/CardUtil";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 import { TableProps } from "./TableUtils";
 
 type SelectValue = "disabled" | "cell_name" | "culture_name" | "buyer_name";
@@ -203,6 +204,9 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
     }, [refetch, isModalShown, setIsModalShown]);
 
     const deleteEntry = useDeleteEntryMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: () => {
             refetch();
             setIsDeleteModalShown(false);

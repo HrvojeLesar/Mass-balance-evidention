@@ -9,6 +9,7 @@ import {
     WeightTypeInsertOptions,
 } from "../../generated/graphql";
 import { MbeGroupContext } from "../../MbeGroupProvider";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 import BaseForm from "./BaseForm";
 
 type WeightTypeFormProps = {
@@ -49,6 +50,9 @@ export default function WeightTypeForm({
     }, [mbeGroupContextValue, reset]);
 
     const insert = useInsertWeightTypeMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (_data, _variables, _context) => {
             reset();
             if (onInsertSuccess) {
@@ -58,6 +62,9 @@ export default function WeightTypeForm({
     });
 
     const update = useUpdateWeightTypesMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (_data, _variables, _context) => {
             reset();
             if (onUpdateSuccess) {

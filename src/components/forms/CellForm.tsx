@@ -12,6 +12,7 @@ import {
     useInsertCellMutation,
     useUpdateCellMutation,
 } from "../../generated/graphql";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 import BaseForm from "./BaseForm";
 import { FormProps } from "./FormUtils";
 
@@ -43,6 +44,9 @@ export default function CellForm({
     });
 
     const insert = useInsertCellMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (data, variables, context) => {
             reset();
             if (onInsertSuccess) {
@@ -52,6 +56,9 @@ export default function CellForm({
     });
 
     const update = useUpdateCellMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (data, variables, context) => {
             reset();
             if (onUpdateSuccess) {

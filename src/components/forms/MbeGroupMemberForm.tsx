@@ -7,6 +7,7 @@ import {
     useInsertMbeGroupMemberMutation,
 } from "../../generated/graphql";
 import { MbeGroupContext } from "../../MbeGroupProvider";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 import BaseForm from "./BaseForm";
 
 type MbeGroupMemberFormProps = {
@@ -43,6 +44,9 @@ export default function MbeGroupMemberForm({
     }, [mbeGroupContextValue, reset]);
 
     const insert = useInsertMbeGroupMemberMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (_data, _variables, _context) => {
             reset();
             if (onInsertSuccess) {

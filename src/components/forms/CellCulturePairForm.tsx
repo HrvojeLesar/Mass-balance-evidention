@@ -30,6 +30,7 @@ import {
 } from "./FormUtils";
 import { DataGroupContext } from "../../DataGroupProvider";
 import { Grid, Input, useMantineTheme } from "@mantine/core";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 
 type FormInput = {
     cell: SelectOption<Cell> | undefined;
@@ -80,6 +81,9 @@ export default function CellCulturePairForm({
     });
 
     const insert = useInsertCellCulturePairMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (data, variables, context) => {
             reset();
             resetSelects();
@@ -90,6 +94,9 @@ export default function CellCulturePairForm({
     });
 
     const update = useUpdateCellCulturePairMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (data, variables, context) => {
             if (onUpdateSuccess) {
                 onUpdateSuccess(data, variables, context);

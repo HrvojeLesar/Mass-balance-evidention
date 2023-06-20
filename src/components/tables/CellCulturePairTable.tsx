@@ -20,6 +20,7 @@ import DeleteModal from "../DeleteModal";
 import EditModal from "../EditModal";
 import CellCulturePairForm from "../forms/CellCulturePairForm";
 import CardUtil from "../util/CardUtil";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 import { TableProps } from "./TableUtils";
 
 type T = CellCulturePair;
@@ -119,6 +120,9 @@ export default function CellCulturePairTable({
     }, [refetch, isModalShown, setIsModalShown]);
 
     const deleteCellCulturePair = useDeleteCellCulturePairMutation({
+        onError: () => {
+            displayOnErrorNotification(t("notificationMessages.deleteCellCulturePairMutation"));
+        },
         onSuccess: () => {
             refetch();
             setIsDeleteModalShown(false);

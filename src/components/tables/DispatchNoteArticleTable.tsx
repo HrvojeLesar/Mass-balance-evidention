@@ -33,6 +33,7 @@ import {
     NumberFilterValues,
 } from "../BaseTable";
 import moment from "moment";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 
 type T = DispatchNoteArticle;
 type TFields = DispatchNoteArticleFields;
@@ -259,6 +260,9 @@ export default function DispatchNoteArticleTable({
     }, [data?.dispatchNoteArticles.totalPages, data?.dispatchNoteArticles]);
 
     const deleteDispatchNote = useDeleteDispatchNoteArticleMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: () => {
             refetch();
             setIsDeleteModalShown(false);

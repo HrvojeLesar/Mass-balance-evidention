@@ -213,5 +213,14 @@
         "greater_or_equal_than": "Veće ili jednako",
         "less_than": "Manje od",
         "less_or_equal_than": "Manje ili jednako"
+    },
+    "notificationMessages": {
+        "title": "Dogodila se greška!",
+        "cellDeleteError": "Zapis ovisi o ovoj čestici! Redoslijed brisanja: Zapis -> Par čestica i kultura -> Čestica.",
+        "cultureDeleteError": "Zapis ovisi o ovoj kulturi! Redoslijed brisanja: Zapis -> Par čestica i kultura -> Kultura.",
+        "deleteWeightTypeMutation": "Artikal na otpremnici zavisi o ovoj mjernoj jedinici! Redoslijed brisanja: Artikli iz otpremnice -> Mjerna jedinica.",
+        "deleteCellCulturePairMutation": "Zapis ovisi o ovom paru! Redoslijed brisanja: Zapis -> Par čestica i kultura.",
+        "buyerDeleteError": "Zapis ovisi o ovom kupcu! Redoslijed brisanja: Zapis -> Kupac.",
+        "articleDeleteError": "Otpremnica ovisi o ovom artiklu! Redoslijed brisanja: Otpremnica -> Artikal."
     }
 }

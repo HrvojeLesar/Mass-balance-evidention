@@ -7,6 +7,7 @@ import {
     useRemoveMbeGroupMemberMutation,
 } from "../generated/graphql";
 import DeleteModal from "./DeleteModal";
+import displayOnErrorNotification from "./util/deleteNotificationUtil";
 
 type MemberProps = {
     position: number;
@@ -73,6 +74,9 @@ export default function MembersDisplay({ idMbeGroup }: MemberDisplayProps) {
     }, [data]);
 
     const remove = useRemoveMbeGroupMemberMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (_data, _variables, _context) => {
             refetch();
             setIsDeleteModalShown(false);

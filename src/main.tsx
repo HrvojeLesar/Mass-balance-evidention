@@ -1,7 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import i18n from "i18next";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+    QueryClient,
+    QueryClientProvider,
+} from "@tanstack/react-query";
 import { initReactI18next } from "react-i18next";
 import Backend from "i18next-http-backend";
 import DataGroupProvider from "./DataGroupProvider";
@@ -25,6 +28,8 @@ import MbeGroupView from "./views/MbeGroupView";
 import NotFound from "./components/NotFound";
 import AuthContextProvider from "./AuthProvider";
 import ArticleMeasureTypeView from "./views/ArticleMeasureTypeView";
+import { MantineProvider } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
 
 const queryClient = new QueryClient();
 
@@ -123,7 +128,10 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
         <QueryClientProvider client={queryClient}>
-            <RouterProvider router={router} />
+            <MantineProvider>
+                <Notifications limit={10} />
+                <RouterProvider router={router} />
+            </MantineProvider>
         </QueryClientProvider>
     </React.StrictMode>
 );

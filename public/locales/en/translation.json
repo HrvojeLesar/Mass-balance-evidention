@@ -214,5 +214,14 @@
         "greater_or_equal_than": "Greater or equal than",
         "less_than": "Less than",
         "less_or_equal_than": "Less or equal than"
+    },
+    "notificationMessages": {
+        "title": "An error occurred!",
+        "cellDeleteError": "Entry depends on this cell! Deletion order: Entry -> Cell and culture pair -> Cell.",
+        "cultureDeleteError": "Entry depends on this culture! Deletion order: Entry -> Cell and culture pair -> Culture.",
+        "deleteWeightTypeMutation": "Dispatch note article depends on this unit! Deletion order: Dispatch note article -> Unit.",
+        "deleteCellCulturePairMutation": "Entry depends on this pair! Deletion order: Entry -> Cell culture pair.",
+        "buyerDeleteError": "Entry depends on this buyer! Deletion order: Entry -> Buyer.",
+        "articleDeleteError": "Dispatch note depends on this article! Deletion order: Dispatch note -> Article."
     }
 }

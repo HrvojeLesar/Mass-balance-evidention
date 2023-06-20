@@ -26,6 +26,7 @@ import { useNavigate } from "react-router-dom";
 import { ColumnFilterType, Comparators } from "../BaseTable";
 import moment from "moment";
 import DispatchNoteForm from "../forms/DisptachNoteForm";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 
 type T = DispatchNote;
 type TFields = DispatchNoteFields;
@@ -191,6 +192,9 @@ export default function DispatchNoteTable({
     }, [data?.dispatchNotes.totalPages, data?.dispatchNotes]);
 
     const deleteDispatchNote = useDeleteDispatchNoteMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: () => {
             refetch();
             setIsDeleteModalShown(false);

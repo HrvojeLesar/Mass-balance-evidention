@@ -5,6 +5,7 @@ import {
     MbeUserInsertOptions,
     useInsertUserMutation,
 } from "../../generated/graphql";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 import BaseForm from "./BaseForm";
 
 type MbeUserFormProps = {
@@ -26,6 +27,9 @@ export default function MbeUserForm({ onInsertSuccess }: MbeUserFormProps) {
     });
 
     const insert = useInsertUserMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (_data, _variables, _context) => {
             reset();
             if (onInsertSuccess) {

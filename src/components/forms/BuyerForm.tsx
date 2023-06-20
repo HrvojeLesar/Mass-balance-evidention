@@ -12,6 +12,7 @@ import {
     useInsertBuyerMutation,
     useUpdateBuyerMutation,
 } from "../../generated/graphql";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 import BaseForm from "./BaseForm";
 import { FormProps } from "./FormUtils";
 
@@ -43,6 +44,9 @@ export default function BuyerForm({
     });
 
     const insert = useInsertBuyerMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (data, variables, context) => {
             reset();
             if (onInsertSuccess) {
@@ -52,6 +56,9 @@ export default function BuyerForm({
     });
 
     const update = useUpdateBuyerMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (data, variables, context) => {
             if (onUpdateSuccess) {
                 onUpdateSuccess(data, variables, context);

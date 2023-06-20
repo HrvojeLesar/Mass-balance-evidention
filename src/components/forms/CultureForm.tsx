@@ -12,6 +12,7 @@ import {
     useInsertCultureMutation,
     useUpdateCultureMutation,
 } from "../../generated/graphql";
+import displayOnErrorNotification from "../util/deleteNotificationUtil";
 import BaseForm from "./BaseForm";
 import { FormProps } from "./FormUtils";
 
@@ -42,6 +43,9 @@ export default function CultureForm({
     });
 
     const insert = useInsertCultureMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (data, variables, context) => {
             reset();
             if (onInsertSuccess) {
@@ -51,6 +55,9 @@ export default function CultureForm({
     });
 
     const update = useUpdateCultureMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
         onSuccess: (data, variables, context) => {
             if (onUpdateSuccess) {
                 onUpdateSuccess(data, variables, context);
