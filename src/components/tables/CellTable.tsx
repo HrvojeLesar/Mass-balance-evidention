@@ -133,7 +133,7 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
 
     const totalPages = useMemo<number | undefined>(() => {
         return data?.cells.totalPages;
-    }, [data?.cells.totalPages, data?.cells]);
+    }, [data?.cells]);
 
     const deleteCell = useDeleteCellMutation({
         onError: () => {

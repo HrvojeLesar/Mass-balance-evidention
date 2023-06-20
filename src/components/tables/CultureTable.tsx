@@ -132,7 +132,7 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
 
     const totalPages = useMemo<number | undefined>(() => {
         return data?.cultures.totalPages;
-    }, [data?.cultures.totalPages, data?.cultures]);
+    }, [data?.cultures]);
 
     const deleteCulture = useDeleteCultureMutation({
         onError: () => {

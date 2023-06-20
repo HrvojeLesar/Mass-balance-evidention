@@ -133,7 +133,7 @@ export default function ArticleTable({ isInsertable, isEditable }: TableProps) {
 
     const totalPages = useMemo<number | undefined>(() => {
         return data?.articles.totalPages;
-    }, [data?.articles.totalPages, data?.articles]);
+    }, [data?.articles]);
 
     const deleteArticle = useDeleteArticleMutation({
         onError: () => {

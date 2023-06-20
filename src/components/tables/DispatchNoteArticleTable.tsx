@@ -257,7 +257,7 @@ export default function DispatchNoteArticleTable({
 
     const totalPages = useMemo<number | undefined>(() => {
         return data?.dispatchNoteArticles.totalPages;
-    }, [data?.dispatchNoteArticles.totalPages, data?.dispatchNoteArticles]);
+    }, [data?.dispatchNoteArticles]);
 
     const deleteDispatchNote = useDeleteDispatchNoteArticleMutation({
         onError: () => {

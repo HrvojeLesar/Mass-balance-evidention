@@ -148,7 +148,7 @@ export default function WeightTypeTable({
 
     const totalPages = useMemo<number | undefined>(() => {
         return data?.weightTypes.totalPages;
-    }, [data?.weightTypes.totalPages, data?.weightTypes]);
+    }, [data?.weightTypes]);
 
     const deleteWeightType = useDeleteWeightTypesMutation({
         onError: () => {

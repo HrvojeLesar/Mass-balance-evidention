@@ -138,7 +138,7 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
 
     const totalPages = useMemo<number | undefined>(() => {
         return data?.buyers.totalPages;
-    }, [data?.buyers.totalPages, data?.buyers]);
+    }, [data?.buyers]);
 
     const deleteBuyer = useDeleteBuyerMutation({
         onError: () => {
