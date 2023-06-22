@@ -324,7 +324,7 @@ export default function AppNavbar({ children }: AppNavbarProps) {
                     <MediaQuery largerThan="sm" styles={{ display: "none" }}>
                         <div>
                             <Divider
-                                label="Options - CHANGE ME"
+                                label={t("navigation.options")}
                                 labelPosition="center"
                             />
                             {multi.links.map((navigationLink) => {

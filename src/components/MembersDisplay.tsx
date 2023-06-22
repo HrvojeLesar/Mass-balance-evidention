@@ -1,7 +1,8 @@
 import { ActionIcon, Divider, Flex, Text } from "@mantine/core";
-import { Fragment, useCallback, useMemo, useState } from "react";
+import { Fragment, useCallback, useContext, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FaTrash } from "react-icons/fa";
+import { AuthContext } from "../AuthProvider";
 import {
     useGetGroupMembersQuery,
     useRemoveMbeGroupMemberMutation,
@@ -17,6 +18,8 @@ type MemberProps = {
 
 function Member({ position, email, openModal }: MemberProps) {
     const { t } = useTranslation();
+    const authContext = useContext(AuthContext);
+
     return (
         <>
             <Flex align="center" justify="space-between">
@@ -26,7 +29,17 @@ function Member({ position, email, openModal }: MemberProps) {
                         <Text fz="xs" c="dimmed">
                             {t("membersDisplay.email")}
                         </Text>
-                        <Text fz="sm">{email}</Text>
+                        <Text
+                            fz="sm"
+                            color={
+                                email.toLowerCase() ===
+                                authContext.email?.toLowerCase()
+                                    ? "orange"
+                                    : undefined
+                            }
+                        >
+                            {email}
+                        </Text>
                     </div>
                 </Flex>
                 <ActionIcon

@@ -10,10 +10,12 @@ type Me = {
 
 type AuthContextT = {
     authorized: boolean;
+    email: string | undefined;
 };
 
 export const AuthContext = createContext<AuthContextT>({
     authorized: false,
+    email: undefined,
 });
 
 type AuthContextProviderProps = {
@@ -24,6 +26,7 @@ export default function AuthContextProvider({
     children,
 }: AuthContextProviderProps) {
     const [isAuthorized, setIsAuthorized] = useState(false);
+    const [email, setEmail] = useState<undefined | string>(undefined);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -41,6 +44,7 @@ export default function AuthContextProvider({
     useEffect(() => {
         if (data?.email && !error) {
             setIsAuthorized(true);
+            setEmail(data?.email);
         } else {
             setIsAuthorized(false);
         }
@@ -65,6 +69,7 @@ export default function AuthContextProvider({
         <AuthContext.Provider
             value={{
                 authorized: isAuthorized,
+                email: email,
             }}
         >
             {children}
