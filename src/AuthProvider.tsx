@@ -53,7 +53,11 @@ export default function AuthContextProvider({
             isLoading === false &&
             isAuthorized === false
         ) {
-            navigate("/login");
+            navigate("/login", {
+                state: {
+                    from: location,
+                },
+            });
         }
     }, [isLoading, location, navigate, isAuthorized]);
 

@@ -2,17 +2,18 @@ import { Button, Center, Divider, Flex, Title } from "@mantine/core";
 import { useContext, useEffect } from "react";
 import { FaFacebook, FaGithub, FaMicrosoft } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../AuthProvider";
 import CardUtil from "./util/CardUtil";
 
 export default function Login() {
     const navigate = useNavigate();
+    const location = useLocation();
     const authContext = useContext(AuthContext);
 
     useEffect(() => {
         if (authContext.authorized) {
-            navigate("/", { replace: true });
+            navigate(location.state?.from?.pathname ?? "/", { replace: true });
         }
     }, [authContext.authorized, navigate]);
 
