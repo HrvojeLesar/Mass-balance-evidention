@@ -11,6 +11,7 @@ import { DataGroup, useGetDataGroupsQuery } from "./generated/graphql";
 type DataGroupContextType = {
     groups: DataGroup[] | undefined;
     isLoading: boolean | undefined;
+    isEmpty: boolean;
     selectGroup: ((id: number) => void) | undefined;
     selectedGroup: number | undefined;
     refetch: (() => void) | undefined;
@@ -19,6 +20,7 @@ type DataGroupContextType = {
 const initialContext: DataGroupContextType = {
     groups: undefined,
     isLoading: undefined,
+    isEmpty: true,
     selectedGroup: undefined,
     selectGroup: undefined,
     refetch: undefined,
@@ -67,9 +69,18 @@ export default function DataGroupProvider({
         }
     }, []);
 
+    const isEmpty = useMemo((): boolean => {
+        if (groups) {
+            return groups.length === 0 ? true : false;
+        } else {
+            return true;
+        }
+    }, [groups]);
+
     const value: DataGroupContextType = useMemo(
         () => ({
             isLoading,
+            isEmpty,
             groups,
             selectedGroup: selectedGroup ?? initialGroupId,
             selectGroup,

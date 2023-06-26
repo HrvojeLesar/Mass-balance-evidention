@@ -33,11 +33,6 @@ export default function MbeGroupMemberForm({
         },
     });
 
-    const isGroupsEmpty = useMemo(
-        () => mbeGroupContextValue.groups?.length === 0,
-        [mbeGroupContextValue]
-    );
-
     // WARN: Inefficient, calls reset on every group change
     useEffect(() => {
         reset({ idMbeGroup: mbeGroupContextValue.selectedGroup });
@@ -101,7 +96,7 @@ export default function MbeGroupMemberForm({
                                 }
                                 disabled={
                                     mbeGroupContextValue.isLoading ||
-                                    isGroupsEmpty
+                                    mbeGroupContextValue.isEmpty
                                 }
                                 onChange={(val) => {
                                     if (

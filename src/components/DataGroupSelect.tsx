@@ -7,14 +7,13 @@ import CardUtil from "./util/CardUtil";
 export default function DataGroupSelect() {
     const { t } = useTranslation();
     const value = useContext(DataGroupContext);
-    const isGroupsEmpty = useMemo(() => value.groups?.length === 0, [value]);
     return (
         <Select
             label={t("dataGroup.dataGroupSelect").toString()}
             value={
                 value.selectedGroup ? value.selectedGroup.toString() : undefined
             }
-            disabled={value.isLoading || isGroupsEmpty}
+            disabled={value.isLoading || value.isEmpty}
             onChange={(val) => {
                 if (value.selectGroup !== undefined) {
                     value.selectGroup(Number(val));

@@ -1,6 +1,8 @@
-import { Divider, Grid, Select, Title } from "@mantine/core";
+import { ActionIcon, Divider, Flex, Grid, Select, Title } from "@mantine/core";
+import { useToggle } from "@mantine/hooks";
 import { useContext, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { FaEdit } from "react-icons/fa";
 import MbeGroupForm from "../components/forms/MbeGroupForm";
 import MbeGroupMemberForm from "../components/forms/MbeGroupMemberForm";
 import MbeUserForm from "../components/forms/MbeUserForm";
@@ -14,18 +16,32 @@ export default function MbeGroupView() {
     const dataGroupContextValue = useContext(DataGroupContext);
     const mbeGroupContextValue = useContext(MbeGroupContext);
 
-    // TODO: Attatch this function to context instead
-    const isGroupsEmpty = useMemo(
-        () => mbeGroupContextValue.groups?.length === 0,
-        [mbeGroupContextValue]
-    );
+    const [editToggleValue, editToggle] = useToggle();
+
+    const selectedGroup = useMemo(() => {
+        return mbeGroupContextValue.groups?.find(
+            (group) => group.id === mbeGroupContextValue.selectedGroup
+        );
+    }, [mbeGroupContextValue]);
 
     // TODO: Decouple changing group globally in every context (maybe)
     return (
         <Grid>
             <Grid.Col sm={12} md={6} lg={6}>
                 <CardUtil>
-                    <Title order={4}>{t("titles.mbeGroupSelection")}</Title>
+                    <Flex justify="space-between">
+                        <Title order={4}>{t("titles.mbeGroupSelection")}</Title>
+                        <ActionIcon
+                            color="yellow"
+                            variant={editToggleValue ? "filled" : "outline"}
+                            onClick={() => {
+                                editToggle();
+                            }}
+                            title={t("titles.edit")}
+                        >
+                            <FaEdit />
+                        </ActionIcon>
+                    </Flex>
                     <Divider my="xs" />
                     <Select
                         label={t("mbeGroupMember.group")}
@@ -35,7 +51,8 @@ export default function MbeGroupView() {
                                 : undefined
                         }
                         disabled={
-                            mbeGroupContextValue.isLoading || isGroupsEmpty
+                            mbeGroupContextValue.isLoading ||
+                            mbeGroupContextValue.isEmpty
                         }
                         onChange={(val) => {
                             if (
@@ -58,6 +75,23 @@ export default function MbeGroupView() {
                                   })) ?? []
                         }
                     />
+                    {!mbeGroupContextValue.isEmpty && editToggleValue && (
+                        <>
+                            <Divider my="xs" />
+                            <Title order={4}>
+                                {t("titles.editMbeDataGroup").toString()}
+                            </Title>
+                            <Divider my="xs" />
+                            <MbeGroupForm
+                                edit={selectedGroup}
+                                onUpdateSuccess={() => {
+                                    if (mbeGroupContextValue.refetch) {
+                                        mbeGroupContextValue.refetch();
+                                    }
+                                }}
+                            />
+                        </>
+                    )}
                 </CardUtil>
             </Grid.Col>
 
@@ -67,8 +101,8 @@ export default function MbeGroupView() {
                     <Divider my="xs" />
                     <MbeUserForm
                         onInsertSuccess={() => {
-                            if (dataGroupContextValue.refetch) {
-                                dataGroupContextValue.refetch();
+                            if (mbeGroupContextValue.refetch) {
+                                mbeGroupContextValue.refetch();
                             }
                         }}
                     />

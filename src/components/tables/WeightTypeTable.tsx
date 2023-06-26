@@ -49,11 +49,6 @@ export default function WeightTypeTable({
 
     const dataGroupContextValue = useContext(DataGroupContext);
 
-    const isGroupsEmpty = useMemo(
-        () => mbeGroupContextValue.groups?.length === 0,
-        [mbeGroupContextValue]
-    );
-
     const { data, refetch, isInitialLoading, isFetching } =
         useGetWeightTypesQuery(
             {

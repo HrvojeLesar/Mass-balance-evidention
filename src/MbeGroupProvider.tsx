@@ -6,13 +6,11 @@ import {
     useMemo,
     useState,
 } from "react";
-import {
-    MbeGroup,
-    useGetMbeGroupsQuery,
-} from "./generated/graphql";
+import { MbeGroup, useGetMbeGroupsQuery } from "./generated/graphql";
 
 type MbeGroupContextType = {
     groups: MbeGroup[] | undefined;
+    isEmpty: boolean;
     isLoading: boolean | undefined;
     selectGroup: ((id: number) => void) | undefined;
     selectedGroup: number | undefined;
@@ -21,6 +19,7 @@ type MbeGroupContextType = {
 
 const initialContext: MbeGroupContextType = {
     groups: undefined,
+    isEmpty: true,
     isLoading: undefined,
     selectedGroup: undefined,
     selectGroup: undefined,
@@ -68,9 +67,18 @@ export default function MbeGroupProvider({ children }: MbeGroupProviderProps) {
         }
     }, []);
 
+    const isEmpty = useMemo((): boolean => {
+        if (groups) {
+            return groups.length === 0 ? true : false;
+        } else {
+            return true;
+        }
+    }, [groups]);
+
     const value: MbeGroupContextType = useMemo(
         () => ({
             isLoading,
+            isEmpty,
             groups,
             selectedGroup: selectedGroup ?? initialGroupId,
             selectGroup,

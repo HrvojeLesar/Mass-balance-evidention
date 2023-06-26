@@ -39,11 +39,6 @@ export default function WeightTypeForm({
         },
     });
 
-    const isGroupsEmpty = useMemo(
-        () => mbeGroupContextValue.groups?.length === 0,
-        [mbeGroupContextValue]
-    );
-
     // WARN: Inefficient, calls reset on every group change
     useEffect(() => {
         reset({ mbeGroup: mbeGroupContextValue.selectedGroup });
@@ -141,7 +136,7 @@ export default function WeightTypeForm({
                                 }
                                 disabled={
                                     mbeGroupContextValue.isLoading ||
-                                    isGroupsEmpty
+                                    mbeGroupContextValue.isEmpty
                                 }
                                 onChange={(val) => {
                                     if (
