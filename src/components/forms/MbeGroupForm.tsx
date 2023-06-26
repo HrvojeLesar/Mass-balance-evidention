@@ -1,10 +1,12 @@
 import { Grid, TextInput } from "@mantine/core";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
     MbeGroup,
     MbeGroupInsertOptions,
     useInsertMbeGroupMutation,
+    useUpdateMbeGroupMutation,
 } from "../../generated/graphql";
 import displayOnErrorNotification from "../util/deleteNotificationUtil";
 import BaseForm from "./BaseForm";
@@ -33,6 +35,12 @@ export default function MbeGroupForm({
         },
     });
 
+    useEffect(() => {
+        if (edit) {
+            reset({ name: edit?.name ?? "" });
+        }
+    }, [edit, reset]);
+
     const insert = useInsertMbeGroupMutation({
         onError: () => {
             displayOnErrorNotification();
@@ -45,26 +53,35 @@ export default function MbeGroupForm({
         },
     });
 
-    // TODO: Updateing
-    // const update = useUpdateDataGroupMutation({
-    //     onSuccess: (_data, _variables, _context) => {
-    //         // WARN: causes flickering input text on save
-    //         // reset();
-    //         if (onUpdateSuccess) {
-    //             onUpdateSuccess();
-    //         }
-    //     },
-    // });
+    const update = useUpdateMbeGroupMutation({
+        onError: () => {
+            displayOnErrorNotification();
+        },
+        onSuccess: (_data, _variables, _context) => {
+            // WARN: causes flickering input text on save
+            reset();
+            if (onUpdateSuccess) {
+                onUpdateSuccess();
+            }
+        },
+    });
 
     return (
         <BaseForm
             submitDisabled={insert.isLoading}
             onSubmit={handleSubmit((data) => {
-                insert.mutate({
-                    options: {
-                        ...data,
-                    },
-                });
+                edit
+                    ? update.mutate({
+                          options: {
+                              idGroup: edit.id,
+                              ...data,
+                          },
+                      })
+                    : insert.mutate({
+                          options: {
+                              ...data,
+                          },
+                      });
             })}
         >
             <Grid mb="sm">
@@ -73,8 +90,12 @@ export default function MbeGroupForm({
                         {...register("name", {
                             required: t("dataGroup.errors.name"),
                         })}
-                        label={t("newMbeGroup.name")}
-                        placeholder={t("newMbeGroup.name")}
+                        label={
+                            edit ? t("mbeGroup.name") : t("mbeGroup.newName")
+                        }
+                        placeholder={
+                            edit ? t("mbeGroup.name") : t("mbeGroup.newName")
+                        }
                         autoComplete="off"
                         withAsterisk
                         error={
