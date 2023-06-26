@@ -13,22 +13,21 @@ use actix_web::{
     get,
     middleware::Logger,
     post,
-    web::{self, Data},
+    web::{self, Data, Query},
     App, HttpResponse, HttpServer,
 };
 use async_graphql::{http::GraphiQLSource, EmptySubscription, Schema};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use auth::{
     login_callback_facebook, login_callback_github, login_callback_google,
-    login_callback_microsoft, login_facebook, login_github, login_google, login_microsoft,
+    login_callback_microsoft, login_facebook, login_github, login_google, login_microsoft, logout,
     GlobalReqwestClient, OAuthClientFacebook, OAuthClientGithub, OAuthClientGoogle,
-    OAuthClientMicrosoft,
+    OAuthClientMicrosoft, manual_auth,
 };
 use dotenvy::dotenv;
 use http_response_errors::AuthError;
 
-use redis_csrf_cache::create_redis_connection_manager;
-use reqwest::header::LOCATION;
+use redis_connection_manager::create_redis_connection_manager;
 use sea_orm::{
     ColumnTrait, ConnectOptions, DatabaseConnection, EntityTrait, QueryFilter, TransactionTrait,
 };
@@ -38,7 +37,7 @@ use crate::auth::SessionData;
 
 mod auth;
 mod http_response_errors;
-mod redis_csrf_cache;
+mod redis_connection_manager;
 mod seaorm_models;
 mod user_models;
 
@@ -90,17 +89,6 @@ async fn me(
     transaction.commit().await?;
 
     Ok(HttpResponse::Ok().json(user))
-}
-
-#[get("/logout")]
-async fn logout(session: Session) -> Result<HttpResponse, AuthError> {
-    session.purge();
-    Ok(HttpResponse::SeeOther()
-        .insert_header((
-            LOCATION,
-            env::var("LOGIN_URL").expect("LOGIN_URL env variable to have been checked"),
-        ))
-        .finish())
 }
 
 #[cfg(debug_assertions)]
@@ -186,7 +174,6 @@ fn load_env() {
     // .env.dev | .env.prod
     load_env_var!("LOGIN_URL");
     load_env_var!("CALLBACK_URL");
-    load_env_var!("TAURI_CALLBACK_URL");
     load_env_var!("GOOGLE_REDIRECT_URL");
     load_env_var!("MICROSOFT_REDIRECT_URL");
     load_env_var!("GITHUB_REDIRECT_URL");
@@ -252,6 +239,7 @@ async fn main() -> std::io::Result<()> {
                             .session_ttl(actix_web::cookie::time::Duration::seconds(MONTH)),
                     )
                     .cookie_http_only(true)
+                    .cookie_secure(false)
                     .cookie_content_security(CookieContentSecurity::Signed)
                     .build(),
             )
@@ -277,6 +265,7 @@ async fn main() -> std::io::Result<()> {
             .service(get_schema)
             .service(me)
             .service(logout)
+            .service(manual_auth)
     })
     .bind("127.0.0.1:8000")?
     .run()

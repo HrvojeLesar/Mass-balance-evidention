@@ -1,25 +1,36 @@
 use std::{borrow::Cow, env, error::Error, future::Future, pin::Pin};
 
 use actix_session::{Session, SessionExt};
-use actix_web::{get, http::header::LOCATION, web::Query, FromRequest, HttpResponse};
+use actix_web::{
+    get,
+    http::header::LOCATION,
+    post,
+    web::{Json, Query},
+    FromRequest, HttpResponse,
+};
 use log::error;
 use oauth2::{
     basic::BasicClient, AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken,
     PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, Scope, TokenResponse, TokenUrl,
 };
+use rand::{RngCore, SeedableRng};
 use redis::{aio::ConnectionLike, Cmd};
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, TransactionTrait};
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha512};
 
 use crate::{
     http_response_errors::{AuthCallbackError, AuthError},
     load_env_var,
-    redis_csrf_cache::RedisConnectionManagerExt,
+    redis_connection_manager::RedisConnectionManagerExt,
     user_models::mbe_user,
     SeaOrmPool,
 };
 
 const CSRF_CACHE_EXPIRY: usize = 60 * 5;
+const TEMP_VERIFICATION_KEYS_CACHE_EXPIRY: usize = 60 * 5;
+
+type MbeUserId = i32;
 
 pub const SESSION_DATA_KEY: &str = "SESSION_DATA";
 
@@ -32,9 +43,9 @@ pub enum Platform {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct LoginRedirectUriParams {
+pub struct RedirectUriParams {
     #[serde(default)]
-    platform: Platform,
+    pub platform: Platform,
 }
 
 impl Platform {
@@ -146,6 +157,47 @@ impl FromRequest for GlobalReqwestClient {
                 .cloned()
                 .expect("An existing global reqwest client"))
         })
+    }
+}
+
+const HEX_TABLE: &[u8; 16] = b"0123456789abcdef";
+const TEMP_CODE_LEN: usize = 2048;
+
+#[derive(Debug, Deserialize)]
+struct TemporaryVerificationCode {
+    code: String,
+}
+
+impl TemporaryVerificationCode {
+    fn new() -> Result<Self, AuthCallbackError> {
+        let mut hasher = Sha512::new();
+        let mut rng = rand::rngs::StdRng::from_entropy();
+        let mut random_code_bytes = [0u8; TEMP_CODE_LEN];
+
+        rng.try_fill_bytes(&mut random_code_bytes)?;
+
+        hasher.update(random_code_bytes);
+
+        let hashed_code = hasher.finalize();
+
+        let code =
+            hashed_code
+                .iter()
+                .fold(String::with_capacity(TEMP_CODE_LEN * 2), |mut acc, byte| {
+                    acc.push(HEX_TABLE[(byte >> 4) as usize] as char);
+                    acc.push(HEX_TABLE[(byte & 0x0f) as usize] as char);
+                    acc
+                });
+
+        Ok(Self { code })
+    }
+
+    fn get_code(&self) -> &String {
+        &self.code
+    }
+
+    fn get_code_owned(self) -> String {
+        self.code
     }
 }
 
@@ -272,12 +324,14 @@ macro_rules! login_route {(
         $(#[$attr])*
         pub async fn $name(
             RedisConnectionManagerExt(mut redis_cache): RedisConnectionManagerExt,
-            Query(params): Query<LoginRedirectUriParams>,
+            Query(params): Query<RedirectUriParams>,
             client: $type,
         ) -> Result<HttpResponse, AuthError> {
             let (pkce_challange, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
 
+            println!("{:#?}", params.platform);
             let redirect_url = gen_redirect_url(load_env_var!($redirect_url), params.platform.as_str()).unwrap();
+            println!("{:#?}", redirect_url);
 
             let (url, csrf_token) = client
                 .0
@@ -353,10 +407,8 @@ macro_rules! callback_route {(
             db_pool: SeaOrmPool,
             session: Session,
         ) -> Result<HttpResponse, AuthCallbackError> {
-            let callback_url = match params.platform {
-                Platform::Tauri => load_env_var!("TAURI_CALLBACK_URL"),
-                Platform::Web => load_env_var!("CALLBACK_URL"),
-            };
+            let callback_url =
+                env::var("CALLBACK_URL").expect("CALLBACK_URL environment variable must be set");
 
             if let Some(error_param) = params.error {
                 match error_param.as_ref() {
@@ -368,6 +420,7 @@ macro_rules! callback_route {(
                            .finish())
                 }
             }
+
             if let (Some(csrf_state), Some(auth_code)) = (params.state, params.code) {
                 let pkce_verifier: Option<String> =
                     Cmd::get(&csrf_state).query_async(&mut redis_cache).await?;
@@ -390,6 +443,7 @@ macro_rules! callback_route {(
                 };
 
                 let redirect_url = gen_redirect_url(load_env_var!($redirect_url), params.platform.as_str()).unwrap();
+                println!("{:#?}", redirect_url);
 
                 let token = client
                     .0
@@ -418,14 +472,24 @@ macro_rules! callback_route {(
                 transaction.commit().await?;
 
                 match user {
-                    Some(user) => {
-                        session.renew();
-                        session.insert(SESSION_DATA_KEY, SessionData::new(user.id))?;
+                    Some(user) => match params.platform {
+                        Platform::Web => {
+                            session.renew();
+                            session.insert(SESSION_DATA_KEY, SessionData::new(user.id))?;
 
-                        Ok(HttpResponse::SeeOther()
-                           .insert_header((LOCATION, callback_url))
-                           .finish())
-                    }
+                            Ok(HttpResponse::SeeOther()
+                                .insert_header((LOCATION, callback_url))
+                                .finish())
+                        },
+                        Platform::Tauri => {
+                            let temp_code = TemporaryVerificationCode::new()?;
+                            Cmd::set_ex(temp_code.get_code(), user.id, TEMP_VERIFICATION_KEYS_CACHE_EXPIRY)
+                                .query_async(&mut redis_cache)
+                                .await?;
+
+                            Ok(HttpResponse::Ok().body(temp_code.get_code_owned()))
+                        }
+                    },
                     None => Err(AuthCallbackError::UserNotFound),
                 }
             } else {
@@ -470,3 +534,43 @@ callback_route![
     "FACEBOOK_REDIRECT_URL",
     UserInfo
 ];
+
+#[get("/logout")]
+pub async fn logout(
+    session: Session,
+) -> Result<HttpResponse, AuthError> {
+    session.purge();
+    Ok(HttpResponse::Ok().finish())
+}
+
+#[post("/manual-auth")]
+async fn manual_auth(
+    session: Session,
+    temp: Json<TemporaryVerificationCode>,
+    RedisConnectionManagerExt(mut redis_cache): RedisConnectionManagerExt,
+) -> Result<HttpResponse, AuthError> {
+    let id: Option<MbeUserId> = Cmd::get(temp.get_code())
+        .query_async(&mut redis_cache)
+        .await?;
+
+    match Cmd::del(temp.get_code())
+        .query_async::<_, i64>(&mut redis_cache)
+        .await
+    {
+        Ok(num_keys_deleted) => {
+            if num_keys_deleted == 0 {
+                return Err(AuthError::InvalidTempCode);
+            }
+        }
+        Err(e) => error!("Redis key deletion failed: {}", e),
+    }
+
+    match id {
+        Some(id) => {
+            session.renew();
+            session.insert(SESSION_DATA_KEY, SessionData::new(id))?;
+            Ok(HttpResponse::Ok().finish())
+        }
+        None => Err(AuthError::InvalidTempCode)?,
+    }
+}

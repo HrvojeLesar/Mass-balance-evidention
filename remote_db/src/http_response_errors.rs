@@ -41,6 +41,8 @@ pub enum AuthError {
     UserNotFound,
     #[error("Unauthorized access.")]
     Unauthorized,
+    #[error("Invalid temporary code")]
+    InvalidTempCode,
 }
 
 #[derive(Serialize, Debug)]
@@ -73,7 +75,8 @@ impl ResponseError for AuthError {
                 AuthError::InvalidPkceVerifier
                 | AuthError::MissingStateOrAuthCode
                 | AuthError::UserNotFound
-                | AuthError::InvalidSession => "Bad request.",
+                | AuthError::InvalidSession
+                | AuthError::InvalidTempCode => "Bad request.",
                 AuthError::MissingEmailInResponse => {
                     "Login service didn't return an e-mail address."
                 }
@@ -101,6 +104,8 @@ pub enum AuthCallbackError {
     SeaOrmDbError(#[from] sea_orm::DbErr),
     #[error(transparent)]
     SessionInsertError(#[from] actix_session::SessionInsertError),
+    #[error(transparent)]
+    RandError(#[from] rand::Error),
     #[error("Invalid pkce verifier")]
     InvalidPkceVerifier,
     #[error("Missing state or auth code")]
@@ -122,6 +127,7 @@ impl ResponseError for AuthCallbackError {
                 header::LOCATION,
                 format!(
                     // TODO: change to env variable
+                    // TODO: CALLBACK_URL will be invalid when using tauri
                     "{}?error={}",
                     env::var("CALLBACK_URL")
                         .expect("CALLBACK_URL env variable to have been checked"),
@@ -132,6 +138,7 @@ impl ResponseError for AuthCallbackError {
                         | AuthCallbackError::SeaOrmDbError(..)
                         | AuthCallbackError::SessionInsertError(..) => "login_service_down",
                         AuthCallbackError::InvalidPkceVerifier => "invalid_pkce_verifier",
+                        AuthCallbackError::RandError(..) => "key_gen_failed",
                         AuthCallbackError::MissingStateOrAuthCode
                         | AuthCallbackError::MissingEmailInResponse => "bad_request",
                         AuthCallbackError::UserNotFound => "user_not_found",

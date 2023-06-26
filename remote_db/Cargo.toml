@@ -30,8 +30,14 @@ anyhow = "1.0"
 chrono = "0.4.22"
 async-trait = "0.1.57"
 actix-cors = "0.6.2"
-sea-orm = { version = "^0", features = [ "sqlx-postgres", "runtime-actix-rustls", "macros" ] }
+sea-orm = { version = "^0", features = [
+    "sqlx-postgres",
+    "runtime-actix-rustls",
+    "macros",
+] }
 oauth2 = "4.3.0"
 actix-session = { version = "0.7.2", features = ["redis-rs-session"] }
 redis = { version = "0.22.3", features = ["tokio-comp", "connection-manager"] }
 reqwest = { version = "0.11.14", features = ["json"] }
+rand = { version = "0.8.5", features = ["std_rng"] }
+sha2 = "0.10.7"
