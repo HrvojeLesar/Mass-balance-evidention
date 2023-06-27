@@ -97,7 +97,8 @@
         "membersDisplay": "Članovi grupe",
         "mbeGroupSelection": "Odabir grupe",
         "measureType": "Pregled mjernih jedinica",
-        "measureTypeInsertable": "Unos mjerne jedinice"
+        "measureTypeInsertable": "Unos mjerne jedinice",
+        "editMbeDataGroup": "Uređivanje trenutne grupe"
     },
     "deleteModal": {
         "deleteConfirmText": "Jeste li sigurni da želite obrisati odabrani red?",
@@ -185,8 +186,9 @@
         "nameShort": "Oznaka",
         "quantity": "Količina"
     },
-    "newMbeGroup": {
-        "name": "Naziv nove groupe"
+    "mbeGroup": {
+        "name": "Naziv grupe",
+        "newName": "Naziv nove grupe"
     },
     "mbeGroupMember": {
         "email": "E-mail",

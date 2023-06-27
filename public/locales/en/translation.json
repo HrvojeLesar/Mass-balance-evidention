@@ -98,7 +98,8 @@
         "membersDisplay": "Group members",
         "mbeGroupSelection": "Group selection",
         "measureType": "Measurement unit preview",
-        "measureTypeInsertable": "New measurement unit"
+        "measureTypeInsertable": "New measurement unit",
+        "editMbeDataGroup": "Edit current group"
     },
     "deleteModal": {
         "deleteConfirmText": "Are you sure you want to delete the selected row?",
@@ -186,8 +187,9 @@
         "nameShort": "Unit symbol",
         "quantity": "Quantity"
     },
-    "newMbeGroup": {
-        "name": "New group name"
+    "mbeGroup": {
+        "name": "Group name",
+        "newName": "New group name"
     },
     "mbeGroupMember": {
         "email": "E-mail",
