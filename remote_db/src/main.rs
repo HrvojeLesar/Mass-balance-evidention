@@ -21,8 +21,8 @@ use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use auth::{
     login_callback_facebook, login_callback_github, login_callback_google,
     login_callback_microsoft, login_facebook, login_github, login_google, login_microsoft, logout,
-    GlobalReqwestClient, OAuthClientFacebook, OAuthClientGithub, OAuthClientGoogle,
-    OAuthClientMicrosoft, manual_auth,
+    manual_auth, GlobalReqwestClient, OAuthClientFacebook, OAuthClientGithub, OAuthClientGoogle,
+    OAuthClientMicrosoft,
 };
 use dotenvy::dotenv;
 use http_response_errors::AuthError;

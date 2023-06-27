@@ -28,6 +28,7 @@ import ArticleMeasureTypeView from "./views/ArticleMeasureTypeView";
 import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import axios from "axios";
+import LoginCodeInsert from "./components/LoginCodeInsert";
 
 const queryClient = new QueryClient();
 
@@ -105,6 +106,11 @@ const router = createBrowserRouter([
         path: "/login-callback",
         loader: login_loader,
         element: <LoginCallback />,
+    },
+    {
+        path: "/manual-login",
+        // loader: login_loader,
+        element: <LoginCodeInsert />,
     },
     {
         // TODO: Have AuthProvider or some other element that wraps and checks for valid authorization

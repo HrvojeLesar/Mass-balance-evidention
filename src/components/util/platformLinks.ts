@@ -1,6 +1,6 @@
 const createLink = (baseUrl: string) => {
     return `${baseUrl}${
-        import.meta.env.TAURI_PLATFORM && !import.meta.env.TAURI_DEBUG
+        import.meta.env.TAURI_PLATFORM /* && !import.meta.env.TAURI_DEBUG */
             ? "?platform=tauri"
             : ""
     }`;
