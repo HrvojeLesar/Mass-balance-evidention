@@ -98,7 +98,9 @@
         "mbeGroupSelection": "Odabir grupe",
         "measureType": "Pregled mjernih jedinica",
         "measureTypeInsertable": "Unos mjerne jedinice",
-        "editMbeDataGroup": "Uređivanje trenutne grupe"
+        "editMbeDataGroup": "Uređivanje trenutne grupe",
+        "manualLogin": "Ručna prijava",
+        "login": "Prijava"
     },
     "deleteModal": {
         "deleteConfirmText": "Jeste li sigurni da želite obrisati odabrani red?",
@@ -224,5 +226,17 @@
         "deleteCellCulturePairMutation": "Zapis ovisi o ovom paru! Redoslijed brisanja: Zapis -> Par čestica i kultura.",
         "buyerDeleteError": "Zapis ovisi o ovom kupcu! Redoslijed brisanja: Zapis -> Kupac.",
         "articleDeleteError": "Otpremnica ovisi o ovom artiklu! Redoslijed brisanja: Otpremnica -> Artikal."
+    },
+    "manualLogin": {
+        "message": "Ispod unesite kod dobiven nakon prijave.",
+        "code": "Pristupni kod",
+        "loginButton": "Prijava",
+        "back": "Povratak"
+    },
+    "login": {
+        "google": "Prijava putem Google računa",
+        "microsoft": "Prijava putem Microsoft računa",
+        "github": "Prijava putem Github računa",
+        "facebook": "Prijava putem Facebook računa"
     }
 }

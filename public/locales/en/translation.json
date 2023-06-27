@@ -99,7 +99,9 @@
         "mbeGroupSelection": "Group selection",
         "measureType": "Measurement unit preview",
         "measureTypeInsertable": "New measurement unit",
-        "editMbeDataGroup": "Edit current group"
+        "editMbeDataGroup": "Edit current group",
+        "manualLogin": "Manual login",
+        "login": "Login"
     },
     "deleteModal": {
         "deleteConfirmText": "Are you sure you want to delete the selected row?",
@@ -225,5 +227,17 @@
         "deleteCellCulturePairMutation": "Entry depends on this pair! Deletion order: Entry -> Cell culture pair.",
         "buyerDeleteError": "Entry depends on this buyer! Deletion order: Entry -> Buyer.",
         "articleDeleteError": "Dispatch note depends on this article! Deletion order: Dispatch note -> Article."
+    },
+    "manualLogin": {
+        "message": "Below, enter the code received after successful login",
+        "code": "Access code",
+        "loginButton": "Login",
+        "back": "Back"
+    },
+    "login": {
+        "google": "Login with Google",
+        "microsoft": "Login with Microsoft Account",
+        "github": "Login with Github",
+        "facebook": "Login with Facebook"
     }
 }

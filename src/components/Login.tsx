@@ -7,6 +7,7 @@ import { AuthContext } from "../AuthProvider";
 import CardUtil from "./util/CardUtil";
 import createLink from "./util/platformLinks";
 import { open } from "@tauri-apps/api/shell";
+import { useTranslation } from "react-i18next";
 
 const manual_login_handler = async (
     url: string,
@@ -17,6 +18,7 @@ const manual_login_handler = async (
 };
 
 export default function Login() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const authContext = useContext(AuthContext);
@@ -30,7 +32,7 @@ export default function Login() {
     return (
         <Center>
             <CardUtil>
-                <Title order={4}>Login</Title>
+                <Title order={4}>{t("titles.login")}</Title>
                 <Divider my="xs" />
                 <Flex direction="column" gap="sm">
                     {import.meta.env.TAURI_PLATFORM ? (
@@ -46,7 +48,7 @@ export default function Login() {
                                 variant="default"
                                 color="gray"
                             >
-                                Login with Google
+                                {t("login.google")}
                             </Button>
                             <Button
                                 onClick={() => {
@@ -58,7 +60,7 @@ export default function Login() {
                                 variant="default"
                                 color="gray"
                             >
-                                Login with Microsoft Account
+                                {t("login.microsoft")}
                             </Button>
                             <Button
                                 onClick={() => {
@@ -83,7 +85,7 @@ export default function Login() {
                                     },
                                 })}
                             >
-                                Login with Github
+                                {t("login.github")}
                             </Button>
                             <Button
                                 onClick={() => {
@@ -103,7 +105,7 @@ export default function Login() {
                                     },
                                 })}
                             >
-                                Login with Facebook
+                                {t("login.facebook")}
                             </Button>
                         </>
                     ) : (
@@ -117,7 +119,7 @@ export default function Login() {
                                 variant="default"
                                 color="gray"
                             >
-                                Login with Google
+                                {t("login.google")}
                             </Button>
                             <Button
                                 component="a"
@@ -128,7 +130,7 @@ export default function Login() {
                                 variant="default"
                                 color="gray"
                             >
-                                Login with Microsoft Account
+                                {t("login.microsoft")}
                             </Button>
                             <Button
                                 component="a"
@@ -152,7 +154,7 @@ export default function Login() {
                                     },
                                 })}
                             >
-                                Login with Github
+                                {t("login.github")}
                             </Button>
                             <Button
                                 component="a"
@@ -171,7 +173,7 @@ export default function Login() {
                                     },
                                 })}
                             >
-                                Login with Facebook
+                                {t("login.facebook")}
                             </Button>
                         </>
                     )}

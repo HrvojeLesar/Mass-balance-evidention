@@ -1,4 +1,14 @@
-import { Button, Center, Divider, Flex, Textarea, Title } from "@mantine/core";
+import {
+    Button,
+    Center,
+    createStyles,
+    Divider,
+    Flex,
+    Paper,
+    Text,
+    Textarea,
+    Title,
+} from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosResponse } from "axios";
 import { useEffect, useState } from "react";
@@ -7,15 +17,34 @@ import { useNavigate } from "react-router-dom";
 import CardUtil from "./util/CardUtil";
 
 const authorize = async (code: string): Promise<AxiosResponse<any, any>> => {
-    return axios.post(import.meta.env.VITE_MANUAL_AUTH, {
-        code,
-    }, {
-        withCredentials: true,
-    });
+    return axios.post(
+        import.meta.env.VITE_MANUAL_AUTH,
+        {
+            code,
+        },
+        {
+            withCredentials: true,
+        }
+    );
 };
+
+const useStyles = createStyles((theme) => ({
+    background: {
+        [theme.fn.largerThan("lg")]: {
+            width: "25vw"
+        },
+        [theme.fn.smallerThan("lg")]: {
+            width: "40vw"
+        },
+        [theme.fn.smallerThan("xs")]: {
+            width: "50vw"
+        }
+    }
+}));
 
 export default function LoginCodeInsert() {
     const { t } = useTranslation();
+    const { classes } = useStyles();
     const navigate = useNavigate();
 
     const [value, setValue] = useState("");
@@ -23,17 +52,27 @@ export default function LoginCodeInsert() {
 
     return (
         <Center>
-            <CardUtil>
-                <Title order={4}>Other login</Title>
+            <Paper
+                radius="md"
+                shadow="xs"
+                p="sm"
+                withBorder
+                sx={() => ({ overflow: "hidden" })}
+                className={classes.background}
+            >
+                <Title order={4}>{t("titles.manualLogin")}</Title>
                 <Divider my="xs" />
+                <Text mb="xs">
+                    {t("manualLogin.message")}
+                </Text>
                 <Textarea
                     required
                     value={value}
                     onChange={(event) => {
                         setValue(event.currentTarget.value);
                     }}
-                    label="labela"
-                    placeholder="placeholder"
+                    label={t("manualLogin.code")}
+                    placeholder={t("manualLogin.code")}
                     mb="xs"
                 />
                 <Flex justify="space-between">
@@ -55,7 +94,7 @@ export default function LoginCodeInsert() {
                                 });
                         }}
                     >
-                        Login
+                        {t("manualLogin.loginButton")}
                     </Button>
                     <Button
                         color="gray"
@@ -63,10 +102,10 @@ export default function LoginCodeInsert() {
                             navigate("/login");
                         }}
                     >
-                        Back
+                        {t("manualLogin.back")}
                     </Button>
                 </Flex>
-            </CardUtil>
+            </Paper>
         </Center>
     );
 }
