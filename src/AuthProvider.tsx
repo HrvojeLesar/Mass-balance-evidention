@@ -1,12 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { createContext, ReactNode, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
-type Me = {
-    id: number;
-    email: string;
-};
+import { get_me } from "./main";
 
 type AuthContextT = {
     authorized: boolean;
@@ -34,9 +29,7 @@ export default function AuthContextProvider({
     const { data, isLoading, error } = useQuery({
         queryKey: ["authQuery"],
         queryFn: async () => {
-            const { data } = await axios.get<Me>(import.meta.env.VITE_ME, {
-                withCredentials: true,
-            });
+            const { data } = await get_me;
             return data;
         },
     });
@@ -51,19 +44,25 @@ export default function AuthContextProvider({
     }, [data?.email, error]);
 
     useEffect(() => {
-        if (
-            location.pathname !== "/login" &&
-            location.pathname !== "/login-callback" &&
-            isLoading === false &&
-            isAuthorized === false
-        ) {
-            navigate("/login", {
-                state: {
-                    from: location,
-                },
-            });
+        if (!isLoading && error) {
+            navigate("/login");
         }
-    }, [isLoading, location, navigate, isAuthorized]);
+    }, [isLoading, error, navigate]);
+
+    // useEffect(() => {
+    //     if (
+    //         location.pathname !== "/login" &&
+    //         location.pathname !== "/login-callback" &&
+    //         isLoading === false &&
+    //         isAuthorized === false
+    //     ) {
+    //         navigate("/login", {
+    //             state: {
+    //                 from: location,
+    //             },
+    //         });
+    //     }
+    // }, [isLoading, location, navigate, isAuthorized]);
 
     return (
         <AuthContext.Provider

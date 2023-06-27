@@ -1,10 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import i18n from "i18next";
-import {
-    QueryClient,
-    QueryClientProvider,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { initReactI18next } from "react-i18next";
 import Backend from "i18next-http-backend";
 import DataGroupProvider from "./DataGroupProvider";
@@ -30,6 +27,7 @@ import AuthContextProvider from "./AuthProvider";
 import ArticleMeasureTypeView from "./views/ArticleMeasureTypeView";
 import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
+import axios from "axios";
 
 const queryClient = new QueryClient();
 
@@ -52,29 +50,56 @@ declare global {
     }
 }
 
+export type Me = {
+    id: number;
+    email: string;
+};
+
+export const get_me = axios.get<Me>(import.meta.env.VITE_ME, {
+    withCredentials: true,
+});
+
+const login_loader = async () => {
+    try {
+        await get_me;
+        return redirect("/");
+    } catch (e) {
+        console.error(e);
+        return null;
+    }
+};
+
+const auth_check_loader = async () => {
+    try {
+        await get_me;
+        return null;
+    } catch (e) {
+        console.error(e);
+        return redirect("/login");
+    }
+};
+
 const router = createBrowserRouter([
     { path: "/*", element: <NotFound /> },
     {
         path: "/logout",
-        loader: () => {
-            return redirect(import.meta.env.VITE_LOGOUT_URL);
+        loader: async () => {
+            // TODO: Rework auth context provider
+            await axios.get("http://localhost:8000/logout", {
+                withCredentials: true,
+            });
+            return redirect("/login");
         },
     },
     {
         path: "/login",
-        element: (
-            <AuthContextProvider>
-                <Login />
-            </AuthContextProvider>
-        ),
+        loader: login_loader,
+        element: <Login />,
     },
     {
         path: "/login-callback",
-        element: (
-            <AuthContextProvider>
-                <LoginCallback />
-            </AuthContextProvider>
-        ),
+        loader: login_loader,
+        element: <LoginCallback />,
     },
     {
         // TODO: Have AuthProvider or some other element that wraps and checks for valid authorization
@@ -91,6 +116,7 @@ const router = createBrowserRouter([
                 />
             </AuthContextProvider>
         ),
+        loader: auth_check_loader,
         children: [
             { path: "/", element: <EntryView /> },
             { path: "/insert-entry", element: <InsertEntryView /> },

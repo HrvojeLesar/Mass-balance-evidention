@@ -5,6 +5,7 @@ import { FcGoogle } from "react-icons/fc";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../AuthProvider";
 import CardUtil from "./util/CardUtil";
+import createLink from "./util/platformLinks";
 
 export default function Login() {
     const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function Login() {
         }
     }, [authContext.authorized, navigate]);
 
+
     return (
         <Center>
             <CardUtil>
@@ -25,7 +27,7 @@ export default function Login() {
                 <Flex direction="column" gap="sm">
                     <Button
                         component="a"
-                        href={import.meta.env.VITE_LOGIN_GOOGLE}
+                        href={createLink(import.meta.env.VITE_LOGIN_GOOGLE)}
                         leftIcon={<FcGoogle />}
                         variant="default"
                         color="gray"
@@ -34,7 +36,7 @@ export default function Login() {
                     </Button>
                     <Button
                         component="a"
-                        href={import.meta.env.VITE_LOGIN_MICROSOFT}
+                        href={createLink(import.meta.env.VITE_LOGIN_MICROSOFT)}
                         leftIcon={<FaMicrosoft />}
                         variant="default"
                         color="gray"
@@ -43,7 +45,7 @@ export default function Login() {
                     </Button>
                     <Button
                         component="a"
-                        href={import.meta.env.VITE_LOGIN_GITHUB}
+                        href={createLink(import.meta.env.VITE_LOGIN_GITHUB)}
                         leftIcon={<FaGithub />}
                         sx={(theme) => ({
                             backgroundColor:
@@ -63,7 +65,7 @@ export default function Login() {
                     </Button>
                     <Button
                         component="a"
-                        href={import.meta.env.VITE_LOGIN_FACEBOOK}
+                        href={createLink(import.meta.env.VITE_LOGIN_FACEBOOK)}
                         leftIcon={<FaFacebook />}
                         sx={(theme) => ({
                             backgroundColor: "#4267B2",
