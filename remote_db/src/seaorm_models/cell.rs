@@ -17,8 +17,8 @@ use super::{
         DataGroupAccessGuard, DeleteOptions, FetchOptions, Filter, OrderingOptions,
         UpdateDeleteGuard,
     },
-    GetEntityDataGroupColumnTrait, GetEntityDataGroupId, GetEntityId, Page, PageSize, QueryDatabase,
-    QueryResults, RowsDeleted,
+    GetEntityDataGroupColumnTrait, GetEntityDataGroupId, GetEntityId, Page, PageSize,
+    QueryDatabase, QueryResults, RowsDeleted,
 };
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, SimpleObject)]

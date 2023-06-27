@@ -13,7 +13,7 @@ use actix_web::{
     get,
     middleware::Logger,
     post,
-    web::{self, Data, Query},
+    web::{self, Data},
     App, HttpResponse, HttpServer,
 };
 use async_graphql::{http::GraphiQLSource, EmptySubscription, Schema};

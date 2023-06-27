@@ -536,9 +536,7 @@ callback_route![
 ];
 
 #[get("/logout")]
-pub async fn logout(
-    session: Session,
-) -> Result<HttpResponse, AuthError> {
+pub async fn logout(session: Session) -> Result<HttpResponse, AuthError> {
     session.purge();
     Ok(HttpResponse::Ok().finish())
 }

@@ -163,7 +163,6 @@ pub struct EntryFlattened {
     pub description_d_group: Option<String>,
     pub created_at_d_group: DateTimeWithTimeZone,
     pub id_mbe_group: i32,
-
     // pub id_weight_type: i32,
     // pub unit_short: String,
     // pub unit: String,

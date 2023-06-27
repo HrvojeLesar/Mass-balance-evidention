@@ -167,12 +167,12 @@ impl MbeGroupMutation {
 
         if res.rows_affected == 0 {
             transaction.rollback().await?;
-            return Err(anyhow!(
+            Err(anyhow!(
                 "Group not found! Only group owner can change the name and find group!"
-            ));
+            ))
         } else if res.rows_affected > 1 {
             transaction.rollback().await?;
-            return Err(anyhow!("Updated more than one field"));
+            Err(anyhow!("Updated more than one field"))
         } else {
             let mbe_group = Entity::find()
                 .filter(Column::Owner.eq(session_data.user_id))
@@ -182,7 +182,7 @@ impl MbeGroupMutation {
                 .ok_or_else(|| anyhow!("Updated mbe group not found"))?;
             transaction.commit().await?;
 
-            return Ok(mbe_group);
+            Ok(mbe_group)
         }
     }
 }

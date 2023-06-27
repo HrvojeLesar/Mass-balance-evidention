@@ -218,7 +218,11 @@ type OptionalI = Option<i32>;
 ))]
 #[graphql(concrete(
     name = "DispatchNoteArticleFetchOptions",
-    params(DispatchNoteArticleFields, OptionalDispatchNoteArticleIds, DispatchNoteFilterValue)
+    params(
+        DispatchNoteArticleFields,
+        OptionalDispatchNoteArticleIds,
+        DispatchNoteFilterValue
+    )
 ))]
 pub struct FetchOptions<T, I = Option<i32>, V = String, O = T>
 where
