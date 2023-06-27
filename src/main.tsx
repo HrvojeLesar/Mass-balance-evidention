@@ -55,13 +55,14 @@ export type Me = {
     email: string;
 };
 
-export const get_me = axios.get<Me>(import.meta.env.VITE_ME, {
-    withCredentials: true,
-});
+export const get_me = () =>
+    axios.get<Me>(import.meta.env.VITE_ME, {
+        withCredentials: true,
+    });
 
 const login_loader = async () => {
     try {
-        await get_me;
+        await get_me();
         return redirect("/");
     } catch (e) {
         console.error(e);
@@ -71,7 +72,7 @@ const login_loader = async () => {
 
 const auth_check_loader = async () => {
     try {
-        await get_me;
+        await get_me();
         return null;
     } catch (e) {
         console.error(e);
@@ -84,11 +85,15 @@ const router = createBrowserRouter([
     {
         path: "/logout",
         loader: async () => {
-            // TODO: Rework auth context provider
-            await axios.get("http://localhost:8000/logout", {
-                withCredentials: true,
-            });
-            return redirect("/login");
+            try {
+                await axios.get(import.meta.env.VITE_LOGOUT_URL, {
+                    withCredentials: true,
+                });
+            } catch (e) {
+                console.error(e);
+            } finally {
+                return redirect("/login");
+            }
         },
     },
     {

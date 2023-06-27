@@ -29,7 +29,7 @@ export default function AuthContextProvider({
     const { data, isLoading, error } = useQuery({
         queryKey: ["authQuery"],
         queryFn: async () => {
-            const { data } = await get_me;
+            const { data } = await get_me();
             return data;
         },
     });
