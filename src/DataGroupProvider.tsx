@@ -86,7 +86,15 @@ export default function DataGroupProvider({
             selectGroup,
             refetch,
         }),
-        [isLoading, selectedGroup, selectGroup, refetch, groups, initialGroupId]
+        [
+            isLoading,
+            selectedGroup,
+            selectGroup,
+            refetch,
+            groups,
+            initialGroupId,
+            isEmpty,
+        ]
     );
 
     useEffect(() => {

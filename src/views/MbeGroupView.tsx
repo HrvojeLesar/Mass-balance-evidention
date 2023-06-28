@@ -8,12 +8,10 @@ import MbeGroupMemberForm from "../components/forms/MbeGroupMemberForm";
 import MbeUserForm from "../components/forms/MbeUserForm";
 import MembersDisplay from "../components/MembersDisplay";
 import CardUtil from "../components/util/CardUtil";
-import { DataGroupContext } from "../DataGroupProvider";
 import { MbeGroupContext } from "../MbeGroupProvider";
 
 export default function MbeGroupView() {
     const { t } = useTranslation();
-    const dataGroupContextValue = useContext(DataGroupContext);
     const mbeGroupContextValue = useContext(MbeGroupContext);
 
     const [editToggleValue, editToggle] = useToggle();

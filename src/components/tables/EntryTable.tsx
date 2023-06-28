@@ -53,18 +53,22 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
 
     const dataGroupContextValue = useContext(DataGroupContext);
 
-    const { data, refetch, isInitialLoading, isFetching } = useGetAllEntriesQuery(
-        {
-            options: {
-                id: undefined,
-                dGroup: dataGroupContextValue.selectedGroup ?? -1,
+    const { data, refetch, isInitialLoading, isFetching } =
+        useGetAllEntriesQuery(
+            {
+                options: {
+                    id: undefined,
+                    dGroup: dataGroupContextValue.selectedGroup ?? -1,
+                },
             },
-        },
-        {
-            queryKey: ["getAllEntries", dataGroupContextValue.selectedGroup],
-            keepPreviousData: true,
-        }
-    );
+            {
+                queryKey: [
+                    "getAllEntries",
+                    dataGroupContextValue.selectedGroup,
+                ],
+                keepPreviousData: true,
+            }
+        );
 
     useEffect(() => {
         if (data) {

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createContext, ReactNode, useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { get_me } from "./main";
 
 type AuthContextT = {
@@ -24,7 +24,6 @@ export default function AuthContextProvider({
     const [email, setEmail] = useState<undefined | string>(undefined);
 
     const navigate = useNavigate();
-    const location = useLocation();
 
     const { data, isLoading, error } = useQuery({
         queryKey: ["authQuery"],

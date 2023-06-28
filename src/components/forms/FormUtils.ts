@@ -135,7 +135,8 @@ export const selectStyle = (error: any, theme: MantineTheme) => {
             return {
                 ...provided,
                 zIndex: 9999,
-                fontFamily: "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji"
+                fontFamily:
+                    "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji",
             };
         },
     };

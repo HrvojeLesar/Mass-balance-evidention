@@ -49,20 +49,20 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
                 page: pagination.pageIndex + 1,
                 ordering: sorting[0]
                     ? {
-                        order: !sorting[0].desc
-                            ? Ordering.Asc
-                            : Ordering.Desc,
-                        orderBy: sorting[0].id.toUpperCase() as TFields,
-                    }
+                          order: !sorting[0].desc
+                              ? Ordering.Asc
+                              : Ordering.Desc,
+                          orderBy: sorting[0].id.toUpperCase() as TFields,
+                      }
                     : undefined,
                 filters:
                     columnFilters.length > 0
                         ? columnFilters.map((filter) => {
-                            return {
-                                value: filter.value as string,
-                                field: filter.id.toUpperCase() as TFields,
-                            };
-                        })
+                              return {
+                                  value: filter.value as string,
+                                  field: filter.id.toUpperCase() as TFields,
+                              };
+                          })
                         : undefined,
                 dGroup: dataGroupContextValue.selectedGroup ?? -1,
             },
@@ -142,7 +142,9 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
 
     const deleteBuyer = useDeleteBuyerMutation({
         onError: () => {
-            displayOnErrorNotification(t("notificationMessages.buyerDeleteError"));
+            displayOnErrorNotification(
+                t("notificationMessages.buyerDeleteError")
+            );
         },
         onSuccess: () => {
             refetch();

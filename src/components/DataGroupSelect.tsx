@@ -1,5 +1,5 @@
 import { Flex, Select } from "@mantine/core";
-import { useContext, useMemo } from "react";
+import { useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { DataGroupContext } from "../DataGroupProvider";
 import CardUtil from "./util/CardUtil";

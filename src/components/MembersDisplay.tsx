@@ -68,7 +68,7 @@ export default function MembersDisplay({ idMbeGroup }: MemberDisplayProps) {
     const [selectedEmail, setSelectedEmail] = useState<string | undefined>(
         undefined
     );
-    const { data, refetch, isInitialLoading } = useGetGroupMembersQuery(
+    const { data, refetch } = useGetGroupMembersQuery(
         {
             options: {
                 idMbeGroup,

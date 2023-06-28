@@ -50,73 +50,75 @@ export default function DispatchNoteTable({
 
     const dataGroupContextValue = useContext(DataGroupContext);
 
-    const { data, refetch, isInitialLoading, isFetching } = useGetDispatchNotesQuery(
-        {
-            options: {
-                id: undefined,
-                pageSize: pagination.pageSize,
-                page: pagination.pageIndex + 1,
-                ordering: sorting[0]
-                    ? {
-                          order: !sorting[0].desc
-                              ? Ordering.Asc
-                              : Ordering.Desc,
-                          orderBy: sorting[0].id.toUpperCase() as TFields,
-                      }
-                    : undefined,
-                filters:
-                    columnFilters.length > 0
-                        ? columnFilters.map((filter) => {
-                              const val = filter.value as {
-                                  value: [Date, Date] | Date | number;
-                                  comparator: Comparators | null;
-                                  desc: ColumnFilterType;
-                              };
-                              return {
-                                  value: {
-                                      value:
-                                          val.desc ===
-                                              ColumnFilterType.Number ||
-                                          val.desc === ColumnFilterType.String
-                                              ? val.value.toString()
-                                              : val.value instanceof Date
-                                              ? new Date(
-                                                    moment(val.value).format(
-                                                        "YYYY-MM-DD"
-                                                    )
-                                                ).toJSON()
-                                              : val.value instanceof Array
-                                              ? `${new Date(
-                                                    moment(val.value[0]).format(
-                                                        "YYYY-MM-DD"
-                                                    )
-                                                ).toJSON()}, ${new Date(
-                                                    moment(val.value[1]).format(
-                                                        "YYYY-MM-DD"
-                                                    )
-                                                ).toJSON()}`
-                                              : val.value.toString(),
-                                      comparator:
-                                          val.comparator?.toUpperCase() as Comparator,
-                                  },
-                                  field: filter.id.toUpperCase() as TFields,
-                              };
-                          })
+    const { data, refetch, isInitialLoading, isFetching } =
+        useGetDispatchNotesQuery(
+            {
+                options: {
+                    id: undefined,
+                    pageSize: pagination.pageSize,
+                    page: pagination.pageIndex + 1,
+                    ordering: sorting[0]
+                        ? {
+                              order: !sorting[0].desc
+                                  ? Ordering.Asc
+                                  : Ordering.Desc,
+                              orderBy: sorting[0].id.toUpperCase() as TFields,
+                          }
                         : undefined,
-                dGroup: dataGroupContextValue.selectedGroup ?? -1,
+                    filters:
+                        columnFilters.length > 0
+                            ? columnFilters.map((filter) => {
+                                  const val = filter.value as {
+                                      value: [Date, Date] | Date | number;
+                                      comparator: Comparators | null;
+                                      desc: ColumnFilterType;
+                                  };
+                                  return {
+                                      value: {
+                                          value:
+                                              val.desc ===
+                                                  ColumnFilterType.Number ||
+                                              val.desc ===
+                                                  ColumnFilterType.String
+                                                  ? val.value.toString()
+                                                  : val.value instanceof Date
+                                                  ? new Date(
+                                                        moment(
+                                                            val.value
+                                                        ).format("YYYY-MM-DD")
+                                                    ).toJSON()
+                                                  : val.value instanceof Array
+                                                  ? `${new Date(
+                                                        moment(
+                                                            val.value[0]
+                                                        ).format("YYYY-MM-DD")
+                                                    ).toJSON()}, ${new Date(
+                                                        moment(
+                                                            val.value[1]
+                                                        ).format("YYYY-MM-DD")
+                                                    ).toJSON()}`
+                                                  : val.value.toString(),
+                                          comparator:
+                                              val.comparator?.toUpperCase() as Comparator,
+                                      },
+                                      field: filter.id.toUpperCase() as TFields,
+                                  };
+                              })
+                            : undefined,
+                    dGroup: dataGroupContextValue.selectedGroup ?? -1,
+                },
             },
-        },
-        {
-            queryKey: [
-                "getDispatchNotes",
-                pagination,
-                sorting,
-                columnFilters,
-                dataGroupContextValue,
-            ],
-            keepPreviousData: true,
-        }
-    );
+            {
+                queryKey: [
+                    "getDispatchNotes",
+                    pagination,
+                    sorting,
+                    columnFilters,
+                    dataGroupContextValue,
+                ],
+                keepPreviousData: true,
+            }
+        );
 
     const columns = useMemo<ColumnDef<T>[]>(() => {
         let columns: ColumnDef<T>[] = [

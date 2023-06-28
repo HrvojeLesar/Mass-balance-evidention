@@ -9,12 +9,10 @@ import {
     Textarea,
     Title,
 } from "@mantine/core";
-import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosResponse } from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import CardUtil from "./util/CardUtil";
 
 const authorize = async (code: string): Promise<AxiosResponse<any, any>> => {
     return axios.post(
@@ -31,15 +29,15 @@ const authorize = async (code: string): Promise<AxiosResponse<any, any>> => {
 const useStyles = createStyles((theme) => ({
     background: {
         [theme.fn.largerThan("lg")]: {
-            width: "25vw"
+            width: "25vw",
         },
         [theme.fn.smallerThan("lg")]: {
-            width: "40vw"
+            width: "40vw",
         },
         [theme.fn.smallerThan("xs")]: {
-            width: "50vw"
-        }
-    }
+            width: "50vw",
+        },
+    },
 }));
 
 export default function LoginCodeInsert() {
@@ -62,9 +60,7 @@ export default function LoginCodeInsert() {
             >
                 <Title order={4}>{t("titles.manualLogin")}</Title>
                 <Divider my="xs" />
-                <Text mb="xs">
-                    {t("manualLogin.message")}
-                </Text>
+                <Text mb="xs">{t("manualLogin.message")}</Text>
                 <Textarea
                     required
                     value={value}

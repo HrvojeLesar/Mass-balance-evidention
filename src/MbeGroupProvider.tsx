@@ -84,7 +84,15 @@ export default function MbeGroupProvider({ children }: MbeGroupProviderProps) {
             selectGroup,
             refetch,
         }),
-        [isLoading, selectedGroup, selectGroup, refetch, groups, initialGroupId]
+        [
+            isLoading,
+            selectedGroup,
+            selectGroup,
+            refetch,
+            groups,
+            initialGroupId,
+            isEmpty,
+        ]
     );
 
     useEffect(() => {

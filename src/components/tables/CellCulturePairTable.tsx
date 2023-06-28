@@ -121,7 +121,9 @@ export default function CellCulturePairTable({
 
     const deleteCellCulturePair = useDeleteCellCulturePairMutation({
         onError: () => {
-            displayOnErrorNotification(t("notificationMessages.deleteCellCulturePairMutation"));
+            displayOnErrorNotification(
+                t("notificationMessages.deleteCellCulturePairMutation")
+            );
         },
         onSuccess: () => {
             refetch();

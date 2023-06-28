@@ -19,14 +19,18 @@ export default function EditModal({
             opened={show}
             onClose={onHide}
             centered
-            title={<Text fz="lg" fw={700}>{title}</Text>}
+            title={
+                <Text fz="lg" fw={700}>
+                    {title}
+                </Text>
+            }
             size="auto"
             // WARN: TEMP fix for modals not being center aligned
             styles={{
                 inner: {
                     paddingLeft: "0px !important",
-                    paddingRight: "0px !important"
-                }
+                    paddingRight: "0px !important",
+                },
             }}
         >
             {children}

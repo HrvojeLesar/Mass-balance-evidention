@@ -11,7 +11,7 @@ import {
     SortingState,
     useReactTable,
 } from "@tanstack/react-table";
-import { Dispatch, SetStateAction, useEffect, useMemo } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 import { Pagination } from "../hooks/usePagination";
 import BaseTable from "./BaseTable";
 import TablePagination from "./TablePagination";
@@ -90,14 +90,14 @@ export default function DataTable<T>({
         onColumnFiltersChange:
             filterState !== undefined
                 ? (filter) => {
-                    paginationState.setPagination({
-                        ...paginationState.pagination,
-                        pageIndex: 0,
-                    });
-                    if (filterState) {
-                        filterState.setColumnFilters(filter);
-                    }
-                }
+                      paginationState.setPagination({
+                          ...paginationState.pagination,
+                          pageIndex: 0,
+                      });
+                      if (filterState) {
+                          filterState.setColumnFilters(filter);
+                      }
+                  }
                 : undefined,
     });
 

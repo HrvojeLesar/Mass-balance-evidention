@@ -19,7 +19,10 @@ export default function App() {
                         path="/insert-cell-culture-buyer"
                         element={<CellCultureBuyerView />}
                     />
-                    <Route path="/article" element={<ArticleMeasureTypeView />} />
+                    <Route
+                        path="/article"
+                        element={<ArticleMeasureTypeView />}
+                    />
                     <Route
                         path="/dispatch-note"
                         element={<DispatchNoteView />}

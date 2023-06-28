@@ -8,7 +8,7 @@ export default function LoginCallback() {
 
     useEffect(() => {
         if (authContext.authorized) {
-            navigate("/", { replace: true })
+            navigate("/", { replace: true });
         }
     }, [authContext.authorized, navigate]);
 

@@ -27,7 +27,7 @@ export default function Login() {
         if (authContext.authorized) {
             navigate(location.state?.from?.pathname ?? "/", { replace: true });
         }
-    }, [authContext.authorized, navigate]);
+    }, [authContext.authorized, navigate, location.state]);
 
     return (
         <Center>
@@ -54,7 +54,8 @@ export default function Login() {
                                 onClick={() => {
                                     manual_login_handler(
                                         import.meta.env.VITE_LOGIN_MICROSOFT,
-                                        navigate);
+                                        navigate
+                                    );
                                 }}
                                 leftIcon={<FaMicrosoft />}
                                 variant="default"
@@ -66,21 +67,22 @@ export default function Login() {
                                 onClick={() => {
                                     manual_login_handler(
                                         import.meta.env.VITE_LOGIN_GITHUB,
-                                        navigate);
+                                        navigate
+                                    );
                                 }}
                                 leftIcon={<FaGithub />}
                                 sx={(theme) => ({
                                     backgroundColor:
                                         theme.colors.dark[
-                                        theme.colorScheme === "dark" ? 9 : 6
+                                            theme.colorScheme === "dark" ? 9 : 6
                                         ],
                                     color: "#fff",
                                     "&:hover": {
                                         backgroundColor:
                                             theme.colors.dark[
-                                            theme.colorScheme === "dark"
-                                                ? 8
-                                                : 5
+                                                theme.colorScheme === "dark"
+                                                    ? 8
+                                                    : 5
                                             ],
                                     },
                                 })}
@@ -91,7 +93,8 @@ export default function Login() {
                                 onClick={() => {
                                     manual_login_handler(
                                         import.meta.env.VITE_LOGIN_FACEBOOK,
-                                        navigate);
+                                        navigate
+                                    );
                                 }}
                                 leftIcon={<FaFacebook />}
                                 sx={(theme) => ({
@@ -141,15 +144,15 @@ export default function Login() {
                                 sx={(theme) => ({
                                     backgroundColor:
                                         theme.colors.dark[
-                                        theme.colorScheme === "dark" ? 9 : 6
+                                            theme.colorScheme === "dark" ? 9 : 6
                                         ],
                                     color: "#fff",
                                     "&:hover": {
                                         backgroundColor:
                                             theme.colors.dark[
-                                            theme.colorScheme === "dark"
-                                                ? 8
-                                                : 5
+                                                theme.colorScheme === "dark"
+                                                    ? 8
+                                                    : 5
                                             ],
                                     },
                                 })}

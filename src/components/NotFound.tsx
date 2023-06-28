@@ -1,6 +1,6 @@
 import { createStyles, Title, Button, Container, Group } from "@mantine/core";
 import { useDocumentTitle } from "@mantine/hooks";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const useStyles = createStyles((theme) => ({
     root: {
@@ -63,9 +63,13 @@ export default function NotFound() {
                 <div className={classes.label}>404</div>
                 <Title className={classes.title}>Page not found</Title>
                 <Group mt="xl" position="center">
-                    <Button onClick={() => {
-                        navigate("/");
-                    }} variant="subtle" size="md">
+                    <Button
+                        onClick={() => {
+                            navigate("/");
+                        }}
+                        variant="subtle"
+                        size="md"
+                    >
                         Take me back to home page
                     </Button>
                 </Group>

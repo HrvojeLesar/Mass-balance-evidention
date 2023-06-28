@@ -1,5 +1,4 @@
 import { Divider, Title } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -50,20 +49,20 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
                 page: pagination.pageIndex + 1,
                 ordering: sorting[0]
                     ? {
-                        order: !sorting[0].desc
-                            ? Ordering.Asc
-                            : Ordering.Desc,
-                        orderBy: sorting[0].id.toUpperCase() as TFields,
-                    }
+                          order: !sorting[0].desc
+                              ? Ordering.Asc
+                              : Ordering.Desc,
+                          orderBy: sorting[0].id.toUpperCase() as TFields,
+                      }
                     : undefined,
                 filters:
                     columnFilters.length > 0
                         ? columnFilters.map((filter) => {
-                            return {
-                                value: filter.value as string,
-                                field: filter.id.toUpperCase() as TFields,
-                            };
-                        })
+                              return {
+                                  value: filter.value as string,
+                                  field: filter.id.toUpperCase() as TFields,
+                              };
+                          })
                         : undefined,
                 dGroup: dataGroupContextValue.selectedGroup ?? -1,
             },
@@ -137,7 +136,9 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
 
     const deleteCell = useDeleteCellMutation({
         onError: () => {
-            displayOnErrorNotification(t("notificationMessages.cellDeleteError"));
+            displayOnErrorNotification(
+                t("notificationMessages.cellDeleteError")
+            );
         },
         onSuccess: () => {
             refetch();

@@ -1,4 +1,4 @@
-import { Button, Divider, Flex, Modal, Title, Text } from "@mantine/core";
+import { Button, Divider, Flex, Modal, Text } from "@mantine/core";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -37,14 +37,18 @@ export default function DeleteModal({
             centered
             closeOnClickOutside={isLoading ? false : true}
             closeOnEscape={isLoading ? false : true}
-            title={<Text fz="lg" fw={700}>{title}</Text>}
+            title={
+                <Text fz="lg" fw={700}>
+                    {title}
+                </Text>
+            }
             size="auto"
             // WARN: TEMP fix for modals not being center aligned
             styles={{
                 inner: {
                     paddingLeft: "0px !important",
-                    paddingRight: "0px !important"
-                }
+                    paddingRight: "0px !important",
+                },
             }}
         >
             <Text>

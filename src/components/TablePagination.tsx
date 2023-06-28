@@ -1,6 +1,5 @@
 import { Pagination } from "@mantine/core";
 import { Table } from "@tanstack/react-table";
-import { useEffect } from "react";
 
 type TablePaginationProps<T> = {
     table: Table<T>;

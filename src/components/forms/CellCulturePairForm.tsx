@@ -67,15 +67,15 @@ export default function CellCulturePairForm({
         defaultValues: {
             cell: edit
                 ? {
-                    value: edit.cell ?? undefined,
-                    label: edit.cell.name ?? undefined,
-                }
+                      value: edit.cell ?? undefined,
+                      label: edit.cell.name ?? undefined,
+                  }
                 : undefined,
             culture: edit
                 ? {
-                    value: edit.culture ?? undefined,
-                    label: edit.culture.name ?? undefined,
-                }
+                      value: edit.culture ?? undefined,
+                      label: edit.culture.name ?? undefined,
+                  }
                 : undefined,
         },
     });
@@ -149,9 +149,9 @@ export default function CellCulturePairForm({
             edit === undefined
                 ? undefined
                 : ({
-                    value: edit.cell,
-                    label: edit?.cell?.name ?? "",
-                } as SelectOption<Cell>),
+                      value: edit.cell,
+                      label: edit?.cell?.name ?? "",
+                  } as SelectOption<Cell>),
         page: 1,
         pages: {},
         limit: LIMIT,
@@ -166,9 +166,9 @@ export default function CellCulturePairForm({
             edit === undefined
                 ? undefined
                 : ({
-                    value: edit.culture,
-                    label: edit?.culture?.name ?? "",
-                } as SelectOption<Culture>),
+                      value: edit.culture,
+                      label: edit?.culture?.name ?? "",
+                  } as SelectOption<Culture>),
         page: 1,
         pages: {},
         limit: LIMIT,
@@ -221,11 +221,11 @@ export default function CellCulturePairForm({
                 filters:
                     cellSelectState.filter !== ""
                         ? [
-                            {
-                                value: cellSelectState.filter,
-                                field: CellFields.Name,
-                            },
-                        ]
+                              {
+                                  value: cellSelectState.filter,
+                                  field: CellFields.Name,
+                              },
+                          ]
                         : undefined,
                 dGroup: dataGroupContextValue.selectedGroup ?? -1,
             },
@@ -261,11 +261,11 @@ export default function CellCulturePairForm({
                 filters:
                     cultureSelectState.filter !== ""
                         ? [
-                            {
-                                value: cultureSelectState.filter,
-                                field: CultureFields.Name,
-                            },
-                        ]
+                              {
+                                  value: cultureSelectState.filter,
+                                  field: CultureFields.Name,
+                              },
+                          ]
                         : undefined,
                 dGroup: dataGroupContextValue.selectedGroup ?? -1,
             },
@@ -381,13 +381,13 @@ export default function CellCulturePairForm({
                                     }}
                                     onMenuScrollToBottom={
                                         cellSelectState.page <
-                                            cellSelectState.maxPage
+                                        cellSelectState.maxPage
                                             ? () => {
-                                                setCellSelectState((old) => ({
-                                                    ...old,
-                                                    page: old.page + 1,
-                                                }));
-                                            }
+                                                  setCellSelectState((old) => ({
+                                                      ...old,
+                                                      page: old.page + 1,
+                                                  }));
+                                              }
                                             : undefined
                                     }
                                     onInputChange={(value, actionMeta) => {
@@ -449,15 +449,15 @@ export default function CellCulturePairForm({
                                     }}
                                     onMenuScrollToBottom={
                                         cultureSelectState.page <
-                                            cultureSelectState.maxPage
+                                        cultureSelectState.maxPage
                                             ? () => {
-                                                setCultureSelectState(
-                                                    (old) => ({
-                                                        ...old,
-                                                        page: old.page + 1,
-                                                    })
-                                                );
-                                            }
+                                                  setCultureSelectState(
+                                                      (old) => ({
+                                                          ...old,
+                                                          page: old.page + 1,
+                                                      })
+                                                  );
+                                              }
                                             : undefined
                                     }
                                     onInputChange={(value, actionMeta) => {

@@ -1,11 +1,11 @@
 {
     "name": "Mass-Balance-Evidention",
     "private": true,
-    "version": "0.0.0",
+    "version": "0.0.1",
     "type": "module",
     "scripts": {
-        "dev": "vite",
-        "build": "tsc && vite build",
+        "dev": "graphql-codegen --config codegen.ts && vite",
+        "build": "graphql-codegen --config codegen.production.ts && tsc && vite build",
         "preview": "vite preview",
         "tauri": "tauri",
         "graphql-codegen": "graphql-codegen --config codegen.ts"

@@ -31,13 +31,7 @@ import {
     selectStyle,
 } from "./FormUtils";
 import { DataGroupContext } from "../../DataGroupProvider";
-import {
-    Grid,
-    Input,
-    NumberInput,
-    TextInput,
-    useMantineTheme,
-} from "@mantine/core";
+import { Grid, Input, NumberInput, useMantineTheme } from "@mantine/core";
 import displayOnErrorNotification from "../util/deleteNotificationUtil";
 
 type FormInput = {

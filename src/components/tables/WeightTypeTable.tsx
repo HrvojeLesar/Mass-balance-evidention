@@ -147,7 +147,9 @@ export default function WeightTypeTable({
 
     const deleteWeightType = useDeleteWeightTypesMutation({
         onError: () => {
-            displayOnErrorNotification(t("notificationMessages.deleteWeightTypeMutation"));
+            displayOnErrorNotification(
+                t("notificationMessages.deleteWeightTypeMutation")
+            );
         },
         onSuccess: () => {
             refetch();

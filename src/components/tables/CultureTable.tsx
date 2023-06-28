@@ -136,7 +136,9 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
 
     const deleteCulture = useDeleteCultureMutation({
         onError: () => {
-            displayOnErrorNotification(t("notificationMessages.cultureDeleteError"));
+            displayOnErrorNotification(
+                t("notificationMessages.cultureDeleteError")
+            );
         },
         onSuccess: () => {
             refetch();

@@ -137,7 +137,9 @@ export default function ArticleTable({ isInsertable, isEditable }: TableProps) {
 
     const deleteArticle = useDeleteArticleMutation({
         onError: () => {
-            displayOnErrorNotification(t("notificationMessages.articleDeleteError"));
+            displayOnErrorNotification(
+                t("notificationMessages.articleDeleteError")
+            );
         },
         onSuccess: () => {
             refetch();
