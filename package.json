@@ -4,7 +4,7 @@
     "version": "0.0.1",
     "type": "module",
     "scripts": {
-        "dev": "graphql-codegen --config codegen.ts && vite",
+        "dev": "graphql-codegen --config codegen.ts && vite --host",
         "build": "graphql-codegen --config codegen.production.ts && tsc && vite build",
         "preview": "vite preview",
         "tauri": "tauri",

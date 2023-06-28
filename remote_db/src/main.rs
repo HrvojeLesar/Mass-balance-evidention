@@ -223,7 +223,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(
                 // TODO: Proper CORS
-                #[cfg(debug_assertions)]
+                // #[cfg(debug_assertions)]
                 Cors::default()
                     .allow_any_origin()
                     .allow_any_header()
@@ -267,7 +267,7 @@ async fn main() -> std::io::Result<()> {
             .service(logout)
             .service(manual_auth)
     })
-    .bind("127.0.0.1:8000")?
+    .bind("0.0.0.0:8000")?
     .run()
     .await
 }

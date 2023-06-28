@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  mbe_db:
+    image: postgres:14
+    env_file: docker/.env
+    restart: unless-stopped
+    container_name: mbe_db
+    volumes:
+      - mbe_db_home:/var/lib/postgresql/data
+
+  mbe_redis:
+    image: redis:7
+    restart: unless-stopped
+    container_name: mbe_redis
+    volumes:
+      - mbe_redis:/data
+  
+  mbe_dev:
+    build: docker/dev_frontend
+    restart: unless-stopped
+    container_name: mbe_dev
+    volumes:
+      - ./:/app
+    ports:
+      - 1420:1420
+    depends_on:
+      - mbe_db
+      - mbe_redis
+
+  mbe_api:
+    build:
+      context: ./
+      dockerfile: docker/api/Dockerfile
+    env_file: docker/.env
+    restart: unless-stopped
+    container_name: mbe_api
+    ports:
+      - 8000:8000
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-mbe}:${POSTGRES_PASSWORD:-mbe}@mbe_db/${POSTGRES_DB:-mbe}
+      - REDIS_CONNECTION=redis://mbe_redis:6379
+    depends_on:
+      - mbe_db
+      - mbe_redis
+  
+volumes:
+  mbe_db_home:
+    external: false
+  mbe_redis:
+    external: false
