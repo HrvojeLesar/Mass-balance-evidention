@@ -304,15 +304,15 @@ impl_oauth_client![
     "GITHUB_REDIRECT_URL"
 ];
 
-impl_oauth_client![
-    #[derive(Clone, Debug)]
-    OAuthClientFacebook(BasicClient),
-    "OAUTH_CLIENT_ID_FACEBOOK",
-    "OAUTH_CLIENT_SECRET_FACEBOOK",
-    "FACEBOOK_AUTH_ENDPOINT",
-    "FACEBOOK_TOKEN_ENDPOINT",
-    "FACEBOOK_REDIRECT_URL"
-];
+// impl_oauth_client![
+//     #[derive(Clone, Debug)]
+//     OAuthClientFacebook(BasicClient),
+//     "OAUTH_CLIENT_ID_FACEBOOK",
+//     "OAUTH_CLIENT_SECRET_FACEBOOK",
+//     "FACEBOOK_AUTH_ENDPOINT",
+//     "FACEBOOK_TOKEN_ENDPOINT",
+//     "FACEBOOK_REDIRECT_URL"
+// ];
 
 macro_rules! login_route {(
         $(#[$attr:meta])*
@@ -380,13 +380,13 @@ login_route![
     "user:email"
 ];
 
-login_route![
-    #[get("/login-fb")]
-    login_facebook,
-    OAuthClientFacebook,
-    "FACEBOOK_REDIRECT_URL",
-    "email"
-];
+// login_route![
+//     #[get("/login-fb")]
+//     login_facebook,
+//     OAuthClientFacebook,
+//     "FACEBOOK_REDIRECT_URL",
+//     "email"
+// ];
 
 macro_rules! callback_route {(
         $(#[$attr:meta])*
@@ -523,14 +523,14 @@ callback_route![
     UserInfo
 ];
 
-callback_route![
-    #[get("/callback-fb")]
-    login_callback_facebook,
-    OAuthClientFacebook,
-    "FACEBOOK_USER_INFO_ENDPOINT",
-    "FACEBOOK_REDIRECT_URL",
-    UserInfo
-];
+// callback_route![
+//     #[get("/callback-fb")]
+//     login_callback_facebook,
+//     OAuthClientFacebook,
+//     "FACEBOOK_USER_INFO_ENDPOINT",
+//     "FACEBOOK_REDIRECT_URL",
+//     UserInfo
+// ];
 
 #[get("/logout")]
 pub async fn logout(session: Session) -> Result<HttpResponse, AuthError> {

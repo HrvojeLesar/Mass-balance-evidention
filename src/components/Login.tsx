@@ -1,6 +1,6 @@
 import { Button, Center, Divider, Flex, Title } from "@mantine/core";
 import { useContext, useEffect } from "react";
-import { FaFacebook, FaGithub, FaMicrosoft } from "react-icons/fa";
+import { FaGithub, FaMicrosoft } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../AuthProvider";
@@ -74,21 +74,22 @@ export default function Login() {
                                 sx={(theme) => ({
                                     backgroundColor:
                                         theme.colors.dark[
-                                            theme.colorScheme === "dark" ? 9 : 6
+                                        theme.colorScheme === "dark" ? 9 : 6
                                         ],
                                     color: "#fff",
                                     "&:hover": {
                                         backgroundColor:
                                             theme.colors.dark[
-                                                theme.colorScheme === "dark"
-                                                    ? 8
-                                                    : 5
+                                            theme.colorScheme === "dark"
+                                                ? 8
+                                                : 5
                                             ],
                                     },
                                 })}
                             >
                                 {t("login.github")}
                             </Button>
+                            {/*
                             <Button
                                 onClick={() => {
                                     manual_login_handler(
@@ -110,6 +111,8 @@ export default function Login() {
                             >
                                 {t("login.facebook")}
                             </Button>
+
+                            */}
                         </>
                     ) : (
                         <>
@@ -144,21 +147,22 @@ export default function Login() {
                                 sx={(theme) => ({
                                     backgroundColor:
                                         theme.colors.dark[
-                                            theme.colorScheme === "dark" ? 9 : 6
+                                        theme.colorScheme === "dark" ? 9 : 6
                                         ],
                                     color: "#fff",
                                     "&:hover": {
                                         backgroundColor:
                                             theme.colors.dark[
-                                                theme.colorScheme === "dark"
-                                                    ? 8
-                                                    : 5
+                                            theme.colorScheme === "dark"
+                                                ? 8
+                                                : 5
                                             ],
                                     },
                                 })}
                             >
                                 {t("login.github")}
                             </Button>
+                            {/*
                             <Button
                                 component="a"
                                 href={createLink(
@@ -178,6 +182,7 @@ export default function Login() {
                             >
                                 {t("login.facebook")}
                             </Button>
+                                */}
                         </>
                     )}
                 </Flex>

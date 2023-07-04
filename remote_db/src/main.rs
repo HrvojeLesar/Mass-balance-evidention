@@ -19,9 +19,9 @@ use actix_web::{
 use async_graphql::{http::GraphiQLSource, EmptySubscription, Schema};
 use async_graphql_actix_web::{GraphQLRequest, GraphQLResponse};
 use auth::{
-    login_callback_facebook, login_callback_github, login_callback_google,
-    login_callback_microsoft, login_facebook, login_github, login_google, login_microsoft, logout,
-    manual_auth, GlobalReqwestClient, OAuthClientFacebook, OAuthClientGithub, OAuthClientGoogle,
+    login_callback_github, login_callback_google,
+    login_callback_microsoft, login_github, login_google, login_microsoft, logout,
+    manual_auth, GlobalReqwestClient, OAuthClientGithub, OAuthClientGoogle,
     OAuthClientMicrosoft,
 };
 use dotenvy::dotenv;
@@ -154,7 +154,7 @@ fn load_env() {
     oauth_client_env_check!("GOOGLE");
     oauth_client_env_check!("MICROSOFT");
     oauth_client_env_check!("GITHUB");
-    oauth_client_env_check!("FACEBOOK");
+    // oauth_client_env_check!("FACEBOOK");
     load_env_var!("SESSION_SECRET_KEY");
 
     // .env.endpoints
@@ -167,9 +167,9 @@ fn load_env() {
     load_env_var!("GITHUB_AUTH_ENDPOINT");
     load_env_var!("GITHUB_TOKEN_ENDPOINT");
     load_env_var!("GITHUB_USER_INFO_ENDPOINT");
-    load_env_var!("FACEBOOK_AUTH_ENDPOINT");
-    load_env_var!("FACEBOOK_TOKEN_ENDPOINT");
-    load_env_var!("FACEBOOK_USER_INFO_ENDPOINT");
+    // load_env_var!("FACEBOOK_AUTH_ENDPOINT");
+    // load_env_var!("FACEBOOK_TOKEN_ENDPOINT");
+    // load_env_var!("FACEBOOK_USER_INFO_ENDPOINT");
 
     // .env.dev | .env.prod
     load_env_var!("LOGIN_URL");
@@ -177,7 +177,7 @@ fn load_env() {
     load_env_var!("GOOGLE_REDIRECT_URL");
     load_env_var!("MICROSOFT_REDIRECT_URL");
     load_env_var!("GITHUB_REDIRECT_URL");
-    load_env_var!("FACEBOOK_REDIRECT_URL");
+    // load_env_var!("FACEBOOK_REDIRECT_URL");
 }
 
 #[actix_web::main]
@@ -204,7 +204,7 @@ async fn main() -> std::io::Result<()> {
     let oauth_client_google = OAuthClientGoogle::new();
     let oauth_client_microsoft = OAuthClientMicrosoft::new();
     let oauth_client_github = OAuthClientGithub::new();
-    let oauth_client_facebook = OAuthClientFacebook::new();
+    // let oauth_client_facebook = OAuthClientFacebook::new();
 
     let session_secret_key = Key::from(
         env::var("SESSION_SECRET_KEY")
@@ -277,7 +277,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(oauth_client_google.clone())
             .app_data(oauth_client_microsoft.clone())
             .app_data(oauth_client_github.clone())
-            .app_data(oauth_client_facebook.clone())
+            // .app_data(oauth_client_facebook.clone())
             .app_data(global_reqwest_client.clone())
             .service(login_google)
             .service(login_callback_google)
@@ -285,8 +285,8 @@ async fn main() -> std::io::Result<()> {
             .service(login_callback_microsoft)
             .service(login_github)
             .service(login_callback_github)
-            .service(login_facebook)
-            .service(login_callback_facebook)
+            // .service(login_facebook)
+            // .service(login_callback_facebook)
             .service(graphql_playground)
             .service(index)
             .service(get_schema)

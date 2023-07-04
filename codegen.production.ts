@@ -13,7 +13,7 @@ const config: CodegenConfig = {
             config: {
                 dedupeFragments: true,
                 fetcher: {
-                    endpoint: "http://localhost:8000/graphiql",
+                    endpoint: "https://mbe-api.hrveklesarov.com/graphiql",
                     fetchParams: {
                         credentials: "include",
                     },
