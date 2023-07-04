@@ -232,6 +232,7 @@ async fn main() -> std::io::Result<()> {
                     .max_age(3600), // .send_wildcard(),
             )
             .wrap(
+                #[cfg(all(debug_assertions, not(windows_client)))]
                 SessionMiddleware::builder(session_store.clone(), session_secret_key.clone())
                     .session_lifecycle(
                         PersistentSession::default()
@@ -240,6 +241,32 @@ async fn main() -> std::io::Result<()> {
                     )
                     .cookie_http_only(true)
                     .cookie_secure(false)
+                    .cookie_content_security(CookieContentSecurity::Signed)
+                    .build(),
+
+                #[cfg(all(debug_assertions, windows_client))]
+                SessionMiddleware::builder(session_store.clone(), session_secret_key.clone())
+                    .session_lifecycle(
+                        PersistentSession::default()
+                            .session_ttl_extension_policy(TtlExtensionPolicy::OnStateChanges)
+                            .session_ttl(actix_web::cookie::time::Duration::seconds(MONTH)),
+                    )
+                    .cookie_http_only(true)
+                    .cookie_secure(true)
+                    .cookie_same_site(actix_web::cookie::SameSite::None)
+                    .cookie_content_security(CookieContentSecurity::Signed)
+                    .build(),
+
+                #[cfg(not(debug_assertions))]
+                SessionMiddleware::builder(session_store.clone(), session_secret_key.clone())
+                    .session_lifecycle(
+                        PersistentSession::default()
+                            .session_ttl_extension_policy(TtlExtensionPolicy::OnStateChanges)
+                            .session_ttl(actix_web::cookie::time::Duration::seconds(MONTH)),
+                    )
+                    .cookie_http_only(true)
+                    .cookie_secure(true)
+                    .cookie_same_site(actix_web::cookie::SameSite::None)
                     .cookie_content_security(CookieContentSecurity::Signed)
                     .build(),
             )

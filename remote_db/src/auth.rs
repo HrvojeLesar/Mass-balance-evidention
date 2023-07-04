@@ -329,9 +329,7 @@ macro_rules! login_route {(
         ) -> Result<HttpResponse, AuthError> {
             let (pkce_challange, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
 
-            println!("{:#?}", params.platform);
-            let redirect_url = gen_redirect_url(load_env_var!($redirect_url), params.platform.as_str()).unwrap();
-            println!("{:#?}", redirect_url);
+            let redirect_url = gen_redirect_url(load_env_var!($redirect_url), params.platform.as_str()).expect("Redirect URL should always be valid.");
 
             let (url, csrf_token) = client
                 .0
@@ -442,8 +440,7 @@ macro_rules! callback_route {(
                     None => Err(AuthCallbackError::InvalidPkceVerifier)?,
                 };
 
-                let redirect_url = gen_redirect_url(load_env_var!($redirect_url), params.platform.as_str()).unwrap();
-                println!("{:#?}", redirect_url);
+                let redirect_url = gen_redirect_url(load_env_var!($redirect_url), params.platform.as_str()).expect("Redirect URL should always be valid.");
 
                 let token = client
                     .0
