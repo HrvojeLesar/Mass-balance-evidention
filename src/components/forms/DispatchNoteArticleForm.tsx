@@ -346,7 +346,7 @@ export default function DispatchNoteArticleForm({
             }
         >
             <Grid mb="sm" grow>
-                <Grid.Col sm={12} md={6} lg={6}>
+                <Grid.Col sm={12} md={12} lg={12}>
                     <Controller
                         name="article"
                         control={control}
@@ -419,7 +419,7 @@ export default function DispatchNoteArticleForm({
                         )}
                     />
                 </Grid.Col>
-                <Grid.Col sm={12} md={6} lg={6}>
+                <Grid.Col sm={8} md={8} lg={8}>
                     <Controller
                         name="quantity"
                         control={control}
@@ -450,7 +450,7 @@ export default function DispatchNoteArticleForm({
                         )}
                     />
                 </Grid.Col>
-                <Grid.Col sm={12} md={6} lg={6}>
+                <Grid.Col sm={4} md={4} lg={4}>
                     <Controller
                         name="measureType"
                         control={control}

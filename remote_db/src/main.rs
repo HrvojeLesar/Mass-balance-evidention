@@ -121,12 +121,12 @@ macro_rules! oauth_client_env_check {
         env::var(concat!("OAUTH_CLIENT_ID_", $name)).expect(concat!(
             "OAUTH_CLIENT_ID_",
             $name,
-            "env variable to be present"
+            " env variable to be present"
         ));
         env::var(concat!("OAUTH_CLIENT_SECRET_", $name)).expect(concat!(
             "OAUTH_CLIENT_SECRET_",
             $name,
-            "env variable to be present"
+            " env variable to be present"
         ));
     };
 }

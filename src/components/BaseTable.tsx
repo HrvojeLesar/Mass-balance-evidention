@@ -163,6 +163,7 @@ function DateFilter<T>({ column }: FilterProps<T>) {
     return (
         <Flex
             align="center"
+            justify="center"
             gap="sm"
             onClick={(e) => {
                 e.stopPropagation();
@@ -178,7 +179,7 @@ function DateFilter<T>({ column }: FilterProps<T>) {
                 }}
             />
             {!isRangePicker ? (
-                <Flex>
+                <Flex justify="center">
                     <DateInput
                         styles={{
                             input: {
@@ -279,6 +280,7 @@ function NumberFilter<T>({ column }: FilterProps<T>) {
 
     return (
         <Flex
+            justify="center"
             align="center"
             onClick={(e) => {
                 e.stopPropagation();

@@ -16,6 +16,18 @@ services:
     volumes:
       - mbe_redis:/data
   
+  mbe_dev:
+    build: docker/dev_frontend
+    restart: unless-stopped
+    container_name: mbe_dev
+    volumes:
+      - ./:/app
+    ports:
+      - 1420:1420
+    depends_on:
+      - mbe_db
+      - mbe_redis
+
   mbe_api:
     build:
       context: ./
@@ -24,7 +36,7 @@ services:
     restart: unless-stopped
     container_name: mbe_api
     ports:
-      - ${API_PORT:-8000}:8000
+      - 8000:8000
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-mbe}:${POSTGRES_PASSWORD:-mbe}@mbe_db/${POSTGRES_DB:-mbe}
       - REDIS_CONNECTION=redis://mbe_redis:6379
