@@ -7,7 +7,7 @@
     },
     "package": {
         "productName": "Mass-Balance-Evidention",
-        "version": "0.1"
+        "version": "0.0.2"
     },
     "tauri": {
         "allowlist": {
@@ -55,7 +55,12 @@
             "csp": null
         },
         "updater": {
-            "active": false
+            "active": true,
+            "dialog": true,
+            "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQyQzUzRTcxMkVFRDJGMzkKUldRNUwrMHVjVDdGMHZpeVErS3FZOE1kRDFlY1NkYmtBZkt2QW5kcmlNTDcrT0hEbUxLdVRkNVkK",
+            "endpoints": [
+                "https://gist.githubusercontent.com/HrvojeLesar/0cb8601d251e4d41f891cae2774f3edd/raw/1a4c63123c13aeb8bec9cd3658fbc54e4e462e4d/update_metadata.json"
+            ]
         },
         "windows": [
             {

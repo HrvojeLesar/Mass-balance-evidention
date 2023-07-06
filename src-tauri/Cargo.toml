@@ -1,6 +1,6 @@
 [package]
 name = "mass_balance_evidention"
-version = "0.0.1"
+version = "0.0.2"
 description = "Mass Balance Evidention"
 authors = ["Hrvoje Lesar"]
 license = "MIT"
