@@ -9,13 +9,7 @@ COPY docker/db/pg_backup_rotated.sh /app
 RUN chmod +x /app/pg_backup_rotated.sh
 
 RUN apt-get update
-RUN apt-get install -y \
-    curl \
-    file \
-    procps \
-    netcat \
-    rclone \
-    cron
+RUN apt-get install -y rclone cron
 
 RUN mkdir -p /root/.config/rclone
 COPY docker/db/rclone.conf /root/.config/rclone
