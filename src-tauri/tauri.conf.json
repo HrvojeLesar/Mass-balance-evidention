@@ -7,18 +7,17 @@
     },
     "package": {
         "productName": "Mass-Balance-Evidention",
-        "version": "0.0.2"
+        "version": "0.1.2"
     },
     "tauri": {
         "allowlist": {
-            "all": true,
             "shell": {
                 "open": true
             }
         },
         "bundle": {
             "active": true,
-            "category": "DeveloperTool",
+            "category": "Productivity",
             "copyright": "",
             "deb": {
                 "depends": []
