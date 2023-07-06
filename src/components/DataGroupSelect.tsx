@@ -27,6 +27,7 @@ export default function DataGroupSelect() {
                           label: group.name,
                       })) ?? []
             }
+            withinPortal
         />
     );
 }

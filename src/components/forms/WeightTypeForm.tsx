@@ -172,6 +172,7 @@ export default function WeightTypeForm({
                                         ? t("dataGroup.errors.name")
                                         : undefined
                                 }
+                                withinPortal
                             />
                         )}
                     />

@@ -178,6 +178,7 @@ export default function DataGroupForm({
                                         ? t("dataGroup.errors.name")
                                         : undefined
                                 }
+                                withinPortal
                             />
                         )}
                     />

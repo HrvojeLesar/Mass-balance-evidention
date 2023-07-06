@@ -72,6 +72,7 @@ export default function MbeGroupView() {
                                       label: group.name,
                                   })) ?? []
                         }
+                        withinPortal
                     />
                     {!mbeGroupContextValue.isEmpty && editToggleValue && (
                         <>

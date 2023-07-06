@@ -132,6 +132,7 @@ export default function MbeGroupMemberForm({
                                         ? t("dataGroup.errors.name")
                                         : undefined
                                 }
+                                withinPortal
                             />
                         )}
                     />
