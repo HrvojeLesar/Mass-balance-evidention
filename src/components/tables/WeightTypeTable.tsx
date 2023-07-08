@@ -35,7 +35,7 @@ export default function WeightTypeTable({
     const { t } = useTranslation();
     const [tableData, setTableData] = useState<T[]>([]);
 
-    const mbeGroupContextValue = useContext(MbeGroupContext);
+    const { selectedGroup: mbeGroupId } = useContext(MbeGroupContext);
 
     const { pagination, setPagination } = usePagination();
     const [sorting, setSorting] = useState<SortingState>([]);
@@ -47,7 +47,7 @@ export default function WeightTypeTable({
         T | undefined
     >();
 
-    const dataGroupContextValue = useContext(DataGroupContext);
+    const { selectedGroup: dataGroupId } = useContext(DataGroupContext);
 
     const { data, refetch, isInitialLoading, isFetching } =
         useGetWeightTypesQuery(
@@ -73,7 +73,7 @@ export default function WeightTypeTable({
                                   };
                               })
                             : undefined,
-                    mbeGroupId: mbeGroupContextValue.selectedGroup ?? 0,
+                    mbeGroupId: dataGroupId ?? -1,
                 },
             },
             {
@@ -82,9 +82,10 @@ export default function WeightTypeTable({
                     pagination,
                     sorting,
                     columnFilters,
-                    dataGroupContextValue,
+                    dataGroupId,
                 ],
                 keepPreviousData: true,
+                enabled: dataGroupId !== undefined,
             }
         );
 
@@ -176,13 +177,12 @@ export default function WeightTypeTable({
                 isLoading={deleteWeightType.isLoading}
                 errorMsg={undefined}
                 deleteFn={() => {
-                    if (selectedWeightType) {
+                    if (selectedWeightType && mbeGroupId) {
                         deleteWeightType.mutate({
                             options: {
                                 id: {
                                     id: selectedWeightType.id,
-                                    mbeGroup:
-                                        mbeGroupContextValue.selectedGroup ?? 0,
+                                    mbeGroup: mbeGroupId,
                                 },
                             },
                         });

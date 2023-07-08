@@ -33,6 +33,7 @@ import {
 import { DataGroupContext } from "../../DataGroupProvider";
 import { Grid, Input, NumberInput, useMantineTheme } from "@mantine/core";
 import displayOnErrorNotification from "../util/deleteNotificationUtil";
+import { MbeGroupContext } from "../../MbeGroupProvider";
 
 type FormInput = {
     article: SelectOption<Article> | undefined;
@@ -60,6 +61,8 @@ export default function DispatchNoteArticleForm({
 }: DispatchNoteArticleFormProps) {
     const { t, i18n } = useTranslation();
     const dataGroupContextValue = useContext(DataGroupContext);
+    const mbeGroupContextValue = useContext(MbeGroupContext);
+
     const theme = useMantineTheme();
 
     const {
@@ -232,8 +235,10 @@ export default function DispatchNoteArticleForm({
                     "getArticlesForm",
                     articleSelectState.limit,
                     articleSelectState.page,
+                    dataGroupContextValue.selectedGroup,
                 ],
                 keepPreviousData: true,
+                enabled: dataGroupContextValue.selectedGroup !== undefined,
             }
         );
 
@@ -257,7 +262,7 @@ export default function DispatchNoteArticleForm({
                                   },
                               ]
                             : undefined,
-                    mbeGroupId: 1,
+                    mbeGroupId: mbeGroupContextValue.selectedGroup ?? -1,
                 },
             },
             {
@@ -265,8 +270,10 @@ export default function DispatchNoteArticleForm({
                     "getWeightTypesDNAForm",
                     weightTypeSelectState.limit,
                     weightTypeSelectState.page,
+                    mbeGroupContextValue.selectedGroup,
                 ],
                 keepPreviousData: true,
+                enabled: mbeGroupContextValue.selectedGroup !== undefined,
             }
         );
 

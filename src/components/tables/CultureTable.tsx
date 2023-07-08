@@ -75,6 +75,7 @@ export default function CultureTable({ isInsertable, isEditable }: TableProps) {
                 dataGroupContextValue.selectedGroup,
             ],
             keepPreviousData: true,
+            enabled: dataGroupContextValue.selectedGroup !== undefined,
         }
     );
 

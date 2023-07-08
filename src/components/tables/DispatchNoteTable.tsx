@@ -48,7 +48,7 @@ export default function DispatchNoteTable({
         T | undefined
     >();
 
-    const dataGroupContextValue = useContext(DataGroupContext);
+    const { selectedGroup: dataGroupId } = useContext(DataGroupContext);
 
     const { data, refetch, isInitialLoading, isFetching } =
         useGetDispatchNotesQuery(
@@ -105,7 +105,7 @@ export default function DispatchNoteTable({
                                   };
                               })
                             : undefined,
-                    dGroup: dataGroupContextValue.selectedGroup ?? -1,
+                    dGroup: dataGroupId ?? -1,
                 },
             },
             {
@@ -114,9 +114,10 @@ export default function DispatchNoteTable({
                     pagination,
                     sorting,
                     columnFilters,
-                    dataGroupContextValue,
+                    dataGroupId,
                 ],
                 keepPreviousData: true,
+                enabled: dataGroupId !== undefined,
             }
         );
 

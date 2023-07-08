@@ -12,7 +12,7 @@ export default function EditModal({ children }: CardUtil) {
             shadow="xs"
             p="sm"
             withBorder
-            sx={() => ({ overflow: "hidden" })}
+            sx={() => ({ overflow: "hidden", position: "relative" })}
         >
             {children}
         </Paper>

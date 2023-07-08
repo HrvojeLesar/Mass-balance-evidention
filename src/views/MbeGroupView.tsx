@@ -7,7 +7,11 @@ import MbeGroupForm from "../components/forms/MbeGroupForm";
 import MbeGroupMemberForm from "../components/forms/MbeGroupMemberForm";
 import MbeUserForm from "../components/forms/MbeUserForm";
 import MembersDisplay from "../components/MembersDisplay";
+import NotSelectedOverlay, {
+    BuiltInNotSelected,
+} from "../components/NotSelectedOverlay";
 import CardUtil from "../components/util/CardUtil";
+import { useGetGroupMembersQuery } from "../generated/graphql";
 import { MbeGroupContext } from "../MbeGroupProvider";
 
 export default function MbeGroupView() {
@@ -22,23 +26,42 @@ export default function MbeGroupView() {
         );
     }, [mbeGroupContextValue]);
 
+    const { data, refetch } = useGetGroupMembersQuery(
+        {
+            options: {
+                idMbeGroup: mbeGroupContextValue.selectedGroup ?? -1,
+            },
+        },
+        {
+            queryKey: ["getGroupMembers", mbeGroupContextValue.selectedGroup],
+            keepPreviousData: true,
+            enabled: mbeGroupContextValue.selectedGroup !== undefined,
+        }
+    );
+
     // TODO: Decouple changing group globally in every context (maybe)
     return (
         <Grid>
             <Grid.Col sm={12} md={6} lg={6}>
                 <CardUtil>
-                    <Flex justify="space-between">
+                    <NotSelectedOverlay
+                        dataGroupId={mbeGroupContextValue.selectedGroup}
+                        builtInType={BuiltInNotSelected.MbeGroup}
+                    />
+                    <Flex justify="space-between" pos="relative">
                         <Title order={4}>{t("titles.mbeGroupSelection")}</Title>
-                        <ActionIcon
-                            color="yellow"
-                            variant={editToggleValue ? "filled" : "outline"}
-                            onClick={() => {
-                                editToggle();
-                            }}
-                            title={t("titles.edit")}
-                        >
-                            <FaEdit />
-                        </ActionIcon>
+                        {mbeGroupContextValue.selectedGroup && (
+                            <ActionIcon
+                                color="yellow"
+                                variant={editToggleValue ? "filled" : "outline"}
+                                onClick={() => {
+                                    editToggle();
+                                }}
+                                title={t("titles.edit")}
+                            >
+                                <FaEdit />
+                            </ActionIcon>
+                        )}
                     </Flex>
                     <Divider my="xs" />
                     <Select
@@ -130,6 +153,7 @@ export default function MbeGroupView() {
                         onInsertSuccess={() => {
                             if (mbeGroupContextValue.refetch) {
                                 mbeGroupContextValue.refetch();
+                                refetch();
                             }
                         }}
                     />
@@ -143,6 +167,8 @@ export default function MbeGroupView() {
                         <Divider my="xs" />
                         <MembersDisplay
                             idMbeGroup={mbeGroupContextValue.selectedGroup}
+                            refetch={refetch}
+                            data={data}
                         />
                     </CardUtil>
                 </Grid.Col>

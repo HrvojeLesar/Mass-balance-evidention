@@ -50,22 +50,20 @@ export default function CellCulturePairTable({
         T | undefined
     >();
 
-    const dataGroupContextValue = useContext(DataGroupContext);
+    const { selectedGroup: dataGroupId } = useContext(DataGroupContext);
 
     const { data, refetch, isInitialLoading, isFetching } =
         useGetAllCellCulturePairsQuery(
             {
                 options: {
                     id: undefined,
-                    dGroup: dataGroupContextValue.selectedGroup ?? -1,
+                    dGroup: dataGroupId ?? -1,
                 },
             },
             {
-                queryKey: [
-                    "getAllCellCulturePairs",
-                    dataGroupContextValue.selectedGroup,
-                ],
+                queryKey: ["getAllCellCulturePairs", dataGroupId],
                 keepPreviousData: true,
+                enabled: dataGroupId !== undefined,
             }
         );
 

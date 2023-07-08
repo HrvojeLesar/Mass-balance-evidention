@@ -61,7 +61,7 @@ export default function EntryForm({
     EntryUpdateOptions
 >) {
     const { t, i18n } = useTranslation();
-    const dataGroupContextValue = useContext(DataGroupContext);
+    const { selectedGroup: dataGroupId } = useContext(DataGroupContext);
     const theme = useMantineTheme();
 
     const {
@@ -125,7 +125,13 @@ export default function EntryForm({
 
     const onInsertSubmit = useCallback(
         (data: FormInput) => {
-            if (data.cell && data.culture && data.buyer && data.date) {
+            if (
+                data.cell &&
+                data.culture &&
+                data.buyer &&
+                data.date &&
+                dataGroupId
+            ) {
                 insert.mutate({
                     insertOptions: {
                         idCell: data.cell.value.id,
@@ -134,7 +140,7 @@ export default function EntryForm({
                         date: new Date(moment(data.date).format("YYYY-MM-DD")),
                         weight: Number(data.weight),
                         idBuyer: data.buyer.value.id,
-                        dGroup: dataGroupContextValue.selectedGroup ?? 1,
+                        dGroup: dataGroupId,
                     },
                 });
             } else {
@@ -144,7 +150,7 @@ export default function EntryForm({
                 );
             }
         },
-        [insert, dataGroupContextValue.selectedGroup]
+        [insert, dataGroupId]
     );
 
     const onUpdateSubmit = useCallback(
@@ -289,7 +295,7 @@ export default function EntryForm({
                                   },
                               ]
                             : undefined,
-                    dGroup: dataGroupContextValue.selectedGroup ?? -1,
+                    dGroup: dataGroupId ?? -1,
                 },
             },
             {
@@ -298,9 +304,10 @@ export default function EntryForm({
                     cellSelectState.limit,
                     cellSelectState.page,
                     cultureSelectState.selected,
-                    dataGroupContextValue.selectedGroup,
+                    dataGroupId,
                 ],
                 keepPreviousData: true,
+                enabled: dataGroupId !== undefined,
             }
         );
 
@@ -326,7 +333,7 @@ export default function EntryForm({
                                   },
                               ]
                             : undefined,
-                    dGroup: dataGroupContextValue.selectedGroup ?? -1,
+                    dGroup: dataGroupId ?? -1,
                 },
             },
             {
@@ -335,9 +342,10 @@ export default function EntryForm({
                     cultureSelectState.limit,
                     cultureSelectState.page,
                     cellSelectState.selected,
-                    dataGroupContextValue.selectedGroup,
+                    dataGroupId,
                 ],
                 keepPreviousData: true,
+                enabled: dataGroupId !== undefined,
             }
         );
 
@@ -360,7 +368,7 @@ export default function EntryForm({
                               },
                           ]
                         : undefined,
-                dGroup: dataGroupContextValue.selectedGroup ?? -1,
+                dGroup: dataGroupId ?? -1,
             },
         },
         {
@@ -368,8 +376,10 @@ export default function EntryForm({
                 "getBuyersForm",
                 buyerSelectState.limit,
                 buyerSelectState.page,
+                dataGroupId,
             ],
             keepPreviousData: true,
+            enabled: dataGroupId !== undefined,
         }
     );
 

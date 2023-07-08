@@ -73,9 +73,10 @@ export default function BuyerTable({ isInsertable, isEditable }: TableProps) {
                 pagination,
                 sorting,
                 columnFilters,
-                dataGroupContextValue,
+                dataGroupContextValue.selectedGroup,
             ],
             keepPreviousData: true,
+            enabled: dataGroupContextValue.selectedGroup !== undefined,
         }
     );
 

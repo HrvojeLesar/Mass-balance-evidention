@@ -76,6 +76,7 @@ export default function CellTable({ isInsertable, isEditable }: TableProps) {
                 dataGroupContextValue.selectedGroup,
             ],
             keepPreviousData: true,
+            enabled: dataGroupContextValue.selectedGroup !== undefined,
         }
     );
 

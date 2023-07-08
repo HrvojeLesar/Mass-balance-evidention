@@ -56,20 +56,18 @@ export default function DispatchNoteForm({
 >) {
     const { classes } = useStyles();
     const { t, i18n } = useTranslation();
-    const dataGroupContextValue = useContext(DataGroupContext);
+    const { selectedGroup: dataGroupId } = useContext(DataGroupContext);
 
     const { data, refetch } = useGetDispatchNoteIdentTrackerQuery(
         {
             options: {
-                idDataGroup: dataGroupContextValue.selectedGroup ?? -1,
+                idDataGroup: dataGroupId ?? -1,
             },
         },
         {
-            queryKey: [
-                "getDispatchNoteIdentTracker",
-                dataGroupContextValue.selectedGroup ?? -1,
-            ],
+            queryKey: ["getDispatchNoteIdentTracker", dataGroupId],
             keepPreviousData: true,
+            enabled: dataGroupId !== undefined,
         }
     );
 
@@ -162,19 +160,20 @@ export default function DispatchNoteForm({
                           });
                       })
                     : handleSubmit((data) => {
-                          insert.mutate({
-                              insertOptions: {
-                                  ...data,
-                                  // WARN: Very dumb hacky way to fix a day off value
-                                  issuingDate: new Date(
-                                      moment(data.issuingDate).format(
-                                          "YYYY-MM-DD"
-                                      )
-                                  ),
-                                  dGroup:
-                                      dataGroupContextValue.selectedGroup ?? 1,
-                              },
-                          });
+                          if (dataGroupId) {
+                              insert.mutate({
+                                  insertOptions: {
+                                      ...data,
+                                      // WARN: Very dumb hacky way to fix a day off value
+                                      issuingDate: new Date(
+                                          moment(data.issuingDate).format(
+                                              "YYYY-MM-DD"
+                                          )
+                                      ),
+                                      dGroup: dataGroupId,
+                                  },
+                              });
+                          }
                       })
             }
         >
@@ -269,18 +268,21 @@ export default function DispatchNoteForm({
                                                                         ) {
                                                                             const identifier =
                                                                                 identValue as number;
-                                                                            updateIdent.mutate(
-                                                                                {
-                                                                                    updateOptions:
-                                                                                        {
-                                                                                            identifier:
-                                                                                                identifier,
-                                                                                            idDataGroup:
-                                                                                                dataGroupContextValue.selectedGroup ??
-                                                                                                1,
-                                                                                        },
-                                                                                }
-                                                                            );
+                                                                            if (
+                                                                                dataGroupId
+                                                                            ) {
+                                                                                updateIdent.mutate(
+                                                                                    {
+                                                                                        updateOptions:
+                                                                                            {
+                                                                                                identifier:
+                                                                                                    identifier,
+                                                                                                idDataGroup:
+                                                                                                    dataGroupId,
+                                                                                            },
+                                                                                    }
+                                                                                );
+                                                                            }
                                                                         }
                                                                     }}
                                                                 >

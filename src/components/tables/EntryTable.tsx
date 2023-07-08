@@ -1,4 +1,9 @@
-import { Divider, Flex, Select, Title } from "@mantine/core";
+import {
+    Divider,
+    Flex,
+    Select,
+    Title,
+} from "@mantine/core";
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -51,22 +56,20 @@ export default function EntryTable({ isInsertable, isEditable }: TableProps) {
     const [isDeleteModalShown, setIsDeleteModalShown] = useState(false);
     const [selectedEntry, setSelectedEntry] = useState<Entry | undefined>();
 
-    const dataGroupContextValue = useContext(DataGroupContext);
+    const { selectedGroup: dataGroupId } = useContext(DataGroupContext);
 
     const { data, refetch, isInitialLoading, isFetching } =
         useGetAllEntriesQuery(
             {
                 options: {
                     id: undefined,
-                    dGroup: dataGroupContextValue.selectedGroup ?? -1,
+                    dGroup: dataGroupId ?? -1,
                 },
             },
             {
-                queryKey: [
-                    "getAllEntries",
-                    dataGroupContextValue.selectedGroup,
-                ],
+                queryKey: ["getAllEntries", dataGroupId],
                 keepPreviousData: true,
+                enabled: dataGroupId !== undefined,
             }
         );
 

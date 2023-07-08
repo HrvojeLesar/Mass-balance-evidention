@@ -91,7 +91,7 @@
         "dispatchNoteArticle": "Pregled otpremnnice",
         "dispatchNoteArticleEdit": "Uređivanje otpremnice",
         "mbeUserInsert": "Dodavanje novog korisnika",
-        "newMbeGroup": "Nova groupa",
+        "newMbeGroup": "Nova grupa",
         "newMbeGroupMember": "Dodavanje korisnika u grupu",
         "mbeGroupMemberDelete": "Potvrda brisanja člana grupe",
         "membersDisplay": "Članovi grupe",
@@ -238,5 +238,9 @@
         "microsoft": "Prijava putem Microsoft računa",
         "github": "Prijava putem Github računa",
         "facebook": "Prijava putem Facebook računa"
+    },
+    "missing": {
+        "mbeGroup": "MBE grupa nije kreirana ili izabrana. Kreirajte novu grupu u Postavke grupa > Nova grupa.",
+        "dataGroup": "Grupacija podataka nije kreirana ili izabrana. Kreirajte novu grupaciju u Postavke grupacije podataka > Dodavanje nove grupacije podataka."
     }
 }

@@ -141,9 +141,10 @@ export default function DispatchNoteArticleTable({
                     pagination,
                     sorting,
                     columnFilters,
-                    dataGroupContextValue,
+                    dataGroupContextValue.selectedGroup,
                 ],
                 keepPreviousData: true,
+                enabled: dataGroupContextValue.selectedGroup !== undefined,
             }
         );
 
@@ -164,9 +165,10 @@ export default function DispatchNoteArticleTable({
                 pagination,
                 sorting,
                 columnFilters,
-                dataGroupContextValue,
+                dataGroupContextValue.selectedGroup,
             ],
             keepPreviousData: true,
+            enabled: dataGroupContextValue.selectedGroup !== undefined,
         }
     );
 

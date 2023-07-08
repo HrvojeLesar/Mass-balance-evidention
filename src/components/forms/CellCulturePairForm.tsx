@@ -52,7 +52,7 @@ export default function CellCulturePairForm({
     CellCulturePairUpdateOptions
 >) {
     const { t } = useTranslation();
-    const dataGroupContextValue = useContext(DataGroupContext);
+    const { selectedGroup: dataGroupId } = useContext(DataGroupContext);
 
     const theme = useMantineTheme();
 
@@ -106,12 +106,12 @@ export default function CellCulturePairForm({
 
     const onInsertSubmit = useCallback(
         (data: FormInput) => {
-            if (data.cell && data.culture) {
+            if (data.cell && data.culture && dataGroupId) {
                 insert.mutate({
                     insertOptions: {
                         idCell: data.cell?.value.id,
                         idCulture: data.culture?.value.id,
-                        dGroup: dataGroupContextValue.selectedGroup ?? 1,
+                        dGroup: dataGroupId,
                     },
                 });
             } else {
@@ -121,7 +121,7 @@ export default function CellCulturePairForm({
                 );
             }
         },
-        [insert, dataGroupContextValue]
+        [insert, dataGroupId]
     );
 
     const onUpdateSubmit = useCallback(
@@ -227,7 +227,7 @@ export default function CellCulturePairForm({
                               },
                           ]
                         : undefined,
-                dGroup: dataGroupContextValue.selectedGroup ?? -1,
+                dGroup: dataGroupId ?? -1,
             },
         },
         {
@@ -236,9 +236,10 @@ export default function CellCulturePairForm({
                 cellSelectState.limit,
                 cellSelectState.page,
                 cultureSelectState.selected,
-                dataGroupContextValue.selectedGroup,
+                dataGroupId,
             ],
             keepPreviousData: true,
+            enabled: dataGroupId !== undefined,
         }
     );
 
@@ -267,7 +268,7 @@ export default function CellCulturePairForm({
                               },
                           ]
                         : undefined,
-                dGroup: dataGroupContextValue.selectedGroup ?? -1,
+                dGroup: dataGroupId ?? -1,
             },
         },
         {
@@ -276,9 +277,10 @@ export default function CellCulturePairForm({
                 cultureSelectState.limit,
                 cultureSelectState.page,
                 cellSelectState.selected,
-                dataGroupContextValue.selectedGroup,
+                dataGroupId,
             ],
             keepPreviousData: true,
+            enabled: dataGroupId !== undefined,
         }
     );
 
@@ -371,7 +373,9 @@ export default function CellCulturePairForm({
                                     value={cellSelectState.selected}
                                     options={cellOptions}
                                     onMenuOpen={() => {
-                                        refetchCells();
+                                        if (dataGroupId) {
+                                            refetchCells();
+                                        }
                                     }}
                                     onMenuClose={() => {
                                         setCellSelectState((old) => ({
@@ -439,7 +443,9 @@ export default function CellCulturePairForm({
                                     value={cultureSelectState.selected}
                                     options={cultureOptions}
                                     onMenuOpen={() => {
-                                        refetchCultures();
+                                        if (dataGroupId) {
+                                            refetchCultures();
+                                        }
                                     }}
                                     onMenuClose={() => {
                                         setCultureSelectState((old) => ({

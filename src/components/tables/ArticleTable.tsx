@@ -39,7 +39,7 @@ export default function ArticleTable({ isInsertable, isEditable }: TableProps) {
     const [isDeleteModalShown, setIsDeleteModalShown] = useState(false);
     const [selectedArticle, setSelectedArticle] = useState<T | undefined>();
 
-    const dataGroupContextValue = useContext(DataGroupContext);
+    const {selectedGroup: dataGroupId } = useContext(DataGroupContext);
 
     const { data, refetch, isInitialLoading, isFetching } = useGetArticlesQuery(
         {
@@ -64,7 +64,7 @@ export default function ArticleTable({ isInsertable, isEditable }: TableProps) {
                               };
                           })
                         : undefined,
-                dGroup: dataGroupContextValue.selectedGroup ?? -1,
+                dGroup: dataGroupId ?? -1,
             },
         },
         {
@@ -73,9 +73,10 @@ export default function ArticleTable({ isInsertable, isEditable }: TableProps) {
                 pagination,
                 sorting,
                 columnFilters,
-                dataGroupContextValue,
+                dataGroupId
             ],
             keepPreviousData: true,
+            enabled: dataGroupId !== undefined
         }
     );
 

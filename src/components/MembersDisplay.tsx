@@ -1,10 +1,15 @@
 import { ActionIcon, Divider, Flex, Text } from "@mantine/core";
+import {
+    QueryObserverResult,
+    RefetchOptions,
+    RefetchQueryFilters,
+} from "@tanstack/react-query";
 import { Fragment, useCallback, useContext, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FaTrash } from "react-icons/fa";
 import { AuthContext } from "../AuthProvider";
 import {
-    useGetGroupMembersQuery,
+    GetGroupMembersQuery,
     useRemoveMbeGroupMemberMutation,
 } from "../generated/graphql";
 import DeleteModal from "./DeleteModal";
@@ -59,25 +64,22 @@ function Member({ position, email, openModal }: MemberProps) {
 
 type MemberDisplayProps = {
     idMbeGroup: number;
+    data: GetGroupMembersQuery | undefined;
+    refetch: <TPageData>(
+        options?: RefetchOptions & RefetchQueryFilters<TPageData>
+    ) => Promise<QueryObserverResult<unknown, unknown>>;
 };
 
-export default function MembersDisplay({ idMbeGroup }: MemberDisplayProps) {
+export default function MembersDisplay({
+    idMbeGroup,
+    data,
+    refetch,
+}: MemberDisplayProps) {
     const { t } = useTranslation();
 
     const [isDeleteModalShown, setIsDeleteModalShown] = useState(false);
     const [selectedEmail, setSelectedEmail] = useState<string | undefined>(
         undefined
-    );
-    const { data, refetch } = useGetGroupMembersQuery(
-        {
-            options: {
-                idMbeGroup,
-            },
-        },
-        {
-            queryKey: ["getGroupMembers", idMbeGroup],
-            keepPreviousData: true,
-        }
     );
 
     const members = useMemo(() => {

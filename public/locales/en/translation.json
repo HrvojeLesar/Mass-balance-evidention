@@ -239,5 +239,9 @@
         "microsoft": "Login with Microsoft Account",
         "github": "Login with Github",
         "facebook": "Login with Facebook"
+    },
+    "missing": {
+        "mbeGroup": "MBE group is not selected or created. Create one in Group Options > New group.",
+        "dataGroup": "Data groups is not selected or created. Create one in Options > New data group."
     }
 }
