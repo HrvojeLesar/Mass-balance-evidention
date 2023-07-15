@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   mbe_db:
-    build:
-      context: ./
-      dockerfile: docker/db/Dockerfile
+    image: postgres:14
     env_file: docker/.env
     restart: unless-stopped
     container_name: mbe_db
@@ -17,7 +15,19 @@ services:
     container_name: mbe_redis
     volumes:
       - mbe_redis:/data
-  
+
+  mbe_cron:
+    build:
+      context: ./
+      dockerfile: docker/cron/Dockerfile
+    env_file: docker/.env
+    restart: unless-stopped
+    container_name: mbe_cron
+    volumes:
+      - mbe_db_home:/var/lib/postgresql/data
+    depends_on:
+      - mbe_db
+
   mbe_dev:
     build: docker/dev_frontend
     restart: unless-stopped
