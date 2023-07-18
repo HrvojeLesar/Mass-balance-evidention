@@ -14,6 +14,9 @@ services:
       context: ./
       dockerfile: docker/cron/Dockerfile
     env_file: docker/.env
+    environment:
+      - HOSTNAME=mbe_db
+      - PGPASSWORD=mbe
     restart: unless-stopped
     container_name: mbe_cron
     volumes:
